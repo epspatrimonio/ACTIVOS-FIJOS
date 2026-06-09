@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-50 text-slate-900">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control Patrimonial - Consulta Pública de Activos</title>
+  <link rel="icon" type="image/jpeg" href="logo.jpg">
+  
+  <!-- Tailwind CSS CDN para Cero Compilación (Ideal para GitHub Pages) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0fbff',
+              500: '#00B0F0',
+              600: '#009ad4',
+              900: '#004763',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Librerías de Exportación (Excel y PDF) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    h1, h2, h3, h4 {
+      font-family: 'Outfit', sans-serif;
+    }
+    .card-hover {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .card-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px -5px rgba(148, 163, 184, 0.15);
+    }
+    .smooth-scroll {
+      -webkit-overflow-scrolling: touch;
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col">
+
+  <!-- Encabezado / Banner Premium -->
+  <header class="bg-[#00B0F0] text-white py-6 px-4 sm:px-6 lg:px-8 border-b border-[#009ad4] shadow-md">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center sm:justify-between gap-4 text-center sm:text-left">
+      <div class="flex flex-col sm:flex-row items-center gap-4">
+        <img src="logo.jpg" alt="Logo EPS Selva Central" class="w-16 h-16 object-contain rounded-2xl bg-white p-1 shadow-md">
+        <div class="flex flex-col items-center sm:items-start">
+          <span class="bg-white/20 text-white border border-white/30 text-[10px] font-bold tracking-widest px-2.5 py-1 rounded-full uppercase">
+            EPS SELVA CENTRAL
+          </span>
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight mt-1">CONTROL PATRIMONIAL</h1>
+          <p class="text-white/90 text-sm mt-0.5 font-medium">
+            CONSULTA DE ACTIVOS FIJOS
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenido de Control y Búsqueda -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Filtros y Buscador -->
+    <div class="bg-white border border-slate-200/85 rounded-2xl p-5 mb-8 shadow-sm flex flex-col md:flex-row gap-4 items-stretch md:items-end">
+      
+      <!-- Buscador -->
+      <div class="w-full md:flex-1">
+        <label for="search" class="block text-xs font-semibold text-slate-500 mb-1.5">Buscador Inteligente</label>
+        <input 
+          type="text" 
+          id="search" 
+          placeholder="Buscar por código, denominación, marca, modelo o responsable..." 
+          class="w-full px-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
+        >
+      </div>
+
+      <!-- Sucursal -->
+      <div class="w-full md:w-64">
+        <label for="filter-sucursal" class="block text-xs font-semibold text-slate-500 mb-1.5">Sucursal</label>
+        <select 
+          id="filter-sucursal" 
+          class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-slate-700 font-medium"
+        >
+          <option value="">Todas las Sucursales</option>
+        </select>
+      </div>
+
+      <!-- Estado -->
+      <div class="w-full md:w-56">
+        <label for="filter-estado" class="block text-xs font-semibold text-slate-500 mb-1.5">Estado</label>
+        <select 
+          id="filter-estado" 
+          class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-slate-700 font-medium"
+        >
+          <option value="">Todos los Estados</option>
+          <option value="REGISTRADO">Registrado</option>
+          <option value="EN_USO">En Uso</option>
+          <option value="TRANSFERIDO">Transferido</option>
+          <option value="BAJA">De Baja</option>
+          <option value="OBSERVADO">Observado</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Indicador de Resultados y Botones de Descarga -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+      <h2 class="text-lg font-bold text-slate-800">Catálogo de Activos Fijos</h2>
+      <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+        <div id="results-count" class="text-xs bg-slate-100 text-slate-600 px-3 py-2 rounded-xl font-semibold border border-slate-200/60 shadow-sm whitespace-nowrap">
+          Cargando registros...
+        </div>
+        <!-- Botón Exportar Excel -->
+        <button id="btn-export-excel" class="flex items-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition-all active:scale-[0.98] whitespace-nowrap">
+          📊 Exportar Excel
+        </button>
+        <!-- Botón Exportar PDF -->
+        <button id="btn-export-pdf" class="flex items-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition-all active:scale-[0.98] whitespace-nowrap">
+          📕 Exportar PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Fallbacks / Estados de carga y error -->
+    <div id="status-container" class="hidden">
+      <!-- Mensaje de Carga -->
+      <div id="status-loading" class="text-center py-12">
+        <div class="inline-block w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
+        <p class="text-sm text-slate-500 mt-2 font-medium">Obteniendo activos de forma estática...</p>
+      </div>
+      
+      <!-- Mensaje de Error -->
+      <div id="status-error" class="hidden max-w-xl mx-auto bg-rose-50 border border-rose-200 text-rose-800 p-6 rounded-2xl text-center">
+        <span class="text-3xl">⚠️</span>
+        <h3 class="text-base font-bold mt-2">Error de Sincronización</h3>
+        <p class="text-xs text-slate-500 mt-1" id="error-message">
+          No se ha encontrado el archivo <code class="bg-rose-100 text-rose-800 px-1 py-0.5 rounded">activos.json</code>. Por favor, realiza la exportación desde la App Administrativa Local.
+        </p>
+      </div>
+    </div>
+
+    <!-- Tabla de Activos (Estructura Horizontal con Encabezados Fijos) -->
+    <div id="assets-table-container" class="hidden rounded-2xl shadow-sm border border-slate-200 overflow-hidden bg-white">
+      <div class="overflow-x-auto max-h-[600px] overflow-y-auto smooth-scroll">
+        <table class="min-w-full divide-y divide-slate-200 border-collapse">
+          <thead class="sticky top-0 bg-slate-50 z-20 shadow-[0_1px_0_0_rgba(226,232,240,1)]">
+            <tr>
+              <th scope="col" class="px-5 py-3 text-left text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Cód. Patrimonial</th>
+              <th scope="col" class="px-5 py-3 text-left text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Documento N Doc</th>
+              <th scope="col" class="px-5 py-3 text-left text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Fecha de Ingreso</th>
+              <th scope="col" class="px-5 py-3 text-left text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Ubicación (Localidad / Sucursal)</th>
+              <th scope="col" class="px-5 py-3 text-left text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Denominación del Activo</th>
+              <th scope="col" class="px-5 py-3 text-left text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Especificaciones</th>
+              <th scope="col" class="px-5 py-3 text-left text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Estado</th>
+              <th scope="col" class="px-5 py-3 text-left text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Valor Residual</th>
+              <th scope="col" class="px-5 py-3 text-left text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Valor Libros</th>
+            </tr>
+          </thead>
+          <tbody id="assets-tbody" class="bg-white divide-y divide-slate-100">
+            <!-- Las filas se inyectarán vía JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Lista Vacía -->
+    <div id="empty-state" class="hidden text-center py-16 text-slate-400">
+      <span class="text-4xl">📦</span>
+      <h3 class="text-sm font-semibold mt-2">No hay resultados</h3>
+      <p class="text-xs text-slate-400 mt-1">Prueba a modificar los filtros o el buscador.</p>
+    </div>
+
+  </main>
+
+  <!-- Pie de Página -->
+  <footer class="bg-white border-t border-slate-200 py-6 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-400">
+      Control Patrimonial - Dashboard Público Estático (GitHub Pages) © 2026
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
