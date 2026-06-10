@@ -113,6 +113,12 @@ document.addEventListener('DOMContentLoaded', () => {
         minimumFractionDigits: 2
       }).format(Number(item.valor_en_libros) || 0);
 
+      // Valor Neto = Valor en Libros - Depreciación Acumulada (NIC 16)
+      const valorNeto = (Number(item.valor_en_libros) || 0) - (Number(item.depreciacion_acumulada) || 0);
+      const valNetoFormateado = new Intl.NumberFormat('es-PE', {
+        minimumFractionDigits: 2
+      }).format(Math.max(valorNeto, 0));
+
       row.innerHTML = `
         <!-- Código Patrimonial -->
         <td class="px-5 py-4 whitespace-nowrap text-sm font-mono font-bold text-slate-800">
@@ -136,10 +142,10 @@ document.addEventListener('DOMContentLoaded', () => {
         <!-- Ubicación -->
         <td class="px-5 py-4 whitespace-nowrap">
           <div class="font-bold text-slate-800 text-xs">
-            ${item.localidad || '—'}
+            ${item.sucursal || '—'}
           </div>
           <div class="text-[10px] text-brand-500 font-bold uppercase tracking-wide mt-0.5">
-            ${item.sucursal || '—'}
+            ${item.localidad || '—'}
           </div>
         </td>
         
@@ -173,14 +179,19 @@ document.addEventListener('DOMContentLoaded', () => {
           ${getEstadoBadgeHTML(item.estado_activo)}
         </td>
         
-        <!-- Valor Residual -->
+        <!-- Valor Libros -->
         <td class="px-5 py-4 whitespace-nowrap text-xs font-medium text-slate-500">
-          S/. 1.00
+          S/. ${valLibrosFormateado}
         </td>
         
-        <!-- Valor Libros -->
+        <!-- Valor Neto -->
         <td class="px-5 py-4 whitespace-nowrap text-xs font-bold text-emerald-600">
-          S/. ${valLibrosFormateado}
+          S/. ${valNetoFormateado}
+        </td>
+        
+        <!-- Responsable -->
+        <td class="px-5 py-4 whitespace-nowrap text-xs font-semibold text-slate-600">
+          ${item.responsable || '—'}
         </td>
       `;
       tbodyContainer.appendChild(row);
@@ -248,10 +259,13 @@ document.addEventListener('DOMContentLoaded', () => {
       "Responsable": item.responsable || "Sin Asignar",
       "N° Factura": item.numero_factura || "",
       "Fecha Alta": item.fecha_alta_factura || "",
+      "Estado": item.estado_activo,
       "Valor en Libros (S/.)": Number(item.valor_en_libros) || 0,
+      "Dep. Acumulada (S/.)": Number(item.depreciacion_acumulada) || 0,
+      "Valor Neto (S/.)": Math.max((Number(item.valor_en_libros) || 0) - (Number(item.depreciacion_acumulada) || 0), 0),
       "IGV (S/.)": Number(item.igv) || 0,
       "N° Acta Entrega": item.n_acta_entrega || "",
-      "Estado Activo": item.estado_activo
+      "Responsable": item.responsable || "Sin Asignar"
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
@@ -283,32 +297,37 @@ document.addEventListener('DOMContentLoaded', () => {
     doc.text(`Fecha de Reporte: ${new Date().toLocaleDateString('es-PE')}`, 14, 26);
 
     const headers = [
-      ["Cód. Patrimonial", "Denominación", "Categoría / Subcategoría", "Sucursal / Localidad", "Responsable", "Valor Libros", "Estado"]
+      ["Cód. Patrimonial", "Denominación", "Categoría / Subcategoría", "Sucursal / Localidad", "Estado", "Valor Libros", "Valor Neto", "Responsable"]
     ];
 
-    const data = currentFilteredAssets.map(item => [
-      item.cod_patrimonial,
-      item.denominacion,
-      `${item.categoria}\n› ${item.subcategoria}`,
-      `${item.sucursal}${item.localidad ? `\n(${item.localidad})` : ''}`,
-      item.responsable || "Sin Asignar",
-      new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(Number(item.valor_en_libros) || 0),
-      item.estado_activo
-    ]);
+    const data = currentFilteredAssets.map(item => {
+      const valorNeto = Math.max((Number(item.valor_en_libros) || 0) - (Number(item.depreciacion_acumulada) || 0), 0);
+      return [
+        item.cod_patrimonial,
+        item.denominacion,
+        `${item.categoria}\n› ${item.subcategoria}`,
+        `${item.sucursal}${item.localidad ? `\n(${item.localidad})` : ''}`,
+        item.estado_activo,
+        new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(Number(item.valor_en_libros) || 0),
+        new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(valorNeto),
+        item.responsable || "Sin Asignar"
+      ];
+    });
 
     doc.autoTable({
       head: headers,
       body: data,
       startY: 32,
       theme: 'grid',
-      styles: { fontSize: 8, cellPadding: 2.5, valign: 'middle' },
-      headStyles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold' }, // Celeste #00B0F0
+      styles: { fontSize: 7, cellPadding: 2.5, valign: 'middle' },
+      headStyles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold' },
       columnStyles: {
-        1: { cellWidth: 55 }, // Denominación
-        2: { cellWidth: 45 }, // Categoría
-        3: { cellWidth: 45 }, // Sucursal
-        4: { cellWidth: 40 }, // Responsable
-        5: { cellWidth: 25, halign: 'right' }  // Valor Libros
+        1: { cellWidth: 45 }, // Denominación
+        2: { cellWidth: 35 }, // Categoría
+        3: { cellWidth: 35 }, // Sucursal
+        5: { cellWidth: 22, halign: 'right' },  // Valor Libros
+        6: { cellWidth: 22, halign: 'right' },  // Valor Neto
+        7: { cellWidth: 35 }  // Responsable
       }
     });
 
