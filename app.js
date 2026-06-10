@@ -190,15 +190,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // Estilos de badge
   function getEstadoBadgeHTML(estado) {
     const styles = {
-      REGISTRADO: 'bg-blue-50 text-blue-700 border-blue-200',
-      EN_USO: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-      TRANSFERIDO: 'bg-amber-50 text-amber-700 border-amber-200',
+      BUENO: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      REGULAR: 'bg-blue-50 text-blue-700 border-blue-200',
+      MALO: 'bg-amber-50 text-amber-700 border-amber-200',
+      'PARA BAJA': 'bg-yellow-50 text-yellow-700 border-yellow-200',
       BAJA: 'bg-rose-50 text-rose-700 border-rose-200',
-      OBSERVADO: 'bg-yellow-50 text-yellow-700 border-yellow-200',
     };
     const style = styles[estado] || 'bg-slate-100 text-slate-700 border-slate-200';
-    const texto = estado === 'EN_USO' ? 'BUENO' : estado;
-    return `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${style}">${texto}</span>`;
+    return `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${style}">${estado || ''}</span>`;
   }
 
   // Manejo de Estados de UI
