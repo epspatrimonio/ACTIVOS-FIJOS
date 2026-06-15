@@ -170,18 +170,54 @@ document.addEventListener('DOMContentLoaded', () => {
         </td>
         
         <!-- Especificaciones -->
-        <td class="px-5 py-4 text-[0.8125rem] min-w-[180px] text-slate-500 leading-relaxed">
-          <div>
-            <span class="font-medium text-slate-400">Marca:</span> ${item.marca || 'S/M'} &bull; <span class="font-medium text-slate-400">Modelo:</span> ${item.modelo || 'S/M'}
-          </div>
-          <div class="mt-0.5">
-            <span class="font-medium text-slate-400">Serie:</span> ${item.numero_serie || 'S/S'}
-          </div>
-          ${item.color ? `
-            <div class="text-[0.75rem] italic text-slate-400 mt-0.5">
-              Color: ${item.color}
+        <td class="px-5 py-4 text-[0.8125rem] min-w-[220px] text-slate-500 leading-relaxed">
+          ${item.placa ? `
+            <div class="mb-1">
+              <span class="font-mono font-bold text-slate-700 bg-slate-950 text-white px-2 py-0.5 rounded text-[10px] tracking-wider shadow-sm mr-1.5">
+                ${item.placa}
+              </span>
+              ${item.categoria_vehiculo ? `<span class="bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded text-[10px] ring-1 ring-amber-200">Cat: ${item.categoria_vehiculo}</span>` : ''}
             </div>
-          ` : ''}
+            <div>
+              <span class="font-medium text-slate-400">Motor:</span> ${item.nro_motor || 'S/M'}
+            </div>
+            <div>
+              <span class="font-medium text-slate-400">Chasis:</span> ${item.nro_chasis || 'S/C'}
+            </div>
+            ${item.carroceria ? `<div><span class="font-medium text-slate-400">Carrocería:</span> ${item.carroceria}</div>` : ''}
+            ${item.combustible ? `<div><span class="font-medium text-slate-400">Combustible:</span> ${item.combustible}</div>` : ''}
+            ${item.nro_tarjeta_prop ? `<div><span class="font-medium text-slate-400">Tarj. Prop:</span> ${item.nro_tarjeta_prop}</div>` : ''}
+            
+            <!-- Alertas SOAT & Rev Tec -->
+            <div class="mt-1.5 flex flex-wrap gap-1">
+              ${item.soat_estado ? `
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold ${
+                  item.soat_estado === 'VIGENTE' ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' :
+                  item.soat_estado === 'POR_VENCER' ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-200' :
+                  'bg-rose-50 text-rose-700 ring-1 ring-rose-200'
+                }">SOAT: ${item.soat_estado === 'POR_VENCER' ? 'Por Vencer' : item.soat_estado} ${item.soat_vencimiento ? `(${formatDate(item.soat_vencimiento)})` : ''}</span>
+              ` : ''}
+              ${item.estado_rev_tec ? `
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold ${
+                  item.estado_rev_tec === 'VIGENTE' ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' :
+                  item.estado_rev_tec === 'POR_VENCER' ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-200' :
+                  'bg-rose-50 text-rose-700 ring-1 ring-rose-200'
+                }">Rev.Tec: ${item.estado_rev_tec === 'POR_VENCER' ? 'Por Vencer' : item.estado_rev_tec} ${item.vencimiento_rev_tec ? `(${formatDate(item.vencimiento_rev_tec)})` : ''}</span>
+              ` : ''}
+            </div>
+          ` : `
+            <div>
+              <span class="font-medium text-slate-400">Marca:</span> ${item.marca || 'S/M'} &bull; <span class="font-medium text-slate-400">Modelo:</span> ${item.modelo || 'S/M'}
+            </div>
+            <div class="mt-0.5">
+              <span class="font-medium text-slate-400">Serie:</span> ${item.numero_serie || 'S/S'}
+            </div>
+            ${item.color ? `
+              <div class="text-[0.75rem] italic text-slate-400 mt-0.5">
+                Color: ${item.color}
+              </div>
+            ` : ''}
+          `}
         </td>
         
         <!-- Estado -->
@@ -258,8 +294,22 @@ document.addEventListener('DOMContentLoaded', () => {
         </dl>
 
         <div class="mt-4 border-t border-slate-100 pt-3 text-[0.8125rem] leading-relaxed text-slate-600">
-          <div><span class="font-semibold text-slate-400">Marca:</span> ${item.marca || 'S/M'} · <span class="font-semibold text-slate-400">Modelo:</span> ${item.modelo || 'S/M'}</div>
-          <div class="mt-1"><span class="font-semibold text-slate-400">Serie:</span> ${item.numero_serie || 'S/S'}</div>
+          ${item.placa ? `
+            <div><span class="font-semibold text-slate-700 bg-slate-900 text-white px-2 py-0.5 rounded text-[10px] font-mono mr-1.5">${item.placa}</span> ${item.categoria_vehiculo ? `<span class="bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded text-[10px] font-bold">Cat: ${item.categoria_vehiculo}</span>` : ''}</div>
+            <div class="mt-1"><span class="font-semibold text-slate-400">Motor:</span> ${item.nro_motor || '—'}</div>
+            <div class="mt-1"><span class="font-semibold text-slate-400">Chasis:</span> ${item.nro_chasis || '—'}</div>
+            ${item.carroceria ? `<div class="mt-1"><span class="font-semibold text-slate-400">Carrocería:</span> ${item.carroceria}</div>` : ''}
+            ${item.combustible ? `<div class="mt-1"><span class="font-semibold text-slate-400">Combustible:</span> ${item.combustible}</div>` : ''}
+            ${item.nro_tarjeta_prop ? `<div class="mt-1"><span class="font-semibold text-slate-400">Tarj. Propiedad:</span> ${item.nro_tarjeta_prop}</div>` : ''}
+            
+            <div class="mt-2 flex flex-wrap gap-1">
+              ${item.soat_estado ? `<span class="inline-flex px-1.5 py-0.5 rounded text-[9px] font-bold ${item.soat_estado === 'VIGENTE' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : item.soat_estado === 'POR_VENCER' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}">SOAT: ${item.soat_estado === 'POR_VENCER' ? 'Por Vencer' : item.soat_estado} ${item.soat_vencimiento ? `(${formatDate(item.soat_vencimiento)})` : ''}</span>` : ''}
+              ${item.estado_rev_tec ? `<span class="inline-flex px-1.5 py-0.5 rounded text-[9px] font-bold ${item.estado_rev_tec === 'VIGENTE' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : item.estado_rev_tec === 'POR_VENCER' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}">Rev.Tec: ${item.estado_rev_tec === 'POR_VENCER' ? 'Por Vencer' : item.estado_rev_tec} ${item.vencimiento_rev_tec ? `(${formatDate(item.vencimiento_rev_tec)})` : ''}</span>` : ''}
+            </div>
+          ` : `
+            <div><span class="font-semibold text-slate-400">Marca:</span> ${item.marca || 'S/M'} · <span class="font-semibold text-slate-400">Modelo:</span> ${item.modelo || 'S/M'}</div>
+            <div class="mt-1"><span class="font-semibold text-slate-400">Serie:</span> ${item.numero_serie || 'S/S'}</div>
+          `}
           <div class="mt-1"><span class="font-semibold text-slate-400">Responsable:</span> ${item.responsable || 'Sin asignar'}</div>
         </div>
       `;
@@ -324,6 +374,19 @@ document.addEventListener('DOMContentLoaded', () => {
       "Modelo": item.modelo || "S/M",
       "N° Serie": item.numero_serie || "S/S",
       "Color": item.color || "",
+      "Placa": item.placa || "",
+      "Carrocería": item.carroceria || "",
+      "Categoría Vehículo": item.categoria_vehiculo || "",
+      "N° Motor": item.nro_motor || "",
+      "N° Chasis": item.nro_chasis || "",
+      "Tipo Combustible": item.combustible || "",
+      "Tarjeta Propiedad": item.nro_tarjeta_prop || "",
+      "SOAT Póliza": item.soat_poliza || "",
+      "SOAT Aseguradora": item.soat_compania || "",
+      "SOAT Vencimiento": item.soat_vencimiento || "",
+      "SOAT Estado": item.soat_estado || "",
+      "Rev. Técnica Vencimiento": item.vencimiento_rev_tec || "",
+      "Rev. Técnica Estado": item.estado_rev_tec || "",
       "Sucursal": item.sucursal,
       "Localidad": item.localidad || "",
       "Unidad Orgánica": item.unidad || "",
@@ -336,8 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
       "Dep. Acumulada (S/.)": Number(item.depreciacion_acumulada) || 0,
       "Valor Neto (S/.)": Math.max((Number(item.valor_en_libros) || 0) - (Number(item.depreciacion_acumulada) || 0), 0),
       "IGV (S/.)": Number(item.igv) || 0,
-      "N° Acta Entrega": item.n_acta_entrega || "",
-      "Responsable": item.responsable || "Sin Asignar"
+      "N° Acta Entrega": item.n_acta_entrega || ""
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
@@ -390,7 +452,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const fechaFormateada = formatDate(item.fecha_alta_factura || item.fecha_registro_contable);
       const ubicacionFormateada = `${item.sucursal || '—'}${item.localidad ? `\n(${item.localidad})` : ''}`;
       const denominacionFormateada = `${item.denominacion || ''}${item.subcategoria ? `\n› ${item.subcategoria}` : ''}`;
-      const especificacionesFormateada = `Marca: ${item.marca || 'S/M'}\nModelo: ${item.modelo || 'S/M'}\nSerie: ${item.numero_serie || 'S/S'}${item.color ? `\nColor: ${item.color}` : ''}`;
+      const especificacionesFormateada = item.placa ? 
+        `Placa: ${item.placa}\nMotor: ${item.nro_motor || 'S/M'}\nChasis: ${item.nro_chasis || 'S/C'}\nSOAT: ${item.soat_estado || '—'}\nRev.Tec: ${item.estado_rev_tec || '—'}` :
+        `Marca: ${item.marca || 'S/M'}\nModelo: ${item.modelo || 'S/M'}\nSerie: ${item.numero_serie || 'S/S'}${item.color ? `\nColor: ${item.color}` : ''}`;
       
       return [
         item.cod_patrimonial || '—',
