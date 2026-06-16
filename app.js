@@ -1,13 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
   let assets = [];
   let celulares = [];
-  let currentTab = 'activos'; // activos | vehiculos | celulares | dashboard
+  let currentTab = 'activos'; // activos | vehiculos | celulares
   let currentFilteredData = [];
-
-  // Gráficos de Chart.js
-  let chartEstado = null;
-  let chartAlertas = null;
-  let chartSucursal = null;
   
   // Elementos del DOM
   const searchInput = document.getElementById('search');
@@ -98,9 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (stateOptions.length === 0) {
         stateOptions = ['ACTIVO', 'INACTIVO'];
       }
-    } else if (currentTab === 'dashboard') {
-      dataset = [...assets, ...celulares];
-      stateOptions = [];
     }
     
     // Poblar Sucursales
@@ -132,14 +124,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabActivos = document.getElementById('tab-activos');
     const tabVehiculos = document.getElementById('tab-vehiculos');
     const tabCelulares = document.getElementById('tab-celulares');
-    const tabDashboard = document.getElementById('tab-dashboard');
     const moduleTitle = document.getElementById('module-title');
     
     function switchTab(newTab) {
       currentTab = newTab;
       
       // Resetear clases de pestañas
-      [tabActivos, tabVehiculos, tabCelulares, tabDashboard].forEach(btn => {
+      [tabActivos, tabVehiculos, tabCelulares].forEach(btn => {
         if (btn) {
           btn.className = "flex-1 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 bg-transparent text-slate-600 hover:bg-white hover:text-slate-900";
         }
@@ -155,9 +146,6 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (currentTab === 'celulares') {
         activeBtn = tabCelulares;
         moduleTitle.textContent = 'Control de Celulares y Líneas';
-      } else if (currentTab === 'dashboard') {
-        activeBtn = tabDashboard;
-        moduleTitle.textContent = 'Indicadores y Monitoreo General';
       }
       
       if (activeBtn) {
@@ -168,40 +156,17 @@ document.addEventListener('DOMContentLoaded', () => {
       const excelBtn = document.getElementById('btn-export-excel');
       const pdfBtn = document.getElementById('btn-export-pdf');
 
-      if (currentTab === 'dashboard') {
-        dashboardContainer.classList.remove('hidden');
-        searchWrapper.classList.add('hidden');
-        estadoWrapper.classList.add('hidden');
-        
-        resultsCount.classList.add('hidden');
-        if (excelBtn) excelBtn.classList.add('hidden');
-        if (pdfBtn) pdfBtn.classList.add('hidden');
-
-        document.getElementById('assets-table-container').classList.add('hidden');
-        document.getElementById('vehiculos-table-container').classList.add('hidden');
-        document.getElementById('celulares-table-container').classList.add('hidden');
-        mobileContainer.classList.add('hidden');
-        emptyState.classList.add('hidden');
-      } else {
-        dashboardContainer.classList.add('hidden');
-        searchWrapper.classList.remove('hidden');
-        estadoWrapper.classList.remove('hidden');
-        
-        resultsCount.classList.remove('hidden');
-        if (excelBtn) excelBtn.classList.remove('hidden');
-        if (pdfBtn) pdfBtn.classList.remove('hidden');
-      }
+      searchWrapper.classList.remove('hidden');
+      estadoWrapper.classList.remove('hidden');
       
-      populateFilters();
-      applyFilters();
+      resultsCount.classList.remove('hidden');
+      if (excelBtn) excelBtn.classList.remove('hidden');
+      if (pdfBtn) pdfBtn.classList.remove('hidden');
     }
     
     tabActivos.addEventListener('click', () => switchTab('activos'));
     tabVehiculos.addEventListener('click', () => switchTab('vehiculos'));
     tabCelulares.addEventListener('click', () => switchTab('celulares'));
-    if (tabDashboard) {
-      tabDashboard.addEventListener('click', () => switchTab('dashboard'));
-    }
   }
 
   // Filtrado del cliente
@@ -210,10 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectedSucursal = sucursalSelect.value;
     const selectedEstado = estadoSelect.value;
     
-    if (currentTab === 'dashboard') {
-      renderDashboardCharts();
-      return;
-    }
+
     
     let baseData = [];
     if (currentTab === 'activos') {
@@ -1266,215 +1228,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ── Renderizado del Dashboard de Monitoreo (Punto 2) ────────────────────────
-  function renderDashboardCharts() {
-    const selectedSucursal = sucursalSelect.value;
 
-    const filteredAssets = assets.filter(item => !selectedSucursal || item.sucursal === selectedSucursal);
-    const filteredVehicles = getVehicles().filter(item => !selectedSucursal || item.sucursal === selectedSucursal);
-    const filteredCelulares = celulares.filter(item => !selectedSucursal || item.sucursal === selectedSucursal);
-
-    // KPI 1: Activos Fijos
-    const totalActivos = filteredAssets.length;
-    const totalValorLibros = filteredAssets.reduce((sum, item) => sum + (Number(item.valor_en_libros) || 0), 0);
-    const activosCantKpiEl = document.getElementById('kpi-activos-cant');
-    const activosValorKpiEl = document.getElementById('kpi-activos-valor');
-    if (activosCantKpiEl) activosCantKpiEl.textContent = totalActivos;
-    if (activosValorKpiEl) activosValorKpiEl.innerHTML = `<span class="text-slate-400">Total Libros:</span> S/. ${formatMoney(totalValorLibros)}`;
-
-    // KPI 2: Control de Vehículos
-    const totalVehiculos = filteredVehicles.length;
-    const vigentesSOAT = filteredVehicles.filter(v => v.soat_estado === 'VIGENTE').length;
-    const vehiculosCantKpiEl = document.getElementById('kpi-vehiculos-cant');
-    const vehiculosDetalleKpiEl = document.getElementById('kpi-vehiculos-detalle');
-    if (vehiculosCantKpiEl) vehiculosCantKpiEl.textContent = totalVehiculos;
-    if (vehiculosDetalleKpiEl) {
-      const vigentesRT = filteredVehicles.filter(v => v.estado_rev_tec === 'VIGENTE').length;
-      vehiculosDetalleKpiEl.textContent = `${vigentesSOAT} SOAT / ${vigentesRT} RT Vigentes`;
-    }
-
-    // KPI 3: Alertas de Tránsito
-    const alertasSOAT = filteredVehicles.filter(v => v.soat_estado === 'VENCIDO' || v.soat_estado === 'POR_VENCER').length;
-    const alertasRT = filteredVehicles.filter(v => v.vencimiento_rev_tec && (v.estado_rev_tec === 'VENCIDO' || v.estado_rev_tec === 'POR_VENCER')).length;
-    const totalAlertas = alertasSOAT + alertasRT;
-    const alertasKpiEl = document.getElementById('kpi-alertas-cant');
-    const alertasDetalleKpiEl = document.getElementById('kpi-alertas-detalle');
-    if (alertasKpiEl) {
-      alertasKpiEl.textContent = totalAlertas;
-      if (totalAlertas > 0) {
-        alertasKpiEl.className = "text-2xl font-extrabold text-rose-600 tracking-tight animate-pulse";
-      } else {
-        alertasKpiEl.className = "text-2xl font-extrabold text-emerald-600 tracking-tight";
-      }
-    }
-    if (alertasDetalleKpiEl) {
-      alertasDetalleKpiEl.textContent = `${alertasSOAT} SOAT, ${alertasRT} Rev. Técnicas`;
-    }
-
-    // KPI 4: Celulares y Líneas
-    const totalCelulares = filteredCelulares.length;
-    const porRenovarCelulares = filteredCelulares.filter(c => c.vida_util_estado === 'VENCIDA' || c.vida_util_estado === 'POR_RENOVAR').length;
-    const celularesCantKpiEl = document.getElementById('kpi-celulares-cant');
-    const celularesRenovacionKpiEl = document.getElementById('kpi-celulares-renovacion');
-    if (celularesCantKpiEl) celularesCantKpiEl.textContent = totalCelulares;
-    if (celularesRenovacionKpiEl) celularesRenovacionKpiEl.textContent = `${porRenovarCelulares} por renovar (vida útil)`;
-
-    // --- GRÁFICO 1: Estado Físico de Activos (Doughnut) ---
-    const countsEstado = { 'BUENO': 0, 'REGULAR': 0, 'MALO': 0, 'PARA BAJA': 0, 'BAJA': 0 };
-    filteredAssets.forEach(item => {
-      const est = (item.estado_activo || '').toUpperCase().trim();
-      if (countsEstado[est] !== undefined) countsEstado[est]++;
-    });
-
-    const ctxEstado = document.getElementById('chart-activos-estado');
-    if (ctxEstado) {
-      if (chartEstado) chartEstado.destroy();
-      chartEstado = new Chart(ctxEstado.getContext('2d'), {
-        type: 'doughnut',
-        data: {
-          labels: ['Bueno', 'Regular', 'Malo', 'Para Baja', 'Baja'],
-          datasets: [{
-            data: [countsEstado['BUENO'], countsEstado['REGULAR'], countsEstado['MALO'], countsEstado['PARA BAJA'], countsEstado['BAJA']],
-            backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#eab308', '#ef4444'],
-            borderWidth: 2,
-            borderColor: '#ffffff'
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'bottom',
-              labels: {
-                boxWidth: 10,
-                font: { size: 10, weight: '600' },
-                color: '#475569'
-              }
-            }
-          },
-          cutout: '65%'
-        }
-      });
-    }
-
-    // --- GRÁFICO 2: Alertas de Tránsito (Grouped Bar) ---
-    const soatVigente = filteredVehicles.filter(v => v.soat_estado === 'VIGENTE').length;
-    const soatPorVencer = filteredVehicles.filter(v => v.soat_estado === 'POR_VENCER').length;
-    const soatVencido = filteredVehicles.filter(v => v.soat_estado === 'VENCIDO').length;
-
-    const rtVehicles = filteredVehicles.filter(v => v.vencimiento_rev_tec);
-    const rtVigente = rtVehicles.filter(v => v.estado_rev_tec === 'VIGENTE').length;
-    const rtPorVencer = rtVehicles.filter(v => v.estado_rev_tec === 'POR_VENCER').length;
-    const rtVencido = rtVehicles.filter(v => v.estado_rev_tec === 'VENCIDO').length;
-
-    const ctxAlertas = document.getElementById('chart-vehiculos-alertas');
-    if (ctxAlertas) {
-      if (chartAlertas) chartAlertas.destroy();
-      chartAlertas = new Chart(ctxAlertas.getContext('2d'), {
-        type: 'bar',
-        data: {
-          labels: ['SOAT', 'Revisión Técnica'],
-          datasets: [
-            {
-              label: 'Vigente',
-              data: [soatVigente, rtVigente],
-              backgroundColor: '#10b981',
-              borderRadius: 6
-            },
-            {
-              label: 'Por Vencer',
-              data: [soatPorVencer, rtPorVencer],
-              backgroundColor: '#f59e0b',
-              borderRadius: 6
-            },
-            {
-              label: 'Vencido',
-              data: [soatVencido, rtVencido],
-              backgroundColor: '#ef4444',
-              borderRadius: 6
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'bottom',
-              labels: {
-                boxWidth: 10,
-                font: { size: 10, weight: '600' },
-                color: '#475569'
-              }
-            }
-          },
-          scales: {
-            x: {
-              grid: { display: false },
-              ticks: { font: { size: 10, weight: 'bold' }, color: '#475569' }
-            },
-            y: {
-              grid: { color: '#f1f5f9' },
-              ticks: { stepSize: 1, color: '#94a3b8' }
-            }
-          }
-        }
-      });
-    }
-
-    // --- GRÁFICO 3: Activos por Ubicación (Horizontal Bar) ---
-    const countsLocation = {};
-    const groupKey = selectedSucursal ? 'localidad' : 'sucursal';
-    
-    filteredAssets.forEach(item => {
-      const key = item[groupKey] || 'Sin especificar';
-      countsLocation[key] = (countsLocation[key] || 0) + 1;
-    });
-
-    const sortedLocations = Object.entries(countsLocation)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 8); // Top 8 locations
-
-    const labels = sortedLocations.map(e => e[0]);
-    const dataCounts = sortedLocations.map(e => e[1]);
-
-    const ctxSucursal = document.getElementById('chart-activos-sucursal');
-    if (ctxSucursal) {
-      if (chartSucursal) chartSucursal.destroy();
-      chartSucursal = new Chart(ctxSucursal.getContext('2d'), {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Cantidad de Activos',
-            data: dataCounts,
-            backgroundColor: '#00B0F0',
-            borderRadius: 6,
-            borderWidth: 0
-          }]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false }
-          },
-          scales: {
-            x: {
-              grid: { color: '#f1f5f9' },
-              ticks: { stepSize: 1, color: '#94a3b8' }
-            },
-            y: {
-              grid: { display: false },
-              ticks: { font: { size: 10, weight: '600' }, color: '#475569' }
-            }
-          }
-        }
-      });
-    }
-  }
 
   // Vincular eventos a botones
   const excelBtn = document.getElementById('btn-export-excel');
