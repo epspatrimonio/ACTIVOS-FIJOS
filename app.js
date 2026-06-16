@@ -1009,165 +1009,261 @@ document.addEventListener('DOMContentLoaded', () => {
     XLSX.writeFile(workbook, `Reporte_${sheetName}_SelvaCentral_${new Date().toISOString().slice(0, 10)}.xlsx`);
   }
 
-  function exportToPDF() {
+  // Helper to load images dynamically for PDF
+  function loadImage(url) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error(`No se pudo cargar la imagen: ${url}`));
+      img.src = url;
+    });
+  }
+
+  async function exportToPDF() {
     if (currentFilteredData.length === 0) {
       alert("No hay registros filtrados para exportar.");
       return;
     }
 
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-
-    // Encabezado
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.setTextColor(0, 176, 240); // Celeste #00B0F0
-    doc.text("EPS SELVA CENTRAL S.A.", 14, 15);
-    
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-    doc.setTextColor(100, 116, 139); // Slate gris
-    
-    let title = "";
-    let headers = [];
-    let data = [];
-    let columnStyles = {};
-    
-    if (currentTab === 'activos') {
-      title = "Control Patrimonial - Catálogo de Activos Fijos Sincronizados";
-      headers = [
-        [
-          "Cód. Patrimonial",
-          "N° Documento",
-          "Fecha de Ingreso",
-          "Ubicación (Sucursal / Localidad)",
-          "Denominación del Activo",
-          "Especificaciones",
-          "Estado",
-          "Valor Libros",
-          "Valor Neto",
-          "Responsable"
-        ]
-      ];
-      data = currentFilteredData.map(item => [
-        item.cod_patrimonial || '—',
-        item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : `INC-${item.n_doc}`) : '—',
-        formatDate(item.fecha_alta_factura || item.fecha_registro_contable),
-        `${item.sucursal || '—'}${item.localidad ? `\n(${item.localidad})` : ''}`,
-        `${item.denominacion || ''}${item.subcategoria ? `\n› ${item.subcategoria}` : ''}`,
-        item.placa ? 
-          `Placa: ${item.placa}\nMotor: ${item.nro_motor || 'S/M'}\nChasis: ${item.nro_chasis || 'S/C'}\nSOAT: ${item.soat_estado || '—'}\nRev.Tec: ${item.estado_rev_tec || '—'}` :
-          `Marca: ${item.marca || 'S/M'}\nModelo: ${item.modelo || 'S/M'}\nSerie: ${item.numero_serie || 'S/S'}${item.color ? `\nColor: ${item.color}` : ''}`,
-        item.estado_activo || '—',
-        `S/. ${formatMoney(item.valor_en_libros)}`,
-        `S/. ${formatMoney(getNetValue(item))}`,
-        item.responsable || "Sin Asignar"
-      ]);
-      columnStyles = {
-        0: { cellWidth: 22 }, // Cód. Patrimonial
-        1: { cellWidth: 22 }, // Documento N Doc
-        2: { cellWidth: 20 }, // Fecha de Ingreso
-        3: { cellWidth: 30 }, // Ubicación
-        4: { cellWidth: 42 }, // Denominación
-        5: { cellWidth: 43 }, // Especificaciones
-        6: { cellWidth: 18 }, // Estado
-        7: { cellWidth: 23, halign: 'right' },  // Valor Libros
-        8: { cellWidth: 23, halign: 'right' },  // Valor Neto
-        9: { cellWidth: 26 }  // Responsable
-      };
-    } else if (currentTab === 'vehiculos') {
-      title = "Control Patrimonial - Flota de Vehículos y Seguros/Revisión Técnica";
-      headers = [
-        [
-          "Placa",
-          "Cód. Patrimonial",
-          "Tipo / Subcat",
-          "Ubicación",
-          "Denominación",
-          "Especificaciones Técnicas",
-          "Estado",
-          "SOAT",
-          "Revisión Técnica",
-          "Responsable"
-        ]
-      ];
-      data = currentFilteredData.map(item => [
-        item.placa || '—',
-        item.cod_patrimonial || '—',
-        item.subcategoria || 'VEHÍCULO',
-        `${item.sucursal || '—'}${item.localidad ? `\n(${item.localidad})` : ''}`,
-        `${item.denominacion || ''}\nAño: ${item.vehiculo_anio || '—'}`,
-        `Motor: ${item.nro_motor || '—'}\nChasis: ${item.nro_chasis || '—'}\nCombustible: ${item.combustible || '—'}`,
-        item.estado_activo || '—',
-        item.soat_estado ? `${item.soat_estado}\nPol: ${item.soat_poliza || '—'}\nVence: ${item.soat_vencimiento ? formatDate(item.soat_vencimiento) : '—'}` : 'No Registrado',
-        item.vencimiento_rev_tec ? `${item.estado_rev_tec}\nVence: ${formatDate(item.vencimiento_rev_tec)}` : 'No Requiere',
-        item.responsable || "Sin Asignar"
-      ]);
-      columnStyles = {
-        0: { cellWidth: 20 }, // Placa
-        1: { cellWidth: 22 }, // Cód. Patrimonial
-        2: { cellWidth: 22 }, // Tipo
-        3: { cellWidth: 25 }, // Ubicación
-        4: { cellWidth: 40 }, // Denominación
-        5: { cellWidth: 43 }, // Specs
-        6: { cellWidth: 15 }, // Estado
-        7: { cellWidth: 35 }, // SOAT
-        8: { cellWidth: 28 }, // Rev Tec
-        9: { cellWidth: 25 }  // Responsable
-      };
-    } else if (currentTab === 'celulares') {
-      title = "Control Patrimonial - Celulares y Líneas Telefónicas Sujetas a Control";
-      headers = [
-        [
-          "Cód. Control",
-          "Marca / Modelo",
-          "IMEI / Operador",
-          "N° Línea",
-          "Ubicación",
-          "Ingreso",
-          "Asignado a",
-          "Renovación (3 Años)",
-          "Estado"
-        ]
-      ];
-      data = currentFilteredData.map(item => [
-        item.cod_control || '—',
-        `${item.marca || 'S/M'}\n${item.modelo || 'S/M'}`,
-        `${item.imei || '—'}\n${item.operador || '—'}`,
-        item.numero_linea || '—',
-        item.sucursal || '—',
-        formatDate(item.fecha_ingreso),
-        `${item.responsable || 'Sin asignar'}\n(${item.puesto || '—'})`,
-        `${item.vida_util_estado}\nVence: ${item.fecha_renovacion ? formatDate(item.fecha_renovacion) : '—'}`,
-        item.estado || 'ACTIVO'
-      ]);
-      columnStyles = {
-        0: { cellWidth: 25 }, // Cód. Control
-        1: { cellWidth: 30 }, // Marca/Modelo
-        2: { cellWidth: 35 }, // IMEI/Operador
-        3: { cellWidth: 25 }, // N° Línea
-        4: { cellWidth: 30 }, // Ubicación
-        5: { cellWidth: 22 }, // Ingreso
-        6: { cellWidth: 43 }, // Asignado a
-        7: { cellWidth: 40 }, // Renovación
-        8: { cellWidth: 20 }  // Estado
-      };
+    const pdfBtn = document.getElementById('btn-export-pdf');
+    let originalText = "";
+    if (pdfBtn) {
+      originalText = pdfBtn.innerHTML;
+      pdfBtn.innerHTML = '⏳ Generando PDF...';
+      pdfBtn.disabled = true;
     }
 
-    doc.text(title, 14, 21);
-    doc.text(`Fecha de Reporte: ${new Date().toLocaleDateString('es-PE')}`, 14, 26);
+    try {
+      // Cargar imágenes en paralelo
+      const [logoImg, selloImg] = await Promise.all([
+        loadImage('logo_eps2.png').catch(() => null),
+        loadImage('Sello Post Firma - CP1.png').catch(() => null)
+      ]);
 
-    doc.autoTable({
-      head: headers,
-      body: data,
-      startY: 32,
-      theme: 'grid',
-      styles: { fontSize: 7, cellPadding: 2.5, valign: 'middle' },
-      headStyles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold' },
-      columnStyles: columnStyles
-    });
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
-    doc.save(`Reporte_${currentTab.toUpperCase()}_SelvaCentral_${new Date().toISOString().slice(0, 10)}.pdf`);
+      // Configurar metadatos del PDF
+      doc.setProperties({
+        title: `Reporte de ${currentTab.toUpperCase()}`,
+        subject: 'Control Patrimonial',
+        author: 'EPS Selva Central'
+      });
+
+      // 1. Agregar Imagen de Logo (Superior Izquierda)
+      if (logoImg) {
+        doc.addImage(logoImg, 'PNG', 14, 8, 48, 14);
+      }
+
+      // 2. Fecha (Superior Derecha)
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(8);
+      doc.setTextColor(100, 116, 139);
+      const today = new Date().toLocaleDateString('es-PE');
+      doc.text(`Fecha de Reporte: ${today}`, 283, 12, { align: 'right' });
+
+      // 3. Título Centrado
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.setTextColor(0, 110, 180); // Azul formal
+      doc.text("CONTROL PATRIMONIAL", 148.5, 14, { align: 'center' });
+
+      // Subtítulo Centrado
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.setTextColor(71, 85, 105);
+      let subtitle = "";
+      if (currentTab === 'activos') subtitle = "Inventario de Activos Fijos";
+      else if (currentTab === 'vehiculos') subtitle = "Inventario de Vehículos";
+      else if (currentTab === 'celulares') subtitle = "Inventario de Celulares";
+      doc.text(subtitle, 148.5, 20, { align: 'center' });
+
+      // Sucursal / Filtro Centrado
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(9);
+      doc.setTextColor(148, 163, 184);
+      const selectedSucursal = sucursalSelect.value || "Todas las Sucursales";
+      doc.text(`Filtro: ${selectedSucursal}`, 148.5, 25, { align: 'center' });
+
+      // Configurar columnas según la pestaña
+      let headers = [];
+      let data = [];
+      let columnStyles = {};
+
+      if (currentTab === 'activos') {
+        headers = [
+          [
+            "Cód. Patrimonial",
+            "N° Documento",
+            "Fecha Ingreso",
+            "Ubicación (Sucursal / Localidad)",
+            "Denominación del Activo",
+            "Especificaciones",
+            "Estado",
+            "Valor Libros",
+            "Valor Neto",
+            "Responsable"
+          ]
+        ];
+        data = currentFilteredData.map(item => [
+          item.cod_patrimonial || '—',
+          item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : `INC-${item.n_doc}`) : '—',
+          formatDate(item.fecha_alta_factura || item.fecha_registro_contable),
+          `${item.sucursal || '—'}${item.localidad ? `\n(${item.localidad})` : ''}`,
+          item.denominacion || '',
+          item.placa ? 
+            `Placa: ${item.placa}\nMotor: ${item.nro_motor || 'S/M'}\nChasis: ${item.nro_chasis || 'S/C'}\nSOAT: ${item.soat_estado || '—'}\nRev.Tec: ${item.estado_rev_tec || '—'}` :
+            `Marca: ${item.marca || 'S/M'}\nModelo: ${item.modelo || 'S/M'}\nSerie: ${item.numero_serie || 'S/S'}${item.color ? `\nColor: ${item.color}` : ''}`,
+          item.estado_activo || '—',
+          `S/. ${formatMoney(item.valor_en_libros)}`,
+          `S/. ${formatMoney(getNetValue(item))}`,
+          item.responsable || "Sin Asignar"
+        ]);
+        columnStyles = {
+          0: { cellWidth: 22 },
+          1: { cellWidth: 22 },
+          2: { cellWidth: 20 },
+          3: { cellWidth: 30 },
+          4: { cellWidth: 42 },
+          5: { cellWidth: 43 },
+          6: { cellWidth: 18 },
+          7: { cellWidth: 23, halign: 'right' },
+          8: { cellWidth: 23, halign: 'right' },
+          9: { cellWidth: 26 }
+        };
+      } else if (currentTab === 'vehiculos') {
+        headers = [
+          [
+            "Placa",
+            "Cód. Patrimonial",
+            "Tipo / Subcat",
+            "Ubicación",
+            "Denominación",
+            "Especificaciones Técnicas",
+            "Estado",
+            "SOAT",
+            "Revisión Técnica",
+            "Responsable"
+          ]
+        ];
+        data = currentFilteredData.map(item => [
+          item.placa || '—',
+          item.cod_patrimonial || '—',
+          item.subcategoria || 'VEHÍCULO',
+          `${item.sucursal || '—'}${item.localidad ? `\n(${item.localidad})` : ''}`,
+          `${item.denominacion || ''}\nAño: ${item.vehiculo_anio || '—'}`,
+          `Motor: ${item.nro_motor || '—'}\nChasis: ${item.nro_chasis || '—'}\nCombustible: ${item.combustible || '—'}`,
+          item.estado_activo || '—',
+          item.soat_estado ? `${item.soat_estado}\nPol: ${item.soat_poliza || '—'}\nVence: ${item.soat_vencimiento ? formatDate(item.soat_vencimiento) : '—'}` : 'No Registrado',
+          item.vencimiento_rev_tec ? `${item.estado_rev_tec}\nVence: ${formatDate(item.vencimiento_rev_tec)}` : 'No Requiere',
+          item.responsable || "Sin Asignar"
+        ]);
+        columnStyles = {
+          0: { cellWidth: 20 },
+          1: { cellWidth: 22 },
+          2: { cellWidth: 22 },
+          3: { cellWidth: 25 },
+          4: { cellWidth: 40 },
+          5: { cellWidth: 43 },
+          6: { cellWidth: 15 },
+          7: { cellWidth: 35 },
+          8: { cellWidth: 28 },
+          9: { cellWidth: 25 }
+        };
+      } else if (currentTab === 'celulares') {
+        headers = [
+          [
+            "Cód. Control",
+            "Marca / Modelo",
+            "IMEI / Operador",
+            "N° Línea",
+            "Ubicación",
+            "Ingreso",
+            "Asignado a",
+            "Renovación (3 Años)",
+            "Estado"
+          ]
+        ];
+        data = currentFilteredData.map(item => [
+          item.cod_control || '—',
+          `${item.marca || 'S/M'}\n${item.modelo || 'S/M'}`,
+          `${item.imei || '—'}\n${item.operador || '—'}`,
+          item.numero_linea || '—',
+          item.sucursal || '—',
+          formatDate(item.fecha_ingreso),
+          `${item.responsable || 'Sin asignar'}\n(${item.puesto || '—'})`,
+          `${item.vida_util_estado}\nVence: ${item.fecha_renovacion ? formatDate(item.fecha_renovacion) : '—'}`,
+          item.estado || 'ACTIVO'
+        ]);
+        columnStyles = {
+          0: { cellWidth: 25 },
+          1: { cellWidth: 30 },
+          2: { cellWidth: 35 },
+          3: { cellWidth: 25 },
+          4: { cellWidth: 30 },
+          5: { cellWidth: 22 },
+          6: { cellWidth: 43 },
+          7: { cellWidth: 40 },
+          8: { cellWidth: 20 }
+        };
+      }
+
+      // Renderizar la tabla principal
+      doc.autoTable({
+        head: headers,
+        body: data,
+        startY: 30,
+        theme: 'grid',
+        styles: { fontSize: 7.5, cellPadding: 2.5, valign: 'middle' },
+        headStyles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold' },
+        columnStyles: columnStyles,
+        margin: { bottom: 33 } // Asegura más espacio útil en cada página (el contenido puede llegar hasta Y=177)
+      });
+
+      // Posición fija Y del pie de página de firmas en la última hoja (ajustado lo más abajo posible)
+      const signatureBlockY = 198;
+      const safeTableMaxY = 158; // Deja al menos 18mm arriba del sello (que empieza en Y = 176)
+
+      // Si la tabla termina más abajo de la zona segura de firmas, agregamos página
+      if (doc.previousAutoTable.finalY > safeTableMaxY) {
+        doc.addPage();
+      }
+
+      // 4. Firma y Sello Punteados (Parte Inferior Izquierda, posición fija)
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8.5);
+      doc.setTextColor(30, 41, 59);
+      doc.text("----------------------------------------------------------------", 20, signatureBlockY);
+      doc.text("Firma y Sello (Huella Digital)", 32, signatureBlockY + 4);
+
+      // 5. Sello Post Firma CP1 (Parte Inferior Derecha, posición fija - desplazado a X=190 para no colisionar con nro de página)
+      if (selloImg) {
+        doc.addImage(selloImg, 'PNG', 190, signatureBlockY - 22, 56, 26);
+      }
+
+      // 6. Agregar Números de Página en el pie de página (Página X de Y)
+      const totalPages = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(7.5);
+        doc.setTextColor(148, 163, 184);
+        doc.text(`Página ${i} de ${totalPages}`, 283, 203, { align: 'right' });
+      }
+
+      // Guardar PDF
+      const filename = `Reporte_${currentTab.toUpperCase()}_SelvaCentral_${new Date().toISOString().slice(0, 10)}.pdf`;
+      doc.save(filename);
+
+    } catch (err) {
+      console.error(err);
+      alert("Error al generar el PDF: " + err.message);
+    } finally {
+      if (pdfBtn) {
+        pdfBtn.innerHTML = originalText;
+        pdfBtn.disabled = false;
+      }
+    }
   }
 
   // ── Renderizado del Dashboard de Monitoreo (Punto 2) ────────────────────────
