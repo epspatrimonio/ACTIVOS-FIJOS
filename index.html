@@ -41,10 +41,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Librerías de Exportación (Excel y PDF) -->
+  <!-- Librerías de Exportación (Excel y PDF) y Gráficos (Chart.js) -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     :root {
@@ -150,7 +151,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
       <div class="bg-white border border-slate-200/85 rounded-xl p-3.5 shadow-sm flex flex-col md:flex-row gap-3 items-stretch md:items-end">
         <!-- Buscador -->
-        <div class="w-full md:flex-1">
+        <div id="search-filter-wrapper" class="w-full md:flex-1">
           <label for="search" class="block text-[0.75rem] font-semibold text-slate-500 mb-1">Buscador inteligente</label>
           <input 
             type="text" 
@@ -172,7 +173,7 @@
         </div>
 
         <!-- Estado -->
-        <div class="w-full md:w-48">
+        <div id="estado-filter-wrapper" class="w-full md:w-48">
           <label for="filter-estado" class="block text-[0.75rem] font-semibold text-slate-500 mb-1">Estado</label>
           <select 
             id="filter-estado" 
@@ -194,7 +195,7 @@
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 overflow-hidden flex flex-col min-h-0">
 
     <!-- Selector de Pestañas (Tabs Switcher) -->
-    <div class="flex bg-slate-200/50 p-1.5 rounded-2xl mb-5 self-center sm:self-start shrink-0 gap-1.5 w-full max-w-md border border-slate-200/60 shadow-sm">
+    <div class="flex bg-slate-200/50 p-1.5 rounded-2xl mb-5 self-center sm:self-start shrink-0 gap-1.5 w-full max-w-lg border border-slate-200/60 shadow-sm">
       <button id="tab-activos" class="flex-1 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 bg-brand-500 text-white shadow-md shadow-brand-500/15">
         💼 Activos Fijos
       </button>
@@ -203,6 +204,9 @@
       </button>
       <button id="tab-celulares" class="flex-1 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent">
         📱 Celulares
+      </button>
+      <button id="tab-dashboard" class="flex-1 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent">
+        📊 Monitoreo
       </button>
     </div>
 
@@ -316,6 +320,101 @@
             <!-- Las filas se inyectarán vía JavaScript -->
           </tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- Contenedor del Dashboard de Monitoreo -->
+    <div id="dashboard-container" class="hidden flex-1 overflow-y-auto smooth-scroll space-y-6 pb-6 pr-1 min-h-0">
+      <!-- Fila de Tarjetas de Indicadores (KPIs) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- KPI 1: Activos Fijos -->
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-[0.6875rem] font-extrabold text-slate-400 uppercase tracking-wider">Activos Fijos</span>
+              <div class="w-8 h-8 rounded-xl bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-600 text-sm shadow-sm">💼</div>
+            </div>
+            <div class="text-2xl font-extrabold text-slate-900 tracking-tight" id="kpi-activos-cant">0</div>
+          </div>
+          <p class="text-[0.75rem] text-slate-500 mt-2 font-semibold" id="kpi-activos-valor">
+            <span class="text-slate-400">Total Libros:</span> S/. 0.00
+          </p>
+        </div>
+
+        <!-- KPI 2: Control de Vehículos -->
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-[0.6875rem] font-extrabold text-slate-400 uppercase tracking-wider">Control de Vehículos</span>
+              <div class="w-8 h-8 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 text-sm shadow-sm">🚗</div>
+            </div>
+            <div class="text-2xl font-extrabold text-slate-900 tracking-tight" id="kpi-vehiculos-cant">0</div>
+          </div>
+          <p class="text-[0.75rem] text-slate-500 mt-2 font-semibold" id="kpi-vehiculos-detalle">
+            0 con SOAT Vigente
+          </p>
+        </div>
+
+        <!-- KPI 3: Alertas de Tránsito -->
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-[0.6875rem] font-extrabold text-slate-400 uppercase tracking-wider">Alertas de Tránsito</span>
+              <div class="w-8 h-8 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 text-sm shadow-sm">🚨</div>
+            </div>
+            <div class="text-2xl font-extrabold text-rose-600 tracking-tight" id="kpi-alertas-cant">0</div>
+          </div>
+          <p class="text-[0.75rem] text-rose-500 mt-2 font-semibold" id="kpi-alertas-detalle">
+            Vencidos o por vencer
+          </p>
+        </div>
+
+        <!-- KPI 4: Celulares y Líneas -->
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-[0.6875rem] font-extrabold text-slate-400 uppercase tracking-wider">Celulares y Líneas</span>
+              <div class="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 text-sm shadow-sm">📱</div>
+            </div>
+            <div class="text-2xl font-extrabold text-slate-900 tracking-tight" id="kpi-celulares-cant">0</div>
+          </div>
+          <p class="text-[0.75rem] text-slate-500 mt-2 font-semibold" id="kpi-celulares-renovacion">
+            0 por renovar
+          </p>
+        </div>
+      </div>
+
+      <!-- Fila de Gráficos (Grid) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <!-- Gráfico 1: Estado Físico de Activos Fijos -->
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm flex flex-col min-h-[300px]">
+          <h3 class="text-sm font-extrabold text-slate-800 mb-4 flex items-center gap-1.5 border-b border-slate-100 pb-3">
+            <span>📈</span> Estado Físico de Activos
+          </h3>
+          <div class="flex-1 relative flex items-center justify-center">
+            <canvas id="chart-activos-estado" class="max-w-full max-h-[240px]"></canvas>
+          </div>
+        </div>
+
+        <!-- Gráfico 2: Alertas de Vencimiento SOAT y RT -->
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm flex flex-col min-h-[300px]">
+          <h3 class="text-sm font-extrabold text-slate-800 mb-4 flex items-center gap-1.5 border-b border-slate-100 pb-3">
+            <span>🛡️</span> Monitoreo de Documentación Vehicular (SOAT & RT)
+          </h3>
+          <div class="flex-1 relative flex items-center justify-center">
+            <canvas id="chart-vehiculos-alertas" class="max-w-full max-h-[240px]"></canvas>
+          </div>
+        </div>
+
+        <!-- Gráfico 3: Activos por Sucursal -->
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm flex flex-col min-h-[350px] lg:col-span-2">
+          <h3 class="text-sm font-extrabold text-slate-800 mb-4 flex items-center gap-1.5 border-b border-slate-100 pb-3">
+            <span>🏢</span> Distribución de Activos Fijos por Ubicación
+          </h3>
+          <div class="flex-1 relative">
+            <canvas id="chart-activos-sucursal" class="w-full h-full max-h-[300px]"></canvas>
+          </div>
+        </div>
       </div>
     </div>
 
