@@ -19,7 +19,7 @@
     "puesto": null,
     "responsable": "AGON GONZALEZ ROSARIO DEL PILAR",
     "fecha_renovacion": "2029-06-15",
-    "dias_para_renovar": 1095,
+    "dias_para_renovar": 1094,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-15T21:56:21.913763Z",
     "updated_at": "2026-06-16T13:44:58.296691Z"
@@ -44,7 +44,7 @@
     "puesto": null,
     "responsable": "ABREGU QUISPE WILLIAM WALTER",
     "fecha_renovacion": "2029-06-15",
-    "dias_para_renovar": 1095,
+    "dias_para_renovar": 1094,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-15T21:34:10.652584Z",
     "updated_at": "2026-06-16T13:44:48.423700Z"
@@ -69,7 +69,7 @@
     "puesto": null,
     "responsable": "ADAMA VILCHEZ ANGELI MELISSA",
     "fecha_renovacion": "2029-06-15",
-    "dias_para_renovar": 1095,
+    "dias_para_renovar": 1094,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-15T21:37:09.803053Z",
     "updated_at": "2026-06-15T21:37:09.803053Z"
