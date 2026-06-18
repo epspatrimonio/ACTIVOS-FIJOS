@@ -1,7 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
   let assets = [];
   let celulares = [];
-  let currentTab = 'activos'; // activos | vehiculos | celulares
+  let inventario = [];
+  let terceros = [];
+  let currentTab = 'activos'; // activos | vehiculos | celulares | inventario | terceros
   let currentFilteredData = [];
   
   // Elementos del DOM
@@ -27,9 +29,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function loadData() {
     try {
-      const [assetsResponse, celularesResponse] = await Promise.all([
+      const [assetsResponse, celularesResponse, inventarioResponse, tercerosResponse] = await Promise.all([
         fetch('./activos.json'),
-        fetch('./celulares.json').catch(() => null)
+        fetch('./celulares.json').catch(() => null),
+        fetch('./inventario_fisico.json').catch(() => null),
+        fetch('./bienes_terceros.json').catch(() => null)
       ]);
       
       if (!assetsResponse.ok) {
@@ -41,6 +45,18 @@ document.addEventListener('DOMContentLoaded', () => {
         celulares = await celularesResponse.json();
       } else {
         celulares = [];
+      }
+
+      if (inventarioResponse && inventarioResponse.ok) {
+        inventario = await inventarioResponse.json();
+      } else {
+        inventario = [];
+      }
+
+      if (tercerosResponse && tercerosResponse.ok) {
+        terceros = await tercerosResponse.json();
+      } else {
+        terceros = [];
       }
       
       hideStatus();
@@ -73,9 +89,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const previousSucursal = sucursalSelect.value;
     const previousEstado = estadoSelect.value;
     
+    // Cambiar la etiqueta del filtro de Estado/Tipo dinámicamente
+    const label = document.getElementById('filter-estado-label');
+    const isTipo = currentTab === 'inventario' || currentTab === 'terceros';
+    if (label) {
+      label.textContent = isTipo ? 'Tipo' : 'Estado';
+    }
+    
     // Limpiar opciones manteniendo la primera por defecto
     sucursalSelect.innerHTML = '<option value="">Todas las Sucursales</option>';
-    estadoSelect.innerHTML = '<option value="">Todos los Estados</option>';
+    estadoSelect.innerHTML = `<option value="">Todos los ${isTipo ? 'Tipos' : 'Estados'}</option>`;
     
     let dataset = [];
     let stateOptions = [];
@@ -93,19 +116,27 @@ document.addEventListener('DOMContentLoaded', () => {
       if (stateOptions.length === 0) {
         stateOptions = ['ACTIVO', 'INACTIVO'];
       }
+    } else if (currentTab === 'inventario') {
+      dataset = inventario;
+      stateOptions = ['FALTANTE', 'SOBRANTE'];
+    } else if (currentTab === 'terceros') {
+      dataset = terceros;
+      stateOptions = ['TERCERO', 'CONTROL'];
     }
     
-    // Poblar Sucursales
-    const sucursales = [...new Set(dataset.map(item => item.sucursal).filter(Boolean))];
-    sucursales.sort().forEach(suc => {
-      const option = document.createElement('option');
-      option.value = suc;
-      option.textContent = suc;
-      if (suc === previousSucursal) {
-        option.selected = true;
-      }
-      sucursalSelect.appendChild(option);
-    });
+    // Poblar Sucursales (solo si no es inventario ni terceros)
+    if (!isTipo) {
+      const sucursales = [...new Set(dataset.map(item => item.sucursal).filter(Boolean))];
+      sucursales.sort().forEach(suc => {
+        const option = document.createElement('option');
+        option.value = suc;
+        option.textContent = suc;
+        if (suc === previousSucursal) {
+          option.selected = true;
+        }
+        sucursalSelect.appendChild(option);
+      });
+    }
     
     // Poblar Estados
     stateOptions.forEach(est => {
@@ -124,15 +155,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabActivos = document.getElementById('tab-activos');
     const tabVehiculos = document.getElementById('tab-vehiculos');
     const tabCelulares = document.getElementById('tab-celulares');
+    const tabInventario = document.getElementById('tab-inventario');
+    const tabTerceros = document.getElementById('tab-terceros');
     const moduleTitle = document.getElementById('module-title');
     
     function switchTab(newTab) {
       currentTab = newTab;
       
       // Resetear clases de pestañas
-      [tabActivos, tabVehiculos, tabCelulares].forEach(btn => {
+      [tabActivos, tabVehiculos, tabCelulares, tabInventario, tabTerceros].forEach(btn => {
         if (btn) {
-          btn.className = "flex-1 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 bg-transparent text-slate-600 hover:bg-white hover:text-slate-900";
+          btn.className = "flex-none sm:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 bg-transparent text-slate-600 hover:bg-white hover:text-slate-900 whitespace-nowrap";
         }
       });
       
@@ -146,11 +179,31 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (currentTab === 'celulares') {
         activeBtn = tabCelulares;
         moduleTitle.textContent = 'Control de Celulares y Líneas';
+      } else if (currentTab === 'inventario') {
+        activeBtn = tabInventario;
+        moduleTitle.textContent = 'Inventario Físico (Faltantes / Sobrantes)';
+      } else if (currentTab === 'terceros') {
+        activeBtn = tabTerceros;
+        moduleTitle.textContent = 'Control de Bienes de Terceros y Control';
       }
       
       if (activeBtn) {
-        activeBtn.className = "flex-1 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 bg-brand-500 text-white shadow-md shadow-brand-500/15";
+        activeBtn.className = "flex-none sm:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 bg-brand-500 text-white shadow-md shadow-brand-500/15 whitespace-nowrap";
       }
+
+      // Mostrar/Ocultar el filtro de Sucursal
+      const sucursalWrapper = document.getElementById('sucursal-filter-wrapper');
+      if (sucursalWrapper) {
+        if (currentTab === 'inventario' || currentTab === 'terceros') {
+          sucursalWrapper.classList.add('hidden');
+        } else {
+          sucursalWrapper.classList.remove('hidden');
+        }
+      }
+
+      // Re-poblar filtros y aplicar
+      populateFilters();
+      applyFilters();
 
       // Mostrar/Ocultar contenedores de filtros y tablas según la pestaña
       const excelBtn = document.getElementById('btn-export-excel');
@@ -164,9 +217,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (pdfBtn) pdfBtn.classList.remove('hidden');
     }
     
-    tabActivos.addEventListener('click', () => switchTab('activos'));
-    tabVehiculos.addEventListener('click', () => switchTab('vehiculos'));
-    tabCelulares.addEventListener('click', () => switchTab('celulares'));
+    if (tabActivos) tabActivos.addEventListener('click', () => switchTab('activos'));
+    if (tabVehiculos) tabVehiculos.addEventListener('click', () => switchTab('vehiculos'));
+    if (tabCelulares) tabCelulares.addEventListener('click', () => switchTab('celulares'));
+    if (tabInventario) tabInventario.addEventListener('click', () => switchTab('inventario'));
+    if (tabTerceros) tabTerceros.addEventListener('click', () => switchTab('terceros'));
   }
 
   // Filtrado del cliente
@@ -175,8 +230,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectedSucursal = sucursalSelect.value;
     const selectedEstado = estadoSelect.value;
     
-
-    
     let baseData = [];
     if (currentTab === 'activos') {
       baseData = assets;
@@ -184,6 +237,10 @@ document.addEventListener('DOMContentLoaded', () => {
       baseData = getVehicles();
     } else if (currentTab === 'celulares') {
       baseData = celulares;
+    } else if (currentTab === 'inventario') {
+      baseData = inventario;
+    } else if (currentTab === 'terceros') {
+      baseData = terceros;
     }
 
     const filtered = baseData.filter(item => {
@@ -192,7 +249,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Filtro de Estado
       const estadoMatch = !selectedEstado || 
-        (currentTab === 'celulares' ? item.estado === selectedEstado : item.estado_activo === selectedEstado);
+        (currentTab === 'celulares' ? item.estado === selectedEstado : 
+         ((currentTab === 'inventario' || currentTab === 'terceros') ? item.tipo === selectedEstado : item.estado_activo === selectedEstado));
 
       // Filtro de Búsqueda de Texto
       let textMatch = true;
@@ -214,6 +272,23 @@ document.addEventListener('DOMContentLoaded', () => {
             (item.modelo && item.modelo.toLowerCase().includes(query)) ||
             (item.nro_motor && item.nro_motor.toLowerCase().includes(query)) ||
             (item.nro_chasis && item.nro_chasis.toLowerCase().includes(query)) ||
+            (item.responsable && item.responsable.toLowerCase().includes(query));
+        } else if (currentTab === 'inventario') {
+          textMatch = 
+            (item.cod_patrimonial && item.cod_patrimonial.toLowerCase().includes(query)) ||
+            (item.denominacion && item.denominacion.toLowerCase().includes(query)) ||
+            (item.marca && item.marca.toLowerCase().includes(query)) ||
+            (item.modelo && item.modelo.toLowerCase().includes(query)) ||
+            (item.numero_serie && item.numero_serie.toLowerCase().includes(query)) ||
+            (item.categoria && item.categoria.toLowerCase().includes(query)) ||
+            (item.subcategoria && item.subcategoria.toLowerCase().includes(query));
+        } else if (currentTab === 'terceros') {
+          textMatch = 
+            (item.cod_patrimonial && item.cod_patrimonial.toLowerCase().includes(query)) ||
+            (item.denominacion && item.denominacion.toLowerCase().includes(query)) ||
+            (item.marca && item.marca.toLowerCase().includes(query)) ||
+            (item.modelo && item.modelo.toLowerCase().includes(query)) ||
+            (item.numero_serie && item.numero_serie.toLowerCase().includes(query)) ||
             (item.responsable && item.responsable.toLowerCase().includes(query));
         } else {
           // Activos
@@ -242,6 +317,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('assets-tbody').innerHTML = '';
     document.getElementById('vehiculos-tbody').innerHTML = '';
     document.getElementById('celulares-tbody').innerHTML = '';
+    document.getElementById('inventario-tbody').innerHTML = '';
+    document.getElementById('terceros-tbody').innerHTML = '';
     mobileContainer.innerHTML = '';
 
     if (data.length === 0) {
@@ -249,6 +326,8 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('assets-table-container').classList.add('hidden');
       document.getElementById('vehiculos-table-container').classList.add('hidden');
       document.getElementById('celulares-table-container').classList.add('hidden');
+      document.getElementById('inventario-table-container').classList.add('hidden');
+      document.getElementById('terceros-table-container').classList.add('hidden');
       mobileContainer.classList.add('hidden');
       return;
     }
@@ -260,6 +339,8 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('assets-table-container').classList.add('hidden');
       document.getElementById('vehiculos-table-container').classList.add('hidden');
       document.getElementById('celulares-table-container').classList.add('hidden');
+      document.getElementById('inventario-table-container').classList.add('hidden');
+      document.getElementById('terceros-table-container').classList.add('hidden');
       
       const activeTableId = `${currentTab === 'activos' ? 'assets' : currentTab}-table-container`;
       document.getElementById(activeTableId).classList.remove('hidden');
@@ -268,6 +349,8 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('assets-table-container').classList.add('hidden');
       document.getElementById('vehiculos-table-container').classList.add('hidden');
       document.getElementById('celulares-table-container').classList.add('hidden');
+      document.getElementById('inventario-table-container').classList.add('hidden');
+      document.getElementById('terceros-table-container').classList.add('hidden');
       mobileContainer.classList.remove('hidden');
     }
 
@@ -278,6 +361,10 @@ document.addEventListener('DOMContentLoaded', () => {
       renderVehiculosRows(data);
     } else if (currentTab === 'celulares') {
       renderCelularesRows(data);
+    } else if (currentTab === 'inventario') {
+      renderInventarioRows(data);
+    } else if (currentTab === 'terceros') {
+      renderTercerosRows(data);
     }
   }
 
@@ -735,6 +822,213 @@ document.addEventListener('DOMContentLoaded', () => {
     mobileContainer.appendChild(mobileCard);
   }
 
+  // ── Renders del Módulo: Inventario Físico ──────────────────────────────────
+  function renderInventarioRows(data) {
+    const tbody = document.getElementById('inventario-tbody');
+    data.forEach(item => {
+      const row = document.createElement('tr');
+      row.className = 'hover:bg-slate-50 text-slate-700 transition-colors border-b border-slate-150';
+      
+      row.innerHTML = `
+        <td class="px-5 py-4 whitespace-nowrap text-[0.875rem] font-mono font-bold text-slate-800">
+          ${item.cod_patrimonial || '—'}
+        </td>
+        <td class="px-5 py-4 whitespace-nowrap">
+          ${getTipoBadgeHTML(item.tipo)}
+        </td>
+        <td class="px-5 py-4 min-w-[180px]">
+          <div class="font-bold text-slate-800 text-[0.8125rem]">
+            ${item.categoria || '—'}
+          </div>
+          <div class="text-[0.6875rem] text-brand-500 font-bold uppercase tracking-wide mt-0.5">
+            ${item.subcategoria || '—'}
+          </div>
+        </td>
+        <td class="px-5 py-4 min-w-[200px] text-[0.875rem] font-bold text-slate-800 leading-snug">
+          ${item.denominacion || ''}
+        </td>
+        <td class="px-5 py-4 text-[0.8125rem] min-w-[200px] text-slate-500 leading-relaxed">
+          <div><span class="font-medium text-slate-400">Marca:</span> ${item.marca || 'S/M'}</div>
+          <div><span class="font-medium text-slate-400">Modelo:</span> ${item.modelo || 'S/M'}</div>
+          <div><span class="font-medium text-slate-400">Serie:</span> ${item.numero_serie || 'S/S'}</div>
+          ${item.color ? `<div><span class="font-medium text-slate-400">Color:</span> ${item.color}</div>` : ''}
+        </td>
+        <td class="px-5 py-4 text-[0.8125rem] min-w-[200px] text-slate-500 leading-relaxed">
+          ${item.caracteristicas_accesorios || '—'}
+        </td>
+        <td class="px-5 py-4 text-[0.8125rem] min-w-[200px] text-slate-500 leading-relaxed">
+          ${item.observaciones || '—'}
+        </td>
+        <td class="px-5 py-4 whitespace-nowrap text-xs text-slate-500 font-medium font-mono">
+          ${formatDate(item.created_at)}
+        </td>
+      `;
+      tbody.appendChild(row);
+      renderInventarioMobileCard(item);
+    });
+  }
+
+  function renderInventarioMobileCard(item) {
+    const mobileCard = document.createElement('article');
+    mobileCard.className = 'bg-white border border-slate-200 rounded-xl shadow-sm p-4';
+    mobileCard.innerHTML = `
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <div class="text-[0.75rem] font-bold text-brand-600 uppercase tracking-wide">Código patrimonial</div>
+          <div class="mt-0.5 font-mono text-[0.9375rem] font-extrabold text-slate-900 break-words">
+            ${item.cod_patrimonial || '—'}
+          </div>
+        </div>
+        <div class="shrink-0">
+          ${getTipoBadgeHTML(item.tipo)}
+        </div>
+      </div>
+
+      <div class="mt-3">
+        <h3 class="text-base font-bold leading-snug text-slate-900">
+          ${item.denominacion || 'Sin denominación'}
+        </h3>
+        <p class="mt-1 text-[0.8125rem] font-semibold text-brand-600 uppercase tracking-wide">
+          ${item.categoria || 'Sin categoría'} / ${item.subcategoria || 'Sin subcategoría'}
+        </p>
+      </div>
+
+      <dl class="mt-4 grid grid-cols-1 gap-y-3 text-[0.8125rem]">
+        <div>
+          <dt class="font-semibold text-slate-400">Especificaciones</dt>
+          <dd class="mt-0.5 text-slate-700">
+            <span class="font-medium text-slate-400">Marca:</span> ${item.marca || 'S/M'} &bull; 
+            <span class="font-medium text-slate-400">Modelo:</span> ${item.modelo || 'S/M'} &bull; 
+            <span class="font-medium text-slate-400">Serie:</span> ${item.numero_serie || 'S/S'}
+            ${item.color ? `&bull; <span class="font-medium text-slate-400">Color:</span> ${item.color}` : ''}
+          </dd>
+        </div>
+        ${item.caracteristicas_accesorios ? `
+        <div>
+          <dt class="font-semibold text-slate-400">Características / Accesorios</dt>
+          <dd class="mt-0.5 text-slate-700">${item.caracteristicas_accesorios}</dd>
+        </div>` : ''}
+        ${item.observaciones ? `
+        <div>
+          <dt class="font-semibold text-slate-400">Observaciones</dt>
+          <dd class="mt-0.5 text-slate-700">${item.observaciones}</dd>
+        </div>` : ''}
+        <div>
+          <dt class="font-semibold text-slate-400">Fecha Registro</dt>
+          <dd class="mt-0.5 font-semibold text-slate-700 font-mono">${formatDate(item.created_at)}</dd>
+        </div>
+      </dl>
+    `;
+    mobileContainer.appendChild(mobileCard);
+  }
+
+  // ── Renders del Módulo: Bienes de Terceros ──────────────────────────────────
+  function renderTercerosRows(data) {
+    const tbody = document.getElementById('terceros-tbody');
+    data.forEach(item => {
+      const row = document.createElement('tr');
+      row.className = 'hover:bg-slate-50 text-slate-700 transition-colors border-b border-slate-150';
+      
+      row.innerHTML = `
+        <td class="px-5 py-4 whitespace-nowrap text-[0.875rem] font-mono font-bold text-slate-800">
+          ${item.cod_patrimonial || '—'}
+        </td>
+        <td class="px-5 py-4 whitespace-nowrap">
+          ${getTipoBadgeHTML(item.tipo)}
+        </td>
+        <td class="px-5 py-4 min-w-[200px] text-[0.875rem] font-bold text-slate-800 leading-snug">
+          ${item.denominacion || ''}
+        </td>
+        <td class="px-5 py-4 text-[0.8125rem] min-w-[200px] text-slate-500 leading-relaxed">
+          <div><span class="font-medium text-slate-400">Marca:</span> ${item.marca || 'S/M'}</div>
+          <div><span class="font-medium text-slate-400">Modelo:</span> ${item.modelo || 'S/M'}</div>
+          <div><span class="font-medium text-slate-400">Serie:</span> ${item.numero_serie || 'S/S'}</div>
+          ${item.color ? `<div><span class="font-medium text-slate-400">Color:</span> ${item.color}</div>` : ''}
+        </td>
+        <td class="px-5 py-4 text-[0.8125rem] min-w-[200px] text-slate-500 leading-relaxed">
+          ${item.caracteristicas_accesorios || '—'}
+        </td>
+        <td class="px-5 py-4 whitespace-nowrap text-[0.8125rem] font-semibold text-slate-600">
+          ${item.responsable || '—'}
+        </td>
+        <td class="px-5 py-4 text-[0.8125rem] min-w-[200px] text-slate-500 leading-relaxed">
+          ${item.observaciones || '—'}
+        </td>
+        <td class="px-5 py-4 whitespace-nowrap text-xs text-slate-500 font-medium font-mono">
+          ${formatDate(item.created_at)}
+        </td>
+      `;
+      tbody.appendChild(row);
+      renderTercerosMobileCard(item);
+    });
+  }
+
+  function renderTercerosMobileCard(item) {
+    const mobileCard = document.createElement('article');
+    mobileCard.className = 'bg-white border border-slate-200 rounded-xl shadow-sm p-4';
+    mobileCard.innerHTML = `
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <div class="text-[0.75rem] font-bold text-brand-600 uppercase tracking-wide">Código patrimonial</div>
+          <div class="mt-0.5 font-mono text-[0.9375rem] font-extrabold text-slate-900 break-words">
+            ${item.cod_patrimonial || '—'}
+          </div>
+        </div>
+        <div class="shrink-0">
+          ${getTipoBadgeHTML(item.tipo)}
+        </div>
+      </div>
+
+      <div class="mt-3">
+        <h3 class="text-base font-bold leading-snug text-slate-900">
+          ${item.denominacion || 'Sin denominación'}
+        </h3>
+      </div>
+
+      <dl class="mt-4 grid grid-cols-1 gap-y-3 text-[0.8125rem]">
+        <div>
+          <dt class="font-semibold text-slate-400">Especificaciones</dt>
+          <dd class="mt-0.5 text-slate-700">
+            <span class="font-medium text-slate-400">Marca:</span> ${item.marca || 'S/M'} &bull; 
+            <span class="font-medium text-slate-400">Modelo:</span> ${item.modelo || 'S/M'} &bull; 
+            <span class="font-medium text-slate-400">Serie:</span> ${item.numero_serie || 'S/S'}
+            ${item.color ? `&bull; <span class="font-medium text-slate-400">Color:</span> ${item.color}` : ''}
+          </dd>
+        </div>
+        ${item.caracteristicas_accesorios ? `
+        <div>
+          <dt class="font-semibold text-slate-400">Características / Accesorios</dt>
+          <dd class="mt-0.5 text-slate-700">${item.caracteristicas_accesorios}</dd>
+        </div>` : ''}
+        <div>
+          <dt class="font-semibold text-slate-400">Responsable</dt>
+          <dd class="mt-0.5 font-semibold text-slate-700">${item.responsable || 'Sin asignar'}</dd>
+        </div>
+        ${item.observaciones ? `
+        <div>
+          <dt class="font-semibold text-slate-400">Observaciones</dt>
+          <dd class="mt-0.5 text-slate-700">${item.observaciones}</dd>
+        </div>` : ''}
+        <div>
+          <dt class="font-semibold text-slate-400">Fecha Registro</dt>
+          <dd class="mt-0.5 font-semibold text-slate-700 font-mono">${formatDate(item.created_at)}</dd>
+        </div>
+      </dl>
+    `;
+    mobileContainer.appendChild(mobileCard);
+  }
+
+  function getTipoBadgeHTML(tipo) {
+    const styles = {
+      FALTANTE: 'bg-rose-50 text-rose-700 border-rose-200',
+      SOBRANTE: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      TERCERO: 'bg-amber-50 text-amber-700 border-amber-200',
+      CONTROL: 'bg-blue-50 text-blue-700 border-blue-200',
+    };
+    const style = styles[tipo] || 'bg-slate-100 text-slate-700 border-slate-200';
+    return `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-[0.6875rem] font-bold border ${style}">${tipo || ''}</span>`;
+  }
+
   // ── Helper Badges & Formateadores ─────────────────────────────────────────
   function getEstadoBadgeHTML(estado) {
     const styles = {
@@ -962,6 +1256,37 @@ document.addEventListener('DOMContentLoaded', () => {
         "Estado Físico": item.estado || "ACTIVO",
         "Observaciones": item.observaciones || ""
       }));
+    } else if (currentTab === 'inventario') {
+      sheetName = "Inventario_Fisico";
+      exportData = currentFilteredData.map(item => ({
+        "Código Patrimonial": item.cod_patrimonial,
+        "Tipo": item.tipo,
+        "Categoría": item.categoria || "",
+        "Subcategoría": item.subcategoria || "",
+        "Denominación": item.denominacion,
+        "Marca": item.marca || "S/M",
+        "Modelo": item.modelo || "S/M",
+        "N° Serie": item.numero_serie || "S/S",
+        "Color": item.color || "",
+        "Características / Accesorios": item.caracteristicas_accesorios || "",
+        "Observaciones": item.observaciones || "",
+        "Fecha Registro": item.created_at || ""
+      }));
+    } else if (currentTab === 'terceros') {
+      sheetName = "Bienes_Terceros";
+      exportData = currentFilteredData.map(item => ({
+        "Código Patrimonial": item.cod_patrimonial,
+        "Tipo": item.tipo,
+        "Denominación": item.denominacion,
+        "Marca": item.marca || "S/M",
+        "Modelo": item.modelo || "S/M",
+        "N° Serie": item.numero_serie || "S/S",
+        "Color": item.color || "",
+        "Características / Accesorios": item.caracteristicas_accesorios || "",
+        "Responsable": item.responsable || "Sin Asignar",
+        "Observaciones": item.observaciones || "",
+        "Fecha Registro": item.created_at || ""
+      }));
     }
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
@@ -1038,13 +1363,15 @@ document.addEventListener('DOMContentLoaded', () => {
       if (currentTab === 'activos') subtitle = "Inventario de Activos Fijos";
       else if (currentTab === 'vehiculos') subtitle = "Inventario de Vehículos";
       else if (currentTab === 'celulares') subtitle = "Inventario de Celulares";
+      else if (currentTab === 'inventario') subtitle = "Inventario Físico (Faltantes / Sobrantes)";
+      else if (currentTab === 'terceros') subtitle = "Bienes de Terceros (Terceros / Control)";
       doc.text(subtitle, 148.5, 20, { align: 'center' });
 
       // Sucursal / Filtro Centrado
       doc.setFont("helvetica", "italic");
       doc.setFontSize(9);
       doc.setTextColor(148, 163, 184);
-      const selectedSucursal = sucursalSelect.value || "Todas las Sucursales";
+      const selectedSucursal = currentTab === 'inventario' || currentTab === 'terceros' ? "N/A" : (sucursalSelect.value || "Todas las Sucursales");
       doc.text(`Filtro: ${selectedSucursal}`, 148.5, 25, { align: 'center' });
 
       // Configurar columnas según la pestaña
@@ -1167,6 +1494,72 @@ document.addEventListener('DOMContentLoaded', () => {
           6: { cellWidth: 43 },
           7: { cellWidth: 40 },
           8: { cellWidth: 20 }
+        };
+      } else if (currentTab === 'inventario') {
+        headers = [
+          [
+            "Cód. Patrimonial",
+            "Tipo",
+            "Categoría / Subcat",
+            "Denominación",
+            "Especificaciones",
+            "Características / Accesorios",
+            "Observaciones",
+            "Fecha Reg"
+          ]
+        ];
+        data = currentFilteredData.map(item => [
+          item.cod_patrimonial || '—',
+          item.tipo || '—',
+          `${item.categoria || '—'}\n${item.subcategoria || '—'}`,
+          item.denominacion || '',
+          `Marca: ${item.marca || 'S/M'}\nModelo: ${item.modelo || 'S/M'}\nSerie: ${item.numero_serie || 'S/S'}${item.color ? `\nColor: ${item.color}` : ''}`,
+          item.caracteristicas_accesorios || '—',
+          item.observaciones || '—',
+          formatDate(item.created_at)
+        ]);
+        columnStyles = {
+          0: { cellWidth: 25 },
+          1: { cellWidth: 20 },
+          2: { cellWidth: 35 },
+          3: { cellWidth: 50 },
+          4: { cellWidth: 40 },
+          5: { cellWidth: 40 },
+          6: { cellWidth: 40 },
+          7: { cellWidth: 20 }
+        };
+      } else if (currentTab === 'terceros') {
+        headers = [
+          [
+            "Cód. Patrimonial",
+            "Tipo",
+            "Denominación",
+            "Especificaciones",
+            "Características / Accesorios",
+            "Responsable",
+            "Observaciones",
+            "Fecha Reg"
+          ]
+        ];
+        data = currentFilteredData.map(item => [
+          item.cod_patrimonial || '—',
+          item.tipo || '—',
+          item.denominacion || '',
+          `Marca: ${item.marca || 'S/M'}\nModelo: ${item.modelo || 'S/M'}\nSerie: ${item.numero_serie || 'S/S'}${item.color ? `\nColor: ${item.color}` : ''}`,
+          item.caracteristicas_accesorios || '—',
+          item.responsable || "Sin Asignar",
+          item.observaciones || '—',
+          formatDate(item.created_at)
+        ]);
+        columnStyles = {
+          0: { cellWidth: 25 },
+          1: { cellWidth: 20 },
+          2: { cellWidth: 55 },
+          3: { cellWidth: 40 },
+          4: { cellWidth: 40 },
+          5: { cellWidth: 35 },
+          6: { cellWidth: 35 },
+          7: { cellWidth: 20 }
         };
       }
 
