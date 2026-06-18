@@ -96,8 +96,25 @@
         display: grid;
         gap: 0.875rem;
       }
-      #assets-table-container {
+      #assets-table-container,
+      #vehiculos-table-container,
+      #celulares-table-container,
+      #inventario-table-container,
+      #terceros-table-container {
         display: none !important;
+      }
+      /* Mejorar botones de exportar en móvil */
+      #btn-export-excel,
+      #btn-export-pdf {
+        flex: 1;
+        justify-content: center;
+        min-height: 2.75rem;
+      }
+      /* Pie de página más compacto */
+      footer {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        margin-top: 2rem !important;
       }
     }
 
@@ -149,7 +166,15 @@
     
     <!-- Filtros Compactos -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
-      <div class="bg-white border border-slate-200/85 rounded-xl p-3.5 shadow-sm flex flex-col md:flex-row gap-3 items-stretch md:items-end">
+      <!-- Botón para alternar filtros en móvil -->
+      <div class="flex md:hidden items-center justify-between mb-2">
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Filtros de Búsqueda</span>
+        <button id="btn-toggle-filters" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-extrabold text-brand-700 bg-brand-50 hover:bg-brand-100 border border-brand-200 rounded-lg transition-all active:scale-[0.98] cursor-pointer">
+          🔍 Mostrar/Ocultar Filtros
+        </button>
+      </div>
+
+      <div id="filters-content" class="hidden md:flex bg-white border border-slate-200/85 rounded-xl p-3.5 shadow-sm flex-col md:flex-row gap-3 items-stretch md:items-end">
         <!-- Buscador -->
         <div id="search-filter-wrapper" class="w-full md:flex-1">
           <label for="search" class="block text-[0.75rem] font-semibold text-slate-500 mb-1">Buscador inteligente</label>
@@ -387,6 +412,6 @@
     </div>
   </footer>
 
-  <script src="app.js?v=2"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>

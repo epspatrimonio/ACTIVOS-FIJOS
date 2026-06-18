@@ -70,6 +70,38 @@ document.addEventListener('DOMContentLoaded', () => {
       searchInput.addEventListener('input', applyFilters);
       sucursalSelect.addEventListener('change', applyFilters);
       estadoSelect.addEventListener('change', applyFilters);
+
+      // Toggle de filtros en móvil
+      const btnToggleFilters = document.getElementById('btn-toggle-filters');
+      const filtersContent = document.getElementById('filters-content');
+      if (btnToggleFilters && filtersContent) {
+        btnToggleFilters.addEventListener('click', () => {
+          const isHidden = filtersContent.classList.contains('hidden');
+          if (isHidden) {
+            filtersContent.classList.remove('hidden');
+            filtersContent.classList.add('flex');
+            btnToggleFilters.innerHTML = '✕ Ocultar Filtros';
+          } else {
+            filtersContent.classList.add('hidden');
+            filtersContent.classList.remove('flex');
+            btnToggleFilters.innerHTML = '🔍 Mostrar Filtros';
+          }
+        });
+
+        // Asegurar que al redimensionar a desktop, los filtros sean visibles
+        window.addEventListener('resize', () => {
+          if (window.innerWidth >= 768) {
+            filtersContent.classList.remove('hidden');
+            filtersContent.classList.add('flex');
+          } else {
+            // En móvil, mantener oculto por defecto salvo que el usuario lo haya abierto
+            if (!filtersContent.dataset.mobileOpen) {
+              filtersContent.classList.add('hidden');
+              filtersContent.classList.remove('flex');
+            }
+          }
+        });
+      }
       
     } catch (error) {
       showError();
