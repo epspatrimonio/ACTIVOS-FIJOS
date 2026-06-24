@@ -36,12 +36,13 @@ frontend_dir = os.path.join(current_dir, "frontend", "dist")
 if os.path.exists(frontend_dir):
     app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
 
-@app.get("/", tags=["General"])
-async def root():
+@app.get("/api/health", tags=["General"])
+async def health_check():
     return {
         "app": "Control Patrimonial - Backend",
         "status": "online",
         "documentation": "/docs"
     }
+
 
 
