@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: activos-db
+    environment:
+      POSTGRES_DB: activos_fijos
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: deutschland
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - "./AFIJOS PG.sql:/docker-entrypoint-initdb.d/01_schema.sql"
+      - "./seed_data.sql:/docker-entrypoint-initdb.d/02_seed.sql"
+    restart: always
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: activos-backend
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:deutschland@db:5432/activos_fijos
+      PUBLIC_EXPORT_PATH: ../public_dashboard/activos.json
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./public_dashboard:/public_dashboard
+    depends_on:
+      - db
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: activos-frontend
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000/api
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    restart: always
+
+volumes:
+  postgres_data:

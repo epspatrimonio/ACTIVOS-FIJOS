@@ -1,0 +1,644 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  ClipboardCheck, Plus, Search, Trash2, Edit3, X, AlertCircle, CheckCircle2 
+} from 'lucide-react';
+import SearchableSelect from './SearchableSelect';
+import Modal from './Modal';
+import { 
+  fetchInventarioFisico, saveInventarioFisico, deleteInventarioFisico, fetchGenerarCodigoSobrante,
+  fetchActivos, fetchSubcategorias
+} from '../utils/api';
+
+const INITIAL_FORM_STATE = {
+  cod_patrimonial: '',
+  tipo: 'FALTANTE', // FALTANTE | SOBRANTE
+  cod_categoria: '',
+  denominacion: '',
+  marca: '',
+  modelo: '',
+  numero_serie: '',
+  color: '',
+  caracteristicas_accesorios: '',
+  observaciones: ''
+};
+
+export default function InventarioFisicoPanel() {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+
+  // Datos auxiliares para el formulario
+  const [activos, setActivos] = useState([]);
+  const [subcategorias, setSubcategorias] = useState([]);
+  
+  // Pestañas y búsqueda
+  const [currentTab, setCurrentTab] = useState('ALL'); // ALL | FALTANTE | SOBRANTE
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Control del modal
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState(INITIAL_FORM_STATE);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
+  const [modalError, setModalError] = useState(null);
+
+  // Cargar datos principales
+  const loadData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await fetchInventarioFisico();
+      setItems(data);
+    } catch (err) {
+      setError(err.message || 'Error al cargar los datos del inventario físico.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Cargar listas auxiliares para el formulario
+  const loadAuxData = async () => {
+    try {
+      const [activosData, subcatData] = await Promise.all([
+        fetchActivos(),
+        fetchSubcategorias()
+      ]);
+      setActivos(activosData);
+      setSubcategorias(subcatData);
+    } catch (err) {
+      console.error('Error al cargar datos auxiliares del formulario:', err);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+    loadAuxData();
+  }, []);
+
+  // Filtrado de items local
+  const filteredItems = items.filter(item => {
+    const matchesTab = currentTab === 'ALL' || item.tipo === currentTab;
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSearch = 
+      item.cod_patrimonial?.toLowerCase().includes(searchLower) ||
+      item.denominacion?.toLowerCase().includes(searchLower) ||
+      item.marca?.toLowerCase().includes(searchLower) ||
+      item.modelo?.toLowerCase().includes(searchLower) ||
+      item.numero_serie?.toLowerCase().includes(searchLower) ||
+      item.subcategoria?.toLowerCase().includes(searchLower);
+    return matchesTab && matchesSearch;
+  });
+
+  // Métricas
+  const totalFaltantes = items.filter(i => i.tipo === 'FALTANTE').length;
+  const totalSobrantes = items.filter(i => i.tipo === 'SOBRANTE').length;
+
+  // Manejar cambio de tipo en el formulario
+  const handleTypeChange = (newTipo) => {
+    setForm(prev => ({
+      ...INITIAL_FORM_STATE,
+      tipo: newTipo,
+      cod_categoria: newTipo === 'FALTANTE' ? '' : prev.cod_categoria
+    }));
+    setModalError(null);
+  };
+
+  // Autocompletar cuando se selecciona un activo (para Faltantes)
+  const handleActivoSelect = (activoCod) => {
+    if (!activoCod) {
+      setForm(prev => ({ ...prev, cod_patrimonial: '' }));
+      return;
+    }
+    const act = activos.find(a => a.cod_patrimonial === activoCod);
+    if (act) {
+      setForm(prev => ({
+        ...prev,
+        cod_patrimonial: act.cod_patrimonial,
+        cod_categoria: act.cod_categoria,
+        denominacion: act.denominacion || '',
+        marca: act.marca || '',
+        modelo: act.modelo || '',
+        numero_serie: act.numero_serie || '',
+        color: act.color || '',
+        caracteristicas_accesorios: act.caracteristicas_accesorios || '',
+        observaciones: prev.observaciones
+      }));
+    }
+  };
+
+  // Generar código y autocompletar para Sobrantes cuando cambia la categoría
+  const handleCategorySelect = async (catId) => {
+    if (!catId) {
+      setForm(prev => ({ ...prev, cod_categoria: '', cod_patrimonial: '' }));
+      return;
+    }
+    setForm(prev => ({ ...prev, cod_categoria: Number(catId) }));
+    setModalLoading(true);
+    setModalError(null);
+    try {
+      const res = await fetchGenerarCodigoSobrante(catId);
+      setForm(prev => ({ ...prev, cod_patrimonial: res.codigo }));
+    } catch (err) {
+      setModalError(err.message || 'Error al generar código para sobrante.');
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  // Abrir modal de creación
+  const handleOpenCreate = () => {
+    setForm(INITIAL_FORM_STATE);
+    setIsEditMode(false);
+    setModalError(null);
+    setShowModal(true);
+  };
+
+  // Abrir modal de edición
+  const handleOpenEdit = (item) => {
+    setForm({
+      cod_patrimonial: item.cod_patrimonial,
+      tipo: item.tipo,
+      cod_categoria: item.cod_categoria,
+      denominacion: item.denominacion,
+      marca: item.marca || '',
+      modelo: item.modelo || '',
+      numero_serie: item.numero_serie || '',
+      color: item.color || '',
+      caracteristicas_accesorios: item.caracteristicas_accesorios || '',
+      observaciones: item.observaciones || ''
+    });
+    setIsEditMode(true);
+    setModalError(null);
+    setShowModal(true);
+  };
+
+  // Enviar formulario (creación/actualización)
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!form.cod_patrimonial) {
+      setModalError('El código patrimonial es obligatorio.');
+      return;
+    }
+    if (!form.cod_categoria) {
+      setModalError('Debe seleccionar una categoría/subcategoría.');
+      return;
+    }
+    setModalLoading(true);
+    setModalError(null);
+    try {
+      await saveInventarioFisico(form.cod_patrimonial, form, isEditMode);
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+      setShowModal(false);
+      loadData();
+    } catch (err) {
+      setModalError(err.message || 'Error al guardar el registro.');
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  // Eliminar registro
+  const handleDelete = async (cod) => {
+    if (!window.confirm(`¿Está seguro de eliminar el registro '${cod}' de la base de datos de inventario físico?`)) {
+      return;
+    }
+    try {
+      await deleteInventarioFisico(cod);
+      loadData();
+    } catch (err) {
+      setError(err.message || 'Error al eliminar el registro.');
+    }
+  };
+
+  // Opciones de activos para el selector de Faltantes
+  const activoOptions = activos.map(a => ({
+    value: a.cod_patrimonial,
+    label: `${a.cod_patrimonial} - ${a.denominacion || ''} (${a.marca || ''} / ${a.modelo || ''})`
+  }));
+
+  // Opciones de subcategorías para el selector de Sobrantes
+  const subcatOptions = subcategorias.map(s => ({
+    value: s.value,
+    label: `${s.label} (${s.categoria})`
+  }));
+
+  return (
+    <div className="flex-1 flex flex-col min-h-0 space-y-4 animate-fadeIn w-full max-w-full overflow-hidden">
+      {/* Cabecera */}
+      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between shrink-0 mb-2">
+        <div className="module-heading">
+          <p className="module-kicker">Módulo de Conciliación</p>
+          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">INVENTARIO FÍSICO</h2>
+          <p className="text-sm text-slate-500">
+            Registro de Faltantes (bienes no hallados) y Sobrantes (bienes encontrados sin registro patrimonial).
+          </p>
+        </div>
+        
+        {/* Métricas */}
+        <div className="flex flex-wrap gap-2.5">
+          <div className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-[0.8125rem] shadow-sm flex items-center space-x-2">
+            <span className="h-2 w-2 rounded-full bg-rose-500"></span>
+            <span className="text-slate-500 font-semibold">Faltantes:</span>
+            <strong className="text-slate-800">{totalFaltantes}</strong>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-[0.8125rem] shadow-sm flex items-center space-x-2">
+            <span className="h-2 w-2 rounded-full bg-amber-500"></span>
+            <span className="text-slate-500 font-semibold">Sobrantes:</span>
+            <strong className="text-slate-800">{totalSobrantes}</strong>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-[0.8125rem] shadow-sm flex items-center space-x-2">
+            <span className="text-slate-500 font-semibold">Total items:</span>
+            <strong className="text-slate-800">{items.length}</strong>
+          </div>
+        </div>
+      </div>
+
+      {/* Controles de Búsqueda y Pestañas */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between bg-white/50 backdrop-blur-sm p-3 rounded-2xl border border-slate-200/60 shrink-0">
+        <div className="flex rounded-xl bg-slate-100 p-1 self-start">
+          <button
+            onClick={() => setCurrentTab('ALL')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              currentTab === 'ALL' ? 'bg-white text-brand-700 shadow-sm' : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            Todos
+          </button>
+          <button
+            onClick={() => setCurrentTab('FALTANTE')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              currentTab === 'FALTANTE' ? 'bg-white text-rose-700 shadow-sm' : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            Faltantes
+          </button>
+          <button
+            onClick={() => setCurrentTab('SOBRANTE')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              currentTab === 'SOBRANTE' ? 'bg-white text-amber-700 shadow-sm' : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            Sobrantes
+          </button>
+        </div>
+
+        <div className="flex items-center space-x-3 w-full sm:w-auto">
+          <div className="relative flex-1 sm:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Buscar por código, denominación..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 min-h-0 text-sm bg-white border-slate-200 rounded-xl focus:border-brand-600 focus:ring-4 focus:ring-brand-500/10"
+            />
+          </div>
+          
+          <button
+            onClick={handleOpenCreate}
+            className="flex items-center space-x-1.5 bg-gradient-to-r from-brand-600 to-[#00B0F0] hover:from-brand-700 hover:to-[#00A0E0] text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md transition-all active:scale-95 shrink-0"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Agregar</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Alertas */}
+      {success && (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-3 rounded-xl flex items-center space-x-2 text-xs animate-fadeIn shrink-0">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+          <span>¡Registro guardado correctamente!</span>
+        </div>
+      )}
+      {error && (
+        <div className="bg-rose-50 border border-rose-200 text-rose-800 p-3 rounded-xl flex items-center space-x-2 text-xs animate-fadeIn shrink-0">
+          <AlertCircle className="w-4 h-4 text-rose-600" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {/* Tabla de Resultados */}
+      <div className="flex-1 min-h-0 bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col">
+        <div className="flex-1 overflow-auto">
+          {loading ? (
+            <div className="h-full flex items-center justify-center text-slate-400 text-sm py-12">
+              Cargando registros...
+            </div>
+          ) : filteredItems.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center text-slate-400 text-sm py-16 space-y-2">
+              <ClipboardCheck className="w-10 h-10 text-slate-300" />
+              <span>No se encontraron registros de inventario físico.</span>
+            </div>
+          ) : (
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50/75 border-b border-slate-200/80 sticky top-0 z-10 text-[0.6875rem] font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="px-5 py-3">Código</th>
+                  <th className="px-4 py-3">Tipo</th>
+                  <th className="px-5 py-3">Subcategoría</th>
+                  <th className="px-5 py-3">Denominación</th>
+                  <th className="px-5 py-3">Características</th>
+                  <th className="px-5 py-3">Observaciones</th>
+                  <th className="px-5 py-3 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-[0.8125rem]">
+                {filteredItems.map((item) => (
+                  <tr key={item.cod_patrimonial} className="table-row-hover text-slate-700">
+                    <td className="px-5 py-3 font-mono font-bold text-slate-800">{item.cod_patrimonial}</td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[0.6875rem] font-extrabold uppercase ${
+                        item.tipo === 'FALTANTE'
+                          ? 'bg-rose-50 text-rose-700 border border-rose-200/60'
+                          : 'bg-amber-50 text-amber-700 border border-amber-200/60'
+                      }`}>
+                        {item.tipo}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3">
+                      <div className="font-semibold text-slate-800 leading-tight">{item.subcategoria}</div>
+                      <div className="text-[0.6875rem] text-slate-400 mt-0.5 font-bold uppercase">{item.categoria}</div>
+                    </td>
+                    <td className="px-5 py-3 font-medium text-slate-800 max-w-[200px] truncate" title={item.denominacion}>
+                      {item.denominacion}
+                    </td>
+                    <td className="px-5 py-3">
+                      <div className="leading-normal">
+                        {item.marca && <span>Marca: <strong className="text-slate-800">{item.marca}</strong></span>}
+                        {item.modelo && <span> \| Modelo: <strong className="text-slate-800">{item.modelo}</strong></span>}
+                        {item.numero_serie && <span> \| N° Serie: <strong className="text-slate-800 font-mono">{item.numero_serie}</strong></span>}
+                        {item.color && <span> \| Color: <strong className="text-slate-800">{item.color}</strong></span>}
+                      </div>
+                      {item.caracteristicas_accesorios && (
+                        <div className="text-[0.6875rem] text-slate-400 mt-1 italic max-w-xs truncate" title={item.caracteristicas_accesorios}>
+                          {item.caracteristicas_accesorios}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-5 py-3 text-slate-500 max-w-[150px] truncate" title={item.observaciones}>
+                      {item.observaciones || <span className="text-slate-300 italic">-</span>}
+                    </td>
+                    <td className="px-5 py-3 text-right">
+                      <div className="flex items-center justify-end space-x-1.5">
+                        <button
+                          onClick={() => handleOpenEdit(item)}
+                          title="Editar Registro"
+                          className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(item.cod_patrimonial)}
+                          title="Eliminar Registro"
+                          className="p-1.5 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
+
+      {/* MODAL DE REGISTRO / EDICIÓN */}
+      <Modal open={showModal} onClose={() => setShowModal(false)} maxWidth="520px">
+        <div className="p-6 flex flex-col h-full overflow-hidden">
+          <div className="flex items-center justify-between pb-4 border-b border-slate-100 shrink-0">
+            <div>
+              <h3 className="text-lg font-bold text-slate-900">
+                {isEditMode ? 'Editar Registro de Inventario' : 'Registrar Conciliación de Inventario'}
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Ingresa los datos del faltante o sobrante del inventario físico.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowModal(false)}
+              className="p-1 text-slate-400 hover:bg-slate-100 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto pr-1 py-4 space-y-4">
+            {modalError && (
+              <div className="bg-rose-50 border border-rose-200 text-rose-800 text-xs p-3 rounded-xl flex items-center space-x-2 animate-fadeIn">
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                <span>{modalError}</span>
+              </div>
+            )}
+
+            {/* Selector de Tipo (Faltante / Sobrante) */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 mb-1.5">Tipo de Hallazgo</label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  disabled={isEditMode}
+                  onClick={() => handleTypeChange('FALTANTE')}
+                  className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all text-center ${
+                    form.tipo === 'FALTANTE'
+                      ? 'bg-rose-50 text-rose-700 border-rose-300 ring-2 ring-rose-500/10'
+                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 disabled:opacity-50'
+                  }`}
+                >
+                  FALTANTE (Activo Faltante)
+                </button>
+                <button
+                  type="button"
+                  disabled={isEditMode}
+                  onClick={() => handleTypeChange('SOBRANTE')}
+                  className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all text-center ${
+                    form.tipo === 'SOBRANTE'
+                      ? 'bg-amber-50 text-amber-700 border-amber-300 ring-2 ring-amber-500/10'
+                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 disabled:opacity-50'
+                  }`}
+                >
+                  SOBRANTE (Activo Sobrante)
+                </button>
+              </div>
+            </div>
+
+            {/* Selección de Código / Activo */}
+            {form.tipo === 'FALTANTE' ? (
+              <div>
+                {isEditMode ? (
+                  <div>
+                    <label className="field-label">Código Patrimonial</label>
+                    <input
+                      type="text"
+                      disabled
+                      value={form.cod_patrimonial}
+                      className="field-input bg-slate-100 font-mono font-bold text-slate-600"
+                    />
+                  </div>
+                ) : (
+                  <SearchableSelect
+                    label="Seleccionar Activo Fijo Faltante"
+                    name="cod_patrimonial"
+                    value={form.cod_patrimonial}
+                    onChange={(e) => handleActivoSelect(e.target.value)}
+                    options={activoOptions}
+                    required
+                    placeholder="Busca por código o denominación..."
+                  />
+                )}
+              </div>
+            ) : (
+              // SOBRANTE
+              <div className="space-y-4">
+                {isEditMode ? (
+                  <div>
+                    <label className="field-label">Código Autogenerado</label>
+                    <input
+                      type="text"
+                      disabled
+                      value={form.cod_patrimonial}
+                      className="field-input bg-slate-100 font-mono font-bold text-slate-600"
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    <SearchableSelect
+                      label="Seleccionar Categoría/Subcategoría"
+                      name="cod_categoria"
+                      value={form.cod_categoria}
+                      onChange={(e) => handleCategorySelect(e.target.value)}
+                      options={subcatOptions}
+                      required
+                      placeholder="Selecciona categoría para generar código..."
+                    />
+                    {form.cod_patrimonial && (
+                      <div className="mt-2 text-[0.8125rem] text-slate-600 bg-slate-50 border border-slate-200 rounded-xl p-2.5 flex items-center justify-between">
+                        <span>Código sugerido:</span>
+                        <strong className="font-mono text-slate-800 text-sm font-bold bg-white px-2 py-0.5 rounded shadow-sm border">{form.cod_patrimonial}</strong>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Características básicas del bien (autocompletados para faltantes, editables para todos) */}
+            <div className="border-t border-slate-100 pt-3 space-y-3">
+              <span className="form-section-label">Características del Bien</span>
+
+              <div>
+                <label className="field-label">Denominación</label>
+                <input
+                  type="text"
+                  required
+                  disabled={form.tipo === 'FALTANTE' && !isEditMode}
+                  value={form.denominacion}
+                  onChange={(e) => setForm(p => ({ ...p, denominacion: e.target.value }))}
+                  placeholder="Ej: LAPTOP LENOVO THINKPAD E14"
+                  className={`field-input ${form.tipo === 'FALTANTE' && !isEditMode ? 'bg-slate-50 text-slate-500' : ''}`}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="field-label">Marca</label>
+                  <input
+                    type="text"
+                    disabled={form.tipo === 'FALTANTE' && !isEditMode}
+                    value={form.marca}
+                    onChange={(e) => setForm(p => ({ ...p, marca: e.target.value }))}
+                    placeholder="Ej: LENOVO"
+                    className={`field-input ${form.tipo === 'FALTANTE' && !isEditMode ? 'bg-slate-50 text-slate-500' : ''}`}
+                  />
+                </div>
+                <div>
+                  <label className="field-label">Modelo</label>
+                  <input
+                    type="text"
+                    disabled={form.tipo === 'FALTANTE' && !isEditMode}
+                    value={form.modelo}
+                    onChange={(e) => setForm(p => ({ ...p, modelo: e.target.value }))}
+                    placeholder="Ej: THINKPAD E14 G4"
+                    className={`field-input ${form.tipo === 'FALTANTE' && !isEditMode ? 'bg-slate-50 text-slate-500' : ''}`}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="field-label">Número de Serie</label>
+                  <input
+                    type="text"
+                    disabled={form.tipo === 'FALTANTE' && !isEditMode}
+                    value={form.numero_serie}
+                    onChange={(e) => setForm(p => ({ ...p, numero_serie: e.target.value }))}
+                    placeholder="Ej: PF3XG82Y"
+                    className={`field-input ${form.tipo === 'FALTANTE' && !isEditMode ? 'bg-slate-50 text-slate-500' : ''}`}
+                  />
+                </div>
+                <div>
+                  <label className="field-label">Color</label>
+                  <input
+                    type="text"
+                    disabled={form.tipo === 'FALTANTE' && !isEditMode}
+                    value={form.color}
+                    onChange={(e) => setForm(p => ({ ...p, color: e.target.value }))}
+                    placeholder="Ej: NEGRO"
+                    className={`field-input ${form.tipo === 'FALTANTE' && !isEditMode ? 'bg-slate-50 text-slate-500' : ''}`}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="field-label">Características / Accesorios</label>
+                <textarea
+                  rows="2"
+                  disabled={form.tipo === 'FALTANTE' && !isEditMode}
+                  value={form.caracteristicas_accesorios}
+                  onChange={(e) => setForm(p => ({ ...p, caracteristicas_accesorios: e.target.value }))}
+                  placeholder="Características físicas o accesorios incluidos..."
+                  className={`field-input resize-none py-2 ${form.tipo === 'FALTANTE' && !isEditMode ? 'bg-slate-50 text-slate-500' : ''}`}
+                />
+              </div>
+
+              <div>
+                <label className="field-label">Observaciones de Inventario</label>
+                <textarea
+                  rows="2"
+                  value={form.observaciones}
+                  onChange={(e) => setForm(p => ({ ...p, observaciones: e.target.value }))}
+                  placeholder="Detalles del por qué falta o por qué sobra..."
+                  className="field-input resize-none py-2"
+                />
+              </div>
+            </div>
+
+            {/* Acciones */}
+            <div className="flex justify-end space-x-3 pt-4 border-t border-slate-100 shrink-0">
+              <button
+                type="button"
+                disabled={modalLoading}
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all disabled:opacity-60"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={modalLoading}
+                className="px-5 py-2.5 bg-gradient-to-r from-brand-600 to-[#00B0F0] hover:from-brand-700 hover:to-[#00A0E0] text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 disabled:opacity-60 flex items-center space-x-1"
+              >
+                {modalLoading && <span className="h-3 w-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1"></span>}
+                <span>{isEditMode ? 'Guardar Cambios' : 'Confirmar Registro'}</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </Modal>
+    </div>
+  );
+}

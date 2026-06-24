@@ -1,0 +1,237 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body, #root {
+    @apply h-full text-slate-900 antialiased;
+    overflow: hidden;
+    background:
+      linear-gradient(180deg, #f8fafc 0%, #eef3f8 45%, #f8fafc 100%);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.010em;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Roboto', sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  label {
+    @apply text-[0.8125rem] font-semibold text-slate-600;
+  }
+
+  input,
+  select,
+  textarea {
+    @apply min-h-[2.75rem] rounded-lg border-slate-200 text-[0.9375rem] text-slate-800 shadow-sm outline-none transition-all;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-slate-400;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    @apply border-brand-600 ring-4 ring-brand-500/10;
+  }
+}
+
+@layer components {
+  .app-shell {
+    @apply min-h-screen max-w-full bg-[radial-gradient(circle_at_top_left,rgba(14,111,220,0.05),transparent_34rem),linear-gradient(180deg,#f8fafc_0%,#eef3f8_45%,#f8fafc_100%)];
+    overflow-x: clip;
+  }
+
+  .app-topbar {
+    @apply sticky top-0 z-30 border-b border-brand-800/20 bg-gradient-to-r from-brand-950 via-brand-900 to-brand-800 text-white shadow-lg shadow-brand-950/20;
+  }
+
+  .module-heading {
+    @apply border-l-4 border-brand-500 pl-4;
+  }
+
+  .module-kicker {
+    @apply mb-1 text-[0.6875rem] font-extrabold uppercase tracking-wider text-brand-700;
+  }
+
+  .metric-pill {
+    @apply rounded-lg border border-slate-200 bg-white px-3 py-2 text-[0.8125rem] font-semibold text-slate-600 shadow-sm;
+  }
+
+  .section-title {
+    @apply mb-4 flex items-center gap-3 border-b border-slate-100 pb-3 text-base font-bold text-slate-800;
+  }
+
+  .section-index {
+    @apply inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-sm font-extrabold text-brand-700 ring-1 ring-brand-100;
+  }
+}
+
+/* Clases utilitarias personalizadas para estetica premium */
+.glass-panel {
+  @apply bg-white/90 backdrop-blur-md border border-slate-200/80 shadow-sm shadow-slate-200/50;
+}
+
+.table-row-hover {
+  @apply transition-colors duration-150 hover:bg-brand-50/35;
+}
+
+/* Custom premium animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+.animate-slideDown {
+  animation: slideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slideInRight {
+  animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Scrollbars premium estilizados para la app administrativa */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f8fafc;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+  border: 2px solid #f8fafc;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+/* ── Capa de modales ──────────────────────────────────────────────────────── */
+/* Permite scroll propio dentro del overlay aunque el body tenga overflow:hidden */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  overflow-y: auto;
+}
+
+.modal-panel {
+  position: relative;
+  width: 100%;
+  background: #fff;
+  border-radius: 1.25rem;
+  box-shadow:
+    0 0 0 1px rgba(100, 116, 139, 0.12),
+    0 8px 32px -4px rgba(15, 23, 42, 0.18),
+    0 32px 64px -16px rgba(15, 23, 42, 0.12);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 2rem);
+  animation: modalIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+/* Separador de sección dentro de formularios de modal */
+.form-section-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  margin-bottom: 0.875rem;
+}
+
+.form-section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e2e8f0;
+}
+
+/* Campo de formulario premium */
+.field-input {
+  display: block;
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 0.625rem;
+  font-size: 0.875rem;
+  color: #1e293b;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  outline: none;
+}
+
+.field-input:focus {
+  background: #fff;
+  border-color: #0e6fdc;
+  box-shadow: 0 0 0 3px rgba(14, 111, 220, 0.12);
+}
+
+.field-input::placeholder {
+  color: #94a3b8;
+}
+
+.field-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 0.375rem;
+  letter-spacing: -0.01em;
+}
+
+/* Badge de estado SOAT */
+.soat-badge-vigente  { background:#dcfce7; color:#15803d; border-color:#bbf7d0; }
+.soat-badge-vencer   { background:#fef9c3; color:#92400e; border-color:#fde68a; }
+.soat-badge-vencido  { background:#fee2e2; color:#b91c1c; border-color:#fecaca; }
+
+/* Barra de progreso de vigencia */
+.vigor-bar-track {
+  height: 6px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  overflow: hidden;
+}
+.vigor-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.6s cubic-bezier(0.16,1,0.3,1);
+}

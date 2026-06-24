@@ -1,0 +1,223 @@
+import React from 'react';
+import { Package, Trash2, Edit3 } from 'lucide-react';
+import { deleteActivo } from '../utils/api';
+
+export default function ActivosTable({ activos, loading, error, onEdit, onDeleteSuccess }) {
+  
+  const handleDelete = async (cod_patrimonial) => {
+    if (window.confirm(`¿Está seguro de que desea eliminar el activo ${cod_patrimonial}?`)) {
+      try {
+        await deleteActivo(cod_patrimonial);
+        if (onDeleteSuccess) onDeleteSuccess();
+      } catch (err) {
+        alert(`Error al eliminar: ${err.message}`);
+      }
+    }
+  };
+
+  const getEstadoBadge = (estado) => {
+    const styles = {
+      BUENO: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      REGULAR: 'bg-blue-50 text-blue-700 border-blue-200',
+      MALO: 'bg-amber-50 text-amber-700 border-amber-200',
+      'PARA BAJA': 'bg-yellow-50 text-yellow-700 border-yellow-200',
+      BAJA: 'bg-rose-50 text-rose-700 border-rose-200',
+    };
+    return (
+      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[0.6875rem] font-bold border ${styles[estado] || 'bg-slate-100 text-slate-700 border-slate-200'}`}>
+        {estado}
+      </span>
+    );
+  };
+
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat('es-PE', {
+      style: 'currency',
+      currency: 'PEN',
+    }).format(Number(value) || 0);
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '—';
+    try {
+      const date = new Date(dateString);
+      // Format as DD/MM/YYYY
+      const day = String(date.getDate() + 1).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
+    } catch {
+      return dateString;
+    }
+  };
+
+  if (error) {
+    return (
+      <div className="glass-panel rounded-xl p-8 text-center text-rose-500 border-rose-200">
+        <p className="font-semibold">Error al cargar la tabla</p>
+        <p className="text-sm text-slate-500 mt-1">{error}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="glass-panel rounded-xl border border-slate-200 overflow-hidden w-full max-w-full h-full flex flex-col">
+      {/* Contenedor de scroll con altura máxima para hacer efectiva la cabecera sticky */}
+      <div className="overflow-x-auto overflow-y-auto w-full flex-1 min-h-0">
+        <table className="min-w-[1450px] w-full divide-y divide-slate-200 border-collapse">
+          <thead className="sticky top-0 bg-slate-100 z-20 shadow-[0_1px_0_0_rgba(226,232,240,1)]">
+            <tr>
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Cód. Patrimonial</th>
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Documento N Doc</th>
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Fecha de Ingreso</th>
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Ubicación (Sucursal / Localidad)</th>
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Denominación del Activo</th>
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Especificaciones</th>
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Estado</th>
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Valor Libros</th>
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Valor Neto</th>
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Responsable</th>
+              <th scope="col" className="px-5 py-3 text-center text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Gestión</th>
+            </tr>
+          </thead>
+          
+          <tbody className="bg-white divide-y divide-slate-100">
+            {loading ? (
+              Array.from({ length: 3 }).map((_, idx) => (
+                <tr key={idx} className="animate-pulse">
+                  <td className="px-5 py-4"><div className="h-4 bg-slate-200 rounded w-20"></div></td>
+                  <td className="px-5 py-4"><div className="h-5 bg-slate-200 rounded-full w-24"></div></td>
+                  <td className="px-5 py-4"><div className="h-5 bg-slate-200 rounded-full w-20"></div></td>
+                  <td className="px-5 py-4">
+                    <div className="h-4 bg-slate-200 rounded w-16 mb-1"></div>
+                    <div className="h-3 bg-slate-150 rounded w-24"></div>
+                  </td>
+                  <td className="px-5 py-4">
+                    <div className="h-4 bg-slate-200 rounded w-48 mb-1"></div>
+                    <div className="h-3 bg-slate-150 rounded w-32"></div>
+                  </td>
+                  <td className="px-5 py-4">
+                    <div className="h-3 bg-slate-200 rounded w-36 mb-1"></div>
+                    <div className="h-3 bg-slate-150 rounded w-24"></div>
+                  </td>
+                  <td className="px-5 py-4"><div className="h-4 bg-slate-200 rounded w-20"></div></td>
+                  <td className="px-5 py-4"><div className="h-6 bg-slate-200 rounded-full w-16"></div></td>
+                  <td className="px-5 py-4"><div className="h-4 bg-slate-200 rounded w-28"></div></td>
+                  <td className="px-5 py-4"><div className="h-4 bg-slate-200 rounded w-20"></div></td>
+                  <td className="px-5 py-4"><div className="h-5 bg-slate-200 rounded w-12 mx-auto"></div></td>
+                </tr>
+              ))
+            ) : activos.length === 0 ? (
+              <tr>
+                <td colSpan="11" className="px-5 py-12 text-center text-slate-400">
+                  <div className="flex flex-col items-center justify-center">
+                    <Package className="w-12 h-12 text-slate-300 mb-3" />
+                    <p className="text-sm font-semibold">No se encontraron activos fijos</p>
+                    <p className="text-xs text-slate-400 mt-1">Registra uno nuevo o cambia los filtros de búsqueda.</p>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              activos.map((activo) => (
+                <tr key={activo.cod_patrimonial} className="table-row-hover text-slate-700">
+                  {/* Código Patrimonial */}
+                  <td className="px-5 py-4 whitespace-nowrap text-[0.875rem] font-mono font-bold text-slate-900">
+                    {activo.cod_patrimonial}
+                  </td>
+                  
+                  <td className="px-5 py-4 whitespace-nowrap">
+                    <span className="px-2.5 py-1 text-xs font-semibold text-brand-600 bg-brand-50/50 border border-brand-200 rounded-full">
+                      {activo.n_doc ? (activo.documento_tipo === 'COMPRA' ? `OC-${activo.n_doc}` : `INC-${activo.n_doc}`) : '—'}
+                    </span>
+                  </td>
+                  
+                  {/* Fecha de Ingreso */}
+                  <td className="px-5 py-4 whitespace-nowrap">
+                    <span className="px-2.5 py-1 text-xs font-medium text-slate-500 bg-slate-50 border border-slate-200 rounded-full">
+                      {formatDate(activo.fecha_alta_factura || activo.fecha_registro_contable)}
+                    </span>
+                  </td>
+                  
+                  {/* Ubicación */}
+                  <td className="px-5 py-4 whitespace-nowrap">
+                    <div className="font-bold text-slate-800 text-[0.8125rem]">
+                      {activo.sucursal || '—'}
+                    </div>
+                    <div className="text-[0.6875rem] text-brand-600 font-bold uppercase tracking-wide mt-0.5">
+                      {activo.localidad || '—'}
+                    </div>
+                  </td>
+                  
+                  {/* Denominación */}
+                  <td className="px-5 py-4 min-w-[200px]">
+                    <div className="text-[0.875rem] font-bold text-slate-900 leading-snug">
+                      {activo.denominacion}
+                    </div>
+                    <div className="text-[0.6875rem] text-brand-600 font-bold mt-1 uppercase">
+                      {activo.subcategoria || '—'}
+                    </div>
+                  </td>
+                  
+                  {/* Especificaciones */}
+                  <td className="px-5 py-4 text-[0.8125rem] min-w-[180px] text-slate-500 leading-relaxed">
+                    <div>
+                      <span className="font-medium text-slate-400">Marca:</span> {activo.marca || 'S/M'} &bull; <span className="font-medium text-slate-400">Modelo:</span> {activo.modelo || 'S/M'}
+                    </div>
+                    <div className="mt-0.5">
+                      <span className="font-medium text-slate-400">Serie:</span> {activo.numero_serie || 'S/S'}
+                    </div>
+                    {activo.color && (
+                      <div className="text-[0.75rem] italic text-slate-400 mt-0.5">
+                        Color: {activo.color}
+                      </div>
+                    )}
+                  </td>
+                  
+                  {/* Estado */}
+                  <td className="px-5 py-4 whitespace-nowrap">
+                    {getEstadoBadge(activo.estado_activo)}
+                  </td>
+                  
+                  {/* Valor Libros */}
+                  <td className="px-5 py-4 whitespace-nowrap text-[0.8125rem] font-medium text-slate-500">
+                    S/. {new Intl.NumberFormat('es-PE', { minimumFractionDigits: 2 }).format(Number(activo.valor_en_libros) || 0)}
+                  </td>
+                  
+                  {/* Valor Neto */}
+                  <td className="px-5 py-4 whitespace-nowrap text-[0.8125rem] font-bold text-emerald-600">
+                    S/. {new Intl.NumberFormat('es-PE', { minimumFractionDigits: 2 }).format(Number(activo.valor_neto) || 0)}
+                  </td>
+
+                  {/* Responsable */}
+                  <td className="px-5 py-4 whitespace-nowrap text-[0.8125rem] font-semibold text-slate-600">
+                    {activo.responsable || '—'}
+                  </td>
+                  
+                  {/* Gestión */}
+                  <td className="px-5 py-4 whitespace-nowrap text-center text-xs">
+                    <div className="flex items-center justify-center space-x-1.5">
+                      <button
+                        onClick={() => onEdit(activo)}
+                        title="Editar Activo"
+                        className="h-8 w-8 bg-brand-50 hover:bg-brand-100 border border-brand-200/50 text-brand-600 hover:text-brand-700 rounded-lg transition-all duration-200 active:scale-95 inline-flex items-center justify-center shadow-sm"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(activo.cod_patrimonial)}
+                        title="Eliminar Activo"
+                        className="h-8 w-8 bg-rose-50 hover:bg-rose-100 border border-rose-200/50 text-rose-500 hover:text-rose-600 rounded-lg transition-all duration-200 active:scale-95 inline-flex items-center justify-center shadow-sm"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}

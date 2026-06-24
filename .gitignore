@@ -1,0 +1,12 @@
+.venv/
+node_modules/
+dist/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.vscode/
+*.xlsx
+*.log
+wscript_temp.vbs
+launch_cp.vbs
