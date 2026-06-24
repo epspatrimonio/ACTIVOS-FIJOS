@@ -18,7 +18,7 @@ If isBackendRunning Then
                  "Control Patrimonial - Gestión")
     
     If res = 6 Then ' Sí (vbYes)
-        WshShell.Run "cmd /c start http://localhost:5173/", 0, False
+        WshShell.Run "cmd /c start http://localhost:8000/", 0, False
     ElseIf res = 7 Then ' No (vbNo)
         WshShell.Run "cmd /c call " & q & currentDir & "\detener_app.bat" & q, 0, True
         MsgBox "El Sistema de Control Patrimonial se ha detenido con éxito.", 64, "Control Patrimonial"
@@ -27,17 +27,14 @@ Else
     ' El sistema no está corriendo. Primero, limpiar posibles puertos colgados para evitar conflictos.
     WshShell.Run "cmd /c call " & q & currentDir & "\detener_app.bat" & q, 0, True
 
-    ' Iniciar FastAPI Backend en segundo plano (puerto 8000)
+    ' Iniciar FastAPI Backend en segundo plano (puerto 8000). 
+    ' Al estar compilado el frontend, FastAPI servirá la interfaz visual directamente en el puerto 8000.
     WshShell.CurrentDirectory = currentDir & "\backend"
     WshShell.Run "cmd.exe /c .venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000", 0, False
 
-    ' Iniciar Vite Frontend en segundo plano (puerto 5173)
-    WshShell.CurrentDirectory = currentDir & "\frontend"
-    WshShell.Run "cmd.exe /c npm run dev", 0, False
+    ' Esperar 3 segundos para que cargue el servidor de FastAPI
+    WScript.Sleep 3000
 
-    ' Esperar 4 segundos para que carguen los servidores antes de abrir el navegador
-    WScript.Sleep 4000
-
-    ' Abrir el navegador en el puerto del frontend local
-    WshShell.Run "cmd /c start http://localhost:5173/", 0, False
+    ' Abrir el navegador directamente en el puerto unificado 8000
+    WshShell.Run "cmd /c start http://localhost:8000/", 0, False
 End If
