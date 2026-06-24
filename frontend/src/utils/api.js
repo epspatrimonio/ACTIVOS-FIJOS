@@ -25,7 +25,7 @@ async function handleResponseError(response, defaultMsg) {
  * Soporta filtros opcionales de estado_activo e id_sucursal.
  */
 export async function fetchActivos(filters = {}) {
-  const url = new URL(`${API_BASE_URL}/activos`);
+  const url = new URL(`${API_BASE_URL}/activos`, window.location.origin);
   
   if (filters.estado_activo) {
     url.searchParams.append('estado_activo', filters.estado_activo);
@@ -91,7 +91,7 @@ export async function fetchSubcategorias() {
 }
 
 export async function fetchPuestos(id_sucursal = null) {
-  const url = new URL(`${API_BASE_URL}/listas/puestos`);
+  const url = new URL(`${API_BASE_URL}/listas/puestos`, window.location.origin);
   if (id_sucursal) url.searchParams.append('id_sucursal', id_sucursal);
   const response = await fetch(url.toString());
   if (!response.ok) throw new Error('Error al cargar puestos.');
@@ -243,7 +243,7 @@ export async function renameIncorporacion(oldNDoc, newNDoc) {
 // ── Celulares (activos sujetos a control) ────────────────────────────────────
 
 export async function fetchCelulares(filters = {}) {
-  const url = new URL(`${API_BASE_URL}/celulares`);
+  const url = new URL(`${API_BASE_URL}/celulares`, window.location.origin);
   if (filters.id_sucursal) url.searchParams.append('id_sucursal', filters.id_sucursal);
   if (filters.estado) url.searchParams.append('estado', filters.estado);
   if (filters.cod_personal) url.searchParams.append('cod_personal', filters.cod_personal);
@@ -359,7 +359,7 @@ export async function deleteSoat(id_soat) {
 // ── Inventario Físico (Faltantes y Sobrantes) ──────────────────────────────────
 
 export async function fetchInventarioFisico(tipo = '') {
-  const url = new URL(`${API_BASE_URL}/inventario-fisico`);
+  const url = new URL(`${API_BASE_URL}/inventario-fisico`, window.location.origin);
   if (tipo) url.searchParams.append('tipo', tipo);
   const response = await fetch(url.toString());
   if (!response.ok) await handleResponseError(response, 'Error al cargar inventario físico.');
@@ -400,7 +400,7 @@ export async function fetchGenerarCodigoSobrante(cod_categoria) {
 // ── Bienes de Terceros y Control ─────────────────────────────────────────────
 
 export async function fetchBienesTerceros(tipo = '') {
-  const url = new URL(`${API_BASE_URL}/bienes-terceros`);
+  const url = new URL(`${API_BASE_URL}/bienes-terceros`, window.location.origin);
   if (tipo) url.searchParams.append('tipo', tipo);
   const response = await fetch(url.toString());
   if (!response.ok) await handleResponseError(response, 'Error al cargar bienes de terceros/control.');
