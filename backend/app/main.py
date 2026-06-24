@@ -31,6 +31,11 @@ public_dir = os.path.join(current_dir, "public_dashboard")
 if os.path.exists(public_dir):
     app.mount("/public", StaticFiles(directory=public_dir, html=True), name="public")
 
+# Servir el frontend compilado (producción) en la raíz '/' si existe
+frontend_dir = os.path.join(current_dir, "frontend", "dist")
+if os.path.exists(frontend_dir):
+    app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
+
 @app.get("/", tags=["General"])
 async def root():
     return {
@@ -38,4 +43,5 @@ async def root():
         "status": "online",
         "documentation": "/docs"
     }
+
 

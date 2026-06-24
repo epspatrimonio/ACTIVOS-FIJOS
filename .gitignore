@@ -10,3 +10,6 @@ __pycache__/
 *.log
 wscript_temp.vbs
 launch_cp.vbs
+reciclado/
+~$*.docx
+
