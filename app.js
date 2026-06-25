@@ -766,6 +766,11 @@ document.addEventListener('DOMContentLoaded', () => {
           ${formatDate(item.fecha_ingreso)}
         </td>
         
+        <!-- Fecha Asignación -->
+        <td class="px-5 py-4 whitespace-nowrap text-xs text-slate-500 font-medium font-mono">
+          ${formatDate(item.fecha_asignacion)}
+        </td>
+        
         <!-- Asignado a -->
         <td class="px-5 py-4 whitespace-nowrap">
           <div class="font-bold text-slate-800 text-[0.8125rem]">
@@ -1496,6 +1501,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "IMEI / Operador",
             "Sucursal",
             "Ingreso",
+            "Asignación",
             "Asignado a",
             "Renovación (3 Años)",
             "Estado"
@@ -1508,20 +1514,22 @@ document.addEventListener('DOMContentLoaded', () => {
           `${item.imei || '—'}\n${item.operador || '—'}`,
           item.sucursal || '—',
           formatDate(item.fecha_ingreso),
+          formatDate(item.fecha_asignacion),
           `${item.responsable || 'Sin asignar'}\n(${item.puesto || '—'})`,
           `${item.vida_util_estado}\nVence: ${item.fecha_renovacion ? formatDate(item.fecha_renovacion) : '—'}`,
           item.estado || 'ACTIVO'
         ]);
         columnStyles = {
-          0: { cellWidth: 25 },
-          1: { cellWidth: 22 },
-          2: { cellWidth: 30 },
-          3: { cellWidth: 35 },
-          4: { cellWidth: 28 },
-          5: { cellWidth: 22 },
-          6: { cellWidth: 43 },
-          7: { cellWidth: 40 },
-          8: { cellWidth: 20 }
+          0: { cellWidth: 22 },
+          1: { cellWidth: 20 },
+          2: { cellWidth: 26 },
+          3: { cellWidth: 32 },
+          4: { cellWidth: 25 },
+          5: { cellWidth: 20 },
+          6: { cellWidth: 20 },
+          7: { cellWidth: 38 },
+          8: { cellWidth: 36 },
+          9: { cellWidth: 18 }
         };
       } else if (currentTab === 'inventario') {
         headers = [
