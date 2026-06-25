@@ -73,6 +73,27 @@ document.addEventListener('DOMContentLoaded', () => {
       localidadSelect.addEventListener('change', applyFilters);
       estadoSelect.addEventListener('change', applyFilters);
 
+      // Event listener para borrar búsqueda
+      const btnClearSearch = document.getElementById('btn-clear-search');
+      if (btnClearSearch) {
+        btnClearSearch.addEventListener('click', () => {
+          searchInput.value = '';
+          applyFilters();
+        });
+      }
+
+      // Event listener para borrar todos los filtros
+      const btnClearFilters = document.getElementById('btn-clear-filters');
+      if (btnClearFilters) {
+        btnClearFilters.addEventListener('click', () => {
+          searchInput.value = '';
+          if (sucursalSelect) sucursalSelect.value = '';
+          if (localidadSelect) localidadSelect.value = '';
+          if (estadoSelect) estadoSelect.value = '';
+          applyFilters();
+        });
+      }
+
       // Toggle de filtros en móvil
       const btnToggleFilters = document.getElementById('btn-toggle-filters');
       const filtersContent = document.getElementById('filters-content');
@@ -287,6 +308,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectedSucursal = sucursalSelect.value;
     const selectedLocalidad = localidadSelect ? localidadSelect.value : '';
     const selectedEstado = estadoSelect.value;
+    
+    // Show/hide X button inside search
+    const btnClearSearch = document.getElementById('btn-clear-search');
+    if (btnClearSearch) {
+      if (searchInput.value.trim() !== '') {
+        btnClearSearch.classList.remove('hidden');
+      } else {
+        btnClearSearch.classList.add('hidden');
+      }
+    }
+
+    // Show/hide Clear Filters button
+    const btnClearFilters = document.getElementById('btn-clear-filters');
+    if (btnClearFilters) {
+      const hasActiveFilters = 
+        searchInput.value.trim() !== '' || 
+        (selectedSucursal && selectedSucursal !== '') || 
+        (selectedLocalidad && selectedLocalidad !== '') || 
+        (selectedEstado && selectedEstado !== '');
+      if (hasActiveFilters) {
+        btnClearFilters.classList.remove('hidden');
+      } else {
+        btnClearFilters.classList.add('hidden');
+      }
+    }
     
     let baseData = [];
     if (currentTab === 'activos') {

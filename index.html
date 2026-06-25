@@ -185,12 +185,22 @@
         <!-- Buscador -->
         <div id="search-filter-wrapper" class="w-full md:flex-1">
           <label for="search" class="block text-[0.75rem] font-semibold text-slate-500 mb-1">Buscador inteligente</label>
-          <input 
-            type="text" 
-            id="search" 
-            placeholder="Buscar por código, denominación, marca, modelo o responsable..." 
-            class="control-field w-full px-3.5 py-2 text-[0.875rem] bg-slate-50/80 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all placeholder:text-slate-400 min-h-[2.5rem]"
-          >
+          <div class="relative">
+            <input 
+              type="text" 
+              id="search" 
+              placeholder="Buscar por código, denominación, marca, modelo o responsable..." 
+              class="control-field w-full pl-3.5 pr-10 py-2 text-[0.875rem] bg-slate-50/80 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all placeholder:text-slate-400 min-h-[2.5rem]"
+            >
+            <button 
+              id="btn-clear-search" 
+              type="button"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none hidden p-1 font-bold text-sm cursor-pointer"
+              title="Borrar búsqueda"
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
         <!-- Sucursal -->
@@ -230,6 +240,15 @@
             <option value="BAJA">BAJA</option>
           </select>
         </div>
+
+        <!-- Botón Borrar Filtros -->
+        <button 
+          id="btn-clear-filters" 
+          type="button"
+          class="control-field px-4 py-2 text-[0.8125rem] font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-1.5 min-h-[2.5rem] hidden"
+        >
+          🔄 Borrar filtros
+        </button>
       </div>
     </div>
   </div>
