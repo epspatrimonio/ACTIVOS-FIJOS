@@ -162,19 +162,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Poblar Sucursales y Localidades (solo si no es inventario ni terceros)
     if (!isTipo) {
-      // Poblar Sucursales con formato Sucursal (Localidad)
-      const sucursalLocMap = new Map();
-      dataset.forEach(item => {
-        if (item.sucursal) {
-          sucursalLocMap.set(item.sucursal, item.localidad || '');
-        }
-      });
-      const sortedSucursales = Array.from(sucursalLocMap.keys()).sort();
-      sortedSucursales.forEach(suc => {
-        const loc = sucursalLocMap.get(suc);
+      // Poblar Sucursales sin formato Sucursal (Localidad)
+      const sucursalNames = [...new Set(dataset.map(item => item.sucursal).filter(Boolean))];
+      sucursalNames.sort().forEach(suc => {
         const option = document.createElement('option');
         option.value = suc;
-        option.textContent = loc ? `${suc} (${loc})` : suc;
+        option.textContent = suc;
         if (suc === previousSucursal) {
           option.selected = true;
         }
@@ -1166,7 +1159,7 @@ document.addEventListener('DOMContentLoaded', () => {
       VENCIDA: 'bg-rose-50 text-rose-700 border-rose-200'
     };
     const style = styles[estado] || 'bg-slate-100 text-slate-700 border-slate-200';
-    const label = estado === 'VENCIDA' ? 'Para baja' : (estado === 'POR_RENOVAR' ? 'Por vencer' : 'Vigente');
+    const label = estado === 'VENCIDA' ? 'Vencido' : (estado === 'POR_RENOVAR' ? 'Por Vencer' : 'Vigente');
     const diasText = dias !== null ? (dias < 0 ? `(Excedido hace ${Math.abs(dias)} d)` : `(${dias} d restantes)`) : '';
     return `
       <div class="flex flex-col gap-1">
@@ -1321,7 +1314,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "Fecha Asignación": item.fecha_asignacion || "",
         "Fecha Renovación": item.fecha_renovacion || "",
         "Días para Renovar": item.dias_para_renovar !== undefined ? item.dias_para_renovar : "",
-        "Estado Renovación": item.vida_util_estado === 'VENCIDA' ? 'Para baja' : (item.vida_util_estado === 'POR_RENOVAR' ? 'Por vencer' : (item.vida_util_estado === 'VIGENTE' ? 'Vigente' : '')),
+        "Estado Renovación": item.vida_util_estado === 'VENCIDA' ? 'Vencido' : (item.vida_util_estado === 'POR_RENOVAR' ? 'Por Vencer' : (item.vida_util_estado === 'VIGENTE' ? 'Vigente' : '')),
         "Estado Físico": item.estado || "ACTIVO",
         "Observaciones": item.observaciones || ""
       }));
@@ -1552,7 +1545,7 @@ document.addEventListener('DOMContentLoaded', () => {
           formatDate(item.fecha_ingreso),
           formatDate(item.fecha_asignacion),
           `${item.responsable || 'Sin asignar'}\n(${item.puesto || '—'})`,
-          `${item.vida_util_estado === 'VENCIDA' ? 'Para baja' : (item.vida_util_estado === 'POR_RENOVAR' ? 'Por vencer' : (item.vida_util_estado === 'VIGENTE' ? 'Vigente' : ''))}\nVence: ${item.fecha_renovacion ? formatDate(item.fecha_renovacion) : '—'}`,
+          `${item.vida_util_estado === 'VENCIDA' ? 'Vencido' : (item.vida_util_estado === 'POR_RENOVAR' ? 'Por Vencer' : (item.vida_util_estado === 'VIGENTE' ? 'Vigente' : ''))}\nVence: ${item.fecha_renovacion ? formatDate(item.fecha_renovacion) : '—'}`,
           item.estado || 'ACTIVO'
         ]);
         columnStyles = {
