@@ -1,21 +1,5 @@
 [
   {
-    "cod_patrimonial": "INV-001",
-    "tipo": "FALTANTE",
-    "cod_categoria": 10001,
-    "denominacion": "MONITOR DE 24 PULGADAS",
-    "marca": "LG",
-    "modelo": "24MK430H",
-    "numero_serie": "LG123456",
-    "color": "NEGRO",
-    "caracteristicas_accesorios": "Incluye cable HDMI y adaptador de corriente",
-    "observaciones": "Reportado como faltante en auditoría de TI",
-    "categoria": "TERRENOS",
-    "subcategoria": "TERRENOS",
-    "created_at": "2026-06-24T13:31:55.600249Z",
-    "updated_at": "2026-06-24T13:31:55.600249Z"
-  },
-  {
     "cod_patrimonial": "INV-002",
     "tipo": "SOBRANTE",
     "cod_categoria": 10001,
@@ -26,8 +10,30 @@
     "color": "BLANCO",
     "caracteristicas_accesorios": "Cable USB y tóner instalado",
     "observaciones": "Encontrada sin registrar en la oficina de contabilidad",
+    "id_sucursal": null,
+    "localidad": null,
     "categoria": "TERRENOS",
     "subcategoria": "TERRENOS",
+    "sucursal": null,
+    "created_at": "2026-06-24T13:31:55.600249Z",
+    "updated_at": "2026-06-24T13:31:55.600249Z"
+  },
+  {
+    "cod_patrimonial": "INV-001",
+    "tipo": "FALTANTE",
+    "cod_categoria": 10001,
+    "denominacion": "MONITOR DE 24 PULGADAS",
+    "marca": "LG",
+    "modelo": "24MK430H",
+    "numero_serie": "LG123456",
+    "color": "NEGRO",
+    "caracteristicas_accesorios": "Incluye cable HDMI y adaptador de corriente",
+    "observaciones": "Reportado como faltante en auditoría de TI",
+    "id_sucursal": null,
+    "localidad": null,
+    "categoria": "TERRENOS",
+    "subcategoria": "TERRENOS",
+    "sucursal": null,
     "created_at": "2026-06-24T13:31:55.600249Z",
     "updated_at": "2026-06-24T13:31:55.600249Z"
   }

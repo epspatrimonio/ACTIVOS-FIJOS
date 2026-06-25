@@ -104,10 +104,12 @@ document.addEventListener('DOMContentLoaded', () => {
             filtersContent.classList.remove('hidden');
             filtersContent.classList.add('flex');
             btnToggleFilters.innerHTML = '✕ Ocultar Filtros';
+            filtersContent.dataset.mobileOpen = 'true';
           } else {
             filtersContent.classList.add('hidden');
             filtersContent.classList.remove('flex');
             btnToggleFilters.innerHTML = '🔍 Mostrar Filtros';
+            delete filtersContent.dataset.mobileOpen;
           }
         });
 
@@ -181,32 +183,29 @@ document.addEventListener('DOMContentLoaded', () => {
       stateOptions = ['TERCERO', 'CONTROL'];
     }
     
-    // Poblar Sucursales y Localidades (solo si no es inventario ni terceros)
-    if (!isTipo) {
-      // Poblar Sucursales sin formato Sucursal (Localidad)
-      const sucursalNames = [...new Set(dataset.map(item => item.sucursal).filter(Boolean))];
-      sucursalNames.sort().forEach(suc => {
-        const option = document.createElement('option');
-        option.value = suc;
-        option.textContent = suc;
-        if (suc === previousSucursal) {
-          option.selected = true;
-        }
-        sucursalSelect.appendChild(option);
-      });
+    // Poblar Sucursales sin formato Sucursal (Localidad)
+    const sucursalNames = [...new Set(dataset.map(item => item.sucursal).filter(Boolean))];
+    sucursalNames.sort().forEach(suc => {
+      const option = document.createElement('option');
+      option.value = suc;
+      option.textContent = suc;
+      if (suc === previousSucursal) {
+        option.selected = true;
+      }
+      sucursalSelect.appendChild(option);
+    });
 
-      // Poblar Localidades
-      const localidades = [...new Set(dataset.map(item => item.localidad).filter(Boolean))];
-      localidades.sort().forEach(loc => {
-        const option = document.createElement('option');
-        option.value = loc;
-        option.textContent = loc;
-        if (loc === previousLocalidad) {
-          option.selected = true;
-        }
-        localidadSelect.appendChild(option);
-      });
-    }
+    // Poblar Localidades
+    const localidades = [...new Set(dataset.map(item => item.localidad).filter(Boolean))];
+    localidades.sort().forEach(loc => {
+      const option = document.createElement('option');
+      option.value = loc;
+      option.textContent = loc;
+      if (loc === previousLocalidad) {
+        option.selected = true;
+      }
+      localidadSelect.appendChild(option);
+    });
     
     // Poblar Estados
     stateOptions.forEach(est => {
@@ -265,18 +264,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const sucursalWrapper = document.getElementById('sucursal-filter-wrapper');
       const localidadWrapper = document.getElementById('localidad-filter-wrapper');
       if (sucursalWrapper) {
-        if (currentTab === 'inventario' || currentTab === 'terceros') {
-          sucursalWrapper.classList.add('hidden');
-        } else {
-          sucursalWrapper.classList.remove('hidden');
-        }
+        sucursalWrapper.classList.remove('hidden');
       }
       if (localidadWrapper) {
-        if (currentTab === 'inventario' || currentTab === 'terceros') {
-          localidadWrapper.classList.add('hidden');
-        } else {
-          localidadWrapper.classList.remove('hidden');
-        }
+        localidadWrapper.classList.remove('hidden');
       }
 
       // Re-poblar filtros y aplicar
@@ -953,6 +944,14 @@ document.addEventListener('DOMContentLoaded', () => {
             ${item.subcategoria || '—'}
           </div>
         </td>
+        <td class="px-5 py-4 whitespace-nowrap">
+          <div class="font-bold text-slate-800 text-[0.8125rem]">
+            ${item.sucursal || '—'}
+          </div>
+          <div class="text-[0.6875rem] text-brand-500 font-bold uppercase tracking-wide mt-0.5">
+            ${item.localidad || '—'}
+          </div>
+        </td>
         <td class="px-5 py-4 min-w-[200px] text-[0.875rem] font-bold text-slate-800 leading-snug">
           ${item.denominacion || ''}
         </td>
@@ -1002,8 +1001,16 @@ document.addEventListener('DOMContentLoaded', () => {
         </p>
       </div>
 
-      <dl class="mt-4 grid grid-cols-1 gap-y-3 text-[0.8125rem]">
+      <dl class="mt-4 grid grid-cols-2 gap-x-3 gap-y-3 text-[0.8125rem]">
         <div>
+          <dt class="font-semibold text-slate-400">Sucursal</dt>
+          <dd class="mt-0.5 font-semibold text-slate-700">${item.sucursal || '—'}</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-slate-400">Localidad</dt>
+          <dd class="mt-0.5 font-semibold text-slate-700">${item.localidad || '—'}</dd>
+        </div>
+        <div class="col-span-2">
           <dt class="font-semibold text-slate-400">Especificaciones</dt>
           <dd class="mt-0.5 text-slate-700">
             <span class="font-medium text-slate-400">Marca:</span> ${item.marca || 'S/M'} &bull; 
@@ -1044,6 +1051,14 @@ document.addEventListener('DOMContentLoaded', () => {
         </td>
         <td class="px-5 py-4 whitespace-nowrap">
           ${getTipoBadgeHTML(item.tipo)}
+        </td>
+        <td class="px-5 py-4 whitespace-nowrap">
+          <div class="font-bold text-slate-800 text-[0.8125rem]">
+            ${item.sucursal || '—'}
+          </div>
+          <div class="text-[0.6875rem] text-brand-500 font-bold uppercase tracking-wide mt-0.5">
+            ${item.localidad || '—'}
+          </div>
         </td>
         <td class="px-5 py-4 min-w-[200px] text-[0.875rem] font-bold text-slate-800 leading-snug">
           ${item.denominacion || ''}
@@ -1094,8 +1109,16 @@ document.addEventListener('DOMContentLoaded', () => {
         </h3>
       </div>
 
-      <dl class="mt-4 grid grid-cols-1 gap-y-3 text-[0.8125rem]">
+      <dl class="mt-4 grid grid-cols-2 gap-x-3 gap-y-3 text-[0.8125rem]">
         <div>
+          <dt class="font-semibold text-slate-400">Sucursal</dt>
+          <dd class="mt-0.5 font-semibold text-slate-700">${item.sucursal || '—'}</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-slate-400">Localidad</dt>
+          <dd class="mt-0.5 font-semibold text-slate-700">${item.localidad || '—'}</dd>
+        </div>
+        <div class="col-span-2">
           <dt class="font-semibold text-slate-400">Especificaciones</dt>
           <dd class="mt-0.5 text-slate-700">
             <span class="font-medium text-slate-400">Marca:</span> ${item.marca || 'S/M'} &bull; 
@@ -1104,17 +1127,17 @@ document.addEventListener('DOMContentLoaded', () => {
             ${item.color ? `&bull; <span class="font-medium text-slate-400">Color:</span> ${item.color}` : ''}
           </dd>
         </div>
-        ${item.caracteristicas_accesorios ? `
-        <div>
-          <dt class="font-semibold text-slate-400">Características / Accesorios</dt>
-          <dd class="mt-0.5 text-slate-700">${item.caracteristicas_accesorios}</dd>
-        </div>` : ''}
-        <div>
+        <div class="col-span-2">
           <dt class="font-semibold text-slate-400">Responsable</dt>
           <dd class="mt-0.5 font-semibold text-slate-700">${item.responsable || 'Sin asignar'}</dd>
         </div>
+        ${item.caracteristicas_accesorios ? `
+        <div class="col-span-2">
+          <dt class="font-semibold text-slate-400">Características / Accesorios</dt>
+          <dd class="mt-0.5 text-slate-700">${item.caracteristicas_accesorios}</dd>
+        </div>` : ''}
         ${item.observaciones ? `
-        <div>
+        <div class="col-span-2">
           <dt class="font-semibold text-slate-400">Observaciones</dt>
           <dd class="mt-0.5 text-slate-700">${item.observaciones}</dd>
         </div>` : ''}
@@ -1371,6 +1394,8 @@ document.addEventListener('DOMContentLoaded', () => {
         "Tipo": item.tipo,
         "Categoría": item.categoria || "",
         "Subcategoría": item.subcategoria || "",
+        "Sucursal": item.sucursal || "",
+        "Localidad": item.localidad || "",
         "Denominación": item.denominacion,
         "Marca": item.marca || "S/M",
         "Modelo": item.modelo || "S/M",
@@ -1385,6 +1410,8 @@ document.addEventListener('DOMContentLoaded', () => {
       exportData = currentFilteredData.map(item => ({
         "Código Patrimonial": item.cod_patrimonial,
         "Tipo": item.tipo,
+        "Sucursal": item.sucursal || "",
+        "Localidad": item.localidad || "",
         "Denominación": item.denominacion,
         "Marca": item.marca || "S/M",
         "Modelo": item.modelo || "S/M",
@@ -1479,7 +1506,7 @@ document.addEventListener('DOMContentLoaded', () => {
       doc.setFont("helvetica", "italic");
       doc.setFontSize(9);
       doc.setTextColor(148, 163, 184);
-      const selectedSucursal = currentTab === 'inventario' || currentTab === 'terceros' ? "N/A" : (sucursalSelect.value || "Todas las Sucursales");
+      const selectedSucursal = sucursalSelect.value || "Todas las Sucursales";
       doc.text(`Filtro: ${selectedSucursal}`, 148.5, 25, { align: 'center' });
 
       // Configurar columnas según la pestaña
@@ -1612,6 +1639,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "Cód. Patrimonial",
             "Tipo",
             "Categoría / Subcat",
+            "Ubicación",
             "Denominación",
             "Especificaciones",
             "Características / Accesorios",
@@ -1623,6 +1651,7 @@ document.addEventListener('DOMContentLoaded', () => {
           item.cod_patrimonial || '—',
           item.tipo || '—',
           `${item.categoria || '—'}\n${item.subcategoria || '—'}`,
+          `${item.sucursal || '—'}${item.localidad ? `\n(${item.localidad})` : ''}`,
           item.denominacion || '',
           `Marca: ${item.marca || 'S/M'}\nModelo: ${item.modelo || 'S/M'}\nSerie: ${item.numero_serie || 'S/S'}${item.color ? `\nColor: ${item.color}` : ''}`,
           item.caracteristicas_accesorios || '—',
@@ -1630,20 +1659,22 @@ document.addEventListener('DOMContentLoaded', () => {
           formatDate(item.created_at)
         ]);
         columnStyles = {
-          0: { cellWidth: 25 },
-          1: { cellWidth: 20 },
-          2: { cellWidth: 35 },
-          3: { cellWidth: 50 },
+          0: { cellWidth: 22 },
+          1: { cellWidth: 18 },
+          2: { cellWidth: 32 },
+          3: { cellWidth: 28 },
           4: { cellWidth: 40 },
-          5: { cellWidth: 40 },
-          6: { cellWidth: 40 },
-          7: { cellWidth: 20 }
+          5: { cellWidth: 35 },
+          6: { cellWidth: 35 },
+          7: { cellWidth: 35 },
+          8: { cellWidth: 15 }
         };
       } else if (currentTab === 'terceros') {
         headers = [
           [
             "Cód. Patrimonial",
             "Tipo",
+            "Ubicación",
             "Denominación",
             "Especificaciones",
             "Características / Accesorios",
@@ -1655,6 +1686,7 @@ document.addEventListener('DOMContentLoaded', () => {
         data = currentFilteredData.map(item => [
           item.cod_patrimonial || '—',
           item.tipo || '—',
+          `${item.sucursal || '—'}${item.localidad ? `\n(${item.localidad})` : ''}`,
           item.denominacion || '',
           `Marca: ${item.marca || 'S/M'}\nModelo: ${item.modelo || 'S/M'}\nSerie: ${item.numero_serie || 'S/S'}${item.color ? `\nColor: ${item.color}` : ''}`,
           item.caracteristicas_accesorios || '—',
@@ -1663,14 +1695,15 @@ document.addEventListener('DOMContentLoaded', () => {
           formatDate(item.created_at)
         ]);
         columnStyles = {
-          0: { cellWidth: 25 },
-          1: { cellWidth: 20 },
-          2: { cellWidth: 55 },
-          3: { cellWidth: 40 },
-          4: { cellWidth: 40 },
+          0: { cellWidth: 22 },
+          1: { cellWidth: 18 },
+          2: { cellWidth: 28 },
+          3: { cellWidth: 45 },
+          4: { cellWidth: 35 },
           5: { cellWidth: 35 },
-          6: { cellWidth: 35 },
-          7: { cellWidth: 20 }
+          6: { cellWidth: 32 },
+          7: { cellWidth: 32 },
+          8: { cellWidth: 15 }
         };
       }
 

@@ -1,32 +1,38 @@
 [
   {
-    "cod_patrimonial": "CTRL-001",
-    "tipo": "CONTROL",
-    "denominacion": "MESA DE ESCRITORIO DE MADERA",
-    "marca": "S/M",
-    "modelo": "Estandar",
-    "numero_serie": "S/S",
-    "color": "MARRON",
-    "caracteristicas_accesorios": "Cajón con llave",
-    "cod_personal": null,
-    "observaciones": "Bien de control interno administrativamente catalogado",
-    "responsable": null,
-    "created_at": "2026-06-24T13:31:55.600249Z",
-    "updated_at": "2026-06-24T23:17:20.223760Z"
-  },
-  {
     "cod_patrimonial": "TERC-001",
     "tipo": "TERCERO",
-    "denominacion": "COMPRESORA DE AIRE",
+    "denominacion": "LAPTOP",
     "marca": "SCHULZ",
     "modelo": "MSV6",
     "numero_serie": "SCH9876",
     "color": "AZUL",
     "caracteristicas_accesorios": "Manguera de 5 metros y manómetro",
-    "cod_personal": null,
+    "cod_personal": "B026",
     "observaciones": "Equipo en préstamo de empresa contratista",
-    "responsable": null,
+    "id_sucursal": null,
+    "localidad": null,
+    "responsable": "BOHORQUEZ AGUILAR JUAN EDER",
+    "sucursal": null,
     "created_at": "2026-06-24T13:31:55.600249Z",
-    "updated_at": "2026-06-24T23:17:20.223760Z"
+    "updated_at": "2026-06-25T20:43:20.730157Z"
+  },
+  {
+    "cod_patrimonial": "CTRL-001",
+    "tipo": "CONTROL",
+    "denominacion": "ESCRITORIO DE MADERA",
+    "marca": "S/M",
+    "modelo": "Estandar",
+    "numero_serie": "S/S",
+    "color": "MARRON",
+    "caracteristicas_accesorios": "Cajón con llave",
+    "cod_personal": "L029",
+    "observaciones": "Bien de control interno administrativamente catalogado",
+    "id_sucursal": null,
+    "localidad": null,
+    "responsable": "LANAZCA HUAMAN JHONY KARSON",
+    "sucursal": null,
+    "created_at": "2026-06-24T13:31:55.600249Z",
+    "updated_at": "2026-06-25T20:43:36.119602Z"
   }
 ]
