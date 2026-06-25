@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Elementos del DOM
   const searchInput = document.getElementById('search');
   const sucursalSelect = document.getElementById('filter-sucursal');
+  const localidadSelect = document.getElementById('filter-localidad');
   const estadoSelect = document.getElementById('filter-estado');
   const emptyState = document.getElementById('empty-state');
   const resultsCount = document.getElementById('results-count');
@@ -69,6 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Adjuntar event listeners
       searchInput.addEventListener('input', applyFilters);
       sucursalSelect.addEventListener('change', applyFilters);
+      localidadSelect.addEventListener('change', applyFilters);
       estadoSelect.addEventListener('change', applyFilters);
 
       // Toggle de filtros en móvil
@@ -119,6 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Rellenar dinámicamente las sucursales y estados basados en el módulo seleccionado
   function populateFilters() {
     const previousSucursal = sucursalSelect.value;
+    const previousLocalidad = localidadSelect.value;
     const previousEstado = estadoSelect.value;
     
     // Cambiar la etiqueta del filtro de Estado/Tipo dinámicamente
@@ -130,6 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Limpiar opciones manteniendo la primera por defecto
     sucursalSelect.innerHTML = '<option value="">Todas las Sucursales</option>';
+    localidadSelect.innerHTML = '<option value="">Todas las Localidades</option>';
     estadoSelect.innerHTML = `<option value="">Todos los ${isTipo ? 'Tipos' : 'Estados'}</option>`;
     
     let dataset = [];
@@ -156,17 +160,37 @@ document.addEventListener('DOMContentLoaded', () => {
       stateOptions = ['TERCERO', 'CONTROL'];
     }
     
-    // Poblar Sucursales (solo si no es inventario ni terceros)
+    // Poblar Sucursales y Localidades (solo si no es inventario ni terceros)
     if (!isTipo) {
-      const sucursales = [...new Set(dataset.map(item => item.sucursal).filter(Boolean))];
-      sucursales.sort().forEach(suc => {
+      // Poblar Sucursales con formato Sucursal (Localidad)
+      const sucursalLocMap = new Map();
+      dataset.forEach(item => {
+        if (item.sucursal) {
+          sucursalLocMap.set(item.sucursal, item.localidad || '');
+        }
+      });
+      const sortedSucursales = Array.from(sucursalLocMap.keys()).sort();
+      sortedSucursales.forEach(suc => {
+        const loc = sucursalLocMap.get(suc);
         const option = document.createElement('option');
         option.value = suc;
-        option.textContent = suc;
+        option.textContent = loc ? `${suc} (${loc})` : suc;
         if (suc === previousSucursal) {
           option.selected = true;
         }
         sucursalSelect.appendChild(option);
+      });
+
+      // Poblar Localidades
+      const localidades = [...new Set(dataset.map(item => item.localidad).filter(Boolean))];
+      localidades.sort().forEach(loc => {
+        const option = document.createElement('option');
+        option.value = loc;
+        option.textContent = loc;
+        if (loc === previousLocalidad) {
+          option.selected = true;
+        }
+        localidadSelect.appendChild(option);
       });
     }
     
@@ -223,13 +247,21 @@ document.addEventListener('DOMContentLoaded', () => {
         activeBtn.className = "flex-none sm:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 bg-brand-500 text-white shadow-md shadow-brand-500/15 whitespace-nowrap";
       }
 
-      // Mostrar/Ocultar el filtro de Sucursal
+      // Mostrar/Ocultar el filtro de Sucursal y Localidad
       const sucursalWrapper = document.getElementById('sucursal-filter-wrapper');
+      const localidadWrapper = document.getElementById('localidad-filter-wrapper');
       if (sucursalWrapper) {
         if (currentTab === 'inventario' || currentTab === 'terceros') {
           sucursalWrapper.classList.add('hidden');
         } else {
           sucursalWrapper.classList.remove('hidden');
+        }
+      }
+      if (localidadWrapper) {
+        if (currentTab === 'inventario' || currentTab === 'terceros') {
+          localidadWrapper.classList.add('hidden');
+        } else {
+          localidadWrapper.classList.remove('hidden');
         }
       }
 
@@ -260,6 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function applyFilters() {
     const query = searchInput.value.toLowerCase().trim();
     const selectedSucursal = sucursalSelect.value;
+    const selectedLocalidad = localidadSelect ? localidadSelect.value : '';
     const selectedEstado = estadoSelect.value;
     
     let baseData = [];
@@ -278,6 +311,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const filtered = baseData.filter(item => {
       // Filtro de Sucursal
       const sucursalMatch = !selectedSucursal || item.sucursal === selectedSucursal;
+
+      // Filtro de Localidad
+      const localidadMatch = !selectedLocalidad || item.localidad === selectedLocalidad;
 
       // Filtro de Estado
       const estadoMatch = !selectedEstado || 
@@ -334,7 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      return sucursalMatch && estadoMatch && textMatch;
+      return sucursalMatch && localidadMatch && estadoMatch && textMatch;
     });
 
     renderData(filtered);
@@ -1130,7 +1166,7 @@ document.addEventListener('DOMContentLoaded', () => {
       VENCIDA: 'bg-rose-50 text-rose-700 border-rose-200'
     };
     const style = styles[estado] || 'bg-slate-100 text-slate-700 border-slate-200';
-    const label = estado === 'VENCIDA' ? 'Vencida' : (estado === 'POR_RENOVAR' ? 'Por Renovar' : 'Vigente');
+    const label = estado === 'VENCIDA' ? 'Para baja' : (estado === 'POR_RENOVAR' ? 'Por vencer' : 'Vigente');
     const diasText = dias !== null ? (dias < 0 ? `(Excedido hace ${Math.abs(dias)} d)` : `(${dias} d restantes)`) : '';
     return `
       <div class="flex flex-col gap-1">
@@ -1285,7 +1321,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "Fecha Asignación": item.fecha_asignacion || "",
         "Fecha Renovación": item.fecha_renovacion || "",
         "Días para Renovar": item.dias_para_renovar !== undefined ? item.dias_para_renovar : "",
-        "Estado Renovación": item.vida_util_estado || "",
+        "Estado Renovación": item.vida_util_estado === 'VENCIDA' ? 'Para baja' : (item.vida_util_estado === 'POR_RENOVAR' ? 'Por vencer' : (item.vida_util_estado === 'VIGENTE' ? 'Vigente' : '')),
         "Estado Físico": item.estado || "ACTIVO",
         "Observaciones": item.observaciones || ""
       }));
@@ -1516,7 +1552,7 @@ document.addEventListener('DOMContentLoaded', () => {
           formatDate(item.fecha_ingreso),
           formatDate(item.fecha_asignacion),
           `${item.responsable || 'Sin asignar'}\n(${item.puesto || '—'})`,
-          `${item.vida_util_estado}\nVence: ${item.fecha_renovacion ? formatDate(item.fecha_renovacion) : '—'}`,
+          `${item.vida_util_estado === 'VENCIDA' ? 'Para baja' : (item.vida_util_estado === 'POR_RENOVAR' ? 'Por vencer' : (item.vida_util_estado === 'VIGENTE' ? 'Vigente' : ''))}\nVence: ${item.fecha_renovacion ? formatDate(item.fecha_renovacion) : '—'}`,
           item.estado || 'ACTIVO'
         ]);
         columnStyles = {
