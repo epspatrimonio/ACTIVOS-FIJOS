@@ -76,7 +76,14 @@
       -webkit-overflow-scrolling: touch;
     }
     .hidden {
-      display: none;
+      display: none !important;
+    }
+    /* Forzar visibilidad de filtros en desktop (md+), ya que .hidden con
+       !important sobreescribe md:flex de Tailwind */
+    @media (min-width: 768px) {
+      #filters-content {
+        display: flex !important;
+      }
     }
     .control-field {
       min-height: 2.875rem;
