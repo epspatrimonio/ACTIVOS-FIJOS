@@ -8,11 +8,11 @@
     "numero_serie": "SCH9876",
     "color": "AZUL",
     "caracteristicas_accesorios": "Manguera de 5 metros y manómetro",
-    "cod_personal": "A001",
+    "cod_personal": null,
     "observaciones": "Equipo en préstamo de empresa contratista",
-    "responsable": "AGON GONZALEZ ROSARIO DEL PILAR",
+    "responsable": null,
     "created_at": "2026-06-24T13:31:55.600249Z",
-    "updated_at": "2026-06-24T13:31:55.600249Z"
+    "updated_at": "2026-06-24T23:17:20.223760Z"
   },
   {
     "cod_patrimonial": "CTRL-001",
@@ -23,10 +23,10 @@
     "numero_serie": "S/S",
     "color": "MARRON",
     "caracteristicas_accesorios": "Cajón con llave",
-    "cod_personal": "A002",
+    "cod_personal": null,
     "observaciones": "Bien de control interno administrativamente catalogado",
-    "responsable": "ALARCON INGA RODRIGO",
+    "responsable": null,
     "created_at": "2026-06-24T13:31:55.600249Z",
-    "updated_at": "2026-06-24T13:31:55.600249Z"
+    "updated_at": "2026-06-24T23:17:20.223760Z"
   }
 ]
