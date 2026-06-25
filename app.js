@@ -729,6 +729,11 @@ document.addEventListener('DOMContentLoaded', () => {
           ${item.cod_control}
         </td>
         
+        <!-- Número Línea (después de Cód. Control, en negrita y azul) -->
+        <td class="px-5 py-4 whitespace-nowrap text-[0.875rem] font-mono font-bold text-brand-600">
+          ${item.numero_linea || '\u2014'}
+        </td>
+        
         <!-- Marca / Modelo -->
         <td class="px-5 py-4 whitespace-nowrap">
           <div class="font-bold text-slate-800 text-[0.8125rem]">
@@ -742,25 +747,17 @@ document.addEventListener('DOMContentLoaded', () => {
         <!-- IMEI / Operador -->
         <td class="px-5 py-4 whitespace-nowrap">
           <div class="text-[0.8125rem] text-slate-800 font-mono">
-            ${item.imei || '—'}
+            ${item.imei || '\u2014'}
           </div>
           <div class="text-[0.6875rem] text-brand-500 font-bold uppercase tracking-wide">
-            ${item.operador || '—'}
+            ${item.operador || '\u2014'}
           </div>
         </td>
         
-        <!-- Número Línea -->
-        <td class="px-5 py-4 whitespace-nowrap font-bold text-[0.8125rem] text-slate-800 font-mono">
-          ${item.numero_linea || '—'}
-        </td>
-        
-        <!-- Ubicación -->
+        <!-- Sucursal (solo sucursal, sin localidad) -->
         <td class="px-5 py-4 whitespace-nowrap">
           <div class="font-bold text-slate-800 text-[0.8125rem]">
-            ${item.sucursal || '—'}
-          </div>
-          <div class="text-[0.6875rem] text-brand-500 font-bold uppercase tracking-wide mt-0.5">
-            ${item.localidad || '—'}
+            ${item.sucursal || '\u2014'}
           </div>
         </td>
         
@@ -775,7 +772,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ${item.responsable || 'Sin asignar'}
           </div>
           <div class="text-[0.6875rem] text-slate-400 font-semibold tracking-wide uppercase mt-0.5">
-            ${item.puesto || '—'}
+            ${item.puesto || '\u2014'}
           </div>
         </td>
         
@@ -822,19 +819,19 @@ document.addEventListener('DOMContentLoaded', () => {
       <dl class="mt-4 grid grid-cols-2 gap-x-3 gap-y-3 text-[0.8125rem]">
         <div>
           <dt class="font-semibold text-slate-400">Sucursal</dt>
-          <dd class="mt-0.5 font-semibold text-slate-700">${item.sucursal || '—'}</dd>
-        </div>
-        <div>
-          <dt class="font-semibold text-slate-400">Localidad</dt>
-          <dd class="mt-0.5 font-semibold text-slate-700">${item.localidad || '—'}</dd>
-        </div>
-        <div>
-          <dt class="font-semibold text-slate-400">IMEI</dt>
-          <dd class="mt-0.5 font-semibold text-slate-700 font-mono text-xs break-all">${item.imei || '—'}</dd>
+          <dd class="mt-0.5 font-semibold text-slate-700">${item.sucursal || '\u2014'}</dd>
         </div>
         <div>
           <dt class="font-semibold text-slate-400">Fecha Ingreso</dt>
           <dd class="mt-0.5 font-semibold text-slate-700 font-mono">${formatDate(item.fecha_ingreso)}</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-slate-400">IMEI</dt>
+          <dd class="mt-0.5 font-semibold text-slate-700 font-mono text-xs break-all">${item.imei || '\u2014'}</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-slate-400">N\u00b0 L\u00ednea</dt>
+          <dd class="mt-0.5 font-bold text-brand-600 font-mono">${item.numero_linea || '\u2014'}</dd>
         </div>
       </dl>
 
@@ -1271,13 +1268,12 @@ document.addEventListener('DOMContentLoaded', () => {
       sheetName = "Celulares";
       exportData = currentFilteredData.map(item => ({
         "Código Control": item.cod_control,
+        "N° Línea": item.numero_linea || "",
         "Marca": item.marca || "S/M",
         "Modelo": item.modelo || "S/M",
         "IMEI": item.imei || "",
-        "N° Línea": item.numero_linea || "",
         "Operador": item.operador || "",
         "Sucursal": item.sucursal,
-        "Localidad": item.localidad || "",
         "Puesto": item.puesto || "",
         "Responsable": item.responsable || "Sin Asignar",
         "Fecha Ingreso": item.fecha_ingreso || "",
@@ -1495,10 +1491,10 @@ document.addEventListener('DOMContentLoaded', () => {
         headers = [
           [
             "Cód. Control",
+            "N° Línea",
             "Marca / Modelo",
             "IMEI / Operador",
-            "N° Línea",
-            "Ubicación",
+            "Sucursal",
             "Ingreso",
             "Asignado a",
             "Renovación (3 Años)",
@@ -1507,9 +1503,9 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
         data = currentFilteredData.map(item => [
           item.cod_control || '—',
+          item.numero_linea || '—',
           `${item.marca || 'S/M'}\n${item.modelo || 'S/M'}`,
           `${item.imei || '—'}\n${item.operador || '—'}`,
-          item.numero_linea || '—',
           item.sucursal || '—',
           formatDate(item.fecha_ingreso),
           `${item.responsable || 'Sin asignar'}\n(${item.puesto || '—'})`,
@@ -1518,10 +1514,10 @@ document.addEventListener('DOMContentLoaded', () => {
         ]);
         columnStyles = {
           0: { cellWidth: 25 },
-          1: { cellWidth: 30 },
-          2: { cellWidth: 35 },
-          3: { cellWidth: 25 },
-          4: { cellWidth: 30 },
+          1: { cellWidth: 22 },
+          2: { cellWidth: 30 },
+          3: { cellWidth: 35 },
+          4: { cellWidth: 28 },
           5: { cellWidth: 22 },
           6: { cellWidth: 43 },
           7: { cellWidth: 40 },
