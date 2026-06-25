@@ -468,6 +468,7 @@ export default function CelularesModule() {
   const [search, setSearch] = useState('');
   const [filtroEstado, setFiltroEstado] = useState('');
   const [filtroVida, setFiltroVida] = useState('');
+  const [filtroSucursal, setFiltroSucursal] = useState('');
   const [sucursales, setSucursales] = useState([]);
   const [personal, setPersonal] = useState([]);
 
@@ -486,6 +487,7 @@ export default function CelularesModule() {
 
   const filtered = celulares.filter(c => {
     if (filtroVida && c.vida_util_estado !== filtroVida) return false;
+    if (filtroSucursal && String(c.id_sucursal) !== filtroSucursal) return false;
     if (!search) return true;
     const q = search.toLowerCase();
     return [c.cod_control, c.marca, c.modelo, c.imei, c.numero_linea, c.responsable, c.sucursal]
@@ -568,6 +570,10 @@ export default function CelularesModule() {
             placeholder="Buscar por código, marca, IMEI, responsable..."
             style={{ paddingLeft:36 }} />
         </div>
+        <Sel value={filtroSucursal} onChange={e => setFiltroSucursal(e.target.value)} style={{ width:'auto', minWidth:180, paddingRight:'2rem' }}>
+          <option value="">Todas las sucursales</option>
+          {sucursales.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+        </Sel>
         <Sel value={filtroEstado} onChange={e => setFiltroEstado(e.target.value)} style={{ width:'auto', paddingRight:'2rem' }}>
           <option value="">Todos los estados</option>
           {ESTADOS.map(e => <option key={e.value} value={e.value}>{e.label}</option>)}
@@ -597,9 +603,9 @@ export default function CelularesModule() {
             <Smartphone style={{ width:48, height:48, color:'#e2e8f0', margin:'0 auto 12px' }} />
             <p style={{ color:'#64748b', fontWeight:600, margin:'0 0 4px' }}>No hay celulares que mostrar</p>
             <p style={{ color:'#94a3b8', fontSize:'0.875rem', margin:'0 0 16px' }}>
-              {search || filtroEstado || filtroVida ? 'Prueba con otros filtros' : 'Registra el primer celular'}
+              {search || filtroEstado || filtroVida || filtroSucursal ? 'Prueba con otros filtros' : 'Registra el primer celular'}
             </p>
-            {!search && !filtroEstado && !filtroVida && (
+            {!search && !filtroEstado && !filtroVida && !filtroSucursal && (
               <button onClick={openNew} style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'9px 20px', background:'#0e6fdc', color:'#fff', border:'none', borderRadius:10, fontWeight:700, cursor:'pointer' }}>
                 <Plus style={{ width:16, height:16 }} /> Registrar Celular
               </button>
@@ -635,7 +641,6 @@ export default function CelularesModule() {
                       </td>
                       <td style={{ padding:'10px 14px', fontSize:'0.75rem' }}>
                         <p style={{ margin:0, fontWeight:600, color:'#334155' }}>{c.sucursal || '—'}</p>
-                        {c.localidad && <p style={{ margin:'2px 0 0', color:'#94a3b8' }}>{c.localidad}</p>}
                       </td>
                       <td style={{ padding:'10px 14px', fontSize:'0.8125rem' }}>
                         {c.responsable
