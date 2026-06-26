@@ -407,7 +407,7 @@
     "numero_linea": "998367005",
     "operador": "ENTEL",
     "id_sucursal": 10,
-    "puesto_id": null,
+    "puesto_id": 93,
     "cod_personal": "A058",
     "fecha_ingreso": "2023-12-01",
     "fecha_asignacion": "2023-12-01",
@@ -416,13 +416,13 @@
     "id_celular": 11,
     "sucursal": "LA MERCED",
     "localidad": "LA MERCED",
-    "puesto": null,
+    "puesto": "PTAP",
     "responsable": "ARAUCO VELIZ OVIDIO CAYO",
     "fecha_renovacion": "2026-12-01",
     "dias_para_renovar": 158,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
-    "updated_at": "2026-06-25T14:18:30.267020Z"
+    "updated_at": "2026-06-26T14:47:52.233453Z"
   },
   {
     "cod_control": "10-002",
