@@ -10,6 +10,7 @@ import SearchableSelect from './SearchableSelect';
 import {
   fetchCelulares, createCelular, updateCelular, deleteCelular,
   fetchSucursales, fetchPuestos, fetchPersonal, fetchGenerarCodigoCelular,
+  fetchLocalidades,
 } from '../utils/api';
 
 // ─── Config estados ───────────────────────────────────────────────────────────
@@ -23,8 +24,8 @@ const ESTADO_MAP = Object.fromEntries(ESTADOS.map(e => [e.value, e]));
 
 const VIDA_UTIL = {
   VIGENTE:    { label: 'Vigente',     color: 'text-emerald-700 bg-emerald-50 ring-1 ring-emerald-200', icon: CheckCircle2 },
-  POR_RENOVAR:{ label: 'Por Renovar', color: 'text-amber-700 bg-amber-50 ring-1 ring-amber-200',       icon: AlertTriangle },
-  VENCIDA:    { label: 'Vida Útil Vencida', color: 'text-rose-700 bg-rose-50 ring-1 ring-rose-200',   icon: AlertCircle },
+  POR_RENOVAR:{ label: 'Por Vencer', color: 'text-amber-700 bg-amber-50 ring-1 ring-amber-200',       icon: AlertTriangle },
+  VENCIDA:    { label: 'Vencido', color: 'text-rose-700 bg-rose-50 ring-1 ring-rose-200',   icon: AlertCircle },
 };
 
 const OPERADORES = ['CLARO', 'MOVISTAR', 'ENTEL', 'BITEL', 'OTRO'];
@@ -469,7 +470,9 @@ export default function CelularesModule() {
   const [filtroEstado, setFiltroEstado] = useState('');
   const [filtroVida, setFiltroVida] = useState('');
   const [filtroSucursal, setFiltroSucursal] = useState('');
+  const [filtroLocalidad, setFiltroLocalidad] = useState('');
   const [sucursales, setSucursales] = useState([]);
+  const [localidades, setLocalidades] = useState([]);
   const [personal, setPersonal] = useState([]);
 
   const load = useCallback(async () => {
@@ -483,14 +486,16 @@ export default function CelularesModule() {
   useEffect(() => {
     fetchSucursales().then(setSucursales).catch(() => {});
     fetchPersonal().then(setPersonal).catch(() => {});
+    fetchLocalidades().then(setLocalidades).catch(() => {});
   }, []);
 
   const filtered = celulares.filter(c => {
     if (filtroVida && c.vida_util_estado !== filtroVida) return false;
     if (filtroSucursal && String(c.id_sucursal) !== filtroSucursal) return false;
+    if (filtroLocalidad && c.localidad !== filtroLocalidad) return false;
     if (!search) return true;
     const q = search.toLowerCase();
-    return [c.cod_control, c.marca, c.modelo, c.imei, c.numero_linea, c.responsable, c.sucursal]
+    return [c.cod_control, c.marca, c.modelo, c.imei, c.numero_linea, c.responsable, c.sucursal, c.localidad]
       .some(v => v?.toLowerCase().includes(q));
   });
 
@@ -563,25 +568,65 @@ export default function CelularesModule() {
       )}
 
       {/* FILTROS */}
-      <div style={{ display:'flex', gap:10, flexWrap:'wrap', alignItems:'center' }}>
-        <div style={{ position:'relative', flex:1, minWidth:220 }}>
-          <Search style={{ position:'absolute', left:10, top:'50%', transform:'translateY(-50%)', width:16, height:16, color:'#94a3b8' }} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:flex lg:items-center gap-3">
+        <div className="relative flex-grow min-w-[220px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Inp value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Buscar por código, marca, IMEI, responsable..."
-            style={{ paddingLeft:36 }} />
+            style={{ paddingLeft:36, paddingRight:32 }} />
+          {search && (
+            <button 
+              onClick={() => setSearch('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 border-none bg-none cursor-pointer text-slate-400 hover:text-slate-600 p-1 flex items-center justify-center"
+              title="Borrar búsqueda"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
-        <Sel value={filtroSucursal} onChange={e => setFiltroSucursal(e.target.value)} style={{ width:'auto', minWidth:180, paddingRight:'2rem' }}>
-          <option value="">Todas las sucursales</option>
-          {sucursales.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-        </Sel>
-        <Sel value={filtroEstado} onChange={e => setFiltroEstado(e.target.value)} style={{ width:'auto', paddingRight:'2rem' }}>
-          <option value="">Todos los estados</option>
-          {ESTADOS.map(e => <option key={e.value} value={e.value}>{e.label}</option>)}
-        </Sel>
-        <Sel value={filtroVida} onChange={e => setFiltroVida(e.target.value)} style={{ width:'auto', paddingRight:'2rem' }}>
-          <option value="">Vida útil: todas</option>
-          {Object.entries(VIDA_UTIL).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
-        </Sel>
+        <div className="w-full lg:w-48">
+          <Sel value={filtroSucursal} onChange={e => setFiltroSucursal(e.target.value)} style={{ width:'100%' }}>
+            <option value="">Todas las sucursales</option>
+            {sucursales.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+          </Sel>
+        </div>
+        <div className="w-full lg:w-48">
+          <Sel value={filtroLocalidad} onChange={e => setFiltroLocalidad(e.target.value)} style={{ width:'100%' }}>
+            <option value="">Todas las localidades</option>
+            {localidades.map(l => (
+              <option key={l.value} value={l.label}>
+                {l.label}
+              </option>
+            ))}
+          </Sel>
+        </div>
+        <div className="w-full lg:w-40">
+          <Sel value={filtroEstado} onChange={e => setFiltroEstado(e.target.value)} style={{ width:'100%' }}>
+            <option value="">Todos los estados</option>
+            {ESTADOS.map(e => <option key={e.value} value={e.value}>{e.label}</option>)}
+          </Sel>
+        </div>
+        <div className="w-full lg:w-40">
+          <Sel value={filtroVida} onChange={e => setFiltroVida(e.target.value)} style={{ width:'100%' }}>
+            <option value="">Vida útil: todas</option>
+            {Object.entries(VIDA_UTIL).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+          </Sel>
+        </div>
+        {(search || filtroSucursal || filtroLocalidad || filtroEstado || filtroVida) && (
+          <button 
+            onClick={() => {
+              setSearch('');
+              setFiltroSucursal('');
+              setFiltroLocalidad('');
+              setFiltroEstado('');
+              setFiltroVida('');
+            }}
+            className="flex items-center justify-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 cursor-pointer h-10 w-full lg:w-auto shrink-0 transition-all active:scale-[0.98]"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Borrar filtros
+          </button>
+        )}
       </div>
 
       {/* ERROR */}
@@ -616,8 +661,8 @@ export default function CelularesModule() {
             <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'0.8125rem' }}>
               <thead>
                 <tr style={{ background:'linear-gradient(to right,#f8fafc,#f1f5f9)', borderBottom:'1px solid #e2e8f0' }}>
-                  {['Cód. Control','Equipo','IMEI / Línea','Sucursal','Responsable','Ingreso','Asignación','Vida Útil','Estado',''].map(h => (
-                    <th key={h} style={{ padding:'10px 14px', textAlign:'left', fontSize:'0.6875rem', fontWeight:800, color:'#64748b', textTransform:'uppercase', letterSpacing:'0.04em', whiteSpace:'nowrap' }}>{h}</th>
+                  {['Cód. Control','IMEI / Línea','Equipo','Sucursal','Responsable','Ingreso','Asignación','Vida Útil','Estado',''].map(h => (
+                    <th key={h} style={{ padding:'10px 8px', textAlign:'left', fontSize:'0.6875rem', fontWeight:800, color:'#64748b', textTransform:'uppercase', letterSpacing:'0.04em', whiteSpace:'nowrap' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -628,32 +673,43 @@ export default function CelularesModule() {
                     <tr key={c.id_celular} style={{ borderBottom:'1px solid #f1f5f9', background: i % 2 === 0 ? '#fff' : '#fafafa', transition:'background .15s' }}
                       onMouseEnter={e => e.currentTarget.style.background='#eff6ff'}
                       onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? '#fff' : '#fafafa'}>
-                      <td style={{ padding:'10px 14px' }}>
+                      <td style={{ padding:'10px 8px' }}>
                         <span style={{ fontFamily:'monospace', fontSize:'0.75rem', fontWeight:800, color:'#0e6fdc', background:'#eff6ff', padding:'2px 8px', borderRadius:6 }}>{c.cod_control}</span>
                       </td>
-                      <td style={{ padding:'10px 14px' }}>
+                      <td style={{ padding:'10px 8px', fontSize:'0.75rem', color:'#475569' }}>
+                        <p style={{ margin:0, fontWeight:700, color:'#0e6fdc' }}>{c.numero_linea || '—'}</p>
+                        <p style={{ margin:'2px 0 0', fontFamily:'monospace', color:'#475569' }}>{c.imei || '—'}</p>
+                        {c.operador && <p style={{ margin:'2px 0 0', color:'#94a3b8', fontWeight:600 }}>{c.operador}</p>}
+                      </td>
+                      <td style={{ padding:'10px 8px' }}>
                         <p style={{ margin:0, fontWeight:700, color:'#0f172a' }}>{c.marca || '—'}</p>
                         <p style={{ margin:'2px 0 0', fontSize:'0.75rem', color:'#64748b' }}>{c.modelo || ''}</p>
                       </td>
-                      <td style={{ padding:'10px 14px', fontSize:'0.75rem', color:'#475569' }}>
-                        <p style={{ margin:0, fontFamily:'monospace' }}>{c.imei || '—'}</p>
-                        {c.numero_linea && <p style={{ margin:'2px 0 0', color:'#94a3b8' }}>{c.numero_linea}{c.operador ? ` · ${c.operador}` : ''}</p>}
-                      </td>
-                      <td style={{ padding:'10px 14px', fontSize:'0.75rem' }}>
+                      <td style={{ padding:'10px 8px', fontSize:'0.75rem' }}>
                         <p style={{ margin:0, fontWeight:600, color:'#334155' }}>{c.sucursal || '—'}</p>
+                        {c.localidad && <p style={{ margin:'2px 0 0', fontSize:'0.6875rem', color:'#64748b' }}>{c.localidad}</p>}
                       </td>
-                      <td style={{ padding:'10px 14px', fontSize:'0.8125rem' }}>
-                        {c.responsable
-                          ? <span style={{ fontWeight:600, color:'#334155' }}>{c.responsable}</span>
-                          : <span style={{ color:'#94a3b8', fontStyle:'italic' }}>Sin asignar</span>}
+                      <td style={{ padding:'10px 8px', fontSize:'0.8125rem' }}>
+                        {c.responsable ? (
+                          <div>
+                            <span style={{ fontWeight:600, color:'#334155', display:'block' }}>{c.responsable}</span>
+                            {c.puesto && (
+                              <span style={{ fontSize:'0.6875rem', color:'#64748b', fontWeight:600, display:'block', textTransform:'uppercase', letterSpacing:'0.02em', marginTop:2 }}>
+                                {c.puesto}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span style={{ color:'#94a3b8', fontStyle:'italic' }}>Sin asignar</span>
+                        )}
                       </td>
-                      <td style={{ padding:'10px 14px', fontSize:'0.75rem', color:'#475569' }}>{fmt(c.fecha_ingreso)}</td>
-                      <td style={{ padding:'10px 14px', fontSize:'0.75rem', color:'#475569' }}>{fmt(c.fecha_asignacion)}</td>
-                      <td style={{ padding:'10px 14px', minWidth:140 }}>
+                      <td style={{ padding:'10px 8px', fontSize:'0.75rem', color:'#475569' }}>{fmt(c.fecha_ingreso)}</td>
+                      <td style={{ padding:'10px 8px', fontSize:'0.75rem', color:'#475569' }}>{fmt(c.fecha_asignacion)}</td>
+                      <td style={{ padding:'10px 8px', minWidth:120 }}>
                         <VidaUtilIndicator dias={c.dias_para_renovar} estado={c.vida_util_estado} fechaRenovacion={c.fecha_renovacion} />
                       </td>
-                      <td style={{ padding:'10px 14px' }}>{badge(estadoCfg)}</td>
-                      <td style={{ padding:'10px 14px' }}>
+                      <td style={{ padding:'10px 8px' }}>{badge(estadoCfg)}</td>
+                      <td style={{ padding:'10px 8px' }}>
                         <div style={{ display:'flex', gap:4 }}>
                           <button onClick={() => openEdit(c)} title="Editar"
                             style={{ padding:6, border:'none', borderRadius:8, background:'none', cursor:'pointer', color:'#94a3b8' }}

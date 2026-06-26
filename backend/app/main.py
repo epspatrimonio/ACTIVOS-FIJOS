@@ -25,6 +25,14 @@ app.add_middleware(
 # Incluir el enrutador de activos bajo el prefijo /api
 app.include_router(api_router, prefix="/api", tags=["Activos"])
 
+@app.get("/api/health", tags=["General"])
+async def health_check():
+    return {
+        "app": "Control Patrimonial - Backend",
+        "status": "online",
+        "documentation": "/docs"
+    }
+
 # Servir el dashboard público como archivos estáticos
 current_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 public_dir = os.path.join(current_dir, "public_dashboard")
@@ -35,14 +43,6 @@ if os.path.exists(public_dir):
 frontend_dir = os.path.join(current_dir, "frontend", "dist")
 if os.path.exists(frontend_dir):
     app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
-
-@app.get("/api/health", tags=["General"])
-async def health_check():
-    return {
-        "app": "Control Patrimonial - Backend",
-        "status": "online",
-        "documentation": "/docs"
-    }
 
 
 

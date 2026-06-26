@@ -382,6 +382,9 @@ class SoatVigenciaDTO(BaseModel):
     estado_soat: str
     monto: Optional[Decimal] = None
     observaciones: Optional[str] = None
+    id_sucursal: Optional[int] = None
+    sucursal: Optional[str] = None
+    localidad: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     model_config = ConfigDict(from_attributes=True)
@@ -402,6 +405,8 @@ class InventarioFisicoBase(BaseModel):
     color: Optional[str] = Field(None, max_length=120)
     caracteristicas_accesorios: Optional[str] = None
     observaciones: Optional[str] = None
+    id_sucursal: Optional[int] = None
+    localidad: Optional[str] = None
 
 
 class InventarioFisicoCreate(InventarioFisicoBase):
@@ -411,6 +416,7 @@ class InventarioFisicoCreate(InventarioFisicoBase):
 class InventarioFisicoResponse(InventarioFisicoBase):
     categoria: Optional[str] = None
     subcategoria: Optional[str] = None
+    sucursal: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     model_config = ConfigDict(from_attributes=True)
@@ -431,6 +437,8 @@ class BienTerceroBase(BaseModel):
     caracteristicas_accesorios: Optional[str] = None
     cod_personal: Optional[str] = Field(None, max_length=20)
     observaciones: Optional[str] = None
+    id_sucursal: Optional[int] = None
+    localidad: Optional[str] = None
 
 
 class BienTerceroCreate(BienTerceroBase):
@@ -439,6 +447,7 @@ class BienTerceroCreate(BienTerceroBase):
 
 class BienTerceroResponse(BienTerceroBase):
     responsable: Optional[str] = None
+    sucursal: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     model_config = ConfigDict(from_attributes=True)

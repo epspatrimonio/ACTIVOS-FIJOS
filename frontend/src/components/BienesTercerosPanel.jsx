@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Users, Plus, Search, Trash2, Edit3, X, AlertCircle, CheckCircle2 
+  Users, Plus, Search, Trash2, Edit3, X, AlertCircle, CheckCircle2, ChevronDown 
 } from 'lucide-react';
 import SearchableSelect from './SearchableSelect';
 import Modal from './Modal';
 import { 
   fetchBienesTerceros, saveBienTercero, deleteBienTercero, fetchGenerarCodigoTerceroControl,
-  fetchPersonal
+  fetchPersonal, fetchSucursales, fetchLocalidades
 } from '../utils/api';
 
 const INITIAL_FORM_STATE = {
@@ -19,7 +19,9 @@ const INITIAL_FORM_STATE = {
   color: '',
   caracteristicas_accesorios: '',
   cod_personal: '',
-  observaciones: ''
+  observaciones: '',
+  id_sucursal: '',
+  localidad: ''
 };
 
 export default function BienesTercerosPanel() {
@@ -30,6 +32,10 @@ export default function BienesTercerosPanel() {
 
   // Datos auxiliares para el formulario
   const [personal, setPersonal] = useState([]);
+  const [filtroSucursal, setFiltroSucursal] = useState('');
+  const [filtroLocalidad, setFiltroLocalidad] = useState('');
+  const [sucursales, setSucursales] = useState([]);
+  const [localidades, setLocalidades] = useState([]);
   
   // Pestañas y búsqueda
   const [currentTab, setCurrentTab] = useState('ALL'); // ALL | TERCERO | CONTROL
@@ -59,8 +65,14 @@ export default function BienesTercerosPanel() {
   // Cargar listas auxiliares
   const loadAuxData = async () => {
     try {
-      const personalData = await fetchPersonal();
+      const [personalData, sucursalData, localidadData] = await Promise.all([
+        fetchPersonal(),
+        fetchSucursales(),
+        fetchLocalidades()
+      ]);
       setPersonal(personalData);
+      setSucursales(sucursalData);
+      setLocalidades(localidadData);
     } catch (err) {
       console.error('Error al cargar personal:', err);
     }
@@ -74,6 +86,8 @@ export default function BienesTercerosPanel() {
   // Filtrado local de items
   const filteredItems = items.filter(item => {
     const matchesTab = currentTab === 'ALL' || item.tipo === currentTab;
+    if (filtroSucursal && Number(item.id_sucursal) !== Number(filtroSucursal)) return false;
+    if (filtroLocalidad && item.localidad !== filtroLocalidad) return false;
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch = 
       item.cod_patrimonial?.toLowerCase().includes(searchLower) ||
@@ -81,7 +95,9 @@ export default function BienesTercerosPanel() {
       item.marca?.toLowerCase().includes(searchLower) ||
       item.modelo?.toLowerCase().includes(searchLower) ||
       item.numero_serie?.toLowerCase().includes(searchLower) ||
-      item.responsable?.toLowerCase().includes(searchLower);
+      item.responsable?.toLowerCase().includes(searchLower) ||
+      item.localidad?.toLowerCase().includes(searchLower) ||
+      item.sucursal?.toLowerCase().includes(searchLower);
     return matchesTab && matchesSearch;
   });
 
@@ -138,7 +154,9 @@ export default function BienesTercerosPanel() {
       color: item.color || '',
       caracteristicas_accesorios: item.caracteristicas_accesorios || '',
       cod_personal: item.cod_personal || '',
-      observaciones: item.observaciones || ''
+      observaciones: item.observaciones || '',
+      id_sucursal: item.id_sucursal || '',
+      localidad: item.localidad || ''
     });
     setIsEditMode(true);
     setModalError(null);
@@ -246,8 +264,8 @@ export default function BienesTercerosPanel() {
           </button>
         </div>
 
-        <div className="flex items-center space-x-3 w-full sm:w-auto">
-          <div className="relative flex-1 sm:w-72">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
@@ -256,6 +274,24 @@ export default function BienesTercerosPanel() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-9 pr-4 py-2 min-h-0 text-sm bg-white border-slate-200 rounded-xl focus:border-brand-600 focus:ring-4 focus:ring-brand-500/10"
             />
+          </div>
+
+          <div className="relative">
+            <select value={filtroLocalidad} onChange={e => setFiltroLocalidad(e.target.value)}
+              className="appearance-none block w-full pl-3 pr-8 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all cursor-pointer" style={{ minHeight: '2.25rem' }}>
+              <option value="">Todas las localidades</option>
+              {localidades.map(l => <option key={l.value} value={l.label}>{l.label}</option>)}
+            </select>
+            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+          </div>
+
+          <div className="relative">
+            <select value={filtroSucursal} onChange={e => setFiltroSucursal(e.target.value)}
+              className="appearance-none block w-full pl-3 pr-8 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all cursor-pointer" style={{ minHeight: '2.25rem' }}>
+              <option value="">Todas las sucursales</option>
+              {sucursales.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+            </select>
+            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
           </div>
           
           <button
@@ -300,6 +336,7 @@ export default function BienesTercerosPanel() {
                 <tr className="bg-slate-50/75 border-b border-slate-200/80 sticky top-0 z-10 text-[0.6875rem] font-bold text-slate-500 uppercase tracking-wider">
                   <th className="px-5 py-3">Código</th>
                   <th className="px-4 py-3">Tipo</th>
+                  <th className="px-5 py-3">Ubicación</th>
                   <th className="px-5 py-3">Denominación</th>
                   <th className="px-5 py-3">Características</th>
                   <th className="px-5 py-3">Responsable</th>
@@ -319,6 +356,10 @@ export default function BienesTercerosPanel() {
                       }`}>
                         {item.tipo === 'TERCERO' ? 'Tercero' : 'Control'}
                       </span>
+                    </td>
+                    <td className="px-5 py-3">
+                      <div className="font-semibold text-slate-800 leading-tight">{item.sucursal || '—'}</div>
+                      <div className="text-[0.6875rem] text-brand-500 font-bold uppercase tracking-wide mt-0.5">{item.localidad || '—'}</div>
                     </td>
                     <td className="px-5 py-3 font-medium text-slate-800 max-w-[200px] truncate" title={item.denominacion}>
                       {item.denominacion}
@@ -501,6 +542,31 @@ export default function BienesTercerosPanel() {
                     placeholder="Ej: AZUL"
                     className="field-input"
                   />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="field-label">Localidad</label>
+                  <select
+                    value={form.localidad}
+                    onChange={(e) => setForm(p => ({ ...p, localidad: e.target.value }))}
+                    className="field-input cursor-pointer"
+                  >
+                    <option value="">Seleccionar localidad...</option>
+                    {localidades.map(l => <option key={l.value} value={l.label}>{l.label}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="field-label">Sucursal</label>
+                  <select
+                    value={form.id_sucursal}
+                    onChange={(e) => setForm(p => ({ ...p, id_sucursal: e.target.value ? Number(e.target.value) : '' }))}
+                    className="field-input cursor-pointer"
+                  >
+                    <option value="">Seleccionar sucursal...</option>
+                    {sucursales.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                  </select>
                 </div>
               </div>
 

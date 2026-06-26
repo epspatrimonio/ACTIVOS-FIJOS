@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  ClipboardCheck, Plus, Search, Trash2, Edit3, X, AlertCircle, CheckCircle2 
+  ClipboardCheck, Plus, Search, Trash2, Edit3, X, AlertCircle, CheckCircle2, ChevronDown 
 } from 'lucide-react';
 import SearchableSelect from './SearchableSelect';
 import Modal from './Modal';
 import { 
   fetchInventarioFisico, saveInventarioFisico, deleteInventarioFisico, fetchGenerarCodigoSobrante,
-  fetchActivos, fetchSubcategorias
+  fetchActivos, fetchSubcategorias, fetchSucursales, fetchLocalidades
 } from '../utils/api';
 
 const INITIAL_FORM_STATE = {
@@ -19,7 +19,9 @@ const INITIAL_FORM_STATE = {
   numero_serie: '',
   color: '',
   caracteristicas_accesorios: '',
-  observaciones: ''
+  observaciones: '',
+  id_sucursal: '',
+  localidad: ''
 };
 
 export default function InventarioFisicoPanel() {
@@ -31,6 +33,11 @@ export default function InventarioFisicoPanel() {
   // Datos auxiliares para el formulario
   const [activos, setActivos] = useState([]);
   const [subcategorias, setSubcategorias] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [filtroSucursal, setFiltroSucursal] = useState('');
+  const [filtroLocalidad, setFiltroLocalidad] = useState('');
+  const [sucursales, setSucursales] = useState([]);
+  const [localidades, setLocalidades] = useState([]);
   
   // Pestañas y búsqueda
   const [currentTab, setCurrentTab] = useState('ALL'); // ALL | FALTANTE | SOBRANTE
@@ -60,12 +67,16 @@ export default function InventarioFisicoPanel() {
   // Cargar listas auxiliares para el formulario
   const loadAuxData = async () => {
     try {
-      const [activosData, subcatData] = await Promise.all([
+      const [activosData, subcatData, sucursalData, localidadData] = await Promise.all([
         fetchActivos(),
-        fetchSubcategorias()
+        fetchSubcategorias(),
+        fetchSucursales(),
+        fetchLocalidades()
       ]);
       setActivos(activosData);
       setSubcategorias(subcatData);
+      setSucursales(sucursalData);
+      setLocalidades(localidadData);
     } catch (err) {
       console.error('Error al cargar datos auxiliares del formulario:', err);
     }
@@ -79,6 +90,8 @@ export default function InventarioFisicoPanel() {
   // Filtrado de items local
   const filteredItems = items.filter(item => {
     const matchesTab = currentTab === 'ALL' || item.tipo === currentTab;
+    if (filtroSucursal && Number(item.id_sucursal) !== Number(filtroSucursal)) return false;
+    if (filtroLocalidad && item.localidad !== filtroLocalidad) return false;
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch = 
       item.cod_patrimonial?.toLowerCase().includes(searchLower) ||
@@ -86,7 +99,9 @@ export default function InventarioFisicoPanel() {
       item.marca?.toLowerCase().includes(searchLower) ||
       item.modelo?.toLowerCase().includes(searchLower) ||
       item.numero_serie?.toLowerCase().includes(searchLower) ||
-      item.subcategoria?.toLowerCase().includes(searchLower);
+      item.subcategoria?.toLowerCase().includes(searchLower) ||
+      item.localidad?.toLowerCase().includes(searchLower) ||
+      item.sucursal?.toLowerCase().includes(searchLower);
     return matchesTab && matchesSearch;
   });
 
@@ -101,6 +116,7 @@ export default function InventarioFisicoPanel() {
       tipo: newTipo,
       cod_categoria: newTipo === 'FALTANTE' ? '' : prev.cod_categoria
     }));
+    setSelectedCategory('');
     setModalError(null);
   };
 
@@ -108,10 +124,17 @@ export default function InventarioFisicoPanel() {
   const handleActivoSelect = (activoCod) => {
     if (!activoCod) {
       setForm(prev => ({ ...prev, cod_patrimonial: '' }));
+      setSelectedCategory('');
       return;
     }
     const act = activos.find(a => a.cod_patrimonial === activoCod);
     if (act) {
+      const foundSubcat = subcategorias.find(s => Number(s.value) === Number(act.cod_categoria));
+      if (foundSubcat) {
+        setSelectedCategory(foundSubcat.categoria);
+      } else {
+        setSelectedCategory('');
+      }
       setForm(prev => ({
         ...prev,
         cod_patrimonial: act.cod_patrimonial,
@@ -122,18 +145,31 @@ export default function InventarioFisicoPanel() {
         numero_serie: act.numero_serie || '',
         color: act.color || '',
         caracteristicas_accesorios: act.caracteristicas_accesorios || '',
+        id_sucursal: act.id_sucursal || '',
+        localidad: act.localidad || '',
         observaciones: prev.observaciones
       }));
     }
   };
 
-  // Generar código y autocompletar para Sobrantes cuando cambia la categoría
+  // Manejar cambio de categoría para Sobrantes
+  const handleCategoryChange = (catName) => {
+    setSelectedCategory(catName);
+    setForm(prev => ({
+      ...prev,
+      cod_categoria: '',
+      cod_patrimonial: ''
+    }));
+  };
+
+  // Generar código y autocompletar para Sobrantes cuando cambia la subcategoría
   const handleCategorySelect = async (catId) => {
     if (!catId) {
-      setForm(prev => ({ ...prev, cod_categoria: '', cod_patrimonial: '' }));
+      setForm(prev => ({ ...prev, cod_categoria: '', cod_patrimonial: isEditMode ? prev.cod_patrimonial : '' }));
       return;
     }
     setForm(prev => ({ ...prev, cod_categoria: Number(catId) }));
+    if (isEditMode) return;
     setModalLoading(true);
     setModalError(null);
     try {
@@ -149,6 +185,7 @@ export default function InventarioFisicoPanel() {
   // Abrir modal de creación
   const handleOpenCreate = () => {
     setForm(INITIAL_FORM_STATE);
+    setSelectedCategory('');
     setIsEditMode(false);
     setModalError(null);
     setShowModal(true);
@@ -156,6 +193,12 @@ export default function InventarioFisicoPanel() {
 
   // Abrir modal de edición
   const handleOpenEdit = (item) => {
+    const foundSubcat = subcategorias.find(s => Number(s.value) === Number(item.cod_categoria));
+    if (foundSubcat) {
+      setSelectedCategory(foundSubcat.categoria);
+    } else {
+      setSelectedCategory('');
+    }
     setForm({
       cod_patrimonial: item.cod_patrimonial,
       tipo: item.tipo,
@@ -166,7 +209,9 @@ export default function InventarioFisicoPanel() {
       numero_serie: item.numero_serie || '',
       color: item.color || '',
       caracteristicas_accesorios: item.caracteristicas_accesorios || '',
-      observaciones: item.observaciones || ''
+      observaciones: item.observaciones || '',
+      id_sucursal: item.id_sucursal || '',
+      localidad: item.localidad || ''
     });
     setIsEditMode(true);
     setModalError(null);
@@ -176,12 +221,16 @@ export default function InventarioFisicoPanel() {
   // Enviar formulario (creación/actualización)
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (form.tipo === 'FALTANTE' && !form.cod_patrimonial) {
+      setModalError('Debe seleccionar un activo fijo existente para registrar un faltante.');
+      return;
+    }
     if (!form.cod_patrimonial) {
       setModalError('El código patrimonial es obligatorio.');
       return;
     }
     if (!form.cod_categoria) {
-      setModalError('Debe seleccionar una categoría/subcategoría.');
+      setModalError('Debe seleccionar una categoría y subcategoría.');
       return;
     }
     setModalLoading(true);
@@ -218,11 +267,13 @@ export default function InventarioFisicoPanel() {
     label: `${a.cod_patrimonial} - ${a.denominacion || ''} (${a.marca || ''} / ${a.modelo || ''})`
   }));
 
-  // Opciones de subcategorías para el selector de Sobrantes
-  const subcatOptions = subcategorias.map(s => ({
-    value: s.value,
-    label: `${s.label} (${s.categoria})`
-  }));
+  // Obtener categorías únicas
+  const uniqueCategories = [...new Set(subcategorias.map(s => s.categoria))].sort();
+
+  // Obtener subcategorías filtradas por la categoría seleccionada
+  const filteredSubcats = subcategorias
+    .filter(s => s.categoria === selectedCategory)
+    .sort((a, b) => a.label.localeCompare(b.label));
 
   return (
     <div className="flex-1 flex flex-col min-h-0 space-y-4 animate-fadeIn w-full max-w-full overflow-hidden">
@@ -284,8 +335,8 @@ export default function InventarioFisicoPanel() {
           </button>
         </div>
 
-        <div className="flex items-center space-x-3 w-full sm:w-auto">
-          <div className="relative flex-1 sm:w-72">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
@@ -294,6 +345,24 @@ export default function InventarioFisicoPanel() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-9 pr-4 py-2 min-h-0 text-sm bg-white border-slate-200 rounded-xl focus:border-brand-600 focus:ring-4 focus:ring-brand-500/10"
             />
+          </div>
+
+          <div className="relative">
+            <select value={filtroLocalidad} onChange={e => setFiltroLocalidad(e.target.value)}
+              className="appearance-none block w-full pl-3 pr-8 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all cursor-pointer" style={{ minHeight: '2.25rem' }}>
+              <option value="">Todas las localidades</option>
+              {localidades.map(l => <option key={l.value} value={l.label}>{l.label}</option>)}
+            </select>
+            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+          </div>
+
+          <div className="relative">
+            <select value={filtroSucursal} onChange={e => setFiltroSucursal(e.target.value)}
+              className="appearance-none block w-full pl-3 pr-8 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all cursor-pointer" style={{ minHeight: '2.25rem' }}>
+              <option value="">Todas las sucursales</option>
+              {sucursales.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+            </select>
+            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
           </div>
           
           <button
@@ -339,6 +408,7 @@ export default function InventarioFisicoPanel() {
                   <th className="px-5 py-3">Código</th>
                   <th className="px-4 py-3">Tipo</th>
                   <th className="px-5 py-3">Subcategoría</th>
+                  <th className="px-5 py-3">Ubicación</th>
                   <th className="px-5 py-3">Denominación</th>
                   <th className="px-5 py-3">Características</th>
                   <th className="px-5 py-3">Observaciones</th>
@@ -361,6 +431,10 @@ export default function InventarioFisicoPanel() {
                     <td className="px-5 py-3">
                       <div className="font-semibold text-slate-800 leading-tight">{item.subcategoria}</div>
                       <div className="text-[0.6875rem] text-slate-400 mt-0.5 font-bold uppercase">{item.categoria}</div>
+                    </td>
+                    <td className="px-5 py-3">
+                      <div className="font-semibold text-slate-800 leading-tight">{item.sucursal || '—'}</div>
+                      <div className="text-[0.6875rem] text-brand-500 font-bold uppercase tracking-wide mt-0.5">{item.localidad || '—'}</div>
                     </td>
                     <td className="px-5 py-3 font-medium text-slate-800 max-w-[200px] truncate" title={item.denominacion}>
                       {item.denominacion}
@@ -468,7 +542,7 @@ export default function InventarioFisicoPanel() {
 
             {/* Selección de Código / Activo */}
             {form.tipo === 'FALTANTE' ? (
-              <div>
+              <div className="space-y-4">
                 {isEditMode ? (
                   <div>
                     <label className="field-label">Código Patrimonial</label>
@@ -490,13 +564,34 @@ export default function InventarioFisicoPanel() {
                     placeholder="Busca por código o denominación..."
                   />
                 )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 animate-fadeIn">
+                  <div>
+                    <label className="field-label">Categoría</label>
+                    <input
+                      type="text"
+                      disabled
+                      value={selectedCategory || '—'}
+                      className="field-input bg-slate-50 text-slate-500 font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="field-label">Subcategoría</label>
+                    <input
+                      type="text"
+                      disabled
+                      value={subcategorias.find(s => Number(s.value) === Number(form.cod_categoria))?.label || '—'}
+                      className="field-input bg-slate-50 text-slate-500 font-medium"
+                    />
+                  </div>
+                </div>
               </div>
             ) : (
               // SOBRANTE
               <div className="space-y-4">
                 {isEditMode ? (
                   <div>
-                    <label className="field-label">Código Autogenerado</label>
+                    <label className="field-label">Código Patrimonial</label>
                     <input
                       type="text"
                       disabled
@@ -505,24 +600,47 @@ export default function InventarioFisicoPanel() {
                     />
                   </div>
                 ) : (
-                  <div>
-                    <SearchableSelect
-                      label="Seleccionar Categoría/Subcategoría"
-                      name="cod_categoria"
-                      value={form.cod_categoria}
-                      onChange={(e) => handleCategorySelect(e.target.value)}
-                      options={subcatOptions}
-                      required
-                      placeholder="Selecciona categoría para generar código..."
-                    />
-                    {form.cod_patrimonial && (
-                      <div className="mt-2 text-[0.8125rem] text-slate-600 bg-slate-50 border border-slate-200 rounded-xl p-2.5 flex items-center justify-between">
-                        <span>Código sugerido:</span>
-                        <strong className="font-mono text-slate-800 text-sm font-bold bg-white px-2 py-0.5 rounded shadow-sm border">{form.cod_patrimonial}</strong>
-                      </div>
-                    )}
-                  </div>
+                  form.cod_patrimonial && (
+                    <div className="text-[0.8125rem] text-slate-600 bg-emerald-50/50 border border-emerald-200/80 rounded-xl p-2.5 flex items-center justify-between animate-fadeIn">
+                      <span>Código sugerido generado:</span>
+                      <strong className="font-mono text-emerald-800 text-sm font-bold bg-white px-2.5 py-0.5 rounded shadow-sm border border-emerald-200">{form.cod_patrimonial}</strong>
+                    </div>
+                  )
                 )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="field-label">Categoría <span className="text-rose-500">*</span></label>
+                    <select
+                      required
+                      value={selectedCategory}
+                      onChange={(e) => handleCategoryChange(e.target.value)}
+                      className="field-input cursor-pointer"
+                    >
+                      <option value="">Seleccionar categoría...</option>
+                      {uniqueCategories.map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  {selectedCategory && (
+                    <div className="animate-fadeIn">
+                      <label className="field-label">Subcategoría <span className="text-rose-500">*</span></label>
+                      <select
+                        required
+                        value={form.cod_categoria}
+                        onChange={(e) => handleCategorySelect(e.target.value)}
+                        className="field-input cursor-pointer"
+                      >
+                        <option value="">Seleccionar subcategoría...</option>
+                        {filteredSubcats.map(subcat => (
+                          <option key={subcat.value} value={subcat.value}>{subcat.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
@@ -578,7 +696,8 @@ export default function InventarioFisicoPanel() {
                     onChange={(e) => setForm(p => ({ ...p, numero_serie: e.target.value }))}
                     placeholder="Ej: PF3XG82Y"
                     className={`field-input ${form.tipo === 'FALTANTE' && !isEditMode ? 'bg-slate-50 text-slate-500' : ''}`}
-                  />
+                  >
+                  </input>
                 </div>
                 <div>
                   <label className="field-label">Color</label>
@@ -589,7 +708,35 @@ export default function InventarioFisicoPanel() {
                     onChange={(e) => setForm(p => ({ ...p, color: e.target.value }))}
                     placeholder="Ej: NEGRO"
                     className={`field-input ${form.tipo === 'FALTANTE' && !isEditMode ? 'bg-slate-50 text-slate-500' : ''}`}
-                  />
+                  >
+                  </input>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="field-label">Localidad</label>
+                  <select
+                    disabled={form.tipo === 'FALTANTE' && !isEditMode}
+                    value={form.localidad}
+                    onChange={(e) => setForm(p => ({ ...p, localidad: e.target.value }))}
+                    className={`field-input ${form.tipo === 'FALTANTE' && !isEditMode ? 'bg-slate-50 text-slate-500' : ''} cursor-pointer`}
+                  >
+                    <option value="">Seleccionar localidad...</option>
+                    {localidades.map(l => <option key={l.value} value={l.label}>{l.label}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="field-label">Sucursal</label>
+                  <select
+                    disabled={form.tipo === 'FALTANTE' && !isEditMode}
+                    value={form.id_sucursal}
+                    onChange={(e) => setForm(p => ({ ...p, id_sucursal: e.target.value ? Number(e.target.value) : '' }))}
+                    className={`field-input ${form.tipo === 'FALTANTE' && !isEditMode ? 'bg-slate-50 text-slate-500' : ''} cursor-pointer`}
+                  >
+                    <option value="">Seleccionar sucursal...</option>
+                    {sucursales.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                  </select>
                 </div>
               </div>
 

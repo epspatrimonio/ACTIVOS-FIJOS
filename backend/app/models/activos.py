@@ -400,6 +400,9 @@ class VwSoatVigencia(Base):
     estado_soat: Mapped[str] = mapped_column(String(20))
     monto: Mapped[Optional[Decimal]] = mapped_column(Numeric(12, 2))
     observaciones: Mapped[Optional[str]] = mapped_column(Text)
+    id_sucursal: Mapped[Optional[int]] = mapped_column(Integer)
+    sucursal: Mapped[Optional[str]] = mapped_column(String(160))
+    localidad: Mapped[Optional[str]] = mapped_column(String(120))
     created_at: Mapped[datetime] = mapped_column(server_default=FetchedValue())
     updated_at: Mapped[datetime] = mapped_column(server_default=FetchedValue())
 
@@ -425,6 +428,8 @@ class InventarioFisico(Base):
     color: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
     caracteristicas_accesorios: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     observaciones: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    id_sucursal: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    localidad: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
     created_at: Mapped[datetime] = mapped_column(server_default=FetchedValue())
     updated_at: Mapped[datetime] = mapped_column(server_default=FetchedValue())
 
@@ -448,6 +453,9 @@ class VwInventarioFisicoDetalle(Base):
     color: Mapped[Optional[str]] = mapped_column(String(120))
     caracteristicas_accesorios: Mapped[Optional[str]] = mapped_column(Text)
     observaciones: Mapped[Optional[str]] = mapped_column(Text)
+    id_sucursal: Mapped[Optional[int]] = mapped_column(Integer)
+    sucursal: Mapped[Optional[str]] = mapped_column(String(160))
+    localidad: Mapped[Optional[str]] = mapped_column(String(120))
     created_at: Mapped[datetime] = mapped_column(server_default=FetchedValue())
     updated_at: Mapped[datetime] = mapped_column(server_default=FetchedValue())
 
@@ -469,6 +477,8 @@ class BienTercero(Base):
     caracteristicas_accesorios: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     cod_personal: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     observaciones: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    id_sucursal: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    localidad: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
     created_at: Mapped[datetime] = mapped_column(server_default=FetchedValue())
     updated_at: Mapped[datetime] = mapped_column(server_default=FetchedValue())
 
@@ -491,6 +501,9 @@ class VwBienesTercerosDetalle(Base):
     cod_personal: Mapped[Optional[str]] = mapped_column(String(20))
     responsable: Mapped[Optional[str]] = mapped_column(String(260))
     observaciones: Mapped[Optional[str]] = mapped_column(Text)
+    id_sucursal: Mapped[Optional[int]] = mapped_column(Integer)
+    sucursal: Mapped[Optional[str]] = mapped_column(String(160))
+    localidad: Mapped[Optional[str]] = mapped_column(String(120))
     created_at: Mapped[datetime] = mapped_column(server_default=FetchedValue())
     updated_at: Mapped[datetime] = mapped_column(server_default=FetchedValue())
 

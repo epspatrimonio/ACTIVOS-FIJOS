@@ -80,7 +80,7 @@ async def run_tests():
     # 2. Validar que el servidor backend esté en línea
     log_info("Paso 2: Validando que el API backend (FastAPI) esté en línea...")
     try:
-        status, res = request_json(f"{BACKEND_URL}/")
+        status, res = request_json(f"{BACKEND_URL}/api/health")
         if status == 200 and res.get("status") == "online":
             log_success(f"Backend en línea: {res.get('app')} (v{res.get('documentation')})")
         else:

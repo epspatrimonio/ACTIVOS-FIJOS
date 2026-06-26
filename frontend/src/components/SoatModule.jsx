@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import Modal from './Modal';
 import SearchableSelect from './SearchableSelect';
-import { fetchSoat, createSoat, updateSoat, deleteSoat, fetchSoatPorVehiculo, fetchActivos } from '../utils/api';
+import { fetchSoat, createSoat, updateSoat, deleteSoat, fetchSoatPorVehiculo, fetchActivos, fetchSucursales, fetchLocalidades } from '../utils/api';
 
 // ─── Config estados SOAT ──────────────────────────────────────────────────────
 const ESTADOS = {
@@ -407,7 +407,11 @@ export default function SoatModule() {
   const [deleteItem, setDeleteItem] = useState(null);
   const [historialItem, setHistorialItem] = useState(null);
   const [filtroEstado, setFiltroEstado] = useState('');
+  const [filtroSucursal, setFiltroSucursal] = useState('');
+  const [filtroLocalidad, setFiltroLocalidad] = useState('');
   const [busqueda, setBusqueda] = useState('');
+  const [sucursales, setSucursales] = useState([]);
+  const [localidades, setLocalidades] = useState([]);
 
   const load = useCallback(async () => {
     setLoading(true); setError(null);
@@ -427,13 +431,19 @@ export default function SoatModule() {
     finally { setLoading(false); }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+    fetchSucursales().then(setSucursales).catch(() => {});
+    fetchLocalidades().then(setLocalidades).catch(() => {});
+  }, [load]);
 
   const filtered = registros.filter(r => {
     if (filtroEstado && r.estado_soat !== filtroEstado) return false;
+    if (filtroSucursal && Number(r.id_sucursal) !== Number(filtroSucursal)) return false;
+    if (filtroLocalidad && r.localidad !== filtroLocalidad) return false;
     if (!busqueda) return true;
     const q = busqueda.toLowerCase();
-    return [r.placa, r.denominacion, r.compania_aseguradora, r.numero_poliza].some(v => v?.toLowerCase().includes(q));
+    return [r.placa, r.denominacion, r.compania_aseguradora, r.numero_poliza, r.localidad].some(v => v?.toLowerCase().includes(q));
   });
 
   const vencidos = registros.filter(r => r.estado_soat === 'VENCIDO').length;
@@ -501,6 +511,24 @@ export default function SoatModule() {
             value={busqueda} onChange={e => setBusqueda(e.target.value)}
             className="field-input pl-9" style={{minHeight:'2.5rem', borderRadius:'0.75rem'}} />
         </div>
+
+        <div className="relative">
+          <select value={filtroLocalidad} onChange={e => setFiltroLocalidad(e.target.value)}
+            className="appearance-none block w-full pl-3 pr-8 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all cursor-pointer" style={{ minHeight: '2.5rem' }}>
+            <option value="">Todas las localidades</option>
+            {localidades.map(l => <option key={l.value} value={l.label}>{l.label}</option>)}
+          </select>
+          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+        </div>
+
+        <div className="relative">
+          <select value={filtroSucursal} onChange={e => setFiltroSucursal(e.target.value)}
+            className="appearance-none block w-full pl-3 pr-8 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all cursor-pointer" style={{ minHeight: '2.5rem' }}>
+            <option value="">Todas las sucursales</option>
+            {sucursales.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+          </select>
+          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+        </div>
         {/* Filtros de estado tipo chips */}
         <div className="flex rounded-xl border border-slate-200 bg-slate-50 p-1 gap-1">
           {[['', 'Todos'], ...Object.entries(ESTADOS).map(([k, v]) => [k, v.label])].map(([val, label]) => (
@@ -549,7 +577,7 @@ export default function SoatModule() {
             <table className="w-full text-sm">
               <thead className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
                 <tr>
-                  {['Vehículo', 'Placa', 'Aseguradora / Póliza', 'Inicio', 'Vencimiento', 'Vigencia', 'Monto', 'Estado', ''].map(h => (
+                  {['Vehículo', 'Placa', 'Aseguradora / Póliza', 'Localidad', 'Sucursal', 'Inicio', 'Vencimiento', 'Vigencia', 'Monto', 'Estado', ''].map(h => (
                     <th key={h} className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
@@ -574,6 +602,12 @@ export default function SoatModule() {
                       <td className="px-4 py-3 text-xs">
                         <p className="font-semibold text-slate-700">{r.compania_aseguradora || '—'}</p>
                         {r.numero_poliza && <p className="font-mono text-slate-400 text-[11px]">#{r.numero_poliza}</p>}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-slate-600 font-semibold text-slate-700">
+                        {r.localidad || '—'}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-slate-600 font-semibold text-slate-700">
+                        {r.sucursal || '—'}
                       </td>
                       <td className="px-4 py-3 text-xs text-slate-500">
                         {r.fecha_inicio ? new Date(r.fecha_inicio + 'T00:00:00').toLocaleDateString('es-PE') : '—'}

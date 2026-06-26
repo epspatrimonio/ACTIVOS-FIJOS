@@ -8,7 +8,7 @@ import Modal from './Modal';
 import SearchableSelect from './SearchableSelect';
 import {
   fetchActivos, fetchVehiculos, upsertVehiculoDetalle,
-  fetchSucursales, fetchPuestos, fetchPersonal,
+  fetchSucursales, fetchPuestos, fetchPersonal, fetchLocalidades,
   createActivo, updateActivo, deleteActivo,
   fetchGenerarCodigoVehiculo, sincronizarPublico
 } from '../utils/api';
@@ -676,9 +676,11 @@ export default function VehiculosModule() {
   
   const [filtroEstadoRev, setFiltroEstadoRev] = useState('');
   const [filtroSucursal, setFiltroSucursal] = useState('');
+  const [filtroLocalidad, setFiltroLocalidad] = useState('');
   const [busqueda, setBusqueda] = useState('');
   
   const [sucursales, setSucursales] = useState([]);
+  const [localidades, setLocalidades] = useState([]);
   const [personal, setPersonal] = useState([]);
   
   const [showForm, setShowForm] = useState(false);
@@ -730,6 +732,7 @@ export default function VehiculosModule() {
   useEffect(() => {
     loadData();
     fetchSucursales().then(setSucursales).catch(() => {});
+    fetchLocalidades().then(setLocalidades).catch(() => {});
     fetchPersonal().then(setPersonal).catch(() => {});
   }, [loadData]);
 
@@ -740,9 +743,10 @@ export default function VehiculosModule() {
       if (filtroEstadoRev !== 'SIN_REV' && v.estado_rev_tec !== filtroEstadoRev) return false;
     }
     if (filtroSucursal && Number(v.id_sucursal) !== Number(filtroSucursal)) return false;
+    if (filtroLocalidad && v.localidad !== filtroLocalidad) return false;
     if (!busqueda) return true;
     const q = busqueda.toLowerCase();
-    return [v.cod_patrimonial, v.denominacion, v.placa, v.responsable, v.marca, v.modelo]
+    return [v.cod_patrimonial, v.denominacion, v.placa, v.responsable, v.marca, v.modelo, v.localidad]
       .some(val => val?.toLowerCase().includes(q));
   });
 
@@ -838,6 +842,15 @@ export default function VehiculosModule() {
         </div>
 
         <div className="relative">
+          <select value={filtroLocalidad} onChange={e => setFiltroLocalidad(e.target.value)}
+            className="appearance-none block w-full pl-3 pr-8 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all cursor-pointer" style={{ minHeight: '2.5rem' }}>
+            <option value="">Todas las localidades</option>
+            {localidades.map(l => <option key={l.value} value={l.label}>{l.label}</option>)}
+          </select>
+          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+        </div>
+
+        <div className="relative">
           <select value={filtroSucursal} onChange={e => setFiltroSucursal(e.target.value)}
             className="appearance-none block w-full pl-3 pr-8 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all cursor-pointer" style={{ minHeight: '2.5rem' }}>
             <option value="">Todas las sucursales</option>
@@ -893,7 +906,7 @@ export default function VehiculosModule() {
             <table className="w-full text-sm">
               <thead className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
                 <tr>
-                  {['Vehículo / Cod.', 'Placa', 'Tipo / Características', 'Sucursal / Asignado', 'Rev. Técnica', 'Estado Físico', ''].map(h => (
+                  {['Vehículo / Cod.', 'Placa', 'Tipo / Características', 'Localidad', 'Sucursal', 'Asignado', 'Rev. Técnica', 'Estado Físico', ''].map(h => (
                     <th key={h} className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
@@ -926,9 +939,14 @@ export default function VehiculosModule() {
                         {v.combustible ? `${v.combustible}` : ''} {v.cilindrada_cc ? `· ${v.cilindrada_cc} cc` : ''}
                       </p>
                     </td>
-                    <td className="px-4 py-3 text-xs text-slate-600">
-                      <p className="font-semibold text-slate-700">{v.sucursal || '—'}</p>
-                      <p className="text-slate-400 mt-0.5">{v.responsable || 'Sin asignar'}</p>
+                    <td className="px-4 py-3 text-xs text-slate-600 font-semibold text-slate-700">
+                      {v.localidad || '—'}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-slate-600 font-semibold text-slate-700">
+                      {v.sucursal || '—'}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-slate-600 text-slate-500">
+                      {v.responsable || 'Sin asignar'}
                     </td>
                     <td className="px-4 py-3 text-xs">
                       {(() => {
