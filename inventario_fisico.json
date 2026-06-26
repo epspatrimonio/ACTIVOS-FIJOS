@@ -10,13 +10,13 @@
     "color": "BLANCO",
     "caracteristicas_accesorios": "Cable USB y tóner instalado",
     "observaciones": "Encontrada sin registrar en la oficina de contabilidad",
-    "id_sucursal": null,
-    "localidad": null,
+    "id_sucursal": 1,
+    "localidad": "LA MERCED",
     "categoria": "TERRENOS",
     "subcategoria": "TERRENOS",
-    "sucursal": null,
+    "sucursal": "SEDE CENTRAL",
     "created_at": "2026-06-24T13:31:55.600249Z",
-    "updated_at": "2026-06-24T13:31:55.600249Z"
+    "updated_at": "2026-06-25T21:23:56.074595Z"
   },
   {
     "cod_patrimonial": "INV-001",
