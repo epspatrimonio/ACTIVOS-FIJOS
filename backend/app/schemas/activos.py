@@ -23,6 +23,7 @@ class ActivoBase(BaseModel):
     numero_factura: Optional[str] = Field(None, max_length=80)
     fecha_alta_factura: Optional[date] = Field(None)
     fecha_registro_contable: Optional[date] = Field(None)
+    fecha_asignacion: Optional[date] = Field(None)
     valor_en_libros: Decimal = Field(Decimal("0.0000"), ge=0, description="Valor del activo registrado en libros")
     igv: Optional[Decimal] = Field(None, ge=0)
     informe_conformidad: Optional[str] = Field(None, max_length=80)
@@ -119,6 +120,7 @@ class ActivoPublicoDTO(BaseModel):
     numero_factura: Optional[str] = None
     fecha_alta_factura: Optional[date] = None
     fecha_registro_contable: Optional[date] = None
+    fecha_asignacion: Optional[date] = None
     valor_en_libros: Decimal
     igv: Optional[Decimal] = None
     informe_conformidad: Optional[str] = None

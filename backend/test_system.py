@@ -123,6 +123,7 @@ async def run_tests():
         "numero_factura": "F-TEST-9999",
         "fecha_alta_factura": "2026-06-07",
         "fecha_registro_contable": "2026-06-07",
+        "fecha_asignacion": "2026-06-07",
         "valor_en_libros": 1200.0,
         "igv": 216.0,
         "n_acta": "099",

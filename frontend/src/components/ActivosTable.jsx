@@ -64,7 +64,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
     <div className="glass-panel rounded-xl border border-slate-200 overflow-hidden w-full max-w-full h-full flex flex-col">
       {/* Contenedor de scroll con altura máxima para hacer efectiva la cabecera sticky */}
       <div className="overflow-x-auto overflow-y-auto w-full flex-1 min-h-0">
-        <table className="min-w-[1450px] w-full divide-y divide-slate-200 border-collapse">
+        <table className="min-w-[1600px] w-full divide-y divide-slate-200 border-collapse">
           <thead className="sticky top-0 bg-slate-100 z-20 shadow-[0_1px_0_0_rgba(226,232,240,1)]">
             <tr>
               <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Cód. Patrimonial</th>
@@ -72,6 +72,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
               <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Fecha de Ingreso</th>
               <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Ubicación (Sucursal / Localidad)</th>
               <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Denominación del Activo</th>
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Características</th>
               <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Especificaciones</th>
               <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Estado</th>
               <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Valor Libros</th>
@@ -97,6 +98,10 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                     <div className="h-3 bg-slate-150 rounded w-32"></div>
                   </td>
                   <td className="px-5 py-4">
+                    <div className="h-3 bg-slate-200 rounded w-28 mb-1"></div>
+                    <div className="h-3 bg-slate-150 rounded w-20"></div>
+                  </td>
+                  <td className="px-5 py-4">
                     <div className="h-3 bg-slate-200 rounded w-36 mb-1"></div>
                     <div className="h-3 bg-slate-150 rounded w-24"></div>
                   </td>
@@ -109,7 +114,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
               ))
             ) : activos.length === 0 ? (
               <tr>
-                <td colSpan="11" className="px-5 py-12 text-center text-slate-400">
+                <td colSpan="12" className="px-5 py-12 text-center text-slate-400">
                   <div className="flex flex-col items-center justify-center">
                     <Package className="w-12 h-12 text-slate-300 mb-3" />
                     <p className="text-sm font-semibold">No se encontraron activos fijos</p>
@@ -132,10 +137,13 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   </td>
                   
                   {/* Fecha de Ingreso */}
-                  <td className="px-5 py-4 whitespace-nowrap">
-                    <span className="px-2.5 py-1 text-xs font-medium text-slate-500 bg-slate-50 border border-slate-200 rounded-full">
-                      {formatDate(activo.fecha_alta_factura || activo.fecha_registro_contable)}
-                    </span>
+                  <td className="px-5 py-4 whitespace-nowrap text-xs">
+                    <p className="text-slate-700 font-semibold leading-none">
+                      Alta: <span className="text-slate-500 font-normal">{formatDate(activo.fecha_alta_factura)}</span>
+                    </p>
+                    <p className="text-slate-700 font-semibold leading-none mt-1">
+                      Asig: <span className="text-slate-500 font-normal">{formatDate(activo.fecha_asignacion)}</span>
+                    </p>
                   </td>
                   
                   {/* Ubicación */}
@@ -158,19 +166,53 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                     </div>
                   </td>
                   
+                  {/* Características */}
+                  <td className="px-5 py-4 text-[0.8125rem] min-w-[180px] text-slate-600 leading-normal">
+                    <div className="space-y-0.5">
+                      <div><span className="font-semibold text-slate-400">Marca:</span> <span className="text-slate-850 font-medium">{activo.marca || 'S/M'}</span></div>
+                      <div><span className="font-semibold text-slate-400">Modelo:</span> <span className="text-slate-850 font-medium">{activo.modelo || 'S/M'}</span></div>
+                      <div><span className="font-semibold text-slate-400">Serie:</span> <span className="text-slate-850 font-mono font-medium">{activo.numero_serie || 'S/S'}</span></div>
+                      {activo.color && <div><span className="font-semibold text-slate-400">Color:</span> <span className="text-slate-700">{activo.color}</span></div>}
+                    </div>
+                  </td>
+                  
                   {/* Especificaciones */}
-                  <td className="px-5 py-4 text-[0.8125rem] min-w-[180px] text-slate-500 leading-relaxed">
-                    <div>
-                      <span className="font-medium text-slate-400">Marca:</span> {activo.marca || 'S/M'} &bull; <span className="font-medium text-slate-400">Modelo:</span> {activo.modelo || 'S/M'}
-                    </div>
-                    <div className="mt-0.5">
-                      <span className="font-medium text-slate-400">Serie:</span> {activo.numero_serie || 'S/S'}
-                    </div>
-                    {activo.color && (
-                      <div className="text-[0.75rem] italic text-slate-400 mt-0.5">
-                        Color: {activo.color}
-                      </div>
-                    )}
+                  <td className="px-5 py-4 text-[0.8125rem] min-w-[200px] text-slate-500 leading-normal">
+                    {(() => {
+                      const isVehicle = (activo.categoria && activo.categoria.toLowerCase().startsWith('vehiculo')) ||
+                                        (activo.cod_categoria && String(activo.cod_categoria).startsWith('4'));
+                      if (isVehicle) {
+                        return (
+                          <div className="space-y-1">
+                            <p className="flex items-center gap-1.5 flex-wrap leading-none mb-1">
+                              <span className="font-semibold text-slate-400">Placa:</span>
+                              {activo.placa ? (
+                                <span className="font-mono font-bold text-slate-700 bg-slate-900 text-white px-1.5 py-0.5 rounded text-[10px] tracking-wider whitespace-nowrap">
+                                  {activo.placa}
+                                </span>
+                              ) : (
+                                <span className="text-slate-400 text-xs italic whitespace-nowrap">S/P</span>
+                              )}
+                            </p>
+                            {activo.nro_motor && (
+                              <div><span className="font-semibold text-slate-400 font-mono">Motor:</span> <span className="text-slate-700 font-mono">{activo.nro_motor}</span></div>
+                            )}
+                            {(activo.nro_chasis || activo.numero_serie) && (
+                              <div><span className="font-semibold text-slate-400 font-mono">Chasis:</span> <span className="text-slate-700 font-mono">{activo.nro_chasis || activo.numero_serie}</span></div>
+                            )}
+                            {activo.combustible && (
+                              <div className="mt-1"><span className="font-semibold text-slate-400">Combustible:</span> <span className="text-slate-650 bg-slate-100 px-1 py-0.5 rounded text-[10px] font-bold">{activo.combustible}</span></div>
+                            )}
+                          </div>
+                        );
+                      } else {
+                        return activo.caracteristicas_accesorios ? (
+                          <div className="text-xs text-slate-600 max-w-[200px] truncate" title={activo.caracteristicas_accesorios}>
+                            {activo.caracteristicas_accesorios}
+                          </div>
+                        ) : <span className="text-slate-400 italic">—</span>;
+                      }
+                    })()}
                   </td>
                   
                   {/* Estado */}

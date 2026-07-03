@@ -1070,8 +1070,8 @@ async def generar_codigo_vehiculo(id_sucursal: int, db: AsyncSession = Depends(g
         import re
         for a in activos:
             if a.cod_patrimonial:
-                # El patrón es '^339' + id_sucursal + 3 dígitos de secuencia
-                match = re.match(rf"^339{id_sucursal}(\d{{3}})$", a.cod_patrimonial)
+                # Primero intentar el nuevo formato de 9 dígitos: 339 + sucursal (2d) + secuencia (4d)
+                match = re.match(rf"^339{id_sucursal:02d}(\d{{4}})$", a.cod_patrimonial)
                 if match:
                     try:
                         seq = int(match.group(1))
@@ -1079,9 +1079,19 @@ async def generar_codigo_vehiculo(id_sucursal: int, db: AsyncSession = Depends(g
                             max_seq = seq
                     except ValueError:
                         pass
+                else:
+                    # Si no coincide, intentar el formato antiguo de 8 dígitos: 339 + sucursal + secuencia (3d)
+                    match_old = re.match(rf"^339{id_sucursal}(\d{{3}})$", a.cod_patrimonial)
+                    if match_old:
+                        try:
+                            seq = int(match_old.group(1))
+                            if seq > max_seq:
+                                max_seq = seq
+                        except ValueError:
+                            pass
 
         siguiente = max_seq + 1
-        codigo = f"339{id_sucursal}{siguiente:03d}"
+        codigo = f"339{id_sucursal:02d}{siguiente:04d}"
 
         # Verificar que sea único
         for _ in range(100):
@@ -1089,7 +1099,7 @@ async def generar_codigo_vehiculo(id_sucursal: int, db: AsyncSession = Depends(g
             if not existe.scalar_one_or_none():
                 break
             siguiente += 1
-            codigo = f"339{id_sucursal}{siguiente:03d}"
+            codigo = f"339{id_sucursal:02d}{siguiente:04d}"
 
         return {"codigo": codigo, "siguiente": siguiente}
     except HTTPException:

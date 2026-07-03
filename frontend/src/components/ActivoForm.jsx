@@ -29,6 +29,7 @@ const INITIAL_FORM_STATE = {
   numero_factura: '',
   fecha_alta_factura: '',
   fecha_registro_contable: '',
+  fecha_asignacion: '',
   valor_en_libros: 0,
   igv: '',
   informe_conformidad: '',
@@ -214,6 +215,7 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
         numero_factura: editingActivo.numero_factura || '',
         fecha_alta_factura: editingActivo.fecha_alta_factura || '',
         fecha_registro_contable: editingActivo.fecha_registro_contable || '',
+        fecha_asignacion: editingActivo.fecha_asignacion || '',
         valor_en_libros: editingActivo.valor_en_libros || 0,
         igv: editingActivo.igv || '',
         informe_conformidad: editingActivo.informe_conformidad || '',
@@ -296,11 +298,12 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
       fetchPuestos(form.id_sucursal)
         .then(setPuestos)
         .catch(() => setPuestos([]));
-      if (!editingActivo || editingActivo.id_sucursal !== form.id_sucursal) {
-        setForm((prev) => ({ ...prev, puesto_id: '' }));
+      if (!editingActivo || Number(editingActivo.id_sucursal) !== Number(form.id_sucursal)) {
+        setForm((prev) => ({ ...prev, puesto_id: '', unidad: '' }));
       }
     } else {
       setPuestos([]);
+      setForm((prev) => ({ ...prev, puesto_id: '', unidad: '' }));
     }
   }, [form.id_sucursal]);
 
@@ -346,7 +349,26 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    if (name === 'unidad') {
+      const selectedSucursal = sucursales.find(s => Number(s.value) === Number(form.id_sucursal));
+      const isSedeCentral = selectedSucursal?.tipo_sucursal === 'SEDE_CENTRAL';
+      if (isSedeCentral) {
+        setForm((prev) => ({
+          ...prev,
+          unidad: value,
+          puesto_id: ''
+        }));
+      } else {
+        const postObj = puestos.find(p => String(p.value) === String(value));
+        setForm((prev) => ({
+          ...prev,
+          puesto_id: value,
+          unidad: postObj ? postObj.label : ''
+        }));
+      }
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -488,6 +510,7 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
         numero_factura: form.numero_factura || null,
         fecha_alta_factura: form.fecha_alta_factura || null,
         fecha_registro_contable: form.fecha_registro_contable || null,
+        fecha_asignacion: form.fecha_asignacion || null,
         informe_conformidad: form.informe_conformidad || null,
         n_acta: form.n_acta || null,
       };
@@ -533,15 +556,55 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
     }));
 
 
+  const selectedSucursal = sucursales.find(s => Number(s.value) === Number(form.id_sucursal));
+  const isSedeCentral = selectedSucursal?.tipo_sucursal === 'SEDE_CENTRAL';
+
   const sucursalOpts = sucursales.map((s) => ({
     value: s.value,
     label: s.label,
   }));
 
-  const puestoOpts = puestos.map((p) => ({
-    value: p.value,
-    label: p.departamento ? `${p.departamento} — ${p.label}` : p.label,
-  }));
+  // Unidad Orgánica options
+  let unidadOpts = [];
+  if (form.id_sucursal) {
+    if (isSedeCentral) {
+      const departments = Array.from(
+        new Set(
+          puestos
+            .map(p => p.departamento)
+            .filter(dept => dept && dept.trim() !== '')
+        )
+      ).sort();
+      unidadOpts = departments.map(dept => ({
+        value: dept,
+        label: dept
+      }));
+    } else {
+      unidadOpts = puestos.map(p => ({
+        value: String(p.value),
+        label: p.label
+      }));
+    }
+  }
+
+  // Puesto options (filtered only in Sede Central)
+  let puestoOpts = [];
+  if (form.id_sucursal) {
+    if (isSedeCentral) {
+      const filteredPuestos = form.unidad
+        ? puestos.filter(p => p.departamento === form.unidad)
+        : [];
+      puestoOpts = filteredPuestos.map(p => ({
+        value: String(p.value),
+        label: p.label
+      }));
+    } else {
+      puestoOpts = puestos.map(p => ({
+        value: String(p.value),
+        label: p.label
+      }));
+    }
+  }
 
   const personalOpts = personal.map((p) => ({
     value: p.value,
@@ -1277,21 +1340,29 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
             required
             placeholder="Seleccionar sucursal..."
           />
-          <div>
-            <label className="block text-xs font-semibold text-slate-500 mb-1">Unidad Orgánica</label>
-            <input type="text" name="unidad" value={form.unidad} onChange={handleChange} placeholder="Ej: TI, Administración"
-              className="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all" />
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           <SearchableSelect
-            label={form.id_sucursal ? 'Puesto Responsable' : 'Puesto Responsable (selecciona sucursal primero)'}
-            name="puesto_id"
-            value={form.puesto_id}
+            label="Unidad Orgánica"
+            name="unidad"
+            value={isSedeCentral ? form.unidad : form.puesto_id}
             onChange={handleChange}
-            options={puestoOpts}
-            placeholder={form.id_sucursal ? 'Seleccionar puesto...' : '— Selecciona sucursal primero —'}
+            options={unidadOpts}
+            disabled={!form.id_sucursal}
+            placeholder={form.id_sucursal ? "Seleccionar unidad orgánica..." : "— Selecciona sucursal primero —"}
+            required
           />
+        </div>
+        <div className={`grid grid-cols-1 ${isSedeCentral ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-4 mt-4`}>
+          {isSedeCentral && (
+            <SearchableSelect
+              label={form.unidad ? 'Puesto Responsable' : 'Puesto Responsable (selecciona unidad orgánica primero)'}
+              name="puesto_id"
+              value={form.puesto_id}
+              onChange={handleChange}
+              options={puestoOpts}
+              disabled={!form.unidad}
+              placeholder={form.unidad ? 'Seleccionar puesto...' : '— Selecciona unidad orgánica primero —'}
+            />
+          )}
           <SearchableSelect
             label="Personal Responsable"
             name="cod_personal"
@@ -1300,6 +1371,11 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
             options={personalOpts}
             placeholder="Seleccionar personal..."
           />
+          <div>
+            <label className="block text-[0.8125rem] font-semibold text-slate-600 mb-1">Fecha de Asignación</label>
+            <input type="date" name="fecha_asignacion" value={form.fecha_asignacion} onChange={handleChange}
+              className="block w-full px-3 py-2 text-sm bg-slate-50/80 border border-slate-200 rounded-lg shadow-sm focus:ring-4 focus:ring-brand-500/10 focus:border-brand-600 transition-all font-medium text-slate-800" />
+          </div>
         </div>
       </div>
 

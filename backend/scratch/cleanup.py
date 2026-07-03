@@ -7,6 +7,7 @@ async def main():
     async with engine.begin() as conn:
         await conn.execute(text("DELETE FROM af.fct_inventario_fisico WHERE cod_patrimonial IN ('INV-001', 'INV-002')"))
         await conn.execute(text("DELETE FROM af.fct_bienes_terceros WHERE cod_patrimonial IN ('TERC-001', 'CTRL-001')"))
+        await conn.execute(text("DELETE FROM af.fct_registro_activos WHERE cod_patrimonial = 'TEST-ACT-9999'"))
         print("Cleanup done successfully!")
 
 if __name__ == '__main__':

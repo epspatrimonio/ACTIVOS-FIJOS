@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import Modal from './Modal';
 import SearchableSelect from './SearchableSelect';
-import { fetchSoat, createSoat, updateSoat, deleteSoat, fetchSoatPorVehiculo, fetchActivos, fetchSucursales, fetchLocalidades } from '../utils/api';
+import { fetchSoat, createSoat, updateSoat, deleteSoat, fetchSoatPorVehiculo, fetchActivos, fetchSucursales, fetchLocalidades, fetchVehiculos } from '../utils/api';
 
 // ─── Config estados SOAT ──────────────────────────────────────────────────────
 const ESTADOS = {
@@ -267,43 +267,7 @@ function SoatFormModal({ open, item, vehicles = [], onSave, onClose }) {
           )}
         </div>
 
-        {/* Póliza */}
-        <div>
-          <div className="form-section-label">Datos de la Póliza</div>
-          <div className="grid grid-cols-2 gap-4">
-            {/* Compañía — botones rápidos */}
-            <div className="col-span-2">
-              <label className="field-label"><Building2 className="inline w-3.5 h-3.5 mr-1 opacity-60" />Compañía Aseguradora</label>
-              <div className="flex flex-wrap gap-1.5 mb-2">
-                {COMPANIAS.map(c => (
-                  <button key={c} type="button"
-                    onClick={() => set('compania_aseguradora', form.compania_aseguradora === c ? '' : c)}
-                    className={`px-3 py-1 rounded-lg text-xs font-bold border transition-all ${
-                      form.compania_aseguradora === c
-                        ? 'bg-brand-600 text-white border-brand-600 shadow-sm shadow-brand-500/30'
-                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-brand-300 hover:text-brand-700'
-                    }`}
-                  >
-                    {c}
-                  </button>
-                ))}
-              </div>
-              <input className="field-input" placeholder="O escribe el nombre de la aseguradora..."
-                maxLength={120} value={form.compania_aseguradora}
-                onChange={e => set('compania_aseguradora', e.target.value)} />
-            </div>
 
-            <Field label="Número de Póliza" icon={Hash}>
-              <input className="field-input font-mono" placeholder="Nro. de póliza" maxLength={60}
-                value={form.numero_poliza} onChange={e => set('numero_poliza', e.target.value)} />
-            </Field>
-
-            <Field label="Monto (S/)" icon={DollarSign}>
-              <input type="number" className="field-input" placeholder="0.00" min="0" step="0.01"
-                value={form.monto} onChange={e => set('monto', e.target.value)} />
-            </Field>
-          </div>
-        </div>
 
         {/* Vigencia */}
         <div>
@@ -398,6 +362,19 @@ function ConfirmDeleteModal({ item, onConfirm, onClose }) {
 
 // ─── COMPONENTE PRINCIPAL ─────────────────────────────────────────────────────
 export default function SoatModule() {
+  const formatDate = (dateString) => {
+    if (!dateString) return '—';
+    try {
+      const parts = dateString.split('T')[0].split('-');
+      if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+      return dateString;
+    } catch {
+      return dateString;
+    }
+  };
+
   const [registros, setRegistros] = useState([]);
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -416,11 +393,28 @@ export default function SoatModule() {
   const load = useCallback(async () => {
     setLoading(true); setError(null);
     try {
-      const [d, activosList] = await Promise.all([
+      const [d, activosList, techDetails] = await Promise.all([
         fetchSoat(),
-        fetchActivos()
+        fetchActivos(),
+        fetchVehiculos()
       ]);
-      setRegistros(d);
+
+      const combined = d.map(r => {
+        const detail = techDetails.find(v => v.cod_patrimonial === r.cod_patrimonial) || {};
+        const asset = activosList.find(v => v.cod_patrimonial === r.cod_patrimonial) || {};
+        return {
+          ...r,
+          tipo_vehiculo: detail.tipo_vehiculo || '—',
+          vencimiento_rev_tec: detail.vencimiento_rev_tec || '',
+          dias_vigencia_rev_tec: detail.dias_vigencia_rev_tec !== undefined ? detail.dias_vigencia_rev_tec : null,
+          estado_rev_tec: detail.estado_rev_tec || null,
+          fecha_alta_factura: asset.fecha_alta_factura || '',
+          fecha_registro_contable: asset.fecha_registro_contable || '',
+        };
+      });
+
+      setRegistros(combined);
+      
       const baseVehicles = activosList.filter(
         a => (a.categoria && a.categoria.toLowerCase().startsWith('vehiculo')) ||
              (a.cod_categoria && String(a.cod_categoria).startsWith('4'))
@@ -440,10 +434,9 @@ export default function SoatModule() {
   const filtered = registros.filter(r => {
     if (filtroEstado && r.estado_soat !== filtroEstado) return false;
     if (filtroSucursal && Number(r.id_sucursal) !== Number(filtroSucursal)) return false;
-    if (filtroLocalidad && r.localidad !== filtroLocalidad) return false;
     if (!busqueda) return true;
     const q = busqueda.toLowerCase();
-    return [r.placa, r.denominacion, r.compania_aseguradora, r.numero_poliza, r.localidad].some(v => v?.toLowerCase().includes(q));
+    return [r.placa, r.denominacion, r.tipo_vehiculo, r.numero_poliza].some(v => v?.toLowerCase().includes(q));
   });
 
   const vencidos = registros.filter(r => r.estado_soat === 'VENCIDO').length;
@@ -512,14 +505,7 @@ export default function SoatModule() {
             className="field-input pl-9" style={{minHeight:'2.5rem', borderRadius:'0.75rem'}} />
         </div>
 
-        <div className="relative">
-          <select value={filtroLocalidad} onChange={e => setFiltroLocalidad(e.target.value)}
-            className="appearance-none block w-full pl-3 pr-8 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all cursor-pointer" style={{ minHeight: '2.5rem' }}>
-            <option value="">Todas las localidades</option>
-            {localidades.map(l => <option key={l.value} value={l.label}>{l.label}</option>)}
-          </select>
-          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
-        </div>
+
 
         <div className="relative">
           <select value={filtroSucursal} onChange={e => setFiltroSucursal(e.target.value)}
@@ -577,7 +563,7 @@ export default function SoatModule() {
             <table className="w-full text-sm">
               <thead className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
                 <tr>
-                  {['Vehículo', 'Placa', 'Aseguradora / Póliza', 'Localidad', 'Sucursal', 'Inicio', 'Vencimiento', 'Vigencia', 'Monto', 'Estado', ''].map(h => (
+                  {['Cód. Patrimonial', 'Placa', 'Tipo de Vehículo', 'Sucursal', 'Vigencia SOAT', 'Rev. Técnica', ''].map(h => (
                     <th key={h} className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
@@ -587,56 +573,84 @@ export default function SoatModule() {
                   const cfg = ESTADOS[r.estado_soat] ?? ESTADOS.VIGENTE;
                   return (
                     <tr key={r.id_soat} className={`transition-colors group hover:brightness-[0.97] ${cfg.row}`}>
-                      <td className="px-4 py-3 max-w-[180px]">
-                        <p className="font-semibold text-slate-800 text-xs leading-tight truncate" title={r.denominacion}>{r.denominacion}</p>
+                      <td className="px-4 py-3 max-w-[200px]">
+                        <p className="font-mono font-bold text-slate-800 text-xs">{r.cod_patrimonial}</p>
+                        <p className="text-slate-500 text-[10px] mt-0.5 truncate max-w-[180px]" title={r.denominacion}>{r.denominacion}</p>
                         <button onClick={() => setHistorialItem(r)}
-                          className="flex items-center gap-1 text-[11px] text-brand-600 hover:underline mt-0.5">
-                          <History className="w-3 h-3" /> Historial
+                          className="flex items-center gap-1 text-[10px] font-semibold text-brand-600 hover:underline mt-1 bg-transparent border-none p-0 cursor-pointer">
+                          <History className="w-2.5 h-2.5" /> Ver Historial
                         </button>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         {r.placa
-                          ? <span className="font-mono font-bold text-slate-700 bg-slate-900 text-white px-2 py-0.5 rounded-lg text-xs">{r.placa}</span>
+                          ? <span className="font-mono font-bold text-slate-700 bg-slate-900 text-white px-2 py-0.5 rounded-lg text-xs whitespace-nowrap">{r.placa}</span>
                           : <span className="text-slate-400 text-xs italic">Sin placa</span>}
                       </td>
-                      <td className="px-4 py-3 text-xs">
-                        <p className="font-semibold text-slate-700">{r.compania_aseguradora || '—'}</p>
-                        {r.numero_poliza && <p className="font-mono text-slate-400 text-[11px]">#{r.numero_poliza}</p>}
-                      </td>
-                      <td className="px-4 py-3 text-xs text-slate-600 font-semibold text-slate-700">
-                        {r.localidad || '—'}
+                      <td className="px-4 py-3 text-xs text-slate-650 font-medium">
+                        <p className="font-bold text-slate-800">{r.tipo_vehiculo || '—'}</p>
+                        <div className="text-[10px] text-slate-400 mt-1 space-y-0.5 font-medium leading-none">
+                          <p>Ingreso: <strong className="text-slate-500 font-normal">{formatDate(r.fecha_alta_factura)}</strong></p>
+                          <p>Asignación: <strong className="text-slate-500 font-normal">{formatDate(r.fecha_registro_contable)}</strong></p>
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-xs text-slate-600 font-semibold text-slate-700">
                         {r.sucursal || '—'}
                       </td>
-                      <td className="px-4 py-3 text-xs text-slate-500">
-                        {r.fecha_inicio ? new Date(r.fecha_inicio + 'T00:00:00').toLocaleDateString('es-PE') : '—'}
-                      </td>
-                      <td className="px-4 py-3 text-xs font-bold text-slate-800">
-                        {r.fecha_vencimiento ? new Date(r.fecha_vencimiento + 'T00:00:00').toLocaleDateString('es-PE') : '—'}
-                      </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 text-xs">
                         <div className="flex flex-col gap-1">
-                          <VigenciaBar dias={r.dias_vigencia ?? 0} estado={r.estado_soat} />
-                          <span className={`text-[11px] font-bold ${r.dias_vigencia < 0 ? 'text-rose-600' : r.dias_vigencia <= 30 ? 'text-amber-600' : 'text-emerald-600'}`}>
-                            {r.dias_vigencia === null ? '—' : r.dias_vigencia < 0 ? `${Math.abs(r.dias_vigencia)}d vencido` : `${r.dias_vigencia}d`}
-                          </span>
+                          <div>
+                            <SoatBadge estado={r.estado_soat} />
+                          </div>
+                          <p className="text-[10px] text-slate-400 mt-0.5">
+                            vence: <strong>{r.fecha_vencimiento ? new Date(r.fecha_vencimiento + 'T00:00:00').toLocaleDateString('es-PE') : '—'}</strong>
+                            {r.dias_vigencia !== null && (
+                              <span className={`ml-1 font-bold ${r.dias_vigencia < 0 ? 'text-rose-600' : r.dias_vigencia <= 30 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                                ({r.dias_vigencia < 0 ? `venció hace ${Math.abs(r.dias_vigencia)}d` : `${r.dias_vigencia}d rest.`})
+                              </span>
+                            )}
+                          </p>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-xs text-slate-600">
-                        {r.monto ? `S/ ${parseFloat(r.monto).toFixed(2)}` : '—'}
-                      </td>
-                      <td className="px-4 py-3">
-                        <SoatBadge estado={r.estado_soat} />
+                      <td className="px-4 py-3 text-xs">
+                        {(() => {
+                          if (!r.vencimiento_rev_tec) {
+                            return (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold ring-1 bg-slate-100 text-slate-500 ring-slate-200">
+                                Sin Rev. Tec.
+                              </span>
+                            );
+                          }
+                          const revState = r.estado_rev_tec || 'VIGENTE';
+                          const badgeClass = revState === 'VIGENTE' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' :
+                                             revState === 'POR_VENCER' ? 'bg-amber-50 text-amber-700 ring-amber-200' :
+                                             'bg-rose-50 text-rose-700 ring-rose-200';
+                          return (
+                            <div className="flex flex-col gap-1">
+                              <div>
+                                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold ring-1 ${badgeClass}`}>
+                                  {revState === 'POR_VENCER' ? 'Por Vencer' : revState}
+                                </span>
+                              </div>
+                              <p className="text-[10px] text-slate-400 mt-0.5">
+                                vence: <strong>{new Date(r.vencimiento_rev_tec + 'T00:00:00').toLocaleDateString('es-PE')}</strong>
+                                {r.dias_vigencia_rev_tec !== null && (
+                                  <span className={`ml-1 font-bold ${r.dias_vigencia_rev_tec < 0 ? 'text-rose-600' : r.dias_vigencia_rev_tec <= 30 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                                    ({r.dias_vigencia_rev_tec < 0 ? `venció hace ${Math.abs(r.dias_vigencia_rev_tec)}d` : `${r.dias_vigencia_rev_tec}d rest.`})
+                                  </span>
+                                )}
+                              </p>
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button onClick={() => { setEditItem(r); setShowForm(true); }} title="Renovar / Editar"
-                            className="p-1.5 rounded-lg hover:bg-brand-50 text-slate-400 hover:text-brand-600 transition-colors">
+                            className="p-1.5 rounded-lg hover:bg-brand-50 text-slate-400 hover:text-brand-600 transition-colors border-none bg-transparent cursor-pointer">
                             <Pencil className="w-3.5 h-3.5" />
                           </button>
                           <button onClick={() => setDeleteItem(r)} title="Eliminar"
-                            className="p-1.5 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors">
+                            className="p-1.5 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors border-none bg-transparent cursor-pointer">
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>

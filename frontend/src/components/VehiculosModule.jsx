@@ -670,6 +670,19 @@ function ConfirmDeleteVehiculoModal({ item, onConfirm, onClose }) {
 
 // ─── COMPONENTE PRINCIPAL ─────────────────────────────────────────────────────
 export default function VehiculosModule() {
+  const formatDate = (dateString) => {
+    if (!dateString) return '—';
+    try {
+      const parts = dateString.split('T')[0].split('-');
+      if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+      return dateString;
+    } catch {
+      return dateString;
+    }
+  };
+
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -743,10 +756,9 @@ export default function VehiculosModule() {
       if (filtroEstadoRev !== 'SIN_REV' && v.estado_rev_tec !== filtroEstadoRev) return false;
     }
     if (filtroSucursal && Number(v.id_sucursal) !== Number(filtroSucursal)) return false;
-    if (filtroLocalidad && v.localidad !== filtroLocalidad) return false;
     if (!busqueda) return true;
     const q = busqueda.toLowerCase();
-    return [v.cod_patrimonial, v.denominacion, v.placa, v.responsable, v.marca, v.modelo, v.localidad]
+    return [v.cod_patrimonial, v.denominacion, v.placa, v.responsable, v.marca, v.modelo]
       .some(val => val?.toLowerCase().includes(q));
   });
 
@@ -841,14 +853,7 @@ export default function VehiculosModule() {
             className="block w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all font-semibold" style={{ minHeight: '2.5rem' }} />
         </div>
 
-        <div className="relative">
-          <select value={filtroLocalidad} onChange={e => setFiltroLocalidad(e.target.value)}
-            className="appearance-none block w-full pl-3 pr-8 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all cursor-pointer" style={{ minHeight: '2.5rem' }}>
-            <option value="">Todas las localidades</option>
-            {localidades.map(l => <option key={l.value} value={l.label}>{l.label}</option>)}
-          </select>
-          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
-        </div>
+
 
         <div className="relative">
           <select value={filtroSucursal} onChange={e => setFiltroSucursal(e.target.value)}
@@ -906,7 +911,7 @@ export default function VehiculosModule() {
             <table className="w-full text-sm">
               <thead className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
                 <tr>
-                  {['Vehículo / Cod.', 'Placa', 'Tipo / Características', 'Localidad', 'Sucursal', 'Asignado', 'Rev. Técnica', 'Estado Físico', ''].map(h => (
+                  {['Cód. Patrimonial', 'Placa', 'Tipo y Características', 'Sucursal', 'Responsable', 'Estado Físico', ''].map(h => (
                     <th key={h} className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
@@ -914,71 +919,72 @@ export default function VehiculosModule() {
               <tbody className="divide-y divide-slate-100">
                 {filtered.map(v => (
                   <tr key={v.cod_patrimonial} className="transition-colors group hover:bg-slate-50/50">
-                    <td className="px-4 py-3 max-w-[200px]">
-                      <p className="font-semibold text-slate-800 text-xs leading-tight truncate" title={v.denominacion}>{v.denominacion}</p>
-                      <p className="font-mono text-slate-400 text-[10px] mt-0.5">{v.cod_patrimonial}</p>
+                    <td className="px-4 py-3 font-mono font-bold text-slate-800 text-xs">
+                      {v.cod_patrimonial}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       {v.placa ? (
-                        <span className="font-mono font-bold text-slate-700 bg-slate-900 text-white px-2 py-0.5 rounded-lg text-xs tracking-wider shadow-sm">
+                        <span className="font-mono font-bold text-slate-700 bg-slate-900 text-white px-2 py-0.5 rounded-lg text-xs tracking-wider shadow-sm whitespace-nowrap">
                           {v.placa}
                         </span>
                       ) : (
                         <span className="text-slate-400 text-xs italic">Sin placa</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-xs text-slate-600">
-                      <p className="font-semibold text-slate-700">
-                        {v.tipo_vehiculo || '—'} {v.anio_fabricacion ? `(${v.anio_fabricacion})` : ''}
-                      </p>
-                      <p className="text-[10px] text-slate-400 mt-0.5">
-                        {v.carroceria ? `Carrocería: ${v.carroceria} ` : ''} 
-                        {v.categoria_vehiculo ? `· Cat: ${v.categoria_vehiculo} ` : ''}
-                      </p>
-                      <p className="text-[10px] text-slate-400 mt-0.5">
-                        {v.combustible ? `${v.combustible}` : ''} {v.cilindrada_cc ? `· ${v.cilindrada_cc} cc` : ''}
-                      </p>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-slate-600 font-semibold text-slate-700">
-                      {v.localidad || '—'}
+                    <td className="px-4 py-3 max-w-[450px]">
+                      <p className="font-bold text-slate-900 text-xs leading-tight uppercase" title={v.denominacion}>{v.denominacion}</p>
+                      
+                      {/* Badges de clasificación */}
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        <span className="bg-slate-900/5 text-slate-800 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide">
+                          {v.tipo_vehiculo || 'VEHÍCULO'}
+                        </span>
+                        {v.carroceria && (
+                          <span className="bg-amber-50 text-amber-800 border border-amber-200/40 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase">
+                            {v.carroceria}
+                          </span>
+                        )}
+                        {v.combustible && (
+                          <span className="bg-sky-50 text-sky-800 border border-sky-200/40 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase">
+                            {v.combustible}
+                          </span>
+                        )}
+                        {v.categoria_vehiculo && (
+                          <span className="bg-purple-50 text-purple-800 border border-purple-200/40 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase">
+                            CAT: {v.categoria_vehiculo}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Características y seriales */}
+                      <div className="text-[11px] text-slate-500 mt-2 space-y-1">
+                        <p className="leading-snug">
+                          <span className="text-slate-400 font-medium">Ficha:</span>{' '}
+                          {v.marca && <span>Marca: <strong className="text-slate-700 font-semibold">{v.marca}</strong></span>}
+                          {v.modelo && <span> · Mod: <strong className="text-slate-700 font-semibold">{v.modelo}</strong></span>}
+                          {v.color && <span> · Color: <strong className="text-slate-600 font-medium">{v.color}</strong></span>}
+                          {v.anio_fabricacion && <span> · Año: <strong className="text-slate-600 font-medium">{v.anio_fabricacion}</strong></span>}
+                        </p>
+                        <p className="text-[10px] font-mono leading-none">
+                          <span className="text-slate-400 font-medium font-sans">Identificación:</span>{' '}
+                          {v.nro_motor && <span>Motor: <strong className="text-slate-500 font-normal">{v.nro_motor}</strong></span>}
+                          {v.nro_chasis && <span>{v.nro_motor ? ' · ' : ''}Chasis: <strong className="text-slate-500 font-normal">{v.nro_chasis}</strong></span>}
+                        </p>
+                        <p className="text-[10px] text-slate-500 flex flex-wrap gap-1.5 mt-1 font-medium leading-none">
+                          <span className="bg-slate-50 text-slate-500 border border-slate-200/60 px-1.5 py-0.5 rounded">
+                            Ingreso: <strong>{formatDate(v.fecha_alta_factura)}</strong>
+                          </span>
+                          <span className="bg-slate-50 text-slate-500 border border-slate-200/60 px-1.5 py-0.5 rounded">
+                            Asignación: <strong>{formatDate(v.fecha_registro_contable)}</strong>
+                          </span>
+                        </p>
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-xs text-slate-600 font-semibold text-slate-700">
                       {v.sucursal || '—'}
                     </td>
-                    <td className="px-4 py-3 text-xs text-slate-600 text-slate-500">
+                    <td className="px-4 py-3 text-xs text-slate-650 text-slate-500 font-medium">
                       {v.responsable || 'Sin asignar'}
-                    </td>
-                    <td className="px-4 py-3 text-xs">
-                      {(() => {
-                        if (!v.vencimiento_rev_tec) {
-                          return (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold ring-1 bg-slate-100 text-slate-600 ring-slate-200">
-                              Sin Rev. Tec.
-                            </span>
-                          );
-                        }
-                        const revState = v.estado_rev_tec || 'VIGENTE';
-                        const badgeClass = revState === 'VIGENTE' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' :
-                                           revState === 'POR_VENCER' ? 'bg-amber-50 text-amber-700 ring-amber-200' :
-                                           'bg-rose-50 text-rose-700 ring-rose-200';
-                        return (
-                          <div className="flex flex-col gap-1">
-                            <div>
-                              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold ring-1 ${badgeClass}`}>
-                                {revState === 'POR_VENCER' ? 'Por Vencer' : revState}
-                              </span>
-                            </div>
-                            <p className="text-[10px] text-slate-400 mt-0.5">
-                              vence: <strong>{new Date(v.vencimiento_rev_tec + 'T00:00:00').toLocaleDateString('es-PE')}</strong>
-                              {v.dias_vigencia_rev_tec !== null && (
-                                <span className={`ml-1 font-bold ${v.dias_vigencia_rev_tec < 0 ? 'text-rose-600' : v.dias_vigencia_rev_tec <= 30 ? 'text-amber-600' : 'text-emerald-600'}`}>
-                                  ({v.dias_vigencia_rev_tec < 0 ? `venció hace ${Math.abs(v.dias_vigencia_rev_tec)}d` : `${v.dias_vigencia_rev_tec}d rest.`})
-                                </span>
-                              )}
-                            </p>
-                          </div>
-                        );
-                      })()}
                     </td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${
