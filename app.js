@@ -6,6 +6,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentTab = 'activos'; // activos | vehiculos | celulares | inventario | terceros
   let currentFilteredData = [];
   
+  // Estado de Filtros de Categoría y Subcategoría (Multiselección)
+  let selectedCategories = [];
+  let selectedSubcategories = [];
+  
   // Elementos del DOM
   const searchInput = document.getElementById('search');
   const sucursalSelect = document.getElementById('filter-sucursal');
@@ -14,6 +18,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const emptyState = document.getElementById('empty-state');
   const resultsCount = document.getElementById('results-count');
   const mobileContainer = document.getElementById('assets-mobile-container');
+  
+  // Selectores de Categoría y Subcategoría (Multiselección)
+  const btnSelectCategoria = document.getElementById('btn-select-categoria');
+  const dropdownCategoria = document.getElementById('dropdown-categoria');
+  const chkAllCategoria = document.getElementById('chk-all-categoria');
+  const optionsContainerCategoria = document.getElementById('options-container-categoria');
+  const labelSelectCategoria = document.getElementById('label-select-categoria');
+  const iconCategoria = document.getElementById('icon-categoria');
+
+  const btnSelectSubcategoria = document.getElementById('btn-select-subcategoria');
+  const dropdownSubcategoria = document.getElementById('dropdown-subcategoria');
+  const chkAllSubcategoria = document.getElementById('chk-all-subcategoria');
+  const optionsContainerSubcategoria = document.getElementById('options-container-subcategoria');
+  const labelSelectSubcategoria = document.getElementById('label-select-subcategoria');
+  const iconSubcategoria = document.getElementById('icon-subcategoria');
   
   const statusContainer = document.getElementById('status-container');
   const statusLoading = document.getElementById('status-loading');
@@ -73,6 +92,94 @@ document.addEventListener('DOMContentLoaded', () => {
       localidadSelect.addEventListener('change', applyFilters);
       estadoSelect.addEventListener('change', applyFilters);
 
+      // Event listeners para los dropdowns de categorías y subcategorías
+      if (btnSelectCategoria && dropdownCategoria) {
+        btnSelectCategoria.addEventListener('click', (e) => {
+          e.stopPropagation();
+          dropdownCategoria.classList.toggle('hidden');
+          dropdownSubcategoria.classList.add('hidden'); // Cerrar el otro
+          
+          // Pivotear flechas
+          if (dropdownCategoria.classList.contains('hidden')) {
+            iconCategoria.style.transform = 'rotate(0deg)';
+          } else {
+            iconCategoria.style.transform = 'rotate(180deg)';
+          }
+          iconSubcategoria.style.transform = 'rotate(0deg)';
+        });
+      }
+
+      if (btnSelectSubcategoria && dropdownSubcategoria) {
+        btnSelectSubcategoria.addEventListener('click', (e) => {
+          e.stopPropagation();
+          dropdownSubcategoria.classList.toggle('hidden');
+          dropdownCategoria.classList.add('hidden'); // Cerrar el otro
+          
+          // Pivotear flechas
+          if (dropdownSubcategoria.classList.contains('hidden')) {
+            iconSubcategoria.style.transform = 'rotate(0deg)';
+          } else {
+            iconSubcategoria.style.transform = 'rotate(180deg)';
+          }
+          iconCategoria.style.transform = 'rotate(0deg)';
+        });
+      }
+
+      // Evitar que el dropdown se cierre al hacer clic adentro
+      if (dropdownCategoria) {
+        dropdownCategoria.addEventListener('click', (e) => e.stopPropagation());
+      }
+      if (dropdownSubcategoria) {
+        dropdownSubcategoria.addEventListener('click', (e) => e.stopPropagation());
+      }
+
+      // Cerrar dropdowns al hacer clic fuera de ellos
+      document.addEventListener('click', () => {
+        if (dropdownCategoria) {
+          dropdownCategoria.classList.add('hidden');
+          iconCategoria.style.transform = 'rotate(0deg)';
+        }
+        if (dropdownSubcategoria) {
+          dropdownSubcategoria.classList.add('hidden');
+          iconSubcategoria.style.transform = 'rotate(0deg)';
+        }
+      });
+
+      // Manejar "Seleccionar Todas" en Categoría
+      if (chkAllCategoria) {
+        chkAllCategoria.addEventListener('change', () => {
+          const isChecked = chkAllCategoria.checked;
+          const checkboxes = optionsContainerCategoria.querySelectorAll('.chk-cat-option');
+          selectedCategories = [];
+          checkboxes.forEach(chk => {
+            chk.checked = isChecked;
+            if (isChecked) {
+              selectedCategories.push(chk.value);
+            }
+          });
+          updateCategoryState();
+          populateSubcategoryFilters();
+          applyFilters();
+        });
+      }
+
+      // Manejar "Seleccionar Todas" en Subcategoría
+      if (chkAllSubcategoria) {
+        chkAllSubcategoria.addEventListener('change', () => {
+          const isChecked = chkAllSubcategoria.checked;
+          const checkboxes = optionsContainerSubcategoria.querySelectorAll('.chk-subcat-option');
+          selectedSubcategories = [];
+          checkboxes.forEach(chk => {
+            chk.checked = isChecked;
+            if (isChecked) {
+              selectedSubcategories.push(chk.value);
+            }
+          });
+          updateSubcategoryState();
+          applyFilters();
+        });
+      }
+
       // Event listener para borrar búsqueda
       const btnClearSearch = document.getElementById('btn-clear-search');
       if (btnClearSearch) {
@@ -90,6 +197,12 @@ document.addEventListener('DOMContentLoaded', () => {
           if (sucursalSelect) sucursalSelect.value = '';
           if (localidadSelect) localidadSelect.value = '';
           if (estadoSelect) estadoSelect.value = '';
+          
+          // Limpiar filtros de multiselección
+          selectedCategories = [];
+          selectedSubcategories = [];
+          populateCategoryFilters();
+          
           applyFilters();
         });
       }
@@ -139,6 +252,180 @@ document.addEventListener('DOMContentLoaded', () => {
       (item.placa && item.placa !== '') || 
       (item.cod_categoria && String(item.cod_categoria).startsWith('4'))
     );
+  }
+
+  // Rellenar dinámicamente las categorías basadas en el módulo seleccionado
+  function populateCategoryFilters() {
+    if (!optionsContainerCategoria) return;
+    optionsContainerCategoria.innerHTML = '';
+    
+    let dataset = [];
+    if (currentTab === 'activos') {
+      dataset = assets;
+    } else if (currentTab === 'vehiculos') {
+      dataset = getVehicles();
+    } else if (currentTab === 'inventario') {
+      dataset = inventario;
+    } else {
+      updateCategoryState();
+      populateSubcategoryFilters();
+      return;
+    }
+    
+    const uniqueCategories = [...new Set(dataset.map(item => item.categoria).filter(Boolean))].sort();
+    
+    uniqueCategories.forEach(cat => {
+      const label = document.createElement('label');
+      label.className = 'flex items-center gap-2 p-1.5 hover:bg-slate-50 rounded-lg cursor-pointer text-xs text-slate-700';
+      
+      const chk = document.createElement('input');
+      chk.type = 'checkbox';
+      chk.value = cat;
+      chk.className = 'chk-cat-option rounded border-slate-300 text-brand-500 focus:ring-brand-500 cursor-pointer';
+      
+      if (selectedCategories.includes(cat)) {
+        chk.checked = true;
+      }
+      
+      chk.addEventListener('change', () => {
+        if (chk.checked) {
+          if (!selectedCategories.includes(cat)) selectedCategories.push(cat);
+        } else {
+          selectedCategories = selectedCategories.filter(c => c !== cat);
+        }
+        updateCategoryState();
+        populateSubcategoryFilters();
+        applyFilters();
+      });
+      
+      label.appendChild(chk);
+      const span = document.createElement('span');
+      span.textContent = cat;
+      label.appendChild(span);
+      
+      optionsContainerCategoria.appendChild(label);
+    });
+    
+    updateCategoryState();
+    populateSubcategoryFilters();
+  }
+
+  function updateCategoryState() {
+    if (!optionsContainerCategoria || !labelSelectCategoria || !chkAllCategoria) return;
+    const checkboxes = optionsContainerCategoria.querySelectorAll('.chk-cat-option');
+    const checkedCount = selectedCategories.length;
+    
+    if (checkboxes.length === 0) {
+      labelSelectCategoria.textContent = 'Sin Categorías';
+      chkAllCategoria.checked = false;
+      chkAllCategoria.disabled = true;
+      return;
+    }
+    
+    chkAllCategoria.disabled = false;
+    if (checkedCount === 0) {
+      labelSelectCategoria.textContent = 'Todas las Categorías';
+      chkAllCategoria.checked = false;
+      chkAllCategoria.indeterminate = false;
+    } else if (checkedCount === checkboxes.length) {
+      labelSelectCategoria.textContent = 'Todas las Categorías';
+      chkAllCategoria.checked = true;
+      chkAllCategoria.indeterminate = false;
+    } else {
+      labelSelectCategoria.textContent = checkedCount === 1 ? `${selectedCategories[0]}` : `${checkedCount} Categorías`;
+      chkAllCategoria.checked = false;
+      chkAllCategoria.indeterminate = true;
+    }
+  }
+
+  // Rellenar dinámicamente las subcategorías dependientes de la categoría seleccionada
+  function populateSubcategoryFilters() {
+    if (!optionsContainerSubcategoria) return;
+    optionsContainerSubcategoria.innerHTML = '';
+    
+    let dataset = [];
+    if (currentTab === 'activos') {
+      dataset = assets;
+    } else if (currentTab === 'vehiculos') {
+      dataset = getVehicles();
+    } else if (currentTab === 'inventario') {
+      dataset = inventario;
+    } else {
+      updateSubcategoryState();
+      return;
+    }
+    
+    // Filtrar dataset por categorías seleccionadas si las hay
+    let filteredDataset = dataset;
+    if (selectedCategories.length > 0) {
+      filteredDataset = dataset.filter(item => selectedCategories.includes(item.categoria));
+    }
+    
+    const uniqueSubcategories = [...new Set(filteredDataset.map(item => item.subcategoria).filter(Boolean))].sort();
+    
+    // Limpiar subcategorías que ya no son válidas
+    selectedSubcategories = selectedSubcategories.filter(sub => uniqueSubcategories.includes(sub));
+    
+    uniqueSubcategories.forEach(sub => {
+      const label = document.createElement('label');
+      label.className = 'flex items-center gap-2 p-1.5 hover:bg-slate-50 rounded-lg cursor-pointer text-xs text-slate-700';
+      
+      const chk = document.createElement('input');
+      chk.type = 'checkbox';
+      chk.value = sub;
+      chk.className = 'chk-subcat-option rounded border-slate-300 text-brand-500 focus:ring-brand-500 cursor-pointer';
+      
+      if (selectedSubcategories.includes(sub)) {
+        chk.checked = true;
+      }
+      
+      chk.addEventListener('change', () => {
+        if (chk.checked) {
+          if (!selectedSubcategories.includes(sub)) selectedSubcategories.push(sub);
+        } else {
+          selectedSubcategories = selectedSubcategories.filter(s => s !== sub);
+        }
+        updateSubcategoryState();
+        applyFilters();
+      });
+      
+      label.appendChild(chk);
+      const span = document.createElement('span');
+      span.textContent = sub;
+      label.appendChild(span);
+      
+      optionsContainerSubcategoria.appendChild(label);
+    });
+    
+    updateSubcategoryState();
+  }
+
+  function updateSubcategoryState() {
+    if (!optionsContainerSubcategoria || !labelSelectSubcategoria || !chkAllSubcategoria) return;
+    const checkboxes = optionsContainerSubcategoria.querySelectorAll('.chk-subcat-option');
+    const checkedCount = selectedSubcategories.length;
+    
+    if (checkboxes.length === 0) {
+      labelSelectSubcategoria.textContent = 'Sin Subcategorías';
+      chkAllSubcategoria.checked = false;
+      chkAllSubcategoria.disabled = true;
+      return;
+    }
+    
+    chkAllSubcategoria.disabled = false;
+    if (checkedCount === 0) {
+      labelSelectSubcategoria.textContent = 'Todas las Subcategorías';
+      chkAllSubcategoria.checked = false;
+      chkAllSubcategoria.indeterminate = false;
+    } else if (checkedCount === checkboxes.length) {
+      labelSelectSubcategoria.textContent = 'Todas las Subcategorías';
+      chkAllSubcategoria.checked = true;
+      chkAllSubcategoria.indeterminate = false;
+    } else {
+      labelSelectSubcategoria.textContent = checkedCount === 1 ? `${selectedSubcategories[0]}` : `${checkedCount} Subcategorías`;
+      chkAllSubcategoria.checked = false;
+      chkAllSubcategoria.indeterminate = true;
+    }
   }
 
   // Rellenar dinámicamente las sucursales y estados basados en el módulo seleccionado
@@ -217,6 +504,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       estadoSelect.appendChild(option);
     });
+
+    // Poblar filtros de categorías multiselección
+    populateCategoryFilters();
   }
 
   // Inicialización de pestañas
@@ -230,6 +520,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function switchTab(newTab) {
       currentTab = newTab;
+      
+      // Resetear filtros de categoría y subcategoría al cambiar de pestaña
+      selectedCategories = [];
+      selectedSubcategories = [];
       
       // Resetear clases de pestañas
       [tabActivos, tabVehiculos, tabCelulares, tabInventario, tabTerceros].forEach(btn => {
@@ -269,6 +563,24 @@ document.addEventListener('DOMContentLoaded', () => {
       if (localidadWrapper) {
         localidadWrapper.classList.remove('hidden');
       }
+
+      // Mostrar/Ocultar el filtro de Categoría y Subcategoría (sólo si aplica)
+      const categoriaWrapper = document.getElementById('categoria-filter-wrapper');
+      const subcategoriaWrapper = document.getElementById('subcategoria-filter-wrapper');
+      const hasCategories = currentTab === 'activos' || currentTab === 'vehiculos' || currentTab === 'inventario';
+      if (hasCategories) {
+        if (categoriaWrapper) categoriaWrapper.classList.remove('hidden');
+        if (subcategoriaWrapper) subcategoriaWrapper.classList.remove('hidden');
+      } else {
+        if (categoriaWrapper) categoriaWrapper.classList.add('hidden');
+        if (subcategoriaWrapper) subcategoriaWrapper.classList.add('hidden');
+      }
+
+      // Cerrar paneles desplegables de categorías y resetear rotaciones
+      if (dropdownCategoria) dropdownCategoria.classList.add('hidden');
+      if (dropdownSubcategoria) dropdownSubcategoria.classList.add('hidden');
+      if (iconCategoria) iconCategoria.style.transform = 'rotate(0deg)';
+      if (iconSubcategoria) iconSubcategoria.style.transform = 'rotate(0deg)';
 
       // Re-poblar filtros y aplicar
       populateFilters();
@@ -317,7 +629,9 @@ document.addEventListener('DOMContentLoaded', () => {
         searchInput.value.trim() !== '' || 
         (selectedSucursal && selectedSucursal !== '') || 
         (selectedLocalidad && selectedLocalidad !== '') || 
-        (selectedEstado && selectedEstado !== '');
+        (selectedEstado && selectedEstado !== '') ||
+        selectedCategories.length > 0 ||
+        selectedSubcategories.length > 0;
       if (hasActiveFilters) {
         btnClearFilters.classList.remove('hidden');
       } else {
@@ -349,6 +663,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const estadoMatch = !selectedEstado || 
         (currentTab === 'celulares' ? item.estado === selectedEstado : 
          ((currentTab === 'inventario' || currentTab === 'terceros') ? item.tipo === selectedEstado : item.estado_activo === selectedEstado));
+
+      // Filtro de Categoría y Subcategoría (si aplica)
+      const hasCategories = currentTab === 'activos' || currentTab === 'vehiculos' || currentTab === 'inventario';
+      const categoriaMatch = !hasCategories || selectedCategories.length === 0 || selectedCategories.includes(item.categoria);
+      const subcategoriaMatch = !hasCategories || selectedSubcategories.length === 0 || selectedSubcategories.includes(item.subcategoria);
 
       // Filtro de Búsqueda de Texto
       let textMatch = true;
@@ -400,7 +719,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      return sucursalMatch && localidadMatch && estadoMatch && textMatch;
+      return sucursalMatch && localidadMatch && estadoMatch && categoriaMatch && subcategoriaMatch && textMatch;
     });
 
     renderData(filtered);

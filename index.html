@@ -181,7 +181,7 @@
         </button>
       </div>
 
-      <div id="filters-content" class="hidden md:flex bg-white border border-slate-200/85 rounded-xl p-3.5 shadow-sm flex-col md:flex-row gap-3 items-stretch md:items-end">
+      <div id="filters-content" class="hidden md:flex bg-white border border-slate-200/85 rounded-xl p-3.5 shadow-sm flex-col md:flex-row md:flex-wrap gap-3 items-stretch md:items-end">
         <!-- Buscador -->
         <div id="search-filter-wrapper" class="w-full md:flex-1">
           <label for="search" class="block text-[0.75rem] font-semibold text-slate-500 mb-1">Buscador inteligente</label>
@@ -223,6 +223,64 @@
           >
             <option value="">Todas las Localidades</option>
           </select>
+        </div>
+
+        <!-- Categoría (Multiselección) -->
+        <div id="categoria-filter-wrapper" class="w-full md:w-64 relative">
+          <label class="block text-[0.75rem] font-semibold text-slate-500 mb-1">Categoría</label>
+          <div class="relative">
+            <button 
+              type="button" 
+              id="btn-select-categoria" 
+              class="control-field w-full px-3 py-2 text-[0.875rem] bg-slate-50/80 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-slate-700 font-medium min-h-[2.5rem] flex items-center justify-between text-left cursor-pointer"
+            >
+              <span id="label-select-categoria" class="truncate">Todas las Categorías</span>
+              <svg class="w-4 h-4 text-slate-400 shrink-0 ml-1.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="icon-categoria">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            <div 
+              id="dropdown-categoria" 
+              class="hidden absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-50 p-2"
+            >
+              <label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 rounded-lg cursor-pointer text-xs font-semibold text-slate-700 border-b border-slate-100 mb-1">
+                <input type="checkbox" id="chk-all-categoria" class="rounded border-slate-300 text-brand-500 focus:ring-brand-500 cursor-pointer">
+                <span>Seleccionar Todas</span>
+              </label>
+              <div id="options-container-categoria" class="flex flex-col gap-0.5 max-h-48 overflow-y-auto">
+                <!-- Se inyectará vía JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subcategoría (Multiselección) -->
+        <div id="subcategoria-filter-wrapper" class="w-full md:w-64 relative">
+          <label class="block text-[0.75rem] font-semibold text-slate-500 mb-1">Subcategoría</label>
+          <div class="relative">
+            <button 
+              type="button" 
+              id="btn-select-subcategoria" 
+              class="control-field w-full px-3 py-2 text-[0.875rem] bg-slate-50/80 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-slate-700 font-medium min-h-[2.5rem] flex items-center justify-between text-left cursor-pointer"
+            >
+              <span id="label-select-subcategoria" class="truncate">Todas las Subcategorías</span>
+              <svg class="w-4 h-4 text-slate-400 shrink-0 ml-1.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="icon-subcategoria">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            <div 
+              id="dropdown-subcategoria" 
+              class="hidden absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-50 p-2"
+            >
+              <label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 rounded-lg cursor-pointer text-xs font-semibold text-slate-700 border-b border-slate-100 mb-1">
+                <input type="checkbox" id="chk-all-subcategoria" class="rounded border-slate-300 text-brand-500 focus:ring-brand-500 cursor-pointer">
+                <span>Seleccionar Todas</span>
+              </label>
+              <div id="options-container-subcategoria" class="flex flex-col gap-0.5 max-h-48 overflow-y-auto">
+                <!-- Se inyectará vía JS -->
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Estado -->
