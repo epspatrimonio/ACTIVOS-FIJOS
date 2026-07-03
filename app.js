@@ -89,7 +89,9 @@ document.addEventListener('DOMContentLoaded', () => {
       // Adjuntar event listeners
       searchInput.addEventListener('input', applyFilters);
       sucursalSelect.addEventListener('change', applyFilters);
-      localidadSelect.addEventListener('change', applyFilters);
+      if (localidadSelect) {
+        localidadSelect.addEventListener('change', applyFilters);
+      }
       estadoSelect.addEventListener('change', applyFilters);
 
       // Event listeners para los dropdowns de categorías y subcategorías
@@ -431,7 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Rellenar dinámicamente las sucursales y estados basados en el módulo seleccionado
   function populateFilters() {
     const previousSucursal = sucursalSelect.value;
-    const previousLocalidad = localidadSelect.value;
+    const previousLocalidad = localidadSelect ? localidadSelect.value : '';
     const previousEstado = estadoSelect.value;
     
     // Cambiar la etiqueta del filtro de Estado/Tipo dinámicamente
@@ -443,7 +445,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Limpiar opciones manteniendo la primera por defecto
     sucursalSelect.innerHTML = '<option value="">Todas las Sucursales</option>';
-    localidadSelect.innerHTML = '<option value="">Todas las Localidades</option>';
+    if (localidadSelect) {
+      localidadSelect.innerHTML = '<option value="">Todas las Localidades</option>';
+    }
     estadoSelect.innerHTML = `<option value="">Todos los ${isTipo ? 'Tipos' : 'Estados'}</option>`;
     
     let dataset = [];
@@ -483,16 +487,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Poblar Localidades
-    const localidades = [...new Set(dataset.map(item => item.localidad).filter(Boolean))];
-    localidades.sort().forEach(loc => {
-      const option = document.createElement('option');
-      option.value = loc;
-      option.textContent = loc;
-      if (loc === previousLocalidad) {
-        option.selected = true;
-      }
-      localidadSelect.appendChild(option);
-    });
+    if (localidadSelect) {
+      const localidades = [...new Set(dataset.map(item => item.localidad).filter(Boolean))];
+      localidades.sort().forEach(loc => {
+        const option = document.createElement('option');
+        option.value = loc;
+        option.textContent = loc;
+        if (loc === previousLocalidad) {
+          option.selected = true;
+        }
+        localidadSelect.appendChild(option);
+      });
+    }
     
     // Poblar Estados
     stateOptions.forEach(est => {
@@ -1517,7 +1523,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function getRevTecBadgeHTML(estado, vencimiento, dias) {
     if (!vencimiento) {
-      return '<span class="text-xs text-slate-400 italic">No requiere / Opcional</span>';
+      return '<span class="text-xs text-slate-400 italic">No registrado</span>';
     }
     const styles = {
       VIGENTE: 'bg-emerald-50 text-emerald-700 border-emerald-200',
@@ -1791,43 +1797,6 @@ document.addEventListener('DOMContentLoaded', () => {
         author: 'EPS Selva Central'
       });
 
-      // 1. Agregar Imagen de Logo (Superior Izquierda)
-      if (logoImg) {
-        doc.addImage(logoImg, 'PNG', 14, 8, 48, 14);
-      }
-
-      // 2. Fecha (Superior Derecha)
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(8);
-      doc.setTextColor(100, 116, 139);
-      const today = new Date().toLocaleDateString('es-PE');
-      doc.text(`Fecha de Reporte: ${today}`, 283, 12, { align: 'right' });
-
-      // 3. Título Centrado
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(16);
-      doc.setTextColor(0, 110, 180); // Azul formal
-      doc.text("CONTROL PATRIMONIAL", 148.5, 14, { align: 'center' });
-
-      // Subtítulo Centrado
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(11);
-      doc.setTextColor(71, 85, 105);
-      let subtitle = "";
-      if (currentTab === 'activos') subtitle = "Inventario de Activos Fijos";
-      else if (currentTab === 'vehiculos') subtitle = "Inventario de Vehículos";
-      else if (currentTab === 'celulares') subtitle = "Inventario de Celulares";
-      else if (currentTab === 'inventario') subtitle = "Inventario Físico (Faltantes / Sobrantes)";
-      else if (currentTab === 'terceros') subtitle = "Bienes de Terceros (Terceros / Control)";
-      doc.text(subtitle, 148.5, 20, { align: 'center' });
-
-      // Sucursal / Filtro Centrado
-      doc.setFont("helvetica", "italic");
-      doc.setFontSize(9);
-      doc.setTextColor(148, 163, 184);
-      const selectedSucursal = sucursalSelect.value || "Todas las Sucursales";
-      doc.text(`Filtro: ${selectedSucursal}`, 148.5, 25, { align: 'center' });
-
       // Configurar columnas según la pestaña
       let headers = [];
       let data = [];
@@ -1898,7 +1867,7 @@ document.addEventListener('DOMContentLoaded', () => {
           `Motor: ${item.nro_motor || '—'}\nChasis: ${item.nro_chasis || '—'}\nCombustible: ${item.combustible || '—'}`,
           item.estado_activo || '—',
           item.soat_estado ? `${item.soat_estado}\nPol: ${item.soat_poliza || '—'}\nVence: ${item.soat_vencimiento ? formatDate(item.soat_vencimiento) : '—'}` : 'No Registrado',
-          item.vencimiento_rev_tec ? `${item.estado_rev_tec}\nVence: ${formatDate(item.vencimiento_rev_tec)}` : 'No Requiere',
+          item.vencimiento_rev_tec ? `${item.estado_rev_tec}\nVence: ${formatDate(item.vencimiento_rev_tec)}` : 'No registrado',
           item.responsable || "Sin Asignar"
         ]);
         columnStyles = {
@@ -2035,38 +2004,80 @@ document.addEventListener('DOMContentLoaded', () => {
         styles: { fontSize: 7.5, cellPadding: 2.5, valign: 'middle' },
         headStyles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold' },
         columnStyles: columnStyles,
-        margin: { bottom: 33 } // Asegura más espacio útil en cada página (el contenido puede llegar hasta Y=177)
+        margin: { top: 30, bottom: 36 } // Asegura espacio superior e inferior en todas las páginas
       });
 
-      // Posición fija Y del pie de página de firmas en la última hoja (ajustado lo más abajo posible)
-      const signatureBlockY = 198;
-      const safeTableMaxY = 158; // Deja al menos 18mm arriba del sello (que empieza en Y = 176)
-
-      // Si la tabla termina más abajo de la zona segura de firmas, agregamos página
-      if (doc.previousAutoTable.finalY > safeTableMaxY) {
-        doc.addPage();
-      }
-
-      // 4. Firma y Sello Punteados (Parte Inferior Izquierda, posición fija)
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(8.5);
-      doc.setTextColor(30, 41, 59);
-      doc.text("----------------------------------------------------------------", 20, signatureBlockY);
-      doc.text("Firma y Sello (Huella Digital)", 32, signatureBlockY + 4);
-
-      // 5. Sello Post Firma CP1 (Parte Inferior Derecha, posición fija - desplazado a X=190 para no colisionar con nro de página)
-      if (selloImg) {
-        doc.addImage(selloImg, 'PNG', 190, signatureBlockY - 22, 56, 26);
-      }
-
-      // 6. Agregar Números de Página en el pie de página (Página X de Y)
+      // Dibujar Encabezado y Pie de página en cada hoja
       const totalPages = doc.internal.getNumberOfPages();
+      const today = new Date().toLocaleDateString('es-PE');
+      const selectedSucursal = sucursalSelect.value || "Todas las Sucursales";
+      
+      let subtitle = "";
+      if (currentTab === 'activos') subtitle = "Inventario de Activos Fijos";
+      else if (currentTab === 'vehiculos') subtitle = "Inventario de Vehículos";
+      else if (currentTab === 'celulares') subtitle = "Inventario de Celulares";
+      else if (currentTab === 'inventario') subtitle = "Inventario Físico (Faltantes / Sobrantes)";
+      else if (currentTab === 'terceros') subtitle = "Bienes de Terceros (Terceros / Control)";
+
+      const signatureBlockY = 198;
+
       for (let i = 1; i <= totalPages; i++) {
         doc.setPage(i);
+
+        // --- ENCABEZADO ---
+        // 1. Agregar Imagen de Logo (Superior Izquierda)
+        if (logoImg) {
+          doc.addImage(logoImg, 'PNG', 14, 8, 48, 14);
+        }
+
+        // 2. Fecha (Superior Derecha)
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8);
+        doc.setTextColor(100, 116, 139);
+        doc.text(`Fecha de Reporte: ${today}`, 283, 12, { align: 'right' });
+
+        // 3. Título Centrado
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(16);
+        doc.setTextColor(0, 110, 180); // Azul formal
+        doc.text("CONTROL PATRIMONIAL", 148.5, 14, { align: 'center' });
+
+        // Subtítulo Centrado
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.setTextColor(71, 85, 105);
+        doc.text(subtitle, 148.5, 20, { align: 'center' });
+
+        // Sucursal / Filtro Centrado
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(9);
+        doc.setTextColor(148, 163, 184);
+        doc.text(`Filtro: ${selectedSucursal}`, 148.5, 25, { align: 'center' });
+
+        // --- PIE DE PÁGINA ---
+        // 4. Mensaje de advertencia de firmas en la parte izquierda
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(7.5);
+        doc.setTextColor(225, 29, 72); // Color rojo/rosa formal (rose-600)
+        doc.text("Nota: El documento sin firmas carece de valor.", 14, signatureBlockY + 4);
+
+        // 5. Firma y Sello Punteados (Posición Centrada-Izquierda)
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8.5);
+        doc.setTextColor(30, 41, 59);
+        doc.text("----------------------------------------------------------------", 110, signatureBlockY);
+        doc.text("Firma y Sello (Huella Digital)", 122, signatureBlockY + 4);
+
+        // 6. Sello Post Firma CP1 (Parte Inferior Derecha, posición fija - desplazado a X=190)
+        if (selloImg) {
+          doc.addImage(selloImg, 'PNG', 190, signatureBlockY - 22, 56, 26);
+        }
+
+        // 7. Número de Página (Página X de Y)
         doc.setFont("helvetica", "normal");
         doc.setFontSize(7.5);
         doc.setTextColor(148, 163, 184);
-        doc.text(`Página ${i} de ${totalPages}`, 283, 203, { align: 'right' });
+        doc.text(`Página ${i} de ${totalPages}`, 283, signatureBlockY + 4, { align: 'right' });
       }
 
       // Guardar PDF
