@@ -4459,9 +4459,9 @@
     "estado_rev_tec": null,
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
-    "soat_vencimiento": "2026-05-13",
-    "soat_dias_vigencia": -51,
-    "soat_estado": "VENCIDO"
+    "soat_vencimiento": "2027-06-17",
+    "soat_dias_vigencia": 349,
+    "soat_estado": "VIGENTE"
   },
   {
     "cod_patrimonial": "410024004",
