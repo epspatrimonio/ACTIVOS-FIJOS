@@ -410,14 +410,16 @@ export default function SoatModule() {
           estado_rev_tec: detail.estado_rev_tec || null,
           fecha_alta_factura: asset.fecha_alta_factura || '',
           fecha_registro_contable: asset.fecha_registro_contable || '',
+          estado_activo: asset.estado_activo || '',
         };
-      });
+      }).filter(r => r.estado_activo !== 'PARA BAJA' && r.estado_activo !== 'BAJA');
 
       setRegistros(combined);
       
       const baseVehicles = activosList.filter(
-        a => (a.categoria && a.categoria.toLowerCase().startsWith('vehiculo')) ||
-             (a.cod_categoria && String(a.cod_categoria).startsWith('4'))
+        a => ((a.categoria && a.categoria.toLowerCase().startsWith('vehiculo')) ||
+             (a.cod_categoria && String(a.cod_categoria).startsWith('4'))) &&
+             a.estado_activo !== 'PARA BAJA' && a.estado_activo !== 'BAJA'
       );
       setVehicles(baseVehicles);
     }

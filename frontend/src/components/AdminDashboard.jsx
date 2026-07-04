@@ -399,7 +399,7 @@ export default function AdminDashboard() {
     }
 
     if (subTab === 'SOAT') {
-      const vh = getVehicles();
+      const vh = getVehicles().filter(v => v.estado_activo !== 'PARA BAJA' && v.estado_activo !== 'BAJA');
 
       // 1. Estado de SOAT (Doughnut)
       const soatVigente = vh.filter(v => v.soat_estado === 'VIGENTE').length;
@@ -498,8 +498,8 @@ export default function AdminDashboard() {
   const totNetValue = totLibros - totDepreciado;
 
   // Alerts lists for SOAT / RT
-  const alertSoat = getVehicles().filter(v => v.soat_estado === 'VENCIDO' || v.soat_estado === 'POR_VENCER');
-  const alertRt = getVehicles().filter(v => v.vencimiento_rev_tec && (v.estado_rev_tec === 'VENCIDO' || v.estado_rev_tec === 'POR_VENCER'));
+  const alertSoat = getVehicles().filter(v => v.estado_activo !== 'PARA BAJA' && v.estado_activo !== 'BAJA').filter(v => v.soat_estado === 'VENCIDO' || v.soat_estado === 'POR_VENCER');
+  const alertRt = getVehicles().filter(v => v.estado_activo !== 'PARA BAJA' && v.estado_activo !== 'BAJA').filter(v => v.vencimiento_rev_tec && (v.estado_rev_tec === 'VENCIDO' || v.estado_rev_tec === 'POR_VENCER'));
 
   return (
     <div className="w-full flex-1 flex flex-col min-h-0 space-y-4">
@@ -805,7 +805,7 @@ export default function AdminDashboard() {
                 <span className="p-1 rounded-lg bg-emerald-50 text-emerald-600 text-xs">Ok</span>
               </div>
               <p className="text-3xl font-extrabold text-emerald-600 tracking-tight">
-                {getVehicles().filter(v => v.soat_estado === 'VIGENTE' && (!v.vencimiento_rev_tec || v.estado_rev_tec === 'VIGENTE')).length}
+                {getVehicles().filter(v => v.estado_activo !== 'PARA BAJA' && v.estado_activo !== 'BAJA').filter(v => v.soat_estado === 'VIGENTE' && (!v.vencimiento_rev_tec || v.estado_rev_tec === 'VIGENTE')).length}
               </p>
               <span className="text-[11px] text-slate-400 font-semibold block mt-1">Vehículos con todo al día</span>
             </div>
