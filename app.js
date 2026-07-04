@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let celulares = [];
   let inventario = [];
   let terceros = [];
-  let currentTab = 'activos'; // activos | vehiculos | celulares | inventario | terceros
+  let currentTab = 'activos'; // activos | vehiculos | celulares | inventario | terceros | soat
   let currentFilteredData = [];
   
   // Estado de Filtros de Categoría y Subcategoría (Multiselección)
@@ -266,6 +266,8 @@ document.addEventListener('DOMContentLoaded', () => {
       dataset = assets;
     } else if (currentTab === 'vehiculos') {
       dataset = getVehicles();
+    } else if (currentTab === 'soat') {
+      dataset = getVehicles().filter(item => item.estado_activo !== 'PARA BAJA' && item.estado_activo !== 'BAJA');
     } else if (currentTab === 'inventario') {
       dataset = inventario;
     } else {
@@ -350,6 +352,8 @@ document.addEventListener('DOMContentLoaded', () => {
       dataset = assets;
     } else if (currentTab === 'vehiculos') {
       dataset = getVehicles();
+    } else if (currentTab === 'soat') {
+      dataset = getVehicles().filter(item => item.estado_activo !== 'PARA BAJA' && item.estado_activo !== 'BAJA');
     } else if (currentTab === 'inventario') {
       dataset = inventario;
     } else {
@@ -519,6 +523,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function initTabs() {
     const tabActivos = document.getElementById('tab-activos');
     const tabVehiculos = document.getElementById('tab-vehiculos');
+    const tabSoat = document.getElementById('tab-soat');
     const tabCelulares = document.getElementById('tab-celulares');
     const tabInventario = document.getElementById('tab-inventario');
     const tabTerceros = document.getElementById('tab-terceros');
@@ -532,7 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
       selectedSubcategories = [];
       
       // Resetear clases de pestañas
-      [tabActivos, tabVehiculos, tabCelulares, tabInventario, tabTerceros].forEach(btn => {
+      [tabActivos, tabVehiculos, tabSoat, tabCelulares, tabInventario, tabTerceros].forEach(btn => {
         if (btn) {
           btn.className = "flex-none sm:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 bg-transparent text-slate-600 hover:bg-white hover:text-slate-900 whitespace-nowrap";
         }
@@ -545,6 +550,9 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (currentTab === 'vehiculos') {
         activeBtn = tabVehiculos;
         moduleTitle.textContent = 'Control Patrimonial de Vehículos';
+      } else if (currentTab === 'soat') {
+        activeBtn = tabSoat;
+        moduleTitle.textContent = 'Monitoreo de SOAT y Revisión Técnica';
       } else if (currentTab === 'celulares') {
         activeBtn = tabCelulares;
         moduleTitle.textContent = 'Control de Celulares y Líneas';
@@ -573,7 +581,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Mostrar/Ocultar el filtro de Categoría y Subcategoría (sólo si aplica)
       const categoriaWrapper = document.getElementById('categoria-filter-wrapper');
       const subcategoriaWrapper = document.getElementById('subcategoria-filter-wrapper');
-      const hasCategories = currentTab === 'activos' || currentTab === 'vehiculos' || currentTab === 'inventario';
+      const hasCategories = currentTab === 'activos' || currentTab === 'vehiculos' || currentTab === 'inventario' || currentTab === 'soat';
       if (hasCategories) {
         if (categoriaWrapper) categoriaWrapper.classList.remove('hidden');
         if (subcategoriaWrapper) subcategoriaWrapper.classList.remove('hidden');
@@ -606,6 +614,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (tabActivos) tabActivos.addEventListener('click', () => switchTab('activos'));
     if (tabVehiculos) tabVehiculos.addEventListener('click', () => switchTab('vehiculos'));
+    if (tabSoat) tabSoat.addEventListener('click', () => switchTab('soat'));
     if (tabCelulares) tabCelulares.addEventListener('click', () => switchTab('celulares'));
     if (tabInventario) tabInventario.addEventListener('click', () => switchTab('inventario'));
     if (tabTerceros) tabTerceros.addEventListener('click', () => switchTab('terceros'));
@@ -650,6 +659,8 @@ document.addEventListener('DOMContentLoaded', () => {
       baseData = assets;
     } else if (currentTab === 'vehiculos') {
       baseData = getVehicles();
+    } else if (currentTab === 'soat') {
+      baseData = getVehicles().filter(item => item.estado_activo !== 'PARA BAJA' && item.estado_activo !== 'BAJA');
     } else if (currentTab === 'celulares') {
       baseData = celulares;
     } else if (currentTab === 'inventario') {
@@ -671,7 +682,7 @@ document.addEventListener('DOMContentLoaded', () => {
          ((currentTab === 'inventario' || currentTab === 'terceros') ? item.tipo === selectedEstado : item.estado_activo === selectedEstado));
 
       // Filtro de Categoría y Subcategoría (si aplica)
-      const hasCategories = currentTab === 'activos' || currentTab === 'vehiculos' || currentTab === 'inventario';
+      const hasCategories = currentTab === 'activos' || currentTab === 'vehiculos' || currentTab === 'inventario' || currentTab === 'soat';
       const categoriaMatch = !hasCategories || selectedCategories.length === 0 || selectedCategories.includes(item.categoria);
       const subcategoriaMatch = !hasCategories || selectedSubcategories.length === 0 || selectedSubcategories.includes(item.subcategoria);
 
@@ -686,7 +697,7 @@ document.addEventListener('DOMContentLoaded', () => {
             (item.imei && item.imei.toLowerCase().includes(query)) ||
             (item.numero_linea && item.numero_linea.toLowerCase().includes(query)) ||
             (item.responsable && item.responsable.toLowerCase().includes(query));
-        } else if (currentTab === 'vehiculos') {
+        } else if (currentTab === 'vehiculos' || currentTab === 'soat') {
           textMatch = 
             (item.cod_patrimonial && item.cod_patrimonial.toLowerCase().includes(query)) ||
             (item.placa && item.placa.toLowerCase().includes(query)) ||
@@ -739,6 +750,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Limpiar todas las tablas y contenedor de tarjetas móviles
     document.getElementById('assets-tbody').innerHTML = '';
     document.getElementById('vehiculos-tbody').innerHTML = '';
+    if (document.getElementById('soat-tbody')) document.getElementById('soat-tbody').innerHTML = '';
     document.getElementById('celulares-tbody').innerHTML = '';
     document.getElementById('inventario-tbody').innerHTML = '';
     document.getElementById('terceros-tbody').innerHTML = '';
@@ -748,6 +760,7 @@ document.addEventListener('DOMContentLoaded', () => {
       emptyState.classList.remove('hidden');
       document.getElementById('assets-table-container').classList.add('hidden');
       document.getElementById('vehiculos-table-container').classList.add('hidden');
+      if (document.getElementById('soat-table-container')) document.getElementById('soat-table-container').classList.add('hidden');
       document.getElementById('celulares-table-container').classList.add('hidden');
       document.getElementById('inventario-table-container').classList.add('hidden');
       document.getElementById('terceros-table-container').classList.add('hidden');
@@ -761,6 +774,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.innerWidth >= 768) {
       document.getElementById('assets-table-container').classList.add('hidden');
       document.getElementById('vehiculos-table-container').classList.add('hidden');
+      if (document.getElementById('soat-table-container')) document.getElementById('soat-table-container').classList.add('hidden');
       document.getElementById('celulares-table-container').classList.add('hidden');
       document.getElementById('inventario-table-container').classList.add('hidden');
       document.getElementById('terceros-table-container').classList.add('hidden');
@@ -771,6 +785,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       document.getElementById('assets-table-container').classList.add('hidden');
       document.getElementById('vehiculos-table-container').classList.add('hidden');
+      if (document.getElementById('soat-table-container')) document.getElementById('soat-table-container').classList.add('hidden');
       document.getElementById('celulares-table-container').classList.add('hidden');
       document.getElementById('inventario-table-container').classList.add('hidden');
       document.getElementById('terceros-table-container').classList.add('hidden');
@@ -782,6 +797,8 @@ document.addEventListener('DOMContentLoaded', () => {
       renderActivosRows(data);
     } else if (currentTab === 'vehiculos') {
       renderVehiculosRows(data);
+    } else if (currentTab === 'soat') {
+      renderSoatRows(data);
     } else if (currentTab === 'celulares') {
       renderCelularesRows(data);
     } else if (currentTab === 'inventario') {
@@ -948,8 +965,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const row = document.createElement('tr');
       row.className = 'hover:bg-slate-50 text-slate-700 transition-colors border-b border-slate-150';
       
-      const soatBadge = getSoatBadgeHTML(item.soat_estado, item.soat_vencimiento, item.soat_dias_vigencia);
-      const revTecBadge = getRevTecBadgeHTML(item.estado_rev_tec, item.vencimiento_rev_tec, item.dias_vigencia_rev_tec);
+      const isBaja = item.estado_activo === 'PARA BAJA' || item.estado_activo === 'BAJA';
+      const soatBadge = isBaja ? 
+        '<span class="px-2.5 py-1 inline-flex text-[11px] leading-4 font-bold rounded-lg bg-slate-100 text-slate-400 border border-slate-200">No requiere (Baja)</span>' : 
+        getSoatBadgeHTML(item.soat_estado, item.soat_vencimiento, item.soat_dias_vigencia);
+      const revTecBadge = isBaja ? 
+        '<span class="px-2.5 py-1 inline-flex text-[11px] leading-4 font-bold rounded-lg bg-slate-100 text-slate-400 border border-slate-200">No requiere (Baja)</span>' : 
+        getRevTecBadgeHTML(item.estado_rev_tec, item.vencimiento_rev_tec, item.dias_vigencia_rev_tec);
       
       row.innerHTML = `
         <!-- Placa -->
@@ -1083,6 +1105,139 @@ document.addEventListener('DOMContentLoaded', () => {
         <div>
           <dt class="font-semibold text-slate-400">Tarjeta Prop.</dt>
           <dd class="mt-0.5 font-semibold text-slate-700">${item.nro_tarjeta_prop || '—'}</dd>
+        </div>
+      </dl>
+
+      <div class="mt-4 border-t border-slate-100 pt-3 grid grid-cols-2 gap-3">
+        <div>
+          <h4 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wide">Seguro SOAT</h4>
+          <div class="mt-1">${soatBadge}</div>
+        </div>
+        <div>
+          <h4 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wide">Rev. Técnica</h4>
+          <div class="mt-1">${revTecBadge}</div>
+        </div>
+      </div>
+
+      <div class="mt-3 border-t border-slate-100 pt-3 text-[0.8125rem]">
+        <span class="font-semibold text-slate-400">Responsable:</span> <span class="font-medium text-slate-700">${item.responsable || 'Sin asignar'}</span>
+      </div>
+    `;
+    mobileContainer.appendChild(mobileCard);
+  }
+
+  // ── Renders del Módulo: SOAT y RT ─────────────────────────────────────────
+  function renderSoatRows(data) {
+    const tbody = document.getElementById('soat-tbody');
+    data.forEach(item => {
+      const row = document.createElement('tr');
+      row.className = 'hover:bg-slate-50 text-slate-700 transition-colors border-b border-slate-150';
+      
+      const soatBadge = getSoatBadgeHTML(item.soat_estado, item.soat_vencimiento, item.soat_dias_vigencia);
+      const revTecBadge = getRevTecBadgeHTML(item.estado_rev_tec, item.vencimiento_rev_tec, item.dias_vigencia_rev_tec);
+      
+      row.innerHTML = `
+        <!-- Placa -->
+        <td class="px-5 py-4 whitespace-nowrap">
+          <span class="font-mono font-bold text-slate-900 bg-white border-2 border-slate-900 px-3 py-1 rounded text-xs tracking-wider shadow-sm">
+            ${item.placa || 'SIN PLACA'}
+          </span>
+        </td>
+        
+        <!-- Código Patrimonial -->
+        <td class="px-5 py-4 whitespace-nowrap text-[0.875rem] font-mono font-bold text-slate-800">
+          ${item.cod_patrimonial}
+        </td>
+        
+        <!-- Tipo / Subcategoria -->
+        <td class="px-5 py-4 whitespace-nowrap text-xs font-semibold text-brand-600">
+          ${item.subcategoria || 'VEHÍCULO'}
+        </td>
+        
+        <!-- Ubicación -->
+        <td class="px-5 py-4 whitespace-nowrap">
+          <div class="font-bold text-slate-800 text-[0.8125rem]">
+            ${item.sucursal || '—'}
+          </div>
+          <div class="text-[0.6875rem] text-brand-500 font-bold uppercase tracking-wide mt-0.5">
+            ${item.localidad || '—'}
+          </div>
+        </td>
+        
+        <!-- Denominación -->
+        <td class="px-5 py-4 min-w-[200px]">
+          <div class="text-[0.875rem] font-bold text-slate-800 leading-snug">
+            ${item.denominacion}
+          </div>
+          <div class="text-[0.75rem] text-slate-400 mt-1">
+            Año: ${item.vehiculo_anio || '—'} &bull; Marca: ${item.marca || '—'} &bull; Modelo: ${item.modelo || '—'}
+          </div>
+        </td>
+        
+        <!-- Estado Físico -->
+        <td class="px-5 py-4 whitespace-nowrap">
+          ${getEstadoBadgeHTML(item.estado_activo)}
+        </td>
+        
+        <!-- SOAT -->
+        <td class="px-5 py-4 whitespace-nowrap">
+          ${soatBadge}
+        </td>
+        
+        <!-- Revisión Técnica -->
+        <td class="px-5 py-4 whitespace-nowrap">
+          ${revTecBadge}
+        </td>
+        
+        <!-- Responsable -->
+        <td class="px-5 py-4 whitespace-nowrap text-[0.8125rem] font-semibold text-slate-600">
+          ${item.responsable || '—'}
+        </td>
+      `;
+      tbody.appendChild(row);
+      renderSoatMobileCard(item, soatBadge, revTecBadge);
+    });
+  }
+
+  function renderSoatMobileCard(item, soatBadge, revTecBadge) {
+    const mobileCard = document.createElement('article');
+    mobileCard.className = 'bg-white border border-slate-200 rounded-xl shadow-sm p-4';
+    mobileCard.innerHTML = `
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0 flex items-center gap-2">
+          <span class="font-mono font-bold text-slate-900 bg-slate-50 border-2 border-slate-900 px-2 py-0.5 rounded text-[10px] tracking-wider shadow-sm">
+            ${item.placa || 'SIN PLACA'}
+          </span>
+          <span class="text-[11px] font-semibold text-brand-600 uppercase tracking-wide">
+            ${item.subcategoria || 'VEHÍCULO'}
+          </span>
+        </div>
+        <div class="shrink-0">
+          ${getEstadoBadgeHTML(item.estado_activo)}
+        </div>
+      </div>
+
+      <div class="mt-3">
+        <h3 class="text-base font-bold leading-snug text-slate-900">
+          ${item.denominacion || 'Vehículo sin denominación'}
+        </h3>
+        <p class="text-[11px] text-slate-400 mt-1">
+          Código: <span class="font-mono font-bold text-slate-600">${item.cod_patrimonial}</span>
+        </p>
+      </div>
+
+      <dl class="mt-4 grid grid-cols-2 gap-x-3 gap-y-3 text-[0.8125rem]">
+        <div>
+          <dt class="font-semibold text-slate-400">Sucursal</dt>
+          <dd class="mt-0.5 font-semibold text-slate-700">${item.sucursal || '—'}</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-slate-400">Localidad</dt>
+          <dd class="mt-0.5 font-semibold text-slate-700">${item.localidad || '—'}</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-slate-400">Marca / Modelo</dt>
+          <dd class="mt-0.5 font-semibold text-slate-700">${item.marca || '—'} / ${item.modelo || '—'}</dd>
         </div>
       </dl>
 
@@ -1692,6 +1847,29 @@ document.addEventListener('DOMContentLoaded', () => {
         "Localidad": item.localidad || "",
         "Responsable": item.responsable || "Sin Asignar"
       }));
+    } else if (currentTab === 'soat') {
+      sheetName = "Monitoreo SOAT y RT";
+      exportData = currentFilteredData.map(item => ({
+        "Placa": item.placa,
+        "Código Patrimonial": item.cod_patrimonial,
+        "Tipo Vehículo": item.subcategoria || "VEHÍCULO",
+        "Marca": item.marca || "S/M",
+        "Modelo": item.modelo || "S/M",
+        "Año": item.vehiculo_anio || "",
+        "Denominación": item.denominacion,
+        "Estado Físico": item.estado_activo,
+        "SOAT Póliza": item.soat_poliza || "",
+        "SOAT Aseguradora": item.soat_compania || "",
+        "SOAT Vencimiento": item.soat_vencimiento || "",
+        "SOAT Estado": item.soat_estado || "",
+        "SOAT Días Vigencia": item.soat_dias_vigencia !== undefined ? item.soat_dias_vigencia : "",
+        "Rev. Técnica Vencimiento": item.vencimiento_rev_tec || "",
+        "Rev. Técnica Estado": item.estado_rev_tec || "",
+        "Rev. Técnica Días Vigencia": item.dias_vigencia_rev_tec !== undefined ? item.dias_vigencia_rev_tec : "",
+        "Sucursal": item.sucursal,
+        "Localidad": item.localidad || "",
+        "Responsable": item.responsable || "Sin Asignar"
+      }));
     } else if (currentTab === 'celulares') {
       sheetName = "Celulares";
       exportData = currentFilteredData.map(item => ({
@@ -1881,6 +2059,42 @@ document.addEventListener('DOMContentLoaded', () => {
           7: { cellWidth: 35 },
           8: { cellWidth: 28 },
           9: { cellWidth: 25 }
+        };
+      } else if (currentTab === 'soat') {
+        headers = [
+          [
+            "Placa",
+            "Cód. Patrimonial",
+            "Tipo / Subcat",
+            "Ubicación",
+            "Denominación",
+            "Estado",
+            "SOAT",
+            "Revisión Técnica",
+            "Responsable"
+          ]
+        ];
+        data = currentFilteredData.map(item => [
+          item.placa || '—',
+          item.cod_patrimonial || '—',
+          item.subcategoria || 'VEHÍCULO',
+          `${item.sucursal || '—'}${item.localidad ? `\n(${item.localidad})` : ''}`,
+          `${item.denominacion || ''}\nAño: ${item.vehiculo_anio || '—'}`,
+          item.estado_activo || '—',
+          item.soat_estado ? `${item.soat_estado}\nPol: ${item.soat_poliza || '—'}\nVence: ${item.soat_vencimiento ? formatDate(item.soat_vencimiento) : '—'}` : 'No Registrado',
+          item.vencimiento_rev_tec ? `${item.estado_rev_tec}\nVence: ${formatDate(item.vencimiento_rev_tec)}` : 'No registrado',
+          item.responsable || "Sin Asignar"
+        ]);
+        columnStyles = {
+          0: { cellWidth: 20 },
+          1: { cellWidth: 25 },
+          2: { cellWidth: 25 },
+          3: { cellWidth: 28 },
+          4: { cellWidth: 45 },
+          5: { cellWidth: 15 },
+          6: { cellWidth: 43 },
+          7: { cellWidth: 43 },
+          8: { cellWidth: 28 }
         };
       } else if (currentTab === 'celulares') {
         headers = [

@@ -105,6 +105,7 @@
       }
       #assets-table-container,
       #vehiculos-table-container,
+      #soat-table-container,
       #celulares-table-container,
       #inventario-table-container,
       #terceros-table-container {
@@ -306,12 +307,15 @@
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 overflow-hidden flex flex-col min-h-0">
 
     <!-- Selector de Pestañas (Tabs Switcher) -->
-    <div class="flex bg-slate-200/50 p-1.5 rounded-2xl mb-5 self-center sm:self-start shrink-0 gap-1.5 w-full max-w-3xl overflow-x-auto scrollbar-none border border-slate-200/60 shadow-sm">
+    <div class="flex bg-slate-200/50 p-1.5 rounded-2xl mb-5 self-center sm:self-start shrink-0 gap-1.5 w-full max-w-4xl overflow-x-auto scrollbar-none border border-slate-200/60 shadow-sm">
       <button id="tab-activos" class="flex-none sm:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 bg-brand-500 text-white shadow-md shadow-brand-500/15 whitespace-nowrap">
         💼 Activos Fijos
       </button>
       <button id="tab-vehiculos" class="flex-none sm:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
         🚗 Vehículos
+      </button>
+      <button id="tab-soat" class="flex-none sm:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
+        🛡️ SOAT y RT
       </button>
       <button id="tab-celulares" class="flex-none sm:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
         📱 Celulares
@@ -407,6 +411,30 @@
             </tr>
           </thead>
           <tbody id="vehiculos-tbody" class="bg-white divide-y divide-slate-100">
+            <!-- Las filas se inyectarán vía JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tabla: SOAT y RT -->
+    <div id="soat-table-container" class="hidden md:flex flex-col flex-1 min-h-0 rounded-xl shadow-sm border border-slate-200 bg-white overflow-hidden">
+      <div class="overflow-x-auto overflow-y-auto smooth-scroll w-full flex-1 min-h-0">
+        <table class="min-w-[1550px] w-full divide-y divide-slate-200 border-collapse">
+          <thead class="sticky top-0 bg-slate-50 z-20 shadow-[0_1px_0_0_rgba(226,232,240,1)]">
+            <tr>
+              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Placa</th>
+              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Cód. Patrimonial</th>
+              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Tipo / Subcat</th>
+              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Ubicación</th>
+              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Denominación / Marca / Modelo</th>
+              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Estado</th>
+              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">SOAT (Póliza / Aseguradora / Vence)</th>
+              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Rev. Técnica (Vencimiento)</th>
+              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Responsable</th>
+            </tr>
+          </thead>
+          <tbody id="soat-tbody" class="bg-white divide-y divide-slate-100">
             <!-- Las filas se inyectarán vía JavaScript -->
           </tbody>
         </table>
