@@ -84,6 +84,34 @@ document.addEventListener('DOMContentLoaded', () => {
       // Inicializar controladores de pestañas y filtros
       initTabs();
       populateFilters();
+
+      // Poblar años en reporte contable
+      const contableYearSelect = document.getElementById('contable-year-select');
+      if (contableYearSelect) {
+        contableYearSelect.innerHTML = '<option value="Todos">Todos</option>';
+        const yearsSet = new Set();
+        assets.forEach(item => {
+          const dateStr = item.fecha_alta_factura || item.fecha_registro_contable;
+          if (dateStr) {
+            const y = new Date(dateStr).getFullYear();
+            if (y && !isNaN(y)) yearsSet.add(y);
+          }
+        });
+        Array.from(yearsSet).sort((a, b) => b - a).forEach(y => {
+          const opt = document.createElement('option');
+          opt.value = y;
+          opt.textContent = y;
+          contableYearSelect.appendChild(opt);
+        });
+      }
+
+      // Event listeners para controles del reporte contable
+      const contableDigitSelect = document.getElementById('contable-digit-select');
+      const contableMonthSelect = document.getElementById('contable-month-select');
+      if (contableDigitSelect) contableDigitSelect.addEventListener('change', applyFilters);
+      if (contableYearSelect) contableYearSelect.addEventListener('change', applyFilters);
+      if (contableMonthSelect) contableMonthSelect.addEventListener('change', applyFilters);
+
       applyFilters();
       
       // Adjuntar event listeners
@@ -540,6 +568,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabCelulares = document.getElementById('tab-celulares');
     const tabInventario = document.getElementById('tab-inventario');
     const tabTerceros = document.getElementById('tab-terceros');
+    const tabContable = document.getElementById('tab-contable');
     const moduleTitle = document.getElementById('module-title');
     
     function switchTab(newTab) {
@@ -550,7 +579,7 @@ document.addEventListener('DOMContentLoaded', () => {
       selectedSubcategories = [];
       
       // Resetear clases de pestañas
-      [tabActivos, tabObras, tabVehiculos, tabSoat, tabCelulares, tabInventario, tabTerceros].forEach(btn => {
+      [tabActivos, tabObras, tabVehiculos, tabSoat, tabCelulares, tabInventario, tabTerceros, tabContable].forEach(btn => {
         if (btn) {
           btn.className = "flex-none sm:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 bg-transparent text-slate-600 hover:bg-white hover:text-slate-900 whitespace-nowrap";
         }
@@ -578,6 +607,9 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (currentTab === 'terceros') {
         activeBtn = tabTerceros;
         moduleTitle.textContent = 'Control de Bienes de Terceros y Control';
+      } else if (currentTab === 'contable') {
+        activeBtn = tabContable;
+        moduleTitle.textContent = 'Reporte Contable Agrupado';
       }
       
       if (activeBtn) {
@@ -587,18 +619,20 @@ document.addEventListener('DOMContentLoaded', () => {
       // Mostrar/Ocultar el filtro de Sucursal y Localidad
       const sucursalWrapper = document.getElementById('sucursal-filter-wrapper');
       const localidadWrapper = document.getElementById('localidad-filter-wrapper');
-      if (sucursalWrapper) {
-        sucursalWrapper.classList.remove('hidden');
-      }
-      if (localidadWrapper) {
-        localidadWrapper.classList.remove('hidden');
+      
+      if (currentTab === 'contable') {
+        if (sucursalWrapper) sucursalWrapper.classList.add('hidden');
+        if (localidadWrapper) localidadWrapper.classList.add('hidden');
+      } else {
+        if (sucursalWrapper) sucursalWrapper.classList.remove('hidden');
+        if (localidadWrapper) localidadWrapper.classList.remove('hidden');
       }
 
       // Mostrar/Ocultar el filtro de Categoría y Subcategoría (sólo si aplica)
       const categoriaWrapper = document.getElementById('categoria-filter-wrapper');
       const subcategoriaWrapper = document.getElementById('subcategoria-filter-wrapper');
       const hasCategories = currentTab === 'activos' || currentTab === 'obras' || currentTab === 'vehiculos' || currentTab === 'inventario' || currentTab === 'soat';
-      if (hasCategories) {
+      if (hasCategories && currentTab !== 'contable') {
         if (categoriaWrapper) categoriaWrapper.classList.remove('hidden');
         if (subcategoriaWrapper) subcategoriaWrapper.classList.remove('hidden');
       } else {
@@ -620,8 +654,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const excelBtn = document.getElementById('btn-export-excel');
       const pdfBtn = document.getElementById('btn-export-pdf');
 
-      searchWrapper.classList.remove('hidden');
-      estadoWrapper.classList.remove('hidden');
+      if (currentTab === 'contable') {
+        searchWrapper.classList.add('hidden');
+        estadoWrapper.classList.add('hidden');
+      } else {
+        searchWrapper.classList.remove('hidden');
+        estadoWrapper.classList.remove('hidden');
+      }
       
       resultsCount.classList.remove('hidden');
       if (excelBtn) excelBtn.classList.remove('hidden');
@@ -635,6 +674,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tabCelulares) tabCelulares.addEventListener('click', () => switchTab('celulares'));
     if (tabInventario) tabInventario.addEventListener('click', () => switchTab('inventario'));
     if (tabTerceros) tabTerceros.addEventListener('click', () => switchTab('terceros'));
+    if (tabContable) tabContable.addEventListener('click', () => switchTab('contable'));
   }
 
   // Filtrado del cliente
@@ -686,9 +726,29 @@ document.addEventListener('DOMContentLoaded', () => {
       baseData = inventario;
     } else if (currentTab === 'terceros') {
       baseData = terceros;
+    } else if (currentTab === 'contable') {
+      baseData = assets;
     }
 
     const filtered = baseData.filter(item => {
+      if (currentTab === 'contable') {
+        const contableYearSelect = document.getElementById('contable-year-select');
+        const contableMonthSelect = document.getElementById('contable-month-select');
+        const selectedYear = contableYearSelect ? contableYearSelect.value : 'Todos';
+        const selectedMonth = contableMonthSelect ? contableMonthSelect.value : 'Todos';
+        const dateStr = item.fecha_alta_factura || item.fecha_registro_contable;
+        
+        if (!dateStr && (selectedYear !== 'Todos' || selectedMonth !== 'Todos')) return false;
+        if (dateStr) {
+          const date = new Date(dateStr);
+          const y = date.getFullYear();
+          const m = date.getMonth() + 1;
+          if (selectedYear !== 'Todos' && y !== Number(selectedYear)) return false;
+          if (selectedMonth !== 'Todos' && m !== Number(selectedMonth)) return false;
+        }
+        return true;
+      }
+
       // Filtro de Sucursal
       const sucursalMatch = !selectedSucursal || item.sucursal === selectedSucursal;
 
@@ -774,17 +834,26 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('celulares-tbody').innerHTML = '';
     document.getElementById('inventario-tbody').innerHTML = '';
     document.getElementById('terceros-tbody').innerHTML = '';
+    if (document.getElementById('contable-tbody')) document.getElementById('contable-tbody').innerHTML = '';
     mobileContainer.innerHTML = '';
+
+    const allContainers = [
+      'assets-table-container',
+      'obras-table-container',
+      'vehiculos-table-container',
+      'soat-table-container',
+      'celulares-table-container',
+      'inventario-table-container',
+      'terceros-table-container',
+      'contable-table-container'
+    ];
 
     if (data.length === 0) {
       emptyState.classList.remove('hidden');
-      document.getElementById('assets-table-container').classList.add('hidden');
-      document.getElementById('obras-table-container').classList.add('hidden');
-      document.getElementById('vehiculos-table-container').classList.add('hidden');
-      if (document.getElementById('soat-table-container')) document.getElementById('soat-table-container').classList.add('hidden');
-      document.getElementById('celulares-table-container').classList.add('hidden');
-      document.getElementById('inventario-table-container').classList.add('hidden');
-      document.getElementById('terceros-table-container').classList.add('hidden');
+      allContainers.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      });
       mobileContainer.classList.add('hidden');
       return;
     }
@@ -793,25 +862,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Manejo adaptativo Desktop vs Móvil
     if (window.innerWidth >= 768) {
-      document.getElementById('assets-table-container').classList.add('hidden');
-      document.getElementById('obras-table-container').classList.add('hidden');
-      document.getElementById('vehiculos-table-container').classList.add('hidden');
-      if (document.getElementById('soat-table-container')) document.getElementById('soat-table-container').classList.add('hidden');
-      document.getElementById('celulares-table-container').classList.add('hidden');
-      document.getElementById('inventario-table-container').classList.add('hidden');
-      document.getElementById('terceros-table-container').classList.add('hidden');
+      allContainers.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      });
       
       const activeTableId = `${currentTab === 'activos' ? 'assets' : currentTab}-table-container`;
-      document.getElementById(activeTableId).classList.remove('hidden');
+      const activeEl = document.getElementById(activeTableId);
+      if (activeEl) activeEl.classList.remove('hidden');
       mobileContainer.classList.add('hidden');
     } else {
-      document.getElementById('assets-table-container').classList.add('hidden');
-      document.getElementById('obras-table-container').classList.add('hidden');
-      document.getElementById('vehiculos-table-container').classList.add('hidden');
-      if (document.getElementById('soat-table-container')) document.getElementById('soat-table-container').classList.add('hidden');
-      document.getElementById('celulares-table-container').classList.add('hidden');
-      document.getElementById('inventario-table-container').classList.add('hidden');
-      document.getElementById('terceros-table-container').classList.add('hidden');
+      allContainers.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      });
       mobileContainer.classList.remove('hidden');
     }
 
@@ -830,6 +894,8 @@ document.addEventListener('DOMContentLoaded', () => {
       renderInventarioRows(data);
     } else if (currentTab === 'terceros') {
       renderTercerosRows(data);
+    } else if (currentTab === 'contable') {
+      renderContableRows(data);
     }
   }
 
@@ -2126,6 +2192,14 @@ document.addEventListener('DOMContentLoaded', () => {
         "Observaciones": item.observaciones || "",
         "Fecha Registro": item.created_at || ""
       }));
+    } else if (currentTab === 'contable') {
+      sheetName = "Reporte_Contable";
+      exportData = currentFilteredData.map(item => ({
+        "Código PCGE": item.codigo,
+        "Descripción de la Cuenta": item.descripcion,
+        "Tipo Elemento": item.tipo,
+        "Saldo Total (S/.)": Number(item.monto.toFixed(2))
+      }));
     }
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
@@ -2455,6 +2529,27 @@ document.addEventListener('DOMContentLoaded', () => {
           7: { cellWidth: 32 },
           8: { cellWidth: 15 }
         };
+      } else if (currentTab === 'contable') {
+        headers = [
+          [
+            "Código PCGE",
+            "Descripción de la Cuenta Contable",
+            "Tipo de Elemento",
+            "Saldo Total (S/.)"
+          ]
+        ];
+        data = currentFilteredData.map(item => [
+          item.codigo,
+          item.descripcion,
+          item.tipo,
+          `S/. ${formatMoney(item.monto)}`
+        ]);
+        columnStyles = {
+          0: { cellWidth: 40 },
+          1: { cellWidth: 120 },
+          2: { cellWidth: 60 },
+          3: { cellWidth: 50, halign: 'right' }
+        };
       }
 
       // Renderizar la tabla principal
@@ -2481,6 +2576,7 @@ document.addEventListener('DOMContentLoaded', () => {
       else if (currentTab === 'celulares') subtitle = "Inventario de Celulares";
       else if (currentTab === 'inventario') subtitle = "Inventario Físico (Faltantes / Sobrantes)";
       else if (currentTab === 'terceros') subtitle = "Bienes de Terceros (Terceros / Control)";
+      else if (currentTab === 'contable') subtitle = "Reporte Contable Agrupado";
 
       const signatureBlockY = 198;
 
@@ -2565,4 +2661,145 @@ document.addEventListener('DOMContentLoaded', () => {
   const pdfBtn = document.getElementById('btn-export-pdf');
   if (excelBtn) excelBtn.addEventListener('click', exportToExcel);
   if (pdfBtn) pdfBtn.addEventListener('click', exportToPDF);
+
+  function renderContableRows(filteredAssets) {
+    const digitSelect = document.getElementById('contable-digit-select');
+    const tbody = document.getElementById('contable-tbody');
+    
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    
+    const digitMode = Number(digitSelect ? digitSelect.value : 10);
+    
+    const generic3Digits = {
+      '331': 'TERRENOS',
+      '332': 'EDIFICACIONES Y OTRAS CONSTRUCCIONES',
+      '333': 'MAQUINARIAS Y EQUIPOS DE EXPLOTACIÓN',
+      '334': 'VEHÍCULOS MOTORIZADOS / EQUIPOS DE TRANSPORTE',
+      '335': 'MUEBLES Y ENSERES',
+      '336': 'EQUIPOS INFORMÁTICOS Y COMUNICACIONES',
+      '337': 'HERRAMIENTAS Y UNIDADES REVALUADAS',
+      '338': 'UNIDADES POR RECIBIR / EQUIPOS EN TRÁNSITO',
+      '339': 'OBRAS EN CURSO (WIP)'
+    };
+    
+    const keyDescriptions = {
+      '3311111101': 'URBANOS',
+      '3311111102': 'SEMI - URBANOS',
+      '3311111103': 'RUSTICOS',
+      '3311151101': 'TERRENOS COSTO COMUNES - ADQUIRIDO O CONSTRUÍDO CON RECURSOS PROPIOS',
+      '3321111101': 'COSTO DE ADQUISICION O CONSTRUC EDIFC.',
+      '3321111102': 'COSTO DE FINANCIAMIENTO EDIFICACIONES AD.',
+      '3321113101': 'OTASS-RENOV. Y REUB. LINEA ADUC. R1 AL R2',
+      '3321121101': 'EDIFICACIONES COSTO ALC - ADQUIRIDO O CONSTRUÍDO CON RECURSOS PROPIOS',
+      '3322111101': 'ALMACENES',
+      '3331111101': 'MAQUINARIAS Y EQUIPO DE BOMBEO AGUA POTABLE',
+      '3331111102': 'MEDIDORES',
+      '3341111101': 'COSTO VEHICULOS MOTORIZADOS',
+      '3341151101': 'VEHÍCULOS MOTORIZADOS COSTO COMUNES - ADQUIRIDO O CONSTRUÍDO CON RECURSOS PROPIOS',
+      '3341152101': 'VEHÍCULOS MOTORIZADOS COSTO COMUNES - RECIBIDO EN DONACIÓN',
+      '3351151101': 'MUEBLES COSTO COMUNES - ADQUIRIDO O CONSTRUÍDO CON RECURSOS PROPIOS',
+      '3361151101': 'EQUIPOS INFORMÁTICOS COSTO COMUNES - ADQUIRIDO O CONSTRUÍDO CON RECURSOS PROPIOS',
+      '3362181101': 'EQUIPO DE COMUNICACIÓN COSTO - ACTIVIDADES NO REGULADAS',
+      '3391010101': 'OBRAS EN CURSO - INICIAL / GENERAL'
+    };
+
+    function getAccountName(code, fullCode, category) {
+      if (keyDescriptions[code]) return keyDescriptions[code];
+      if (keyDescriptions[fullCode]) return keyDescriptions[fullCode];
+      
+      if (digitMode === 3) {
+        if (code.startsWith('33')) return generic3Digits[code] || `PROPIEDAD, PLANTA Y EQUIPO (${code})`;
+        if (code.startsWith('68')) {
+          const ref33 = '33' + code.charAt(2);
+          return `VALUACIÓN DE ${generic3Digits[ref33] || 'PROPIEDAD, PLANTA Y EQUIPO'}`;
+        }
+      }
+      if (code.startsWith('33')) {
+        return `ACTIVO FIJO - CATEGORÍA ${category || 'GENERAL'} (${code})`;
+      } else if (code.startsWith('68')) {
+        return `DEPRECIACIÓN ACUMULADA - CÓDIGO REF (${code})`;
+      }
+      return `CUENTA CONTABLE (${code})`;
+    }
+
+    const ledger = {};
+    filteredAssets.forEach(item => {
+      const cc = item.cuenta_contable || '3391010101';
+      const cost = Number(item.valor_en_libros) || 0;
+      const dep = Number(item.depreciacion_acumulada) || 0;
+
+      let costKey = cc;
+      let depKey = cc.startsWith('33') ? '68' + cc.slice(2) : '68' + cc;
+
+      if (digitMode === 3) {
+        costKey = cc.slice(0, 3);
+        depKey = cc.startsWith('33') ? '68' + cc.charAt(2) : '68' + cc.slice(0, 1);
+      }
+
+      if (!ledger[costKey]) {
+        ledger[costKey] = {
+          codigo: costKey,
+          descripcion: getAccountName(costKey, cc, item.categoria),
+          tipo: 'ACTIVO FIJO (33)',
+          monto: 0
+        };
+      }
+      ledger[costKey].monto += cost;
+
+      if (!ledger[depKey]) {
+        const baseName = getAccountName(costKey, cc, item.categoria);
+        ledger[depKey] = {
+          codigo: depKey,
+          descripcion: `DEPRECIACIÓN ACUM. - ${baseName}`,
+          tipo: 'DEPRECIACIÓN (68)',
+          monto: 0
+        };
+      }
+      ledger[depKey].monto += dep;
+    });
+
+    const ledgerList = Object.values(ledger).sort((a, b) => a.codigo.localeCompare(b.codigo));
+    currentFilteredData = ledgerList;
+    resultsCount.textContent = `Registros: ${ledgerList.length}`;
+
+    if (ledgerList.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" class="px-5 py-6 text-center text-slate-400">No hay saldos en este período</td></tr>`;
+      return;
+    }
+
+    let sumCost = 0;
+    let sumDep = 0;
+
+    ledgerList.forEach(item => {
+      const row = document.createElement('tr');
+      row.className = 'hover:bg-slate-50 text-slate-700 transition-colors border-b border-slate-150';
+      
+      if (item.codigo.startsWith('33')) sumCost += item.monto;
+      else if (item.codigo.startsWith('68')) sumDep += item.monto;
+
+      row.innerHTML = `
+        <td class="px-5 py-3 whitespace-nowrap text-xs font-mono font-bold text-slate-800">${item.codigo}</td>
+        <td class="px-5 py-3 text-xs font-medium text-slate-700">${item.descripcion}</td>
+        <td class="px-5 py-3 whitespace-nowrap">
+          <span class="px-2 py-0.5 text-[10px] font-bold border rounded-full ${
+            item.codigo.startsWith('33') ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-rose-50 text-rose-700 border-rose-200'
+          }">
+            ${item.tipo}
+          </span>
+        </td>
+        <td class="px-5 py-3 whitespace-nowrap text-xs font-mono font-bold text-slate-900 text-right">${formatMoney(item.monto)}</td>
+      `;
+      tbody.appendChild(row);
+    });
+
+    const totalRow = document.createElement('tr');
+    totalRow.className = 'bg-slate-100/80 font-bold text-slate-900 border-t border-slate-300';
+    totalRow.innerHTML = `
+      <td class="px-5 py-3" colspan="2">TOTAL COSTO (33) vs DEPRECIACIÓN (68)</td>
+      <td class="px-5 py-3 text-xs text-slate-500">Neto: ${formatMoney(sumCost - sumDep)}</td>
+      <td class="px-5 py-3 text-right font-mono">${formatMoney(sumCost)} / <span class="text-rose-600">${formatMoney(sumDep)}</span></td>
+    `;
+    tbody.appendChild(totalRow);
+  }
 });

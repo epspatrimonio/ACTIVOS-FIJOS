@@ -329,6 +329,9 @@
       <button id="tab-terceros" class="flex-none sm:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
         🤝 Bienes de Terceros
       </button>
+      <button id="tab-contable" class="flex-none sm:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
+        📊 Reporte Contable
+      </button>
     </div>
 
     <!-- Indicador de Resultados y Botones de Descarga -->
@@ -535,6 +538,61 @@
             </tr>
           </thead>
           <tbody id="terceros-tbody" class="bg-white divide-y divide-slate-100">
+            <!-- Las filas se inyectarán vía JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tabla: Reporte Contable -->
+    <div id="contable-table-container" class="hidden md:flex flex-col flex-1 min-h-0 rounded-xl shadow-sm border border-slate-200 bg-white overflow-hidden">
+      <!-- Period Filters and Digit Switch for Public Dashboard -->
+      <div class="p-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 shrink-0">
+        <div class="flex items-center gap-2">
+          <label for="contable-digit-select" class="text-xs font-bold text-slate-600">Nivel de Cuenta:</label>
+          <select id="contable-digit-select" class="px-2 py-1 text-xs border border-slate-350 rounded bg-white text-slate-800 font-semibold focus:outline-none focus:ring-1 focus:ring-brand-500">
+            <option value="10">10 Dígitos (Sub-cuenta)</option>
+            <option value="3">3 Dígitos (Mayor)</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-1.5">
+            <label for="contable-year-select" class="text-xs font-bold text-slate-600">Año:</label>
+            <select id="contable-year-select" class="px-2 py-1 text-xs border border-slate-350 rounded bg-white text-slate-800 font-semibold focus:outline-none focus:ring-1 focus:ring-brand-500">
+              <option value="Todos">Todos</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <label for="contable-month-select" class="text-xs font-bold text-slate-600">Mes:</label>
+            <select id="contable-month-select" class="px-2 py-1 text-xs border border-slate-350 rounded bg-white text-slate-800 font-semibold focus:outline-none focus:ring-1 focus:ring-brand-500">
+              <option value="Todos">Todos</option>
+              <option value="1">Enero</option>
+              <option value="2">Febrero</option>
+              <option value="3">Marzo</option>
+              <option value="4">Abril</option>
+              <option value="5">Mayo</option>
+              <option value="6">Junio</option>
+              <option value="7">Julio</option>
+              <option value="8">Agosto</option>
+              <option value="9">Septiembre</option>
+              <option value="10">Octubre</option>
+              <option value="11">Noviembre</option>
+              <option value="12">Diciembre</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="overflow-x-auto overflow-y-auto smooth-scroll w-full flex-1 min-h-0">
+        <table class="min-w-[800px] w-full divide-y divide-slate-200 border-collapse">
+          <thead class="sticky top-0 bg-slate-50 z-20 shadow-[0_1px_0_0_rgba(226,232,240,1)]">
+            <tr>
+              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide w-24">Código PCGE</th>
+              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Descripción de la Cuenta Contable</th>
+              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide w-48">Tipo de Elemento</th>
+              <th scope="col" class="px-5 py-3 text-right text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide w-36">Saldo Total</th>
+            </tr>
+          </thead>
+          <tbody id="contable-tbody" class="bg-white divide-y divide-slate-100">
             <!-- Las filas se inyectarán vía JavaScript -->
           </tbody>
         </table>
