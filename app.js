@@ -1967,6 +1967,7 @@ document.addEventListener('DOMContentLoaded', () => {
       sheetName = "Activos";
       exportData = currentFilteredData.map(item => ({
         "Código Patrimonial": item.cod_patrimonial,
+        "Cuenta Contable": item.cuenta_contable || "",
         "Documento": item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : `INC-${item.n_doc}`) : "",
         "Tipo Adquisición": item.documento_tipo,
         "Categoría": item.categoria,
@@ -1994,6 +1995,7 @@ document.addEventListener('DOMContentLoaded', () => {
       sheetName = "Obras_En_Curso";
       exportData = currentFilteredData.map(item => ({
         "Código Patrimonial": item.cod_patrimonial,
+        "Cuenta Contable": item.cuenta_contable || "",
         "Documento": item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : `INC-${item.n_doc}`) : "",
         "Tipo Adquisición": item.documento_tipo,
         "Categoría": item.categoria,
@@ -2183,6 +2185,7 @@ document.addEventListener('DOMContentLoaded', () => {
         headers = [
           [
             "Cód. Patrimonial",
+            "Cta. Contable",
             "N° Documento",
             "Fecha Ingreso",
             "Ubicación (Sucursal / Localidad)",
@@ -2196,6 +2199,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
         data = currentFilteredData.map(item => [
           item.cod_patrimonial || '—',
+          item.cuenta_contable || '—',
           item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : `INC-${item.n_doc}`) : '—',
           formatDate(item.fecha_alta_factura || item.fecha_registro_contable),
           `${item.sucursal || '—'}${item.localidad ? `\n(${item.localidad})` : ''}`,
@@ -2209,21 +2213,23 @@ document.addEventListener('DOMContentLoaded', () => {
           item.responsable || "Sin Asignar"
         ]);
         columnStyles = {
-          0: { cellWidth: 22 },
-          1: { cellWidth: 22 },
+          0: { cellWidth: 20 },
+          1: { cellWidth: 18 },
           2: { cellWidth: 20 },
-          3: { cellWidth: 30 },
-          4: { cellWidth: 42 },
-          5: { cellWidth: 43 },
-          6: { cellWidth: 18 },
-          7: { cellWidth: 23, halign: 'right' },
+          3: { cellWidth: 18 },
+          4: { cellWidth: 30 },
+          5: { cellWidth: 38 },
+          6: { cellWidth: 39 },
+          7: { cellWidth: 15 },
           8: { cellWidth: 23, halign: 'right' },
-          9: { cellWidth: 26 }
+          9: { cellWidth: 23, halign: 'right' },
+          10: { cellWidth: 25 }
         };
       } else if (currentTab === 'obras') {
         headers = [
           [
             "Cód. Patrimonial",
+            "Cta. Contable",
             "N° Documento",
             "Fecha Ingreso",
             "Ubicación (Sucursal / Localidad)",
@@ -2237,6 +2243,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
         data = currentFilteredData.map(item => [
           item.cod_patrimonial || '—',
+          item.cuenta_contable || '—',
           item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : `INC-${item.n_doc}`) : '—',
           formatDate(item.fecha_alta_factura || item.fecha_registro_contable),
           `${item.sucursal || '—'}${item.localidad ? `\n(${item.localidad})` : ''}`,
@@ -2250,16 +2257,17 @@ document.addEventListener('DOMContentLoaded', () => {
           item.responsable || "Sin Asignar"
         ]);
         columnStyles = {
-          0: { cellWidth: 22 },
-          1: { cellWidth: 22 },
+          0: { cellWidth: 20 },
+          1: { cellWidth: 18 },
           2: { cellWidth: 20 },
-          3: { cellWidth: 30 },
-          4: { cellWidth: 42 },
-          5: { cellWidth: 43 },
-          6: { cellWidth: 18 },
-          7: { cellWidth: 23, halign: 'right' },
+          3: { cellWidth: 18 },
+          4: { cellWidth: 30 },
+          5: { cellWidth: 38 },
+          6: { cellWidth: 39 },
+          7: { cellWidth: 15 },
           8: { cellWidth: 23, halign: 'right' },
-          9: { cellWidth: 26 }
+          9: { cellWidth: 23, halign: 'right' },
+          10: { cellWidth: 25 }
         };
       } else if (currentTab === 'vehiculos') {
         headers = [
