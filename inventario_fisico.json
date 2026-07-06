@@ -1,1 +1,40 @@
-[]
+[
+  {
+    "cod_patrimonial": "INV-001",
+    "tipo": "FALTANTE",
+    "cod_categoria": 10001,
+    "denominacion": "MONITOR DE 24 PULGADAS",
+    "marca": "LG",
+    "modelo": "24MK430H",
+    "numero_serie": "LG123456",
+    "color": "NEGRO",
+    "caracteristicas_accesorios": "Incluye cable HDMI y adaptador de corriente",
+    "observaciones": "Reportado como faltante en auditoría de TI",
+    "id_sucursal": 10,
+    "localidad": "LA MERCED",
+    "categoria": "TERRENOS",
+    "subcategoria": "TERRENOS",
+    "sucursal": "LA MERCED",
+    "created_at": "2026-07-06T13:39:36.850210Z",
+    "updated_at": "2026-07-06T13:39:36.850210Z"
+  },
+  {
+    "cod_patrimonial": "INV-002",
+    "tipo": "SOBRANTE",
+    "cod_categoria": 10001,
+    "denominacion": "IMPRESORA MULTIFUNCIONAL Laser",
+    "marca": "HP",
+    "modelo": "LaserJet Pro M15w",
+    "numero_serie": "HP789101",
+    "color": "BLANCO",
+    "caracteristicas_accesorios": "Cable USB y tóner instalado",
+    "observaciones": "Encontrada sin registrar en la oficina de contabilidad",
+    "id_sucursal": 20,
+    "localidad": "SAN RAMON",
+    "categoria": "TERRENOS",
+    "subcategoria": "TERRENOS",
+    "sucursal": "SAN RAMON",
+    "created_at": "2026-07-06T13:39:36.850210Z",
+    "updated_at": "2026-07-06T13:39:36.850210Z"
+  }
+]

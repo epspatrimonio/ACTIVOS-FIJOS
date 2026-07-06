@@ -156,7 +156,7 @@
   <div class="bg-slate-50 border-b border-slate-200/80 shadow-sm w-full shrink-0">
     <!-- Encabezado Compacto Celeste -->
     <header class="bg-[#00B0F0] text-white py-3 px-4 sm:px-6 lg:px-8 border-b border-[#009ad4] shadow-sm">
-      <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <div class="max-w-[1600px] mx-auto flex items-center justify-between gap-4">
         <div class="flex items-center gap-3">
           <img src="logo.jpg" alt="Logo EPS Selva Central" class="w-10 h-10 object-contain rounded-lg bg-white p-0.5 shadow-sm">
           <div>
@@ -173,7 +173,7 @@
     </header>
     
     <!-- Filtros Compactos -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
+    <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
       <!-- Botón para alternar filtros en móvil -->
       <div class="flex md:hidden items-center justify-between mb-2">
         <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Filtros de Búsqueda</span>
@@ -184,7 +184,7 @@
 
       <div id="filters-content" class="hidden md:flex bg-white border border-slate-200/85 rounded-xl p-3.5 shadow-sm flex-col md:flex-row md:flex-wrap gap-3 items-stretch md:items-end">
         <!-- Buscador -->
-        <div id="search-filter-wrapper" class="w-full md:flex-1">
+        <div id="search-filter-wrapper" class="w-full md:flex-grow md:min-w-[350px] md:flex-1">
           <label for="search" class="block text-[0.75rem] font-semibold text-slate-500 mb-1">Buscador inteligente</label>
           <div class="relative">
             <input 
@@ -304,12 +304,15 @@
   </div>
 
   <!-- Contenido de Control y Búsqueda -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 overflow-hidden flex flex-col min-h-0">
+  <main class="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 overflow-hidden flex flex-col min-h-0">
 
     <!-- Selector de Pestañas (Tabs Switcher) -->
-    <div class="flex bg-slate-200/50 p-1.5 rounded-2xl mb-5 self-center sm:self-start shrink-0 gap-1.5 w-full max-w-4xl overflow-x-auto scrollbar-none border border-slate-200/60 shadow-sm">
+    <div class="flex bg-slate-200/50 p-1.5 rounded-2xl mb-5 self-center sm:self-start shrink-0 gap-1.5 w-full max-w-5xl overflow-x-auto scrollbar-none border border-slate-200/60 shadow-sm">
       <button id="tab-activos" class="flex-none sm:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 bg-brand-500 text-white shadow-md shadow-brand-500/15 whitespace-nowrap">
         💼 Activos Fijos
+      </button>
+      <button id="tab-obras" class="flex-none sm:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
+        🚧 Obras en Curso
       </button>
       <button id="tab-vehiculos" class="flex-none sm:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
         🚗 Vehículos
@@ -373,19 +376,44 @@
         <table class="min-w-[1350px] w-full divide-y divide-slate-200 border-collapse">
           <thead class="sticky top-0 bg-slate-50 z-20 shadow-[0_1px_0_0_rgba(226,232,240,1)]">
             <tr>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Cód. Patrimonial</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">N° Documento</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Fecha de Ingreso</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Ubicación (Sucursal | Localidad)</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Denominación del Activo</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Especificaciones</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Estado</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Valor Libros</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Valor Neto</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Responsable</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Cód. Patrimonial</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">N° Documento</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Fecha de Ingreso</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Ubicación (Sucursal | Localidad)</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Denominación del Activo</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Especificaciones</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Estado</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Valor Libros</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Valor Neto</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Responsable</th>
             </tr>
           </thead>
           <tbody id="assets-tbody" class="bg-white divide-y divide-slate-100">
+            <!-- Las filas se inyectarán vía JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tabla: Obras en Curso -->
+    <div id="obras-table-container" class="hidden md:flex flex-col flex-1 min-h-0 rounded-xl shadow-sm border border-slate-200 bg-white overflow-hidden">
+      <div class="overflow-x-auto overflow-y-auto smooth-scroll w-full flex-1 min-h-0">
+        <table class="min-w-[1350px] w-full divide-y divide-slate-200 border-collapse">
+          <thead class="sticky top-0 bg-slate-50 z-20 shadow-[0_1px_0_0_rgba(226,232,240,1)]">
+            <tr>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Cód. Patrimonial</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">N° Documento</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Fecha de Ingreso</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Ubicación (Sucursal | Localidad)</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Denominación del Activo</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Especificaciones</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Estado</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Valor Libros</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Valor Neto</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Responsable</th>
+            </tr>
+          </thead>
+          <tbody id="obras-tbody" class="bg-white divide-y divide-slate-100">
             <!-- Las filas se inyectarán vía JavaScript -->
           </tbody>
         </table>
@@ -398,16 +426,16 @@
         <table class="min-w-[1550px] w-full divide-y divide-slate-200 border-collapse">
           <thead class="sticky top-0 bg-slate-50 z-20 shadow-[0_1px_0_0_rgba(226,232,240,1)]">
             <tr>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Placa</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Cód. Patrimonial</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Tipo / Subcat</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Ubicación</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Denominación / Marca / Modelo</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Especificaciones Técnicas</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Estado</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">SOAT (Póliza / Aseguradora / Vence)</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Rev. Técnica (Vencimiento)</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Responsable</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Placa</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Cód. Patrimonial</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Tipo / Subcat</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Ubicación</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Denominación / Marca / Modelo</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Especificaciones Técnicas</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Estado</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">SOAT (Póliza / Aseguradora / Vence)</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Rev. Técnica (Vencimiento)</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Responsable</th>
             </tr>
           </thead>
           <tbody id="vehiculos-tbody" class="bg-white divide-y divide-slate-100">
@@ -423,15 +451,15 @@
         <table class="min-w-[1550px] w-full divide-y divide-slate-200 border-collapse">
           <thead class="sticky top-0 bg-slate-50 z-20 shadow-[0_1px_0_0_rgba(226,232,240,1)]">
             <tr>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Placa</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Cód. Patrimonial</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Tipo / Subcat</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Ubicación</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Denominación / Marca / Modelo</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Estado</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">SOAT (Póliza / Aseguradora / Vence)</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Rev. Técnica (Vencimiento)</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Responsable</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Placa</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Cód. Patrimonial</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Tipo / Subcat</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Ubicación</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Denominación / Marca / Modelo</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Estado</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">SOAT (Póliza / Aseguradora / Vence)</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Rev. Técnica (Vencimiento)</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Responsable</th>
             </tr>
           </thead>
           <tbody id="soat-tbody" class="bg-white divide-y divide-slate-100">
@@ -447,16 +475,16 @@
         <table class="min-w-[1250px] w-full divide-y divide-slate-200 border-collapse">
           <thead class="sticky top-0 bg-slate-50 z-20 shadow-[0_1px_0_0_rgba(226,232,240,1)]">
             <tr>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Cód. Control</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">N° Línea</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Marca / Modelo</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">IMEI / Operador</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Sucursal</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Fecha Ingreso</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Fecha Asignación</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Asignado a</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Renovación (3 Años / Estado)</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Estado</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Cód. Control</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">N° Línea</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Marca / Modelo</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">IMEI / Operador</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Sucursal</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Fecha Ingreso</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Fecha Asignación</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Asignado a</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Renovación (3 Años / Estado)</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Estado</th>
             </tr>
           </thead>
           <tbody id="celulares-tbody" class="bg-white divide-y divide-slate-100">
@@ -471,15 +499,15 @@
         <table class="min-w-[1350px] w-full divide-y divide-slate-200 border-collapse">
           <thead class="sticky top-0 bg-slate-50 z-20 shadow-[0_1px_0_0_rgba(226,232,240,1)]">
             <tr>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Cód. Patrimonial</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Tipo</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Categoría / Subcategoría</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Ubicación</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Denominación del Activo</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Especificaciones</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Características / Accesorios</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Observaciones</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Fecha Registro</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Cód. Patrimonial</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Tipo</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Categoría / Subcategoría</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Ubicación</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Denominación del Activo</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Especificaciones</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Características / Accesorios</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Observaciones</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Fecha Registro</th>
             </tr>
           </thead>
           <tbody id="inventario-tbody" class="bg-white divide-y divide-slate-100">
@@ -495,15 +523,15 @@
         <table class="min-w-[1350px] w-full divide-y divide-slate-200 border-collapse">
           <thead class="sticky top-0 bg-slate-50 z-20 shadow-[0_1px_0_0_rgba(226,232,240,1)]">
             <tr>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Cód. Patrimonial</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Tipo</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Ubicación</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Denominación</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Especificaciones</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Características / Accesorios</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Responsable</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Observaciones</th>
-              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Fecha Registro</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Cód. Patrimonial</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Tipo</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Ubicación</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Denominación</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Especificaciones</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Características / Accesorios</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Responsable</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Observaciones</th>
+              <th scope="col" class="px-3.5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Fecha Registro</th>
             </tr>
           </thead>
           <tbody id="terceros-tbody" class="bg-white divide-y divide-slate-100">
@@ -524,7 +552,7 @@
 
   <!-- Pie de Página -->
   <footer class="bg-white border-t border-slate-200 py-6 mt-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-[0.8125rem] text-slate-400">
+    <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 text-center text-[0.8125rem] text-slate-400">
       Control Patrimonial - Juan Eder Systems © 2026
     </div>
   </footer>

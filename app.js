@@ -263,7 +263,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let dataset = [];
     if (currentTab === 'activos') {
-      dataset = assets;
+      dataset = assets.filter(item => !String(item.cod_patrimonial).startsWith('339'));
+    } else if (currentTab === 'obras') {
+      dataset = assets.filter(item => String(item.cod_patrimonial).startsWith('339'));
     } else if (currentTab === 'vehiculos') {
       dataset = getVehicles();
     } else if (currentTab === 'soat') {
@@ -349,7 +351,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let dataset = [];
     if (currentTab === 'activos') {
-      dataset = assets;
+      dataset = assets.filter(item => !String(item.cod_patrimonial).startsWith('339'));
+    } else if (currentTab === 'obras') {
+      dataset = assets.filter(item => String(item.cod_patrimonial).startsWith('339'));
     } else if (currentTab === 'vehiculos') {
       dataset = getVehicles();
     } else if (currentTab === 'soat') {
@@ -458,11 +462,17 @@ document.addEventListener('DOMContentLoaded', () => {
     let stateOptions = [];
     
     if (currentTab === 'activos') {
-      dataset = assets;
+      dataset = assets.filter(item => !String(item.cod_patrimonial).startsWith('339'));
+      stateOptions = ['BUENO', 'REGULAR', 'MALO', 'PARA BAJA', 'BAJA'];
+    } else if (currentTab === 'obras') {
+      dataset = assets.filter(item => String(item.cod_patrimonial).startsWith('339'));
       stateOptions = ['BUENO', 'REGULAR', 'MALO', 'PARA BAJA', 'BAJA'];
     } else if (currentTab === 'vehiculos') {
       dataset = getVehicles();
       stateOptions = ['BUENO', 'REGULAR', 'MALO', 'PARA BAJA', 'BAJA'];
+    } else if (currentTab === 'soat') {
+      dataset = getVehicles().filter(item => item.estado_activo !== 'PARA BAJA' && item.estado_activo !== 'BAJA');
+      stateOptions = ['BUENO', 'REGULAR', 'MALO'];
     } else if (currentTab === 'celulares') {
       dataset = celulares;
       // Obtener estados únicos de los celulares reales registrados
@@ -479,7 +489,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Poblar Sucursales sin formato Sucursal (Localidad)
-    const sucursalNames = [...new Set(dataset.map(item => item.sucursal).filter(Boolean))];
+    // Consolidar de todos los datasets para mantener la lista completa y consistente en todas las pestañas
+    const allItems = [...assets, ...celulares, ...inventario, ...terceros];
+    const sucursalNames = [...new Set(allItems.map(item => item.sucursal).filter(Boolean))];
     sucursalNames.sort().forEach(suc => {
       const option = document.createElement('option');
       option.value = suc;
@@ -492,7 +504,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Poblar Localidades
     if (localidadSelect) {
-      const localidades = [...new Set(dataset.map(item => item.localidad).filter(Boolean))];
+      const localidades = [...new Set(allItems.map(item => item.localidad).filter(Boolean))];
       localidades.sort().forEach(loc => {
         const option = document.createElement('option');
         option.value = loc;
@@ -522,6 +534,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Inicialización de pestañas
   function initTabs() {
     const tabActivos = document.getElementById('tab-activos');
+    const tabObras = document.getElementById('tab-obras');
     const tabVehiculos = document.getElementById('tab-vehiculos');
     const tabSoat = document.getElementById('tab-soat');
     const tabCelulares = document.getElementById('tab-celulares');
@@ -537,7 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
       selectedSubcategories = [];
       
       // Resetear clases de pestañas
-      [tabActivos, tabVehiculos, tabSoat, tabCelulares, tabInventario, tabTerceros].forEach(btn => {
+      [tabActivos, tabObras, tabVehiculos, tabSoat, tabCelulares, tabInventario, tabTerceros].forEach(btn => {
         if (btn) {
           btn.className = "flex-none sm:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 bg-transparent text-slate-600 hover:bg-white hover:text-slate-900 whitespace-nowrap";
         }
@@ -547,6 +560,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (currentTab === 'activos') {
         activeBtn = tabActivos;
         moduleTitle.textContent = 'Catálogo de Activos Fijos';
+      } else if (currentTab === 'obras') {
+        activeBtn = tabObras;
+        moduleTitle.textContent = 'Obras en Curso (WIP)';
       } else if (currentTab === 'vehiculos') {
         activeBtn = tabVehiculos;
         moduleTitle.textContent = 'Control Patrimonial de Vehículos';
@@ -581,7 +597,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Mostrar/Ocultar el filtro de Categoría y Subcategoría (sólo si aplica)
       const categoriaWrapper = document.getElementById('categoria-filter-wrapper');
       const subcategoriaWrapper = document.getElementById('subcategoria-filter-wrapper');
-      const hasCategories = currentTab === 'activos' || currentTab === 'vehiculos' || currentTab === 'inventario' || currentTab === 'soat';
+      const hasCategories = currentTab === 'activos' || currentTab === 'obras' || currentTab === 'vehiculos' || currentTab === 'inventario' || currentTab === 'soat';
       if (hasCategories) {
         if (categoriaWrapper) categoriaWrapper.classList.remove('hidden');
         if (subcategoriaWrapper) subcategoriaWrapper.classList.remove('hidden');
@@ -613,6 +629,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     if (tabActivos) tabActivos.addEventListener('click', () => switchTab('activos'));
+    if (tabObras) tabObras.addEventListener('click', () => switchTab('obras'));
     if (tabVehiculos) tabVehiculos.addEventListener('click', () => switchTab('vehiculos'));
     if (tabSoat) tabSoat.addEventListener('click', () => switchTab('soat'));
     if (tabCelulares) tabCelulares.addEventListener('click', () => switchTab('celulares'));
@@ -656,7 +673,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let baseData = [];
     if (currentTab === 'activos') {
-      baseData = assets;
+      baseData = assets.filter(item => !String(item.cod_patrimonial).startsWith('339'));
+    } else if (currentTab === 'obras') {
+      baseData = assets.filter(item => String(item.cod_patrimonial).startsWith('339'));
     } else if (currentTab === 'vehiculos') {
       baseData = getVehicles();
     } else if (currentTab === 'soat') {
@@ -682,7 +701,7 @@ document.addEventListener('DOMContentLoaded', () => {
          ((currentTab === 'inventario' || currentTab === 'terceros') ? item.tipo === selectedEstado : item.estado_activo === selectedEstado));
 
       // Filtro de Categoría y Subcategoría (si aplica)
-      const hasCategories = currentTab === 'activos' || currentTab === 'vehiculos' || currentTab === 'inventario' || currentTab === 'soat';
+      const hasCategories = currentTab === 'activos' || currentTab === 'obras' || currentTab === 'vehiculos' || currentTab === 'inventario' || currentTab === 'soat';
       const categoriaMatch = !hasCategories || selectedCategories.length === 0 || selectedCategories.includes(item.categoria);
       const subcategoriaMatch = !hasCategories || selectedSubcategories.length === 0 || selectedSubcategories.includes(item.subcategoria);
 
@@ -749,6 +768,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Limpiar todas las tablas y contenedor de tarjetas móviles
     document.getElementById('assets-tbody').innerHTML = '';
+    document.getElementById('obras-tbody').innerHTML = '';
     document.getElementById('vehiculos-tbody').innerHTML = '';
     if (document.getElementById('soat-tbody')) document.getElementById('soat-tbody').innerHTML = '';
     document.getElementById('celulares-tbody').innerHTML = '';
@@ -759,6 +779,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (data.length === 0) {
       emptyState.classList.remove('hidden');
       document.getElementById('assets-table-container').classList.add('hidden');
+      document.getElementById('obras-table-container').classList.add('hidden');
       document.getElementById('vehiculos-table-container').classList.add('hidden');
       if (document.getElementById('soat-table-container')) document.getElementById('soat-table-container').classList.add('hidden');
       document.getElementById('celulares-table-container').classList.add('hidden');
@@ -773,6 +794,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Manejo adaptativo Desktop vs Móvil
     if (window.innerWidth >= 768) {
       document.getElementById('assets-table-container').classList.add('hidden');
+      document.getElementById('obras-table-container').classList.add('hidden');
       document.getElementById('vehiculos-table-container').classList.add('hidden');
       if (document.getElementById('soat-table-container')) document.getElementById('soat-table-container').classList.add('hidden');
       document.getElementById('celulares-table-container').classList.add('hidden');
@@ -784,6 +806,7 @@ document.addEventListener('DOMContentLoaded', () => {
       mobileContainer.classList.add('hidden');
     } else {
       document.getElementById('assets-table-container').classList.add('hidden');
+      document.getElementById('obras-table-container').classList.add('hidden');
       document.getElementById('vehiculos-table-container').classList.add('hidden');
       if (document.getElementById('soat-table-container')) document.getElementById('soat-table-container').classList.add('hidden');
       document.getElementById('celulares-table-container').classList.add('hidden');
@@ -795,6 +818,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Inyectar datos específicos
     if (currentTab === 'activos') {
       renderActivosRows(data);
+    } else if (currentTab === 'obras') {
+      renderObrasRows(data);
     } else if (currentTab === 'vehiculos') {
       renderVehiculosRows(data);
     } else if (currentTab === 'soat') {
@@ -910,6 +935,153 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="mt-3">
         <h3 class="text-base font-bold leading-snug text-slate-900">
           ${item.denominacion || 'Activo sin denominación'}
+        </h3>
+        <p class="mt-1 text-[0.8125rem] font-semibold text-brand-600 uppercase tracking-wide">
+          ${item.subcategoria || 'Sin subcategoría'}
+        </p>
+      </div>
+
+      <dl class="mt-4 grid grid-cols-2 gap-x-3 gap-y-3 text-[0.8125rem]">
+        <div>
+          <dt class="font-semibold text-slate-400">Sucursal</dt>
+          <dd class="mt-0.5 font-semibold text-slate-700">${item.sucursal || '—'}</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-slate-400">Localidad</dt>
+          <dd class="mt-0.5 font-semibold text-slate-700">${item.localidad || '—'}</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-slate-400">Ingreso</dt>
+          <dd class="mt-0.5 font-semibold text-slate-700">${formatDate(item.fecha_alta_factura || item.fecha_registro_contable)}</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-slate-400">Documento</dt>
+          <dd class="mt-0.5 font-semibold text-slate-700">${item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : `INC-${item.n_doc}`) : '—'}</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-slate-400">Valor libros</dt>
+          <dd class="mt-0.5 font-semibold text-slate-700">S/. ${valLibrosFormateado}</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-slate-400">Valor neto</dt>
+          <dd class="mt-0.5 font-extrabold text-emerald-600">S/. ${valNetoFormateado}</dd>
+        </div>
+      </dl>
+
+      <div class="mt-4 border-t border-slate-100 pt-3 text-[0.8125rem] leading-relaxed text-slate-600">
+        ${item.placa ? `
+          <div><span class="font-semibold text-slate-700 bg-slate-900 text-white px-2 py-0.5 rounded text-[10px] font-mono mr-1.5">${item.placa}</span></div>
+          <div class="mt-1"><span class="font-semibold text-slate-400">Motor:</span> ${item.nro_motor || '—'}</div>
+          <div class="mt-1"><span class="font-semibold text-slate-400">Chasis:</span> ${item.nro_chasis || '—'}</div>
+        ` : `
+          <div><span class="font-semibold text-slate-400">Marca:</span> ${item.marca || 'S/M'} · <span class="font-semibold text-slate-400">Modelo:</span> ${item.modelo || 'S/M'}</div>
+          <div class="mt-1"><span class="font-semibold text-slate-400">Serie:</span> ${item.numero_serie || 'S/S'}</div>
+        `}
+        <div class="mt-1"><span class="font-semibold text-slate-400">Responsable:</span> ${item.responsable || 'Sin asignar'}</div>
+      </div>
+    `;
+    mobileContainer.appendChild(mobileCard);
+  }
+
+  // ── Renders del Módulo: Obras en Curso ──────────────────────────────────────
+  function renderObrasRows(data) {
+    const tbody = document.getElementById('obras-tbody');
+    data.forEach(item => {
+      const row = document.createElement('tr');
+      row.className = 'hover:bg-slate-50 text-slate-700 transition-colors border-b border-slate-150';
+      const valLibrosFormateado = formatMoney(item.valor_en_libros);
+      const valNetoFormateado = formatMoney(getNetValue(item));
+
+      row.innerHTML = `
+        <td class="px-3.5 py-4 whitespace-nowrap text-[0.875rem] font-mono font-bold text-slate-800">
+          ${item.cod_patrimonial}
+        </td>
+        <td class="px-3.5 py-4 whitespace-nowrap">
+          <span class="px-2.5 py-1 text-xs font-semibold text-brand-600 bg-brand-50/50 border border-brand-200 rounded-full">
+            ${item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : `INC-${item.n_doc}`) : '—'}
+          </span>
+        </td>
+        <td class="px-3.5 py-4 whitespace-nowrap">
+          <span class="px-2.5 py-1 text-xs font-medium text-slate-500 bg-slate-50 border border-slate-200 rounded-full">
+            ${formatDate(item.fecha_alta_factura || item.fecha_registro_contable)}
+          </span>
+        </td>
+        <td class="px-3.5 py-4 whitespace-nowrap">
+          <div class="font-bold text-slate-800 text-[0.8125rem]">
+            ${item.sucursal || '—'}
+          </div>
+          <div class="text-[0.6875rem] text-brand-500 font-bold uppercase tracking-wide mt-0.5">
+            ${item.localidad || '—'}
+          </div>
+        </td>
+        <td class="px-3.5 py-4 min-w-[200px]">
+          <div class="text-[0.875rem] font-bold text-slate-800 leading-snug">
+            ${item.denominacion}
+          </div>
+          <div class="text-[0.6875rem] text-brand-500 font-bold mt-1 uppercase">
+            ${item.subcategoria || '—'}
+          </div>
+        </td>
+        <td class="px-3.5 py-4 text-[0.8125rem] min-w-[220px] text-slate-500 leading-relaxed">
+          ${item.placa ? `
+            <div class="mb-1">
+              <span class="font-mono font-bold text-slate-700 bg-slate-950 text-white px-2 py-0.5 rounded text-[10px] tracking-wider shadow-sm mr-1.5">
+                ${item.placa}
+              </span>
+              ${item.categoria_vehiculo ? `<span class="bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded text-[10px] ring-1 ring-amber-200">Cat: ${item.categoria_vehiculo}</span>` : ''}
+            </div>
+            <div>
+              <span class="font-medium text-slate-400">Motor:</span> ${item.nro_motor || 'S/M'}
+            </div>
+            <div>
+              <span class="font-medium text-slate-400">Chasis:</span> ${item.nro_chasis || 'S/C'}
+            </div>
+          ` : `
+            <div>
+              <span class="font-medium text-slate-400">Marca:</span> ${item.marca || 'S/M'} &bull; <span class="font-medium text-slate-400">Modelo:</span> ${item.modelo || 'S/M'}
+            </div>
+            <div class="mt-0.5">
+              <span class="font-medium text-slate-400">Serie:</span> ${item.numero_serie || 'S/S'}
+            </div>
+          `}
+        </td>
+        <td class="px-3.5 py-4 whitespace-nowrap">
+          ${getEstadoBadgeHTML(item.estado_activo)}
+        </td>
+        <td class="px-3.5 py-4 whitespace-nowrap text-[0.8125rem] font-medium text-slate-500">
+          S/. ${valLibrosFormateado}
+        </td>
+        <td class="px-3.5 py-4 whitespace-nowrap text-[0.8125rem] font-bold text-emerald-600">
+          S/. ${valNetoFormateado}
+        </td>
+        <td class="px-3.5 py-4 whitespace-nowrap text-[0.8125rem] font-semibold text-slate-600">
+          ${item.responsable || '—'}
+        </td>
+      `;
+      tbody.appendChild(row);
+      renderObrasMobileCard(item, valLibrosFormateado, valNetoFormateado);
+    });
+  }
+
+  function renderObrasMobileCard(item, valLibrosFormateado, valNetoFormateado) {
+    const mobileCard = document.createElement('article');
+    mobileCard.className = 'bg-white border border-slate-200 rounded-xl shadow-sm p-4';
+    mobileCard.innerHTML = `
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <div class="text-[0.75rem] font-bold text-brand-600 uppercase tracking-wide">Código patrimonial</div>
+          <div class="mt-0.5 font-mono text-[0.9375rem] font-extrabold text-slate-900 break-words">
+            ${item.cod_patrimonial || '—'}
+          </div>
+        </div>
+        <div class="shrink-0">
+          ${getEstadoBadgeHTML(item.estado_activo)}
+        </div>
+      </div>
+
+      <div class="mt-3">
+        <h3 class="text-base font-bold leading-snug text-slate-900">
+          ${item.denominacion || 'Obra sin denominación'}
         </h3>
         <p class="mt-1 text-[0.8125rem] font-semibold text-brand-600 uppercase tracking-wide">
           ${item.subcategoria || 'Sin subcategoría'}
@@ -1818,6 +1990,33 @@ document.addEventListener('DOMContentLoaded', () => {
         "IGV (S/.)": Number(item.igv) || 0,
         "N° Acta Entrega": item.n_acta_entrega || ""
       }));
+    } else if (currentTab === 'obras') {
+      sheetName = "Obras_En_Curso";
+      exportData = currentFilteredData.map(item => ({
+        "Código Patrimonial": item.cod_patrimonial,
+        "Documento": item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : `INC-${item.n_doc}`) : "",
+        "Tipo Adquisición": item.documento_tipo,
+        "Categoría": item.categoria,
+        "Subcategoría": item.subcategoria,
+        "Denominación": item.denominacion,
+        "Marca": item.marca || "S/M",
+        "Modelo": item.modelo || "S/M",
+        "N° Serie": item.numero_serie || "S/S",
+        "Color": item.color || "",
+        "Sucursal": item.sucursal,
+        "Localidad": item.localidad || "",
+        "Unidad Orgánica": item.unidad || "",
+        "Puesto": item.puesto || "",
+        "Responsable": item.responsable || "Sin Asignar",
+        "N° Factura": item.numero_factura || "",
+        "Fecha Alta": item.fecha_alta_factura || "",
+        "Estado": item.estado_activo,
+        "Valor en Libros (S/.)": Number(item.valor_en_libros) || 0,
+        "Dep. Acumulada (S/.)": Number(item.depreciacion_acumulada) || 0,
+        "Valor Neto (S/.)": getNetValue(item),
+        "IGV (S/.)": Number(item.igv) || 0,
+        "N° Acta Entrega": item.n_acta_entrega || ""
+      }));
     } else if (currentTab === 'vehiculos') {
       sheetName = "Vehículos";
       exportData = currentFilteredData.map(item => ({
@@ -2003,6 +2202,47 @@ document.addEventListener('DOMContentLoaded', () => {
           item.denominacion || '',
           item.placa ? 
             `Placa: ${item.placa}\nMotor: ${item.nro_motor || 'S/M'}\nChasis: ${item.nro_chasis || 'S/C'}\nSOAT: ${item.soat_estado || '—'}\nRev.Tec: ${item.estado_rev_tec || '—'}` :
+            `Marca: ${item.marca || 'S/M'}\nModelo: ${item.modelo || 'S/M'}\nSerie: ${item.numero_serie || 'S/S'}${item.color ? `\nColor: ${item.color}` : ''}`,
+          item.estado_activo || '—',
+          `S/. ${formatMoney(item.valor_en_libros)}`,
+          `S/. ${formatMoney(getNetValue(item))}`,
+          item.responsable || "Sin Asignar"
+        ]);
+        columnStyles = {
+          0: { cellWidth: 22 },
+          1: { cellWidth: 22 },
+          2: { cellWidth: 20 },
+          3: { cellWidth: 30 },
+          4: { cellWidth: 42 },
+          5: { cellWidth: 43 },
+          6: { cellWidth: 18 },
+          7: { cellWidth: 23, halign: 'right' },
+          8: { cellWidth: 23, halign: 'right' },
+          9: { cellWidth: 26 }
+        };
+      } else if (currentTab === 'obras') {
+        headers = [
+          [
+            "Cód. Patrimonial",
+            "N° Documento",
+            "Fecha Ingreso",
+            "Ubicación (Sucursal / Localidad)",
+            "Denominación del Activo",
+            "Especificaciones",
+            "Estado",
+            "Valor Libros",
+            "Valor Neto",
+            "Responsable"
+          ]
+        ];
+        data = currentFilteredData.map(item => [
+          item.cod_patrimonial || '—',
+          item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : `INC-${item.n_doc}`) : '—',
+          formatDate(item.fecha_alta_factura || item.fecha_registro_contable),
+          `${item.sucursal || '—'}${item.localidad ? `\n(${item.localidad})` : ''}`,
+          item.denominacion || '',
+          item.placa ? 
+            `Placa: ${item.placa}\nMotor: ${item.nro_motor || 'S/M'}\nChasis: ${item.nro_chasis || 'S/C'}` :
             `Marca: ${item.marca || 'S/M'}\nModelo: ${item.modelo || 'S/M'}\nSerie: ${item.numero_serie || 'S/S'}${item.color ? `\nColor: ${item.color}` : ''}`,
           item.estado_activo || '—',
           `S/. ${formatMoney(item.valor_en_libros)}`,
@@ -2228,6 +2468,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       let subtitle = "";
       if (currentTab === 'activos') subtitle = "Inventario de Activos Fijos";
+      else if (currentTab === 'obras') subtitle = "Inventario de Obras en Curso";
       else if (currentTab === 'vehiculos') subtitle = "Inventario de Vehículos";
       else if (currentTab === 'celulares') subtitle = "Inventario de Celulares";
       else if (currentTab === 'inventario') subtitle = "Inventario Físico (Faltantes / Sobrantes)";
