@@ -1,27 +1,30 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   BarChart3, TrendingUp, TrendingDown, AlertTriangle, ShieldCheck, CheckCircle2, 
-  AlertCircle, Smartphone, Car, FolderSearch, Coins, ClipboardList, Clock 
+  AlertCircle, Smartphone, Car, FolderSearch, Coins, ClipboardList, Clock, Calendar
 } from 'lucide-react';
 import { fetchActivos, fetchCelulares, fetchSoat } from '../utils/api';
 
 export default function AdminDashboard() {
-  const [subTab, setSubTab] = useState('ACTIVOS'); // ACTIVOS | DEPRECIACION | CELULARES | VEHICULOS | SOAT
+  const [subTab, setSubTab] = useState('ACTIVOS'); // ACTIVOS | DEPRECIACION | CELULARES | VEHICULOS | SOAT | CUENTAS_Y_CATEGORIAS
   const [assets, setAssets] = useState([]);
+  const [filteredAssets, setFilteredAssets] = useState([]);
   const [celulares, setCelulares] = useState([]);
   const [soatList, setSoatList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Filtros de período
+  const [selectedYear, setSelectedYear] = useState('Todos');
+  const [selectedMonth, setSelectedMonth] = useState('Todos');
 
   // Chart refs
   const chartRef1 = useRef(null);
   const chartRef2 = useRef(null);
-  const chartRef3 = useRef(null);
 
   // Chart instances
   const chartInstance1 = useRef(null);
   const chartInstance2 = useRef(null);
-  const chartInstance3 = useRef(null);
 
   // Fetch all data once on mount
   useEffect(() => {
@@ -47,9 +50,46 @@ export default function AdminDashboard() {
     loadData();
   }, []);
 
-  // Filter helper for vehicles
+  // Generar años disponibles
+  const getAvailableYears = () => {
+    const years = new Set();
+    assets.forEach(item => {
+      const dateStr = item.fecha_alta_factura || item.fecha_registro_contable;
+      if (dateStr) {
+        const y = new Date(dateStr).getFullYear();
+        if (y && !isNaN(y)) {
+          years.add(y);
+        }
+      }
+    });
+    return Array.from(years).sort((a, b) => b - a);
+  };
+
+  const years = getAvailableYears();
+
+  // Filtrar activos por el período seleccionado
+  useEffect(() => {
+    let result = assets;
+    if (selectedYear !== 'Todos') {
+      result = result.filter(item => {
+        const dateStr = item.fecha_alta_factura || item.fecha_registro_contable;
+        if (!dateStr) return false;
+        return new Date(dateStr).getFullYear() === Number(selectedYear);
+      });
+    }
+    if (selectedMonth !== 'Todos') {
+      result = result.filter(item => {
+        const dateStr = item.fecha_alta_factura || item.fecha_registro_contable;
+        if (!dateStr) return false;
+        return (new Date(dateStr).getMonth() + 1) === Number(selectedMonth);
+      });
+    }
+    setFilteredAssets(result);
+  }, [assets, selectedYear, selectedMonth]);
+
+  // Filter helper for vehicles (using filtered assets to react to period)
   const getVehicles = () => {
-    return assets.filter(item => 
+    return filteredAssets.filter(item => 
       (item.placa && item.placa !== '') || 
       (item.cod_categoria && String(item.cod_categoria).startsWith('4'))
     );
@@ -71,7 +111,7 @@ export default function AdminDashboard() {
     );
   };
 
-  // Re-render charts whenever subTab or data changes
+  // Re-render charts whenever subTab, selected periods or data changes
   useEffect(() => {
     if (loading || error || !window.Chart) return;
 
@@ -85,10 +125,6 @@ export default function AdminDashboard() {
         chartInstance2.current.destroy();
         chartInstance2.current = null;
       }
-      if (chartInstance3.current) {
-        chartInstance3.current.destroy();
-        chartInstance3.current = null;
-      }
     };
 
     destroyCharts();
@@ -98,7 +134,7 @@ export default function AdminDashboard() {
     if (subTab === 'ACTIVOS') {
       // 1. Estado Físico (Doughnut)
       const countsEstado = { 'BUENO': 0, 'REGULAR': 0, 'MALO': 0, 'PARA BAJA': 0, 'BAJA': 0 };
-      assets.forEach(item => {
+      filteredAssets.forEach(item => {
         const est = (item.estado_activo || '').toUpperCase().trim();
         if (countsEstado[est] !== undefined) countsEstado[est]++;
       });
@@ -137,7 +173,7 @@ export default function AdminDashboard() {
 
       // 2. Activos por Sucursal (Horizontal Bar)
       const countsLocation = {};
-      assets.forEach(item => {
+      filteredAssets.forEach(item => {
         const key = item.sucursal || 'Sin sucursal';
         countsLocation[key] = (countsLocation[key] || 0) + 1;
       });
@@ -174,7 +210,7 @@ export default function AdminDashboard() {
       // 1. Comparativa Libros vs Neto (Bar)
       let totLibros = 0;
       let totNeto = 0;
-      assets.forEach(item => {
+      filteredAssets.forEach(item => {
         totLibros += (Number(item.valor_en_libros) || 0);
         totNeto += getNetValue(item);
       });
@@ -216,7 +252,7 @@ export default function AdminDashboard() {
 
       // 2. Depreciación por Categoría de Activo (Doughnut)
       const depPorCat = {};
-      assets.forEach(item => {
+      filteredAssets.forEach(item => {
         const key = item.categoria || 'Sin categoría';
         depPorCat[key] = (depPorCat[key] || 0) + (Number(item.depreciacion_acumulada) || 0);
       });
@@ -467,8 +503,82 @@ export default function AdminDashboard() {
       }
     }
 
+    if (subTab === 'CUENTAS_Y_CATEGORIAS') {
+      // 1. Costo vs Depreciación por Cuenta Contable 3 Dígitos
+      const accountsGroup = {};
+      filteredAssets.forEach(item => {
+        const key = (item.cuenta_contable || '3391010101').slice(0, 3);
+        if (!accountsGroup[key]) accountsGroup[key] = { cost: 0, dep: 0 };
+        accountsGroup[key].cost += Number(item.valor_en_libros) || 0;
+        accountsGroup[key].dep += Number(item.depreciacion_acumulada) || 0;
+      });
+      const labelsAcc = Object.keys(accountsGroup).sort();
+      const costsAcc = labelsAcc.map(k => accountsGroup[k].cost);
+      const depsAcc = labelsAcc.map(k => accountsGroup[k].dep);
+
+      if (chartRef1.current) {
+        chartInstance1.current = new Chart(chartRef1.current.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: labelsAcc,
+            datasets: [
+              { label: 'Costo Histórico', data: costsAcc, backgroundColor: '#00B0F0' },
+              { label: 'Depreciación Acum.', data: depsAcc, backgroundColor: '#f43f5e' }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10, weight: '600' } } }
+            },
+            scales: {
+              x: { grid: { display: false }, ticks: { font: { size: 10, weight: '600' } } },
+              y: { grid: { color: '#f1f5f9' } }
+            }
+          }
+        });
+      }
+
+      // 2. Costo vs Depreciación por Categoría
+      const categoriesGroup = {};
+      filteredAssets.forEach(item => {
+        const key = item.categoria || 'Sin Categoría';
+        if (!categoriesGroup[key]) categoriesGroup[key] = { cost: 0, dep: 0 };
+        categoriesGroup[key].cost += Number(item.valor_en_libros) || 0;
+        categoriesGroup[key].dep += Number(item.depreciacion_acumulada) || 0;
+      });
+      const labelsCat = Object.keys(categoriesGroup);
+      const costsCat = labelsCat.map(k => categoriesGroup[k].cost);
+      const depsCat = labelsCat.map(k => categoriesGroup[k].dep);
+
+      if (chartRef2.current) {
+        chartInstance2.current = new Chart(chartRef2.current.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: labelsCat,
+            datasets: [
+              { label: 'Costo Histórico', data: costsCat, backgroundColor: '#10b981' },
+              { label: 'Depreciación Acum.', data: depsCat, backgroundColor: '#eab308' }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10, weight: '600' } } }
+            },
+            scales: {
+              x: { grid: { display: false }, ticks: { font: { size: 9, weight: '600' } } },
+              y: { grid: { color: '#f1f5f9' } }
+            }
+          }
+        });
+      }
+    }
+
     return destroyCharts;
-  }, [subTab, loading, error, assets, celulares, soatList]);
+  }, [subTab, loading, error, filteredAssets, celulares, soatList]);
 
   if (loading) {
     return (
@@ -489,12 +599,12 @@ export default function AdminDashboard() {
     );
   }
 
-  // Common counters
-  const totalAssets = assets.length;
+  // Common counters (updated to use filteredAssets to react to year/month selection)
+  const totalAssets = filteredAssets.length;
   const totalVehicles = getVehicles().length;
   const totalCelulares = celulares.length;
-  const totLibros = assets.reduce((sum, item) => sum + (Number(item.valor_en_libros) || 0), 0);
-  const totDepreciado = assets.reduce((sum, item) => sum + (Number(item.depreciacion_acumulada) || 0), 0);
+  const totLibros = filteredAssets.reduce((sum, item) => sum + (Number(item.valor_en_libros) || 0), 0);
+  const totDepreciado = filteredAssets.reduce((sum, item) => sum + (Number(item.depreciacion_acumulada) || 0), 0);
   const totNetValue = totLibros - totDepreciado;
 
   // Alerts lists for SOAT / RT
@@ -513,14 +623,56 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      {/* Selector de Período Global en Dashboard */}
+      <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm shrink-0 flex flex-wrap gap-4 items-center">
+        <div className="flex items-center space-x-2 text-xs font-bold text-slate-700">
+          <Calendar className="w-4 h-4 text-brand-500" />
+          <span>Filtrar por Período de Registro:</span>
+        </div>
+        
+        <div className="flex gap-2">
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value)}
+            className="rounded-xl border border-slate-200 py-1.5 px-3 bg-slate-50 text-xs font-semibold focus:ring-2 focus:ring-brand-500 transition-all text-slate-800"
+          >
+            <option value="Todos">Todos los Años</option>
+            {years.map(y => (
+              <option key={y} value={y}>{y}</option>
+            ))}
+          </select>
+
+          <select
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+            className="rounded-xl border border-slate-200 py-1.5 px-3 bg-slate-50 text-xs font-semibold focus:ring-2 focus:ring-brand-500 transition-all text-slate-800"
+          >
+            <option value="Todos">Todos los Meses</option>
+            <option value="1">Enero</option>
+            <option value="2">Febrero</option>
+            <option value="3">Marzo</option>
+            <option value="4">Abril</option>
+            <option value="5">Mayo</option>
+            <option value="6">Junio</option>
+            <option value="7">Julio</option>
+            <option value="8">Agosto</option>
+            <option value="9">Septiembre</option>
+            <option value="10">Octubre</option>
+            <option value="11">Noviembre</option>
+            <option value="12">Diciembre</option>
+          </select>
+        </div>
+      </div>
+
       {/* Sub-Navegación (Segmentación) */}
       <div className="flex bg-slate-100 p-1.5 rounded-2xl shrink-0 gap-1.5 overflow-x-auto border border-slate-200/50 shadow-sm self-start w-full md:w-auto">
         {[
-          { key: 'ACTIVOS', label: '💼 Activos Fijos', color: 'text-brand-700 bg-brand-50 border-brand-200' },
-          { key: 'DEPRECIACION', label: '🪙 Depreciación', color: 'text-indigo-700 bg-indigo-50 border-indigo-200' },
-          { key: 'CELULARES', label: '📱 Celulares', color: 'text-cyan-700 bg-cyan-50 border-cyan-200' },
-          { key: 'VEHICULOS', label: '🚗 Vehículos', color: 'text-blue-700 bg-blue-50 border-blue-200' },
-          { key: 'SOAT', label: '🛡️ SOAT y Alertas', color: 'text-rose-700 bg-rose-50 border-rose-200' }
+          { key: 'ACTIVOS', label: '💼 Activos Fijos' },
+          { key: 'DEPRECIACION', label: '🪙 Depreciación' },
+          { key: 'CUENTAS_Y_CATEGORIAS', label: '📊 Cuentas y Categorías' },
+          { key: 'CELULARES', label: '📱 Celulares' },
+          { key: 'VEHICULOS', label: '🚗 Vehículos' },
+          { key: 'SOAT', label: '🛡️ SOAT y Alertas' }
         ].map((tab) => (
           <button
             key={tab.key}
@@ -547,7 +699,7 @@ export default function AdminDashboard() {
                 <span className="p-1 rounded-lg bg-brand-50 text-brand-600 text-xs">Total</span>
               </div>
               <p className="text-3xl font-extrabold text-slate-900 tracking-tight">{totalAssets}</p>
-              <span className="text-[11px] text-slate-400 font-semibold block mt-1">Registrados en la base de datos</span>
+              <span className="text-[11px] text-slate-400 font-semibold block mt-1">Registrados en el período</span>
             </div>
 
             <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm">
@@ -652,6 +804,148 @@ export default function AdminDashboard() {
         </div>
       )}
 
+      {/* RENDER SEGMENTO: CUENTAS Y CATEGORIAS */}
+      {subTab === 'CUENTAS_Y_CATEGORIAS' && (
+        <div className="space-y-6 animate-fadeIn">
+          {/* Fila de KPIs */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[0.6875rem] font-extrabold text-slate-400 uppercase tracking-wider">Costo en Libros</span>
+                <span className="p-1 rounded-lg bg-emerald-50 text-emerald-600 text-xs">Costo (33)</span>
+              </div>
+              <p className="text-2xl font-extrabold text-emerald-600 tracking-tight">{formatMoney(totLibros)}</p>
+            </div>
+
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[0.6875rem] font-extrabold text-slate-400 uppercase tracking-wider">Depreciación Acumulada</span>
+                <span className="p-1 rounded-lg bg-rose-50 text-rose-600 text-xs">Dep. (68)</span>
+              </div>
+              <p className="text-2xl font-extrabold text-rose-600 tracking-tight">{formatMoney(totDepreciado)}</p>
+            </div>
+
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[0.6875rem] font-extrabold text-slate-400 uppercase tracking-wider">Valor Neto Contable</span>
+                <span className="p-1 rounded-lg bg-brand-50 text-brand-600 text-xs">Neto</span>
+              </div>
+              <p className="text-2xl font-extrabold text-brand-600 tracking-tight">{formatMoney(totNetValue)}</p>
+            </div>
+          </div>
+
+          {/* Gráficos */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm flex flex-col min-h-[300px]">
+              <h3 className="text-sm font-extrabold text-slate-800 mb-4 border-b border-slate-100 pb-3 flex items-center gap-1.5">
+                <BarChart3 className="w-4 h-4 text-brand-500" />
+                <span>Comparativa Costo vs Depreciación por Cuenta Contable (3 Dígitos)</span>
+              </h3>
+              <div className="flex-1 relative flex items-center justify-center">
+                <canvas ref={chartRef1} className="max-h-[220px] w-full"></canvas>
+              </div>
+            </div>
+
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm flex flex-col min-h-[300px]">
+              <h3 className="text-sm font-extrabold text-slate-800 mb-4 border-b border-slate-100 pb-3 flex items-center gap-1.5">
+                <BarChart3 className="w-4 h-4 text-emerald-500" />
+                <span>Comparativa Costo vs Depreciación por Categoría de Activo</span>
+              </h3>
+              <div className="flex-1 relative flex items-center justify-center">
+                <canvas ref={chartRef2} className="max-h-[220px] w-full"></canvas>
+              </div>
+            </div>
+          </div>
+
+          {/* Tablas de Detalle */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            {/* Tabla Cuentas */}
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm flex flex-col min-h-[350px]">
+              <h3 className="text-sm font-extrabold text-slate-800 mb-3 pb-2 border-b border-slate-100">
+                Resumen por Cuenta Contable (Perú PCGE)
+              </h3>
+              <div className="flex-1 overflow-auto max-h-[300px]">
+                <table className="min-w-full divide-y divide-slate-200 text-xs">
+                  <thead className="bg-slate-50 sticky top-0">
+                    <tr>
+                      <th className="px-3 py-2 text-left font-bold text-slate-500">Cuenta</th>
+                      <th className="px-3 py-2 text-right font-bold text-slate-500">Costo (33)</th>
+                      <th className="px-3 py-2 text-right font-bold text-slate-500">Dep. (68)</th>
+                      <th className="px-3 py-2 text-right font-bold text-slate-500">Valor Neto</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {(() => {
+                      const accountsGroup = {};
+                      filteredAssets.forEach(item => {
+                        const key = item.cuenta_contable || '3391010101';
+                        if (!accountsGroup[key]) accountsGroup[key] = { cost: 0, dep: 0 };
+                        accountsGroup[key].cost += Number(item.valor_en_libros) || 0;
+                        accountsGroup[key].dep += Number(item.depreciacion_acumulada) || 0;
+                      });
+                      const keys = Object.keys(accountsGroup).sort();
+                      if (keys.length === 0) {
+                        return <tr><td colSpan="4" className="text-center py-4 text-slate-400">Sin datos</td></tr>;
+                      }
+                      return keys.map(k => (
+                        <tr key={k} className="hover:bg-slate-50">
+                          <td className="px-3 py-2 font-mono font-bold text-slate-700">{k}</td>
+                          <td className="px-3 py-2 text-right text-slate-600 font-mono">{formatMoney(accountsGroup[k].cost)}</td>
+                          <td className="px-3 py-2 text-right text-rose-600 font-mono">{formatMoney(accountsGroup[k].dep)}</td>
+                          <td className="px-3 py-2 text-right font-bold text-slate-900 font-mono">{formatMoney(accountsGroup[k].cost - accountsGroup[k].dep)}</td>
+                        </tr>
+                      ));
+                    })()}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Tabla Categorías & Subcategorías */}
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm flex flex-col min-h-[350px]">
+              <h3 className="text-sm font-extrabold text-slate-800 mb-3 pb-2 border-b border-slate-100">
+                Resumen por Categoría y Subcategoría
+              </h3>
+              <div className="flex-1 overflow-auto max-h-[300px]">
+                <table className="min-w-full divide-y divide-slate-200 text-xs">
+                  <thead className="bg-slate-50 sticky top-0">
+                    <tr>
+                      <th className="px-3 py-2 text-left font-bold text-slate-500">Categoría / Subcategoría</th>
+                      <th className="px-3 py-2 text-right font-bold text-slate-500">Costo</th>
+                      <th className="px-3 py-2 text-right font-bold text-slate-500">Depreciación</th>
+                      <th className="px-3 py-2 text-right font-bold text-slate-500">Valor Neto</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {(() => {
+                      const catGroup = {};
+                      filteredAssets.forEach(item => {
+                        const key = `${item.categoria || 'Sin Categoría'} - ${item.subcategoria || 'Sin Subcategoría'}`;
+                        if (!catGroup[key]) catGroup[key] = { cost: 0, dep: 0 };
+                        catGroup[key].cost += Number(item.valor_en_libros) || 0;
+                        catGroup[key].dep += Number(item.depreciacion_acumulada) || 0;
+                      });
+                      const keys = Object.keys(catGroup).sort();
+                      if (keys.length === 0) {
+                        return <tr><td colSpan="4" className="text-center py-4 text-slate-400">Sin datos</td></tr>;
+                      }
+                      return keys.map(k => (
+                        <tr key={k} className="hover:bg-slate-50">
+                          <td className="px-3 py-2 font-medium text-slate-700 truncate max-w-[200px]" title={k}>{k}</td>
+                          <td className="px-3 py-2 text-right text-slate-600 font-mono">{formatMoney(catGroup[k].cost)}</td>
+                          <td className="px-3 py-2 text-right text-rose-600 font-mono">{formatMoney(catGroup[k].dep)}</td>
+                          <td className="px-3 py-2 text-right font-bold text-slate-900 font-mono">{formatMoney(catGroup[k].cost - catGroup[k].dep)}</td>
+                        </tr>
+                      ));
+                    })()}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* RENDER SEGMENTO: CELULARES */}
       {subTab === 'CELULARES' && (
         <div className="space-y-6 animate-fadeIn">
@@ -750,7 +1044,7 @@ export default function AdminDashboard() {
           {/* Gráficos */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm flex flex-col min-h-[300px]">
-              <h3 class="text-sm font-extrabold text-slate-800 mb-4 border-b border-slate-100 pb-3 flex items-center gap-1.5">
+              <h3 className="text-sm font-extrabold text-slate-800 mb-4 border-b border-slate-100 pb-3 flex items-center gap-1.5">
                 <Car className="w-4 h-4 text-blue-500" />
                 <span>Distribución por Subcategoría de Vehículo</span>
               </h3>
