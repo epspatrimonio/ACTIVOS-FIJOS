@@ -12,7 +12,7 @@ from app.core.database import get_db
 from app.models.activos import (
     Activo, VwRegistroActivosDetalle,
     VwListaSucursal, VwListaSubcategoria, VwListaPuestoPorSucursal, VwListaPersonal,
-    Compra, Incorporacion, VwListaLocalidad, VwListaCuentaContable, VwListaCentroCosto, VwListaFuente,
+    Compra, Incorporacion, Obra, VwListaLocalidad, VwListaCuentaContable, VwListaCentroCosto, VwListaFuente,
     Celular, VwCelularesDetalle,
     VehiculoDetalle,
     Soat, VwSoatVigencia,
@@ -24,6 +24,7 @@ from app.schemas.activos import (
     SucursalDTO, SubcategoriaDTO, PuestoDTO, PersonalDTO,
     LocalidadDTO, CuentaContableDTO, CentroCostoDTO, FuenteDTO,
     CompraCreate, CompraResponse, IncorporacionCreate, IncorporacionResponse,
+    ObraCreate, ObraResponse,
     CelularCreate, CelularResponse,
     VehiculoDetalleCreate, VehiculoDetalleResponse,
     SoatCreate, SoatResponse, SoatVigenciaDTO,
@@ -263,6 +264,79 @@ async def upsert_acquisition_document(db: AsyncSession, activo_in: ActivoCreate)
                 concepto=activo_in.inc_concepto
             )
             db.add(db_inc)
+            
+    elif activo_in.documento_tipo == "OBRA":
+        n_doc_clean = activo_in.n_doc_obra.strip() if activo_in.n_doc_obra else None
+        if not n_doc_clean:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="N° Doc Obra es requerido para Tipo de Adquisición OBRA."
+            )
+        if len(n_doc_clean) > 30:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El N° Expediente de Obra no debe exceder los 30 caracteres."
+            )
+        activo_in.n_doc_obra = n_doc_clean
+
+        # Buscar si ya existe el documento
+        result = await db.execute(select(Obra).where(Obra.n_doc == n_doc_clean))
+        db_obra = result.scalar_one_or_none()
+
+        cuenta_clean = clean_digits(activo_in.obra_cuenta_contable)
+        if not cuenta_clean:
+            if not db_obra:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="La Cuenta Contable es requerida."
+                )
+            else:
+                cuenta_clean = db_obra.cuenta_contable
+        else:
+            if len(cuenta_clean) != 10:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="La Cuenta Contable debe tener exactamente 10 dígitos."
+                )
+            activo_in.obra_cuenta_contable = cuenta_clean
+            await ensure_cuenta_contable_exists(db, cuenta_clean)
+
+        cc_clean = clean_digits(activo_in.obra_centro_costo)
+        if cc_clean:
+            if len(cc_clean) != 8:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="El Centro de Costo debe tener exactamente 8 dígitos."
+                )
+            activo_in.obra_centro_costo = cc_clean
+            await ensure_centro_costo_exists(db, cc_clean)
+        elif db_obra:
+            cc_clean = db_obra.centro_costo
+            
+        if db_obra:
+            db_obra.fecha_doc = activo_in.obra_fecha_doc or db_obra.fecha_doc
+            db_obra.id_localidad = activo_in.obra_id_localidad or db_obra.id_localidad
+            db_obra.cuenta_contable = cuenta_clean or db_obra.cuenta_contable
+            db_obra.centro_costo = cc_clean or db_obra.centro_costo
+            db_obra.id_fuente = activo_in.obra_id_fuente or db_obra.id_fuente
+            db_obra.fuente_origen = activo_in.obra_fuente_origen or db_obra.fuente_origen
+            db_obra.origen = activo_in.obra_origen or db_obra.origen
+            db_obra.fecha_alta = activo_in.obra_fecha_alta or db_obra.fecha_alta
+            db_obra.concepto = activo_in.obra_concepto or db_obra.concepto
+        else:
+            db_obra = Obra(
+                n_doc=n_doc_clean,
+                fecha_doc=activo_in.obra_fecha_doc,
+                id_localidad=activo_in.obra_id_localidad or 1,
+                cuenta_contable=cuenta_clean,
+                centro_costo=cc_clean,
+                id_fuente=activo_in.obra_id_fuente,
+                fuente_origen=activo_in.obra_fuente_origen,
+                origen=activo_in.obra_origen,
+                fecha_alta=activo_in.obra_fecha_alta,
+                concepto=activo_in.obra_concepto
+            )
+            db.add(db_obra)
 
 
 def clean_db_error_message(e: Exception) -> str:
@@ -307,7 +381,7 @@ async def create_activo(
     
     activo_data = activo_in.model_dump()
     for field in list(activo_data.keys()):
-        if field.startswith("compra_") or field.startswith("inc_"):
+        if field.startswith("compra_") or field.startswith("inc_") or field.startswith("obra_"):
             del activo_data[field]
             
     db_activo = Activo(**activo_data)
@@ -345,7 +419,7 @@ async def update_activo(
     
     update_data = activo_in.model_dump(exclude_unset=True)
     for field in list(update_data.keys()):
-        if field.startswith("compra_") or field.startswith("inc_"):
+        if field.startswith("compra_") or field.startswith("inc_") or field.startswith("obra_"):
             del update_data[field]
             
     for field, value in update_data.items():
@@ -885,6 +959,122 @@ async def rename_incorporacion(n_doc: str, rename_in: DocumentRename, db: AsyncS
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=400, detail=f"Error al renombrar la resolución de incorporación: {str(e)}")
+
+
+@router.get("/obras", response_model=List[ObraResponse], tags=["Documentos"])
+async def get_obras(db: AsyncSession = Depends(get_db)):
+    """Obtiene la lista de todas las obras en curso registradas."""
+    try:
+        result = await db.execute(select(Obra).order_by(Obra.n_doc))
+        return result.scalars().all()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/obras", response_model=ObraResponse, tags=["Documentos"])
+async def create_obra(obra_in: ObraCreate, db: AsyncSession = Depends(get_db)):
+    """Registra o actualiza una obra en curso directamente."""
+    n_doc_clean = obra_in.n_doc.strip() if obra_in.n_doc else None
+    if not n_doc_clean:
+        raise HTTPException(status_code=400, detail="El número de documento es obligatorio.")
+    if len(n_doc_clean) > 30:
+        raise HTTPException(status_code=400, detail="El N° Expediente de Obra no debe exceder los 30 caracteres.")
+    obra_in.n_doc = n_doc_clean
+
+    cuenta_clean = clean_digits(obra_in.cuenta_contable)
+    if not cuenta_clean:
+        raise HTTPException(status_code=400, detail="La Cuenta Contable es obligatoria.")
+    if len(cuenta_clean) != 10:
+        raise HTTPException(status_code=400, detail="La Cuenta Contable debe tener exactamente 10 dígitos.")
+    obra_in.cuenta_contable = cuenta_clean
+    await ensure_cuenta_contable_exists(db, cuenta_clean)
+
+    cc_clean = clean_digits(obra_in.centro_costo)
+    if cc_clean:
+        if len(cc_clean) != 8:
+            raise HTTPException(status_code=400, detail="El Centro de Costo debe tener exactamente 8 dígitos.")
+        obra_in.centro_costo = cc_clean
+        await ensure_centro_costo_exists(db, cc_clean)
+        
+    result = await db.execute(select(Obra).where(Obra.n_doc == n_doc_clean))
+    db_obra = result.scalar_one_or_none()
+    
+    if db_obra:
+        db_obra.fecha_doc = obra_in.fecha_doc
+        db_obra.id_localidad = obra_in.id_localidad
+        db_obra.cuenta_contable = cuenta_clean
+        db_obra.centro_costo = cc_clean
+        db_obra.id_fuente = obra_in.id_fuente
+        db_obra.fuente_origen = obra_in.fuente_origen
+        db_obra.origen = obra_in.origen
+        db_obra.fecha_alta = obra_in.fecha_alta
+        db_obra.concepto = obra_in.concepto
+    else:
+        db_obra = Obra(
+            n_doc=n_doc_clean,
+            fecha_doc=obra_in.fecha_doc,
+            id_localidad=obra_in.id_localidad,
+            cuenta_contable=cuenta_clean,
+            centro_costo=cc_clean,
+            id_fuente=obra_in.id_fuente,
+            fuente_origen=obra_in.fuente_origen,
+            origen=obra_in.origen,
+            fecha_alta=obra_in.fecha_alta,
+            concepto=obra_in.concepto
+        )
+        db.add(db_obra)
+        
+    try:
+        await db.commit()
+        await db.refresh(db_obra)
+        return db_obra
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail=f"Error al registrar el expediente de obra: {str(e)}")
+
+
+@router.get("/obras/{n_doc}", tags=["Documentos"])
+async def get_obra(n_doc: str, db: AsyncSession = Depends(get_db)):
+    """Busca un expediente de obra en curso por su número de documento."""
+    result = await db.execute(select(Obra).where(Obra.n_doc == n_doc))
+    db_obra = result.scalar_one_or_none()
+    if not db_obra:
+        raise HTTPException(status_code=404, detail="Expediente de obra no encontrado.")
+    return db_obra
+
+
+@router.put("/obras/{n_doc}/rename", response_model=ObraResponse, tags=["Documentos"])
+async def rename_obra(n_doc: str, rename_in: DocumentRename, db: AsyncSession = Depends(get_db)):
+    """Renombra un expediente de obra modificando su clave primaria y propagando a activos fijos."""
+    result = await db.execute(select(Obra).where(Obra.n_doc == n_doc))
+    db_obra = result.scalar_one_or_none()
+    if not db_obra:
+        raise HTTPException(status_code=404, detail="Expediente de obra no encontrado.")
+
+    new_n_doc_clean = rename_in.new_n_doc.strip() if rename_in.new_n_doc else None
+    if not new_n_doc_clean:
+        raise HTTPException(status_code=400, detail="El número de documento es obligatorio.")
+    if len(new_n_doc_clean) > 30:
+        raise HTTPException(status_code=400, detail="El nuevo N° Expediente de Obra no debe exceder los 30 caracteres.")
+
+    if new_n_doc_clean == n_doc:
+        return db_obra
+
+    exist_result = await db.execute(select(Obra).where(Obra.n_doc == new_n_doc_clean))
+    if exist_result.scalar_one_or_none():
+        raise HTTPException(status_code=400, detail="Ya existe otro expediente de obra con el nuevo número de documento.")
+
+    try:
+        await db.execute(
+            text("UPDATE af.fct_obra SET n_doc = :new_doc WHERE n_doc = :old_doc"),
+            {"new_doc": new_n_doc_clean, "old_doc": n_doc}
+        )
+        await db.commit()
+        new_result = await db.execute(select(Obra).where(Obra.n_doc == new_n_doc_clean))
+        return new_result.scalar_one()
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail=f"Error al renombrar el expediente de obra: {str(e)}")
 
 
 # ═══════════════════════════════════════════════════════════

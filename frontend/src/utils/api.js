@@ -240,6 +240,46 @@ export async function renameIncorporacion(oldNDoc, newNDoc) {
   return response.json();
 }
 
+export async function fetchObra(n_doc) {
+  const response = await fetch(`${API_BASE_URL}/obras/${encodeURIComponent(n_doc)}`);
+  if (!response.ok) throw new Error('Expediente de obra no encontrado.');
+  return response.json();
+}
+
+export async function fetchObras() {
+  const response = await fetch(`${API_BASE_URL}/obras`);
+  if (!response.ok) throw new Error('Error al cargar expedientes de obra.');
+  return response.json();
+}
+
+export async function createObra(obraData) {
+  const response = await fetch(`${API_BASE_URL}/obras`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(obraData),
+  });
+  if (!response.ok) {
+    await handleResponseError(response, 'Error al registrar el expediente de obra.');
+  }
+  return response.json();
+}
+
+export async function renameObra(oldNDoc, newNDoc) {
+  const response = await fetch(`${API_BASE_URL}/obras/${encodeURIComponent(oldNDoc)}/rename`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ new_n_doc: newNDoc }),
+  });
+  if (!response.ok) {
+    await handleResponseError(response, 'Error al renombrar el expediente de obra.');
+  }
+  return response.json();
+}
+
 // ── Celulares (activos sujetos a control) ────────────────────────────────────
 
 export async function fetchCelulares(filters = {}) {

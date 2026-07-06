@@ -30,19 +30,19 @@ async def main():
         # Insert Inventario Físico
         await conn.execute(text("""
             INSERT INTO af.fct_inventario_fisico 
-            (cod_patrimonial, tipo, cod_categoria, denominacion, marca, modelo, numero_serie, color, caracteristicas_accesorios, observaciones) 
+            (cod_patrimonial, tipo, cod_categoria, denominacion, marca, modelo, numero_serie, color, caracteristicas_accesorios, observaciones, id_sucursal, localidad) 
             VALUES 
-            ('INV-001', 'FALTANTE', :cod_cat, 'MONITOR DE 24 PULGADAS', 'LG', '24MK430H', 'LG123456', 'NEGRO', 'Incluye cable HDMI y adaptador de corriente', 'Reportado como faltante en auditoría de TI'),
-            ('INV-002', 'SOBRANTE', :cod_cat, 'IMPRESORA MULTIFUNCIONAL Laser', 'HP', 'LaserJet Pro M15w', 'HP789101', 'BLANCO', 'Cable USB y tóner instalado', 'Encontrada sin registrar en la oficina de contabilidad')
+            ('INV-001', 'FALTANTE', :cod_cat, 'MONITOR DE 24 PULGADAS', 'LG', '24MK430H', 'LG123456', 'NEGRO', 'Incluye cable HDMI y adaptador de corriente', 'Reportado como faltante en auditoría de TI', 10, 'LA MERCED'),
+            ('INV-002', 'SOBRANTE', :cod_cat, 'IMPRESORA MULTIFUNCIONAL Laser', 'HP', 'LaserJet Pro M15w', 'HP789101', 'BLANCO', 'Cable USB y tóner instalado', 'Encontrada sin registrar en la oficina de contabilidad', 20, 'SAN RAMON')
         """), {"cod_cat": cod_cat})
         
         # Insert Bienes de Terceros
         await conn.execute(text("""
             INSERT INTO af.fct_bienes_terceros 
-            (cod_patrimonial, tipo, denominacion, marca, modelo, numero_serie, color, caracteristicas_accesorios, cod_personal, observaciones) 
+            (cod_patrimonial, tipo, denominacion, marca, modelo, numero_serie, color, caracteristicas_accesorios, cod_personal, observaciones, id_sucursal, localidad) 
             VALUES 
-            ('TERC-001', 'TERCERO', 'COMPRESORA DE AIRE', 'SCHULZ', 'MSV6', 'SCH9876', 'AZUL', 'Manguera de 5 metros y manómetro', 'A001', 'Equipo en préstamo de empresa contratista'),
-            ('CTRL-001', 'CONTROL', 'MESA DE ESCRITORIO DE MADERA', 'S/M', 'Estandar', 'S/S', 'MARRON', 'Cajón con llave', 'A002', 'Bien de control interno administrativamente catalogado')
+            ('TERC-001', 'TERCERO', 'COMPRESORA DE AIRE', 'SCHULZ', 'MSV6', 'SCH9876', 'AZUL', 'Manguera de 5 metros y manómetro', 'A001', 'Equipo en préstamo de empresa contratista', 10, 'LA MERCED'),
+            ('CTRL-001', 'CONTROL', 'MESA DE ESCRITORIO DE MADERA', 'S/M', 'Estandar', 'S/S', 'MARRON', 'Cajón con llave', 'A002', 'Bien de control interno administrativamente catalogado', 20, 'SAN RAMON')
         """))
         
         print("Mock data inserted successfully!")

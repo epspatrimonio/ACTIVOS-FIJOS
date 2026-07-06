@@ -5,9 +5,10 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class ActivoBase(BaseModel):
     cod_patrimonial: str = Field(..., max_length=30, description="Código patrimonial único del activo")
-    documento_tipo: Literal["COMPRA", "INCORPORACION"] = Field("COMPRA", description="Tipo de documento de adquisición")
+    documento_tipo: Literal["COMPRA", "INCORPORACION", "OBRA"] = Field("COMPRA", description="Tipo de documento de adquisición")
     n_doc_compra: Optional[str] = Field(None, max_length=30, description="Nro de documento de compra")
     n_doc_incorporacion: Optional[str] = Field(None, max_length=30, description="Nro de documento de incorporación")
+    n_doc_obra: Optional[str] = Field(None, max_length=30, description="Nro de documento de obra")
     cod_categoria: int = Field(..., description="Código de la categoría (dim_categoria)")
     denominacion: str = Field(..., max_length=300, description="Denominación o descripción detallada")
     color: Optional[str] = Field(None, max_length=120)
@@ -52,6 +53,16 @@ class ActivoCreate(ActivoBase):
     inc_fecha_alta: Optional[date] = None
     inc_concepto: Optional[str] = None
 
+    obra_fecha_doc: Optional[date] = None
+    obra_id_localidad: Optional[int] = None
+    obra_cuenta_contable: Optional[str] = None
+    obra_centro_costo: Optional[str] = None
+    obra_id_fuente: Optional[int] = None
+    obra_fuente_origen: Optional[str] = None
+    obra_origen: Optional[str] = None
+    obra_fecha_alta: Optional[date] = None
+    obra_concepto: Optional[str] = None
+
 class ActivoResponse(ActivoBase):
     # Campos calculados u autogenerados en DB
     n_doc: Optional[str] = None
@@ -66,6 +77,7 @@ class ActivoResponse(ActivoBase):
     responsable: Optional[str] = None
     depreciacion_acumulada: Optional[Decimal] = None
     valor_neto: Optional[Decimal] = None
+    cuenta_contable: Optional[str] = None
     
     # Datos adicionales de vehículos
     placa: Optional[str] = None
@@ -128,6 +140,7 @@ class ActivoPublicoDTO(BaseModel):
     depreciacion_acumulada: Optional[Decimal] = None
     valor_neto: Optional[Decimal] = None
     estado_activo: str
+    cuenta_contable: Optional[str] = None
 
     # Datos adicionales de vehículos
     placa: Optional[str] = None
@@ -257,6 +270,34 @@ class IncorporacionCreate(BaseModel):
     concepto: Optional[str] = None
 
 class IncorporacionResponse(BaseModel):
+    n_doc: str
+    fecha_doc: Optional[date] = None
+    id_localidad: int
+    cuenta_contable: str
+    centro_costo: Optional[str] = None
+    id_fuente: Optional[int] = None
+    fuente_origen: Optional[str] = None
+    origen: Optional[str] = None
+    fecha_alta: Optional[date] = None
+    concepto: Optional[str] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ObraCreate(BaseModel):
+    n_doc: str = Field(..., max_length=30)
+    fecha_doc: Optional[date] = None
+    id_localidad: int
+    cuenta_contable: str
+    centro_costo: Optional[str] = None
+    id_fuente: Optional[int] = None
+    fuente_origen: Optional[str] = None
+    origen: Optional[str] = None
+    fecha_alta: Optional[date] = None
+    concepto: Optional[str] = None
+
+class ObraResponse(BaseModel):
     n_doc: str
     fecha_doc: Optional[date] = None
     id_localidad: int

@@ -6,7 +6,8 @@ import VehiculoDetalleForm from './VehiculoDetalleForm';
 import { 
   createActivo, updateActivo, fetchSucursales, fetchSubcategorias, fetchPuestos, fetchPersonal,
   fetchLocalidades, fetchCuentasContables, fetchCentrosCosto, fetchFuentes, fetchCompra, fetchIncorporacion,
-  fetchCompras, fetchIncorporaciones, fetchVehiculoDetalle, upsertVehiculoDetalle
+  fetchCompras, fetchIncorporaciones, fetchVehiculoDetalle, upsertVehiculoDetalle,
+  fetchObras, fetchObra
 } from '../utils/api';
 
 const INITIAL_FORM_STATE = {
@@ -14,6 +15,7 @@ const INITIAL_FORM_STATE = {
   documento_tipo: 'COMPRA',
   n_doc_compra: '',
   n_doc_incorporacion: '',
+  n_doc_obra: '',
   cod_categoria: '',
   denominacion: '',
   color: '',
@@ -57,6 +59,17 @@ const INITIAL_FORM_STATE = {
   inc_origen: '',
   inc_fecha_alta: '',
   inc_concepto: '',
+
+  // Campos Obras inline
+  obra_fecha_doc: '',
+  obra_id_localidad: '101',
+  obra_cuenta_contable: '',
+  obra_centro_costo: '',
+  obra_id_fuente: '',
+  obra_fuente_origen: '',
+  obra_origen: '',
+  obra_fecha_alta: '',
+  obra_concepto: '',
 };
 
 
@@ -78,10 +91,12 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
   const [fuentes, setFuentes] = useState([]);
   const [compras, setCompras] = useState([]);
   const [incorporaciones, setIncorporaciones] = useState([]);
+  const [obras, setObras] = useState([]);
   
-  const [docSelectionMode, setDocSelectionMode] = useState('EXISTING_COMPRA'); // EXISTING_COMPRA | EXISTING_INCORPORACION | NEW_DOCUMENT
+  const [docSelectionMode, setDocSelectionMode] = useState('EXISTING_COMPRA'); // EXISTING_COMPRA | EXISTING_INCORPORACION | EXISTING_OBRA | NEW_DOCUMENT
   const [selectedCompraDetail, setSelectedCompraDetail] = useState(null);
   const [selectedIncDetail, setSelectedIncDetail] = useState(null);
+  const [selectedObraDetail, setSelectedObraDetail] = useState(null);
   const [loadingListas, setLoadingListas] = useState(true);
 
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -155,9 +170,10 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
   // Cargar listas y documentos al montar
   const reloadDocumentLists = async () => {
     try {
-      const [cps, incs] = await Promise.all([fetchCompras(), fetchIncorporaciones()]);
+      const [cps, incs, obrs] = await Promise.all([fetchCompras(), fetchIncorporaciones(), fetchObras()]);
       setCompras(cps);
       setIncorporaciones(incs);
+      setObras(obrs);
     } catch (err) {}
   };
 
@@ -171,9 +187,10 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
       fetchCentrosCosto(),
       fetchFuentes(),
       fetchCompras(),
-      fetchIncorporaciones()
+      fetchIncorporaciones(),
+      fetchObras()
     ])
-      .then(([suc, subcat, pers, loc, cta, cc, fte, cps, incs]) => {
+      .then(([suc, subcat, pers, loc, cta, cc, fte, cps, incs, obrs]) => {
         setSucursales(suc);
         setSubcategorias(subcat);
         setPersonal(pers);
@@ -183,6 +200,7 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
         setFuentes(fte);
         setCompras(cps);
         setIncorporaciones(incs);
+        setObras(obrs);
       })
       .catch(() => {})
       .finally(() => setLoadingListas(false));
@@ -193,6 +211,7 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
     if (editingActivo) {
       const initialDocCompra = editingActivo.n_doc_compra || (editingActivo.documento_tipo === 'COMPRA' ? editingActivo.n_doc : '') || '';
       const initialDocInc = editingActivo.n_doc_incorporacion || (editingActivo.documento_tipo === 'INCORPORACION' ? editingActivo.n_doc : '') || '';
+      const initialDocObra = editingActivo.n_doc_obra || (editingActivo.documento_tipo === 'OBRA' ? editingActivo.n_doc : '') || '';
 
       setForm({
         ...INITIAL_FORM_STATE,
@@ -200,6 +219,7 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
         documento_tipo: editingActivo.documento_tipo || 'COMPRA',
         n_doc_compra: initialDocCompra,
         n_doc_incorporacion: initialDocInc,
+        n_doc_obra: initialDocObra,
         cod_categoria: editingActivo.cod_categoria || '',
         denominacion: editingActivo.denominacion || '',
         color: editingActivo.color || '',
@@ -269,6 +289,28 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
             // Si el documento no existe en BD, cambiar a registro manual manteniendo el número
             setDocSelectionMode('NEW_DOCUMENT');
           });
+      } else if (editingActivo.documento_tipo === 'OBRA' && initialDocObra) {
+        setDocSelectionMode('EXISTING_OBRA');
+        fetchObra(initialDocObra)
+          .then((obra) => {
+            setSelectedObraDetail(obra);
+            setForm((prev) => ({
+              ...prev,
+              obra_fecha_doc: obra.fecha_doc || '',
+              obra_id_localidad: obra.id_localidad || '',
+              obra_cuenta_contable: obra.cuenta_contable || '',
+              obra_centro_costo: obra.centro_costo || '',
+              obra_id_fuente: obra.id_fuente || '',
+              obra_fuente_origen: obra.fuente_origen || '',
+              obra_origen: obra.origen || '',
+              obra_fecha_alta: obra.fecha_alta || '',
+              obra_concepto: obra.concepto || '',
+            }));
+          })
+          .catch(() => {
+            // Si el documento no existe en BD, cambiar a registro manual manteniendo el número
+            setDocSelectionMode('NEW_DOCUMENT');
+          });
       }
       setInitialVehiculoDetalle(null);
       setVehiculoDetalleData(null);
@@ -286,6 +328,7 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
       setForm(INITIAL_FORM_STATE);
       setSelectedCompraDetail(null);
       setSelectedIncDetail(null);
+      setSelectedObraDetail(null);
       setDocSelectionMode('EXISTING_COMPRA');
       setInitialVehiculoDetalle(null);
       setVehiculoDetalleData(null);
@@ -333,6 +376,7 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
       ...prev,
       n_doc_incorporacion: value,
       n_doc_compra: '',
+      n_doc_obra: '',
       documento_tipo: 'INCORPORACION'
     }));
     if (value) {
@@ -344,6 +388,27 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
       }
     } else {
       setSelectedIncDetail(null);
+    }
+  };
+
+  const handleSelectExistingObra = async (e) => {
+    const value = e.target.value;
+    setForm((prev) => ({
+      ...prev,
+      n_doc_obra: value,
+      n_doc_compra: '',
+      n_doc_incorporacion: '',
+      documento_tipo: 'OBRA'
+    }));
+    if (value) {
+      try {
+        const obra = await fetchObra(value);
+        setSelectedObraDetail(obra);
+      } catch (err) {
+        setSelectedObraDetail(null);
+      }
+    } else {
+      setSelectedObraDetail(null);
     }
   };
 
@@ -395,6 +460,7 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
       let docTipo = form.documento_tipo;
       let docCompra = form.n_doc_compra;
       let docInc = form.n_doc_incorporacion;
+      let docObra = form.n_doc_obra;
 
       if (docSelectionMode === 'EXISTING_COMPRA') {
         docTipo = 'COMPRA';
@@ -402,6 +468,9 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
       } else if (docSelectionMode === 'EXISTING_INCORPORACION') {
         docTipo = 'INCORPORACION';
         if (!docInc) throw new Error("Por favor, seleccione un Documento de Incorporación registrado.");
+      } else if (docSelectionMode === 'EXISTING_OBRA') {
+        docTipo = 'OBRA';
+        if (!docObra) throw new Error("Por favor, seleccione un Expediente de Obra registrado.");
       } else {
         // NEW DOCUMENT
         const cleanDigits = (val) => val ? val.replace(/\D/g, '') : '';
@@ -434,7 +503,7 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
             throw new Error("El Centro de Costo debe tener exactamente 8 dígitos (números).");
           }
           form.compra_centro_costo = ccClean;
-        } else {
+        } else if (docTipo === 'INCORPORACION') {
           docInc = form.n_doc_incorporacion ? form.n_doc_incorporacion.trim() : '';
           if (!docInc) {
             throw new Error("El N° de Resolución/Expediente es requerido.");
@@ -454,6 +523,26 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
             throw new Error("El Centro de Costo debe tener exactamente 8 dígitos (números).");
           }
           form.inc_centro_costo = ccClean;
+        } else {
+          docObra = form.n_doc_obra ? form.n_doc_obra.trim() : '';
+          if (!docObra) {
+            throw new Error("El N° de Resolución/Expediente de Obra es requerido.");
+          }
+          if (docObra.length > 30) {
+            throw new Error("El N° de Resolución/Expediente de Obra no debe exceder los 30 caracteres.");
+          }
+          
+          const cuentaClean = cleanDigits(form.obra_cuenta_contable);
+          if (cuentaClean.length !== 10) {
+            throw new Error("La Cuenta Contable debe tener exactamente 10 dígitos (números).");
+          }
+          form.obra_cuenta_contable = cuentaClean;
+
+          const ccClean = cleanDigits(form.obra_centro_costo);
+          if (ccClean && ccClean.length !== 8) {
+            throw new Error("El Centro de Costo debe tener exactamente 8 dígitos (números).");
+          }
+          form.obra_centro_costo = ccClean;
         }
       }
 
@@ -462,6 +551,7 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
         documento_tipo: docTipo,
         n_doc_compra: docTipo === 'COMPRA' ? docCompra : null,
         n_doc_incorporacion: docTipo === 'INCORPORACION' ? docInc : null,
+        n_doc_obra: docTipo === 'OBRA' ? docObra : null,
         cod_categoria: Number(form.cod_categoria),
         id_sucursal: Number(form.id_sucursal),
         vida_util_anios: Number(form.vida_util_anios) || 0,
@@ -500,6 +590,26 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
         inc_fecha_alta: docSelectionMode === 'EXISTING_INCORPORACION' && selectedIncDetail ? selectedIncDetail.fecha_alta : (form.inc_fecha_alta || null),
         inc_concepto: docSelectionMode === 'EXISTING_INCORPORACION' && selectedIncDetail ? selectedIncDetail.concepto : (form.inc_concepto || null),
 
+        // Mapear campos Obras
+        obra_fecha_doc: docSelectionMode === 'EXISTING_OBRA' && selectedObraDetail ? selectedObraDetail.fecha_doc : (form.obra_fecha_doc || null),
+        obra_id_localidad: docSelectionMode === 'EXISTING_OBRA' && selectedObraDetail ? selectedObraDetail.id_localidad : (form.obra_id_localidad ? Number(form.obra_id_localidad) : null),
+        obra_cuenta_contable: docSelectionMode === 'EXISTING_OBRA' && selectedObraDetail ? selectedObraDetail.cuenta_contable : (form.obra_cuenta_contable || null),
+        obra_centro_costo: docSelectionMode === 'EXISTING_OBRA' && selectedObraDetail ? selectedObraDetail.centro_costo : (form.obra_centro_costo || null),
+        obra_id_fuente: docSelectionMode === 'EXISTING_OBRA' && selectedObraDetail ? selectedObraDetail.id_fuente : (form.obra_id_fuente ? Number(form.obra_id_fuente) : null),
+        obra_fuente_origen: (() => {
+          if (docSelectionMode === 'EXISTING_OBRA' && selectedObraDetail) {
+            return selectedObraDetail.fuente_origen;
+          }
+          const selectedFuenteId = form.obra_id_fuente ? Number(form.obra_id_fuente) : null;
+          if (selectedFuenteId === 5) return 'LIQ OBRAS';
+          if (selectedFuenteId === 6) return 'TRANSFERENCIA';
+          if (selectedFuenteId === 7) return 'DONACION';
+          return null;
+        })(),
+        obra_origen: docSelectionMode === 'EXISTING_OBRA' && selectedObraDetail ? selectedObraDetail.origen : (form.obra_origen || null),
+        obra_fecha_alta: docSelectionMode === 'EXISTING_OBRA' && selectedObraDetail ? selectedObraDetail.fecha_alta : (form.obra_fecha_alta || null),
+        obra_concepto: docSelectionMode === 'EXISTING_OBRA' && selectedObraDetail ? selectedObraDetail.concepto : (form.obra_concepto || null),
+
         color: form.color || null,
         marca: form.marca || null,
         modelo: form.modelo || null,
@@ -532,6 +642,7 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
         setForm(INITIAL_FORM_STATE);
         setSelectedCompraDetail(null);
         setSelectedIncDetail(null);
+        setSelectedObraDetail(null);
         reloadDocumentLists();
         if (onSuccess) onSuccess();
       }
@@ -744,7 +855,7 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
             type="button"
             onClick={() => {
               setDocSelectionMode('EXISTING_INCORPORACION');
-              setForm(prev => ({ ...prev, documento_tipo: 'INCORPORACION', n_doc_compra: '' }));
+              setForm(prev => ({ ...prev, documento_tipo: 'INCORPORACION', n_doc_compra: '', n_doc_obra: '' }));
             }}
             className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
               docSelectionMode === 'EXISTING_INCORPORACION'
@@ -759,12 +870,29 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
           <button
             type="button"
             onClick={() => {
+              setDocSelectionMode('EXISTING_OBRA');
+              setForm(prev => ({ ...prev, documento_tipo: 'OBRA', n_doc_compra: '', n_doc_incorporacion: '' }));
+            }}
+            className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
+              docSelectionMode === 'EXISTING_OBRA'
+                ? 'bg-[#00B0F0]/10 text-[#00B0F0]'
+                : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
+            }`}
+          >
+            <FileText className="w-3.5 h-3.5" />
+            <span>Asociar Obra Existente</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
               setDocSelectionMode('NEW_DOCUMENT');
               if (!isEditMode) {
-                setForm(prev => ({ ...prev, n_doc_compra: '', n_doc_incorporacion: '' }));
+                setForm(prev => ({ ...prev, n_doc_compra: '', n_doc_incorporacion: '', n_doc_obra: '' }));
               }
               setSelectedCompraDetail(null);
               setSelectedIncDetail(null);
+              setSelectedObraDetail(null);
             }}
             className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
               docSelectionMode === 'NEW_DOCUMENT'
@@ -891,6 +1019,63 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
           </div>
         )}
 
+        {/* 2.5 ASOCIAR OBRA EXISTENTE */}
+        {docSelectionMode === 'EXISTING_OBRA' && (
+          <div className="space-y-4">
+            <SearchableSelect
+              label="Seleccionar Expediente de Obra Registrado"
+              name="n_doc_obra"
+              value={form.n_doc_obra}
+              onChange={handleSelectExistingObra}
+              options={obras.map(o => ({ value: o.n_doc, label: `OBR-${o.n_doc}` }))}
+              required
+              placeholder="Buscar expediente de obra registrado..."
+            />
+            
+            {selectedObraDetail && (
+              <div className="p-4 bg-slate-50/70 border border-slate-200/50 rounded-2xl space-y-2 text-xs animate-fadeIn">
+                <h4 className="font-extrabold text-[#00B0F0] uppercase tracking-wider mb-2">Detalles del Documento Seleccionado</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2 text-slate-600">
+                  <div>
+                    <span className="font-bold text-slate-400 block uppercase tracking-wide text-[9px] mb-0.5">N° Documento:</span> 
+                    <span className="font-mono text-slate-800 font-bold text-sm">OBR-{selectedObraDetail.n_doc}</span>
+                  </div>
+                  <div>
+                    <span className="font-bold text-slate-400 block uppercase tracking-wide text-[9px] mb-0.5">Fecha Pliego/Doc:</span> 
+                    <span className="text-slate-800 font-semibold">{formatDate(selectedObraDetail.fecha_doc)}</span>
+                  </div>
+                  <div>
+                    <span className="font-bold text-slate-400 block uppercase tracking-wide text-[9px] mb-0.5">Fecha Alta:</span> 
+                    <span className="text-slate-800 font-semibold">{formatDate(selectedObraDetail.fecha_alta)}</span>
+                  </div>
+                  <div>
+                    <span className="font-bold text-slate-400 block uppercase tracking-wide text-[9px] mb-0.5">Fuente:</span> 
+                    <span className="text-slate-800 font-semibold">{selectedObraDetail.fuente_origen || '—'}</span>
+                  </div>
+                  <div>
+                    <span className="font-bold text-slate-400 block uppercase tracking-wide text-[9px] mb-0.5">Origen:</span> 
+                    <span className="text-slate-800 font-semibold">{selectedObraDetail.origen || '—'}</span>
+                  </div>
+                  <div>
+                    <span className="font-bold text-slate-400 block uppercase tracking-wide text-[9px] mb-0.5">Cuenta Contable:</span> 
+                    <span className="font-mono text-slate-800 font-semibold">{selectedObraDetail.cuenta_contable}</span>
+                  </div>
+                  <div>
+                    <span className="font-bold text-slate-400 block uppercase tracking-wide text-[9px] mb-0.5">Centro Costo:</span> 
+                    <span className="font-mono text-slate-800 font-semibold">{selectedObraDetail.centro_costo || '—'}</span>
+                  </div>
+                </div>
+                {selectedObraDetail.concepto && (
+                  <div className="mt-2 border-t border-slate-200/50 pt-2 text-slate-600">
+                    <span className="font-bold text-slate-400 block uppercase tracking-wide text-[9px] mb-0.5">Concepto:</span>
+                    <p className="italic text-slate-500">{selectedObraDetail.concepto}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* 3. CREAR NUEVO DOCUMENTO (INLINE) */}
         {docSelectionMode === 'NEW_DOCUMENT' && (
           <div className="space-y-4">
@@ -905,10 +1090,11 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
                 >
                   <option value="COMPRA">Compra</option>
                   <option value="INCORPORACION">Incorporación</option>
+                  <option value="OBRA">Obra en Curso</option>
                 </select>
               </div>
 
-              {form.documento_tipo === 'COMPRA' ? (
+              {form.documento_tipo === 'COMPRA' && (
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 mb-1">
                     N° Documento (Orden Compra) <span className="text-rose-500">*</span>
@@ -924,7 +1110,9 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
                     className="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all font-mono"
                   />
                 </div>
-              ) : (
+              )}
+
+              {form.documento_tipo === 'INCORPORACION' && (
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 mb-1">
                     N° Expediente / Documento <span className="text-rose-500">*</span>
@@ -937,6 +1125,24 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
                     value={form.n_doc_incorporacion}
                     onChange={handleChange}
                     placeholder="Ej: INC-2026-001"
+                    className="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all font-mono"
+                  />
+                </div>
+              )}
+
+              {form.documento_tipo === 'OBRA' && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1">
+                    N° Expediente de Obra <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="n_doc_obra"
+                    required
+                    maxLength={30}
+                    value={form.n_doc_obra}
+                    onChange={handleChange}
+                    placeholder="Ej: OBR-2026-001"
                     className="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all font-mono"
                   />
                 </div>
@@ -1202,6 +1408,133 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
                     value={form.inc_concepto}
                     onChange={handleChange}
                     placeholder="Especifica el concepto de la incorporación..."
+                    className="block w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-slate-700"
+                  />
+                </div>
+              </div>
+            )}
+            {/* CONTENEDOR DE CAMPOS ESPECÍFICOS DE OBRA */}
+            {form.documento_tipo === 'OBRA' && (
+              <div className="mt-5 p-4 bg-slate-50/50 border border-slate-150 rounded-2xl space-y-4 animate-slideDown">
+                <h4 className="text-xs font-extrabold text-brand-600 uppercase tracking-wider">
+                  Datos del Expediente de Obra en Curso
+                </h4>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 mb-1">Fecha del Expediente / Documento</label>
+                    <input
+                      type="date"
+                      name="obra_fecha_doc"
+                      required
+                      value={form.obra_fecha_doc}
+                      onChange={handleChange}
+                      className="block w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-slate-700"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 mb-1">Fecha de Alta (Uso del Activo)</label>
+                    <input
+                      type="date"
+                      name="obra_fecha_alta"
+                      required
+                      value={form.obra_fecha_alta}
+                      onChange={handleChange}
+                      className="block w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-slate-700"
+                    />
+                  </div>
+
+                  <SearchableSelect
+                    label="Localidad"
+                    name="obra_id_localidad"
+                    value={form.obra_id_localidad}
+                    onChange={handleChange}
+                    options={localidadOpts}
+                    required
+                    placeholder="Seleccionar localidad..."
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <SearchableSelect
+                    label="Procedencia"
+                    name="obra_id_fuente"
+                    value={form.obra_id_fuente}
+                    onChange={handleChange}
+                    options={incProcedenciaOpts}
+                    placeholder="Seleccionar procedencia..."
+                  />
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 mb-1">
+                      Entidad de Origen <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="obra_origen"
+                      required
+                      value={form.obra_origen}
+                      onChange={handleChange}
+                      placeholder="Ej: Municipalidad de cualquier distrito, tercero..."
+                      className="block w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-slate-700 font-semibold"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 mb-1">
+                      Cuenta Contable <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="obra_cuenta_contable"
+                      required
+                      maxLength={10}
+                      value={form.obra_cuenta_contable}
+                      onChange={handleChange}
+                      list="cuentas-obra-form"
+                      placeholder="Ej: 339... (10 dígitos)"
+                      className="block w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all font-mono"
+                    />
+                    <datalist id="cuentas-obra-form">
+                      {cuentaContableOpts.map(o => (
+                        <option key={o.value} value={o.value}>{o.label}</option>
+                      ))}
+                    </datalist>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 mb-1">
+                      Centro de Costo <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="obra_centro_costo"
+                      required
+                      maxLength={8}
+                      value={form.obra_centro_costo}
+                      onChange={handleChange}
+                      list="cc-obra-form"
+                      placeholder="Ej: 90133301 (8 dígitos)"
+                      className="block w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all font-mono"
+                    />
+                    <datalist id="cc-obra-form">
+                      {centroCostoOpts.map(o => (
+                        <option key={o.value} value={o.value}>{o.label}</option>
+                      ))}
+                    </datalist>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1">Concepto/Detalle de Obra</label>
+                  <textarea
+                    name="obra_concepto"
+                    rows="2"
+                    value={form.obra_concepto}
+                    onChange={handleChange}
+                    placeholder="Especifica el concepto del expediente de obra..."
                     className="block w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-slate-700"
                   />
                 </div>

@@ -5,13 +5,15 @@ import Modal from './Modal';
 import { 
   fetchCompras, fetchIncorporaciones, createCompra, createIncorporacion,
   fetchLocalidades, fetchCuentasContables, fetchCentrosCosto, fetchFuentes, fetchPersonal,
-  renameCompra, renameIncorporacion
+  renameCompra, renameIncorporacion,
+  fetchObras, createObra, renameObra
 } from '../utils/api';
 
 export default function DocumentosPanel() {
-  const [docType, setDocType] = useState('COMPRA'); // COMPRA | INCORPORACION
+  const [docType, setDocType] = useState('COMPRA'); // COMPRA | INCORPORACION | OBRA
   const [compras, setCompras] = useState([]);
   const [incorporaciones, setIncorporaciones] = useState([]);
+  const [obras, setObras] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
@@ -66,12 +68,26 @@ export default function DocumentosPanel() {
     concepto: '',
   });
 
+  const [obraForm, setObraForm] = useState({
+    n_doc: '',
+    fecha_doc: '',
+    id_localidad: '101',
+    cuenta_contable: '',
+    centro_costo: '',
+    id_fuente: '',
+    fuente_origen: '',
+    origen: '',
+    fecha_alta: '',
+    concepto: '',
+  });
+
   const loadData = async () => {
     setLoading(true);
     try {
-      const [cps, incs, locs, ctas, ccs, ftes, pers] = await Promise.all([
+      const [cps, incs, obrs, locs, ctas, ccs, ftes, pers] = await Promise.all([
         fetchCompras(),
         fetchIncorporaciones(),
+        fetchObras(),
         fetchLocalidades(),
         fetchCuentasContables(),
         fetchCentrosCosto(),
@@ -80,6 +96,7 @@ export default function DocumentosPanel() {
       ]);
       setCompras(cps);
       setIncorporaciones(incs);
+      setObras(obrs);
       setLocalidades(locs);
       setCuentasContables(ctas);
       setCentrosCosto(ccs);
@@ -106,6 +123,11 @@ export default function DocumentosPanel() {
     setIncForm(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleObraChange = (e) => {
+    const { name, value } = e.target;
+    setObraForm(prev => ({ ...prev, [name]: value }));
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return '—';
     const parts = dateString.split('T')[0].split('-');
@@ -117,7 +139,10 @@ export default function DocumentosPanel() {
 
   const formatDocNum = (n_doc, type) => {
     if (!n_doc) return '';
-    const prefix = type === 'COMPRA' ? 'OC-' : 'INC-';
+    let prefix = '';
+    if (type === 'COMPRA') prefix = 'OC-';
+    else if (type === 'INCORPORACION') prefix = 'INC-';
+    else if (type === 'OBRA') prefix = 'OBR-';
     if (n_doc.startsWith(prefix)) {
       return n_doc;
     }
@@ -140,8 +165,21 @@ export default function DocumentosPanel() {
         requerido_por: doc.requerido_por || '',
         concepto: doc.concepto || '',
       });
-    } else {
+    } else if (type === 'INCORPORACION') {
       setIncForm({
+        n_doc: doc.n_doc || '',
+        fecha_doc: doc.fecha_doc ? doc.fecha_doc.split('T')[0] : '',
+        id_localidad: doc.id_localidad !== undefined && doc.id_localidad !== null ? String(doc.id_localidad) : '',
+        cuenta_contable: doc.cuenta_contable || '',
+        centro_costo: doc.centro_costo || '',
+        id_fuente: doc.id_fuente !== undefined && doc.id_fuente !== null ? String(doc.id_fuente) : '',
+        fuente_origen: doc.fuente_origen || '',
+        origen: doc.origen || '',
+        fecha_alta: doc.fecha_alta ? doc.fecha_alta.split('T')[0] : '',
+        concepto: doc.concepto || '',
+      });
+    } else {
+      setObraForm({
         n_doc: doc.n_doc || '',
         fecha_doc: doc.fecha_doc ? doc.fecha_doc.split('T')[0] : '',
         id_localidad: doc.id_localidad !== undefined && doc.id_localidad !== null ? String(doc.id_localidad) : '',
@@ -174,6 +212,18 @@ export default function DocumentosPanel() {
       concepto: '',
     });
     setIncForm({
+      n_doc: '',
+      fecha_doc: '',
+      id_localidad: '101',
+      cuenta_contable: '',
+      centro_costo: '',
+      id_fuente: '',
+      fuente_origen: '',
+      origen: '',
+      fecha_alta: '',
+      concepto: '',
+    });
+    setObraForm({
       n_doc: '',
       fecha_doc: '',
       id_localidad: '101',
@@ -324,6 +374,73 @@ export default function DocumentosPanel() {
     }
   };
 
+  const handleObraSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(false);
+
+    try {
+      const cleanDigits = (val) => val ? val.replace(/\D/g, '') : '';
+      
+      const nDocClean = obraForm.n_doc ? obraForm.n_doc.trim() : '';
+      if (!nDocClean) {
+        throw new Error('El N° de Expediente es requerido.');
+      }
+      if (nDocClean.length > 30) {
+        throw new Error('El N° de Expediente no debe exceder los 30 caracteres.');
+      }
+
+      const cuentaClean = cleanDigits(obraForm.cuenta_contable);
+      if (cuentaClean.length !== 10) {
+        throw new Error('La Cuenta Contable debe tener exactamente 10 dígitos (números).');
+      }
+
+      const ccClean = cleanDigits(obraForm.centro_costo);
+      if (ccClean && ccClean.length !== 8) {
+        throw new Error('El Centro de Costo debe tener exactamente 8 dígitos (números).');
+      }
+
+      // Resolve fuente_origen from id_fuente automatically
+      let resolvedFuenteOrigen = '';
+      const selectedFuenteId = obraForm.id_fuente ? Number(obraForm.id_fuente) : null;
+      if (selectedFuenteId === 5) resolvedFuenteOrigen = 'LIQ OBRAS';
+      else if (selectedFuenteId === 6) resolvedFuenteOrigen = 'TRANSFERENCIA';
+      else if (selectedFuenteId === 7) resolvedFuenteOrigen = 'DONACION';
+
+      const payload = {
+        ...obraForm,
+        n_doc: nDocClean,
+        fecha_doc: obraForm.fecha_doc || null,
+        fecha_alta: obraForm.fecha_alta || null,
+        cuenta_contable: cuentaClean,
+        centro_costo: ccClean || null,
+        id_localidad: Number(obraForm.id_localidad),
+        id_fuente: selectedFuenteId,
+        fuente_origen: resolvedFuenteOrigen,
+      };
+
+      await createObra(payload);
+      setSuccess(true);
+      setEditingDoc(null);
+      setObraForm({
+        n_doc: '',
+        fecha_doc: '',
+        id_localidad: '101',
+        cuenta_contable: '',
+        centro_costo: '',
+        id_fuente: '',
+        fuente_origen: '',
+        origen: '',
+        fecha_alta: '',
+        concepto: '',
+      });
+      setShowForm(false);
+      loadData();
+    } catch (err) {
+      setError(err.message || 'Error al guardar el expediente de obra.');
+    }
+  };
+
   const handleRenameSubmit = async (e) => {
     e.preventDefault();
     if (!editingDoc) return;
@@ -339,7 +456,7 @@ export default function DocumentosPanel() {
           throw new Error('El nuevo número de documento debe tener exactamente 7 dígitos.');
         }
         await renameCompra(editingDoc.n_doc, targetNewNum);
-      } else {
+      } else if (docType === 'INCORPORACION') {
         targetNewNum = newDocNum.strip ? newDocNum.strip() : newDocNum.trim();
         if (!targetNewNum) {
           throw new Error('El nuevo número de documento no puede estar vacío.');
@@ -348,13 +465,24 @@ export default function DocumentosPanel() {
           throw new Error('El nuevo número de documento no debe exceder los 30 caracteres.');
         }
         await renameIncorporacion(editingDoc.n_doc, targetNewNum);
+      } else {
+        targetNewNum = newDocNum.strip ? newDocNum.strip() : newDocNum.trim();
+        if (!targetNewNum) {
+          throw new Error('El nuevo número de documento no puede estar vacío.');
+        }
+        if (targetNewNum.length > 30) {
+          throw new Error('El nuevo número de documento no debe exceder los 30 caracteres.');
+        }
+        await renameObra(editingDoc.n_doc, targetNewNum);
       }
       
       // Actualizar el estado del formulario con el nuevo n_doc
       if (docType === 'COMPRA') {
         setCompraForm(prev => ({ ...prev, n_doc: targetNewNum }));
-      } else {
+      } else if (docType === 'INCORPORACION') {
         setIncForm(prev => ({ ...prev, n_doc: targetNewNum }));
+      } else {
+        setObraForm(prev => ({ ...prev, n_doc: targetNewNum }));
       }
       
       // Actualizar el editingDoc con la nueva clave primaria
@@ -441,6 +569,14 @@ export default function DocumentosPanel() {
     return true;
   });
 
+  const filteredObras = obras.filter(o => {
+    if (tableFilters.id_localidad && Number(o.id_localidad) !== Number(tableFilters.id_localidad)) return false;
+    if (tableFilters.cuenta_contable && o.cuenta_contable !== tableFilters.cuenta_contable) return false;
+    if (tableFilters.fecha_desde && o.fecha_doc && o.fecha_doc.split('T')[0] < tableFilters.fecha_desde) return false;
+    if (tableFilters.fecha_hasta && o.fecha_doc && o.fecha_doc.split('T')[0] > tableFilters.fecha_hasta) return false;
+    return true;
+  });
+
   const fuenteOrigenOpts = [
     { value: 'LIQ OBRAS', label: 'LIQ OBRAS (Liquidación de Obras)' },
     { value: 'DONACION', label: 'DONACIÓN' },
@@ -518,10 +654,11 @@ export default function DocumentosPanel() {
             >
               <option value="COMPRA">Orden de Compra</option>
               <option value="INCORPORACION">Resolución de Incorporación</option>
+              <option value="OBRA">Expediente de Obra en Curso</option>
             </select>
           </div>
 
-          {docType === 'COMPRA' ? (
+          {docType === 'COMPRA' && (
             /* FORMULARIO COMPRA */
             <form onSubmit={handleCompraSubmit} className="space-y-4">
               <h3 className="text-sm font-bold text-[#00B0F0] uppercase tracking-wide mb-2">Datos de la Orden de Compra</h3>
@@ -706,7 +843,9 @@ export default function DocumentosPanel() {
                 </button>
               </div>
             </form>
-          ) : (
+          )}
+
+          {docType === 'INCORPORACION' && (
             /* FORMULARIO INCORPORACION */
             <form onSubmit={handleIncSubmit} className="space-y-4">
               <h3 className="text-sm font-bold text-[#00B0F0] uppercase tracking-wide mb-2">Datos del Expediente de Incorporación</h3>
@@ -800,7 +939,7 @@ export default function DocumentosPanel() {
                     value={incForm.origen}
                     onChange={handleIncChange}
                     placeholder="Ej: Municipalidad de cualquier distrito, tercero..."
-                    className="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#00B0F0]/20 focus:border-[#00B0F0] transition-all text-slate-700 font-semibold"
+                    className="block w-slate w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#00B0F0]/20 focus:border-[#00B0F0] transition-all text-slate-700 font-semibold"
                   />
                 </div>
               </div>
@@ -883,6 +1022,184 @@ export default function DocumentosPanel() {
               </div>
             </form>
           )}
+
+          {docType === 'OBRA' && (
+            /* FORMULARIO OBRA */
+            <form onSubmit={handleObraSubmit} className="space-y-4">
+              <h3 className="text-sm font-bold text-[#00B0F0] uppercase tracking-wide mb-2">Datos del Expediente de Obra en Curso</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1">
+                    N° Expediente de Obra <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      name="n_doc"
+                      required
+                      disabled={!!editingDoc}
+                      maxLength={30}
+                      value={obraForm.n_doc}
+                      onChange={handleObraChange}
+                      placeholder="Ej: OBR-2026-001"
+                      className="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#00B0F0]/20 focus:border-[#00B0F0] transition-all font-mono font-bold text-slate-700 disabled:opacity-60 disabled:cursor-not-allowed"
+                    />
+                    {!!editingDoc && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setNewDocNum(obraForm.n_doc);
+                          setRenameError(null);
+                          setShowRenameModal(true);
+                        }}
+                        className="px-3 py-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 hover:text-amber-800 rounded-xl text-xs font-bold transition-all active:scale-95 shrink-0"
+                      >
+                        Renombrar
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1">Fecha del Documento</label>
+                  <input
+                    type="date"
+                    name="fecha_doc"
+                    required
+                    value={obraForm.fecha_doc}
+                    onChange={handleObraChange}
+                    className="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#00B0F0]/20 focus:border-[#00B0F0] transition-all text-slate-700"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1">Fecha de Alta</label>
+                  <input
+                    type="date"
+                    name="fecha_alta"
+                    required
+                    value={obraForm.fecha_alta}
+                    onChange={handleObraChange}
+                    className="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#00B0F0]/20 focus:border-[#00B0F0] transition-all text-slate-700"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <SearchableSelect
+                  label="Localidad"
+                  name="id_localidad"
+                  value={obraForm.id_localidad}
+                  onChange={handleObraChange}
+                  options={editingDoc ? getLocalidadOptsForEdit(obraForm.id_localidad) : localidadOpts}
+                  required
+                  placeholder="Seleccionar localidad..."
+                />
+
+                <SearchableSelect
+                  label="Procedencia"
+                  name="id_fuente"
+                  value={obraForm.id_fuente}
+                  onChange={handleObraChange}
+                  options={incProcedenciaOpts}
+                  placeholder="Seleccionar procedencia..."
+                />
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1">
+                    Entidad de Origen <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="origen"
+                    required
+                    value={obraForm.origen}
+                    onChange={handleObraChange}
+                    placeholder="Ej: Municipalidad de cualquier distrito, tercero..."
+                    className="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#00B0F0]/20 focus:border-[#00B0F0] transition-all text-slate-700 font-semibold"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1">
+                    Cuenta Contable <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="cuenta_contable"
+                    required
+                    maxLength={10}
+                    value={obraForm.cuenta_contable}
+                    onChange={handleObraChange}
+                    list="cuentas-obras"
+                    placeholder="Ej: 339... (10 dígitos)"
+                    className="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#00B0F0]/20 focus:border-[#00B0F0] transition-all font-mono"
+                  />
+                  <datalist id="cuentas-obras">
+                    {cuentaContableOpts.map(o => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </datalist>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1">
+                    Centro de Costo <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="centro_costo"
+                    required
+                    maxLength={8}
+                    value={obraForm.centro_costo}
+                    onChange={handleObraChange}
+                    list="cc-obras"
+                    placeholder="Ej: 90133301 (8 dígitos)"
+                    className="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#00B0F0]/20 focus:border-[#00B0F0] transition-all font-mono"
+                  />
+                  <datalist id="cc-obras">
+                    {centroCostoOpts.map(o => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </datalist>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">Concepto/Detalle de Obra</label>
+                <textarea
+                  name="concepto"
+                  rows="3"
+                  value={obraForm.concepto}
+                  onChange={handleObraChange}
+                  placeholder="Escribe detalles complementarios del expediente de obra..."
+                  className="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#00B0F0]/20 focus:border-[#00B0F0] transition-all text-slate-700"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-2">
+                {editingDoc && (
+                  <button
+                    type="button"
+                    onClick={handleCancelEdit}
+                    className="inline-flex items-center space-x-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-200 active:scale-[0.98]"
+                  >
+                    Cancelar
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  className="inline-flex items-center space-x-2 bg-gradient-to-r from-brand-600 to-[#00B0F0] hover:from-brand-700 hover:to-[#00A0E0] text-white px-6 py-3 rounded-xl font-bold text-sm shadow-lg shadow-brand-600/20 transition-all duration-200 active:scale-[0.98]"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{editingDoc ? 'Actualizar Expediente' : 'Guardar Expediente'}</span>
+                </button>
+              </div>
+            </form>
+          )}
         </div>
       ) : (
         /* TABLAS DE EXPEDIENTES EXISTENTES */
@@ -908,6 +1225,16 @@ export default function DocumentosPanel() {
               }`}
             >
               Incorporaciones ({filteredIncorporaciones.length})
+            </button>
+            <button
+              onClick={() => setDocType('OBRA')}
+              className={`px-4 py-2 text-xs font-bold uppercase tracking-wider border-b-2 transition-all ${
+                docType === 'OBRA'
+                  ? 'border-[#00B0F0] text-[#00B0F0]'
+                  : 'border-transparent text-slate-400 hover:text-slate-600'
+              }`}
+            >
+              Obras en Curso ({filteredObras.length})
             </button>
           </div>
 
@@ -955,112 +1282,174 @@ export default function DocumentosPanel() {
             <div className="text-center text-xs text-slate-400 py-12 animate-pulse">
               Cargando expedientes registrados...
             </div>
-          ) : docType === 'COMPRA' ? (
-            /* TABLA COMPRAS */
-            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-slate-100 text-left text-xs">
-                  <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider">
-                    <tr>
-                      <th className="px-6 py-3.5">N° Documento</th>
-                      <th className="px-6 py-3.5">Fecha O/C</th>
-                      <th className="px-6 py-3.5">Localidad</th>
-                      <th className="px-6 py-3.5">Nota Pedido</th>
-                      <th className="px-6 py-3.5">Certificación</th>
-                      <th className="px-6 py-3.5">Cuenta Contable</th>
-                      <th className="px-6 py-3.5">Centro Costo</th>
-                      <th className="px-6 py-3.5">Concepto</th>
-                      <th className="px-6 py-3.5 text-center">Gestión</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-slate-600">
-                    {filteredCompras.length === 0 ? (
-                      <tr>
-                        <td colSpan="9" className="px-6 py-8 text-center text-slate-400">
-                          No hay órdenes de compra que coincidan con los filtros.
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredCompras.map((c) => (
-                        <tr key={c.n_doc} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="px-6 py-3 font-bold font-mono text-slate-800">{formatDocNum(c.n_doc, 'COMPRA')}</td>
-                          <td className="px-6 py-3">{formatDate(c.fecha_oc)}</td>
-                          <td className="px-6 py-3 text-xs font-semibold text-slate-700">{getLocalidadLabel(c.id_localidad)}</td>
-                          <td className="px-6 py-3 font-mono">{c.nota_pedido || '—'}</td>
-                          <td className="px-6 py-3 font-mono">{c.certificacion_presupuestal || '—'}</td>
-                          <td className="px-6 py-3 font-mono">{c.cuenta_contable}</td>
-                          <td className="px-6 py-3 font-mono">{c.centro_costo || '—'}</td>
-                          <td className="px-6 py-3 truncate max-w-xs" title={c.concepto}>{c.concepto || '—'}</td>
-                          <td className="px-6 py-3 text-center">
-                            <button
-                              onClick={() => handleEditDoc('COMPRA', c)}
-                              title="Editar Documento"
-                              className="p-1.5 bg-brand-50 hover:bg-brand-100 border border-brand-200 text-brand-600 hover:text-brand-700 rounded-lg transition-all duration-200 active:scale-95 inline-flex items-center"
-                            >
-                              <Edit3 className="w-3.5 h-3.5" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
           ) : (
-            /* TABLA INCORPORACIONES */
-            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-slate-100 text-left text-xs">
-                  <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider">
-                    <tr>
-                      <th className="px-6 py-3.5">N° Expediente</th>
-                      <th className="px-6 py-3.5">Fecha Pliego</th>
-                      <th className="px-6 py-3.5">Localidad</th>
-                      <th className="px-6 py-3.5">Fuente Origen</th>
-                      <th className="px-6 py-3.5">Origen</th>
-                      <th className="px-6 py-3.5">Fecha Alta</th>
-                      <th className="px-6 py-3.5">Cuenta Contable</th>
-                      <th className="px-6 py-3.5">Centro Costo</th>
-                      <th className="px-6 py-3.5">Concepto</th>
-                      <th className="px-6 py-3.5 text-center">Gestión</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-slate-600">
-                    {filteredIncorporaciones.length === 0 ? (
-                      <tr>
-                        <td colSpan="10" className="px-6 py-8 text-center text-slate-400">
-                          No hay incorporaciones que coincidan con los filtros.
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredIncorporaciones.map((i) => (
-                        <tr key={i.n_doc} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="px-6 py-3 font-bold font-mono text-slate-800">{formatDocNum(i.n_doc, 'INCORPORACION')}</td>
-                          <td className="px-6 py-3">{formatDate(i.fecha_doc)}</td>
-                          <td className="px-6 py-3 text-xs font-semibold text-slate-700">{getLocalidadLabel(i.id_localidad)}</td>
-                          <td className="px-6 py-3">{i.fuente_origen || '—'}</td>
-                          <td className="px-6 py-3">{i.origen || '—'}</td>
-                          <td className="px-6 py-3">{formatDate(i.fecha_alta)}</td>
-                          <td className="px-6 py-3 font-mono">{i.cuenta_contable}</td>
-                          <td className="px-6 py-3 font-mono">{i.centro_costo || '—'}</td>
-                          <td className="px-6 py-3 truncate max-w-xs" title={i.concepto}>{i.concepto || '—'}</td>
-                          <td className="px-6 py-3 text-center">
-                            <button
-                              onClick={() => handleEditDoc('INCORPORACION', i)}
-                              title="Editar Documento"
-                              className="p-1.5 bg-brand-50 hover:bg-brand-100 border border-brand-200 text-brand-600 hover:text-brand-700 rounded-lg transition-all duration-200 active:scale-95 inline-flex items-center"
-                            >
-                              <Edit3 className="w-3.5 h-3.5" />
-                            </button>
-                          </td>
+            <>
+              {docType === 'COMPRA' && (
+                /* TABLA COMPRAS */
+                <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-slate-100 text-left text-xs">
+                      <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider">
+                        <tr>
+                          <th className="px-6 py-3.5">N° Documento</th>
+                          <th className="px-6 py-3.5">Fecha O/C</th>
+                          <th className="px-6 py-3.5">Localidad</th>
+                          <th className="px-6 py-3.5">Nota Pedido</th>
+                          <th className="px-6 py-3.5">Certificación</th>
+                          <th className="px-6 py-3.5">Cuenta Contable</th>
+                          <th className="px-6 py-3.5">Centro Costo</th>
+                          <th className="px-6 py-3.5">Concepto</th>
+                          <th className="px-6 py-3.5 text-center">Gestión</th>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 text-slate-600">
+                        {filteredCompras.length === 0 ? (
+                          <tr>
+                            <td colSpan="9" className="px-6 py-8 text-center text-slate-400">
+                              No hay órdenes de compra que coincidan con los filtros.
+                            </td>
+                          </tr>
+                        ) : (
+                          filteredCompras.map((c) => (
+                            <tr key={c.n_doc} className="hover:bg-slate-50/50 transition-colors">
+                              <td className="px-6 py-3 font-bold font-mono text-slate-800">{formatDocNum(c.n_doc, 'COMPRA')}</td>
+                              <td className="px-6 py-3">{formatDate(c.fecha_oc)}</td>
+                              <td className="px-6 py-3 text-xs font-semibold text-slate-700">{getLocalidadLabel(c.id_localidad)}</td>
+                              <td className="px-6 py-3 font-mono">{c.nota_pedido || '—'}</td>
+                              <td className="px-6 py-3 font-mono">{c.certificacion_presupuestal || '—'}</td>
+                              <td className="px-6 py-3 font-mono">{c.cuenta_contable}</td>
+                              <td className="px-6 py-3 font-mono">{c.centro_costo || '—'}</td>
+                              <td className="px-6 py-3 truncate max-w-xs" title={c.concepto}>{c.concepto || '—'}</td>
+                              <td className="px-6 py-3 text-center">
+                                <button
+                                  onClick={() => handleEditDoc('COMPRA', c)}
+                                  title="Editar Documento"
+                                  className="p-1.5 bg-brand-50 hover:bg-brand-100 border border-brand-200 text-brand-600 hover:text-brand-700 rounded-lg transition-all duration-200 active:scale-95 inline-flex items-center"
+                                >
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {docType === 'INCORPORACION' && (
+                /* TABLA INCORPORACIONES */
+                <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-slate-100 text-left text-xs">
+                      <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider">
+                        <tr>
+                          <th className="px-6 py-3.5">N° Expediente</th>
+                          <th className="px-6 py-3.5">Fecha Pliego</th>
+                          <th className="px-6 py-3.5">Localidad</th>
+                          <th className="px-6 py-3.5">Fuente Origen</th>
+                          <th className="px-6 py-3.5">Origen</th>
+                          <th className="px-6 py-3.5">Fecha Alta</th>
+                          <th className="px-6 py-3.5">Cuenta Contable</th>
+                          <th className="px-6 py-3.5">Centro Costo</th>
+                          <th className="px-6 py-3.5">Concepto</th>
+                          <th className="px-6 py-3.5 text-center">Gestión</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 text-slate-600">
+                        {filteredIncorporaciones.length === 0 ? (
+                          <tr>
+                            <td colSpan="10" className="px-6 py-8 text-center text-slate-400">
+                              No hay incorporaciones que coincidan con los filtros.
+                            </td>
+                          </tr>
+                        ) : (
+                          filteredIncorporaciones.map((i) => (
+                            <tr key={i.n_doc} className="hover:bg-slate-50/50 transition-colors">
+                              <td className="px-6 py-3 font-bold font-mono text-slate-800">{formatDocNum(i.n_doc, 'INCORPORACION')}</td>
+                              <td className="px-6 py-3">{formatDate(i.fecha_doc)}</td>
+                              <td className="px-6 py-3 text-xs font-semibold text-slate-700">{getLocalidadLabel(i.id_localidad)}</td>
+                              <td className="px-6 py-3">{i.fuente_origen || '—'}</td>
+                              <td className="px-6 py-3">{i.origen || '—'}</td>
+                              <td className="px-6 py-3">{formatDate(i.fecha_alta)}</td>
+                              <td className="px-6 py-3 font-mono">{i.cuenta_contable}</td>
+                              <td className="px-6 py-3 font-mono">{i.centro_costo || '—'}</td>
+                              <td className="px-6 py-3 truncate max-w-xs" title={i.concepto}>{i.concepto || '—'}</td>
+                              <td className="px-6 py-3 text-center">
+                                <button
+                                  onClick={() => handleEditDoc('INCORPORACION', i)}
+                                  title="Editar Documento"
+                                  className="p-1.5 bg-brand-50 hover:bg-brand-100 border border-brand-200 text-brand-600 hover:text-brand-700 rounded-lg transition-all duration-200 active:scale-95 inline-flex items-center"
+                                >
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {docType === 'OBRA' && (
+                /* TABLA OBRAS */
+                <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-slate-100 text-left text-xs">
+                      <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider">
+                        <tr>
+                          <th className="px-6 py-3.5">N° Expediente de Obra</th>
+                          <th className="px-6 py-3.5">Fecha Pliego/Doc</th>
+                          <th className="px-6 py-3.5">Localidad</th>
+                          <th className="px-6 py-3.5">Fuente Origen</th>
+                          <th className="px-6 py-3.5">Origen</th>
+                          <th className="px-6 py-3.5">Fecha Alta</th>
+                          <th className="px-6 py-3.5">Cuenta Contable</th>
+                          <th className="px-6 py-3.5">Centro Costo</th>
+                          <th className="px-6 py-3.5">Concepto</th>
+                          <th className="px-6 py-3.5 text-center">Gestión</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 text-slate-600">
+                        {filteredObras.length === 0 ? (
+                          <tr>
+                            <td colSpan="10" className="px-6 py-8 text-center text-slate-400">
+                              No hay expedientes de obra que coincidan con los filtros.
+                            </td>
+                          </tr>
+                        ) : (
+                          filteredObras.map((o) => (
+                            <tr key={o.n_doc} className="hover:bg-slate-50/50 transition-colors">
+                              <td className="px-6 py-3 font-bold font-mono text-slate-800">{formatDocNum(o.n_doc, 'OBRA')}</td>
+                              <td className="px-6 py-3">{formatDate(o.fecha_doc)}</td>
+                              <td className="px-6 py-3 text-xs font-semibold text-slate-700">{getLocalidadLabel(o.id_localidad)}</td>
+                              <td className="px-6 py-3">{o.fuente_origen || '—'}</td>
+                              <td className="px-6 py-3">{o.origen || '—'}</td>
+                              <td className="px-6 py-3">{formatDate(o.fecha_alta)}</td>
+                              <td className="px-6 py-3 font-mono">{o.cuenta_contable}</td>
+                              <td className="px-6 py-3 font-mono">{o.centro_costo || '—'}</td>
+                              <td className="px-6 py-3 truncate max-w-xs" title={o.concepto}>{o.concepto || '—'}</td>
+                              <td className="px-6 py-3 text-center">
+                                <button
+                                  onClick={() => handleEditDoc('OBRA', o)}
+                                  title="Editar Documento"
+                                  className="p-1.5 bg-brand-50 hover:bg-brand-100 border border-brand-200 text-brand-600 hover:text-brand-700 rounded-lg transition-all duration-200 active:scale-95 inline-flex items-center"
+                                >
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}

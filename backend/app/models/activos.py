@@ -18,8 +18,9 @@ class Activo(Base):
     documento_tipo: Mapped[str] = mapped_column(String(20), default="COMPRA")
     n_doc_compra: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
     n_doc_incorporacion: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
+    n_doc_obra: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
     
-    # Campo autogenerado en la base de datos (STORED: COALESCE(n_doc_compra, n_doc_incorporacion))
+    # Campo autogenerado en la base de datos (STORED: COALESCE(n_doc_compra, n_doc_incorporacion, n_doc_obra))
     n_doc: Mapped[Optional[str]] = mapped_column(String(30), server_default=FetchedValue())
     
     cod_categoria: Mapped[int] = mapped_column(Integer)
@@ -100,6 +101,7 @@ class VwRegistroActivosDetalle(Base):
     depreciacion_acumulada: Mapped[Decimal] = mapped_column(Numeric(18, 4))
     valor_neto: Mapped[Decimal] = mapped_column(Numeric(18, 4))
     estado_activo: Mapped[str] = mapped_column(String(30))
+    cuenta_contable: Mapped[Optional[str]] = mapped_column(String(20))
 
     # Campos de vehículo detalle
     placa: Mapped[Optional[str]] = mapped_column(String(10))
@@ -200,6 +202,27 @@ class Incorporacion(Base):
     Modelo ORM para la tabla af.fct_incorporacion_af.
     """
     __tablename__ = "fct_incorporacion_af"
+    __table_args__ = {"schema": "af"}
+
+    n_doc: Mapped[str] = mapped_column(String(30), primary_key=True)
+    fecha_doc: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    id_localidad: Mapped[int] = mapped_column(Integer, nullable=False)
+    cuenta_contable: Mapped[str] = mapped_column(String(20), nullable=False)
+    centro_costo: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    id_fuente: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    fuente_origen: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    origen: Mapped[Optional[str]] = mapped_column(String(150), nullable=True)
+    fecha_alta: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    concepto: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(server_default=FetchedValue())
+    updated_at: Mapped[datetime] = mapped_column(server_default=FetchedValue())
+
+
+class Obra(Base):
+    """
+    Modelo ORM para la tabla af.fct_obra.
+    """
+    __tablename__ = "fct_obra"
     __table_args__ = {"schema": "af"}
 
     n_doc: Mapped[str] = mapped_column(String(30), primary_key=True)

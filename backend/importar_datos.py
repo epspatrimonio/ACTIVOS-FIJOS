@@ -186,12 +186,20 @@ async def main():
                     if db_act.documento_tipo != doc_type:
                         db_act.documento_tipo = doc_type
                         changed = True
-                    if doc_type == 'COMPRA' and db_act.n_doc_compra != doc_num:
-                        db_act.n_doc_compra = doc_num
-                        changed = True
-                    elif doc_type == 'INCORPORACION' and db_act.n_doc_incorporacion != doc_num:
-                        db_act.n_doc_incorporacion = doc_num
-                        changed = True
+                    if doc_type == 'COMPRA':
+                        if db_act.n_doc_compra != doc_num:
+                            db_act.n_doc_compra = doc_num
+                            changed = True
+                        if db_act.n_doc_incorporacion is not None:
+                            db_act.n_doc_incorporacion = None
+                            changed = True
+                    elif doc_type == 'INCORPORACION':
+                        if db_act.n_doc_incorporacion != doc_num:
+                            db_act.n_doc_incorporacion = doc_num
+                            changed = True
+                        if db_act.n_doc_compra is not None:
+                            db_act.n_doc_compra = None
+                            changed = True
                         
                 if changed:
                     updated_activos += 1
