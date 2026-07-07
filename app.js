@@ -111,6 +111,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (contableDigitSelect) contableDigitSelect.addEventListener('change', applyFilters);
       if (contableYearSelect) contableYearSelect.addEventListener('change', applyFilters);
       if (contableMonthSelect) contableMonthSelect.addEventListener('change', applyFilters);
+      const contableTypeSelect = document.getElementById('contable-type-select');
+      if (contableTypeSelect) contableTypeSelect.addEventListener('change', applyFilters);
 
       applyFilters();
       
@@ -2198,7 +2200,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "Código PCGE": item.codigo,
         "Descripción de la Cuenta": item.descripcion,
         "Tipo Elemento": item.tipo,
-        "Saldo Total (S/.)": Number(item.monto.toFixed(2))
+        "Saldo Total (S/.)": Number(item.monto.toFixed(4))
       }));
     }
 
@@ -2664,12 +2666,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderContableRows(filteredAssets) {
     const digitSelect = document.getElementById('contable-digit-select');
+    const typeSelect = document.getElementById('contable-type-select');
     const tbody = document.getElementById('contable-tbody');
     
     if (!tbody) return;
     tbody.innerHTML = '';
     
     const digitMode = Number(digitSelect ? digitSelect.value : 10);
+    const selectedType = typeSelect ? typeSelect.value : 'Todos';
     
     const generic3Digits = {
       '331': 'TERRENOS',
@@ -2716,9 +2720,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
       if (code.startsWith('33')) {
-        return `ACTIVO FIJO - CATEGORÍA ${category || 'GENERAL'} (${code})`;
+        return category ? category.toUpperCase() : 'GENERAL';
       } else if (code.startsWith('68')) {
-        return `DEPRECIACIÓN ACUMULADA - CÓDIGO REF (${code})`;
+        return 'DEPRECIACIÓN ACUMULADA';
       }
       return `CUENTA CONTABLE (${code})`;
     }
@@ -2741,29 +2745,42 @@ document.addEventListener('DOMContentLoaded', () => {
         ledger[costKey] = {
           codigo: costKey,
           descripcion: getAccountName(costKey, cc, item.categoria),
-          tipo: 'ACTIVO FIJO (33)',
+          tipo: costKey.startsWith('339') ? 'OBRAS EN CURSO' : 'ACTIVO',
           monto: 0
         };
       }
       ledger[costKey].monto += cost;
 
-      if (!ledger[depKey]) {
-        const baseName = getAccountName(costKey, cc, item.categoria);
-        ledger[depKey] = {
-          codigo: depKey,
-          descripcion: `DEPRECIACIÓN ACUM. - ${baseName}`,
-          tipo: 'DEPRECIACIÓN (68)',
-          monto: 0
-        };
+      // Las obras en curso no se deprecian
+      if (!cc.startsWith('339')) {
+        if (!ledger[depKey]) {
+          const baseName = getAccountName(costKey, cc, item.categoria);
+          ledger[depKey] = {
+            codigo: depKey,
+            descripcion: `DEPRECIACIÓN ACUM. - ${baseName}`,
+            tipo: 'DEPRECIACIÓN',
+            monto: 0
+          };
+        }
+        ledger[depKey].monto += dep;
       }
-      ledger[depKey].monto += dep;
     });
 
     const ledgerList = Object.values(ledger).sort((a, b) => a.codigo.localeCompare(b.codigo));
-    currentFilteredData = ledgerList;
-    resultsCount.textContent = `Registros: ${ledgerList.length}`;
+    
+    // Filtrar por Tipo de Elemento
+    const filteredLedgerList = ledgerList.filter(item => {
+      if (selectedType === 'Todos') return true;
+      if (selectedType === 'ACTIVO') return item.tipo === 'ACTIVO';
+      if (selectedType === 'DEPRECIACION') return item.tipo === 'DEPRECIACIÓN';
+      if (selectedType === 'OBRAS_EN_CURSO') return item.tipo === 'OBRAS EN CURSO';
+      return true;
+    });
 
-    if (ledgerList.length === 0) {
+    currentFilteredData = filteredLedgerList;
+    resultsCount.textContent = `Registros: ${filteredLedgerList.length}`;
+
+    if (filteredLedgerList.length === 0) {
       tbody.innerHTML = `<tr><td colspan="4" class="px-5 py-6 text-center text-slate-400">No hay saldos en este período</td></tr>`;
       return;
     }
@@ -2771,7 +2788,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let sumCost = 0;
     let sumDep = 0;
 
-    ledgerList.forEach(item => {
+    filteredLedgerList.forEach(item => {
       const row = document.createElement('tr');
       row.className = 'hover:bg-slate-50 text-slate-700 transition-colors border-b border-slate-150';
       
@@ -2783,7 +2800,9 @@ document.addEventListener('DOMContentLoaded', () => {
         <td class="px-5 py-3 text-xs font-medium text-slate-700">${item.descripcion}</td>
         <td class="px-5 py-3 whitespace-nowrap">
           <span class="px-2 py-0.5 text-[10px] font-bold border rounded-full ${
-            item.codigo.startsWith('33') ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-rose-50 text-rose-700 border-rose-200'
+            item.tipo === 'ACTIVO' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+            item.tipo === 'OBRAS EN CURSO' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+            'bg-rose-50 text-rose-700 border-rose-200'
           }">
             ${item.tipo}
           </span>
