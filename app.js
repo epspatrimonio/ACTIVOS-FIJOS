@@ -2766,7 +2766,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const baseName = getAccountName(costKey, cc, item.categoria);
           ledger[depKey] = {
             codigo: depKey,
-            descripcion: `DEPRECIACIÓN ACUM. - ${baseName}`,
+            descripcion: baseName,
             tipo: 'DEPRECIACIÓN',
             monto: 0
           };
