@@ -2729,7 +2729,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const ledger = {};
     filteredAssets.forEach(item => {
-      const cc = item.cuenta_contable || '3391010101';
+      const cc = item.cuenta_contable || '';
+      if (!cc || cc === '0000000000' || cc.startsWith('0')) {
+        // Skip dummy/non-existent accounts
+        return;
+      }
       if (cc.startsWith('339')) {
         // Skip Obras en curso completely from the Reporte Contable
         return;
