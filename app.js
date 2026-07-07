@@ -2730,6 +2730,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const ledger = {};
     filteredAssets.forEach(item => {
       const cc = item.cuenta_contable || '3391010101';
+      if (cc.startsWith('339')) {
+        // Skip Obras en curso completely from the Reporte Contable
+        return;
+      }
+
       const cost = Number(item.valor_en_libros) || 0;
       const dep = Number(item.depreciacion_acumulada) || 0;
 
@@ -2745,14 +2750,14 @@ document.addEventListener('DOMContentLoaded', () => {
         ledger[costKey] = {
           codigo: costKey,
           descripcion: getAccountName(costKey, cc, item.categoria),
-          tipo: costKey.startsWith('339') ? 'OBRAS EN CURSO' : 'ACTIVO',
+          tipo: 'ACTIVO',
           monto: 0
         };
       }
       ledger[costKey].monto += cost;
 
-      // Las obras en curso no se deprecian
-      if (!cc.startsWith('339')) {
+      // Terrenos (331) no se deprecian
+      if (!cc.startsWith('331')) {
         if (!ledger[depKey]) {
           const baseName = getAccountName(costKey, cc, item.categoria);
           ledger[depKey] = {
@@ -2773,7 +2778,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (selectedType === 'Todos') return true;
       if (selectedType === 'ACTIVO') return item.tipo === 'ACTIVO';
       if (selectedType === 'DEPRECIACION') return item.tipo === 'DEPRECIACIÓN';
-      if (selectedType === 'OBRAS_EN_CURSO') return item.tipo === 'OBRAS EN CURSO';
       return true;
     });
 
