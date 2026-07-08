@@ -486,9 +486,9 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
           }
           form.compra_nota_pedido = npClean;
 
-          const certClean = cleanDigits(form.compra_certificacion_presupuestal);
+          let certClean = cleanDigits(form.compra_certificacion_presupuestal);
           if (certClean && certClean.length < 4) {
-            throw new Error("La Certificación Presupuestal debe tener como mínimo 4 dígitos (números).");
+            certClean = certClean.padStart(4, '0');
           }
           form.compra_certificacion_presupuestal = certClean;
 

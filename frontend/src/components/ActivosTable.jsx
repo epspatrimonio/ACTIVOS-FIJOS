@@ -1,9 +1,83 @@
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Package, Trash2, Edit3 } from 'lucide-react';
 import { deleteActivo } from '../utils/api';
+import ExcelHeaderFilter from './ExcelHeaderFilter';
 
 export default function ActivosTable({ activos, loading, error, onEdit, onDeleteSuccess }) {
-  
+  const [colFilters, setColFilters] = useState({});
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+
+  // Reset filters only when data is reloaded (length changes)
+  const activosCount = activos.length;
+  useEffect(() => {
+    setColFilters({});
+    setSortConfig({ key: null, direction: null });
+  }, [activosCount]);
+
+  const handleFilterChange = (columnKey, values) => {
+    setColFilters(prev => ({
+      ...prev,
+      [columnKey]: values
+    }));
+  };
+
+  const handleSortChange = (columnKey, direction) => {
+    setSortConfig({ key: columnKey, direction });
+  };
+
+  const getColValue = (item, key) => {
+    switch (key) {
+      case 'cod_patrimonial': return item.cod_patrimonial || '';
+      case 'n_doc': return item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : `INC-${item.n_doc}`) : '';
+      case 'fecha_ingreso': return item.fecha_alta_factura || '';
+      case 'ubicacion': return `${item.sucursal || ''} / ${item.localidad || ''}`;
+      case 'denominacion': return item.denominacion || '';
+      case 'marca': return item.marca || '';
+      case 'placa': return item.placa || '';
+      case 'estado': return item.estado_activo || '';
+      case 'valor_en_libros': return item.valor_en_libros || 0;
+      case 'valor_neto': return (Number(item.valor_en_libros) || 0) - (Number(item.depreciacion_acumulada) || 0);
+      case 'responsable': return item.responsable || '';
+      case 'puesto': return item.puesto || '';
+      case 'unidad': return item.unidad || '';
+      default: return '';
+    }
+  };
+
+  const filteredAndSortedActivos = useMemo(() => {
+    let result = [...activos];
+
+    // Apply column filters
+    Object.keys(colFilters).forEach(key => {
+      const selected = colFilters[key];
+      if (selected && selected.length > 0) {
+        result = result.filter(item => {
+          const val = String(getColValue(item, key)).trim();
+          return selected.includes(val);
+        });
+      }
+    });
+
+    // Apply sort
+    if (sortConfig.key) {
+      result.sort((a, b) => {
+        const valA = getColValue(a, sortConfig.key);
+        const valB = getColValue(b, sortConfig.key);
+
+        if (typeof valA === 'number' && typeof valB === 'number') {
+          return sortConfig.direction === 'asc' ? valA - valB : valB - valA;
+        }
+
+        const strA = String(valA);
+        const strB = String(valB);
+        const comp = strA.localeCompare(strB, undefined, { numeric: true, sensitivity: 'base' });
+        return sortConfig.direction === 'asc' ? comp : -comp;
+      });
+    }
+
+    return result;
+  }, [activos, colFilters, sortConfig]);
+
   const handleDelete = async (cod_patrimonial) => {
     if (window.confirm(`¿Está seguro de que desea eliminar el activo ${cod_patrimonial}?`)) {
       try {
@@ -67,17 +141,148 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
         <table className="min-w-[1600px] w-full divide-y divide-slate-200 border-collapse">
           <thead className="sticky top-0 bg-slate-100 z-20 shadow-[0_1px_0_0_rgba(226,232,240,1)]">
             <tr>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Cód. Patrimonial</th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Documento N Doc</th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Fecha de Ingreso</th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Ubicación (Sucursal / Localidad)</th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Denominación del Activo</th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Características</th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Especificaciones</th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Estado</th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Valor Libros</th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Valor Neto</th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Responsable</th>
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+                <ExcelHeaderFilter
+                  title="Cód. Patrimonial"
+                  columnKey="cod_patrimonial"
+                  data={activos}
+                  selectedValues={colFilters.cod_patrimonial}
+                  onFilterChange={(vals) => handleFilterChange('cod_patrimonial', vals)}
+                  currentSort={sortConfig}
+                  onSortChange={handleSortChange}
+                  getValue={(item) => getColValue(item, 'cod_patrimonial')}
+                />
+              </th>
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+                <ExcelHeaderFilter
+                  title="Documento N Doc"
+                  columnKey="n_doc"
+                  data={activos}
+                  selectedValues={colFilters.n_doc}
+                  onFilterChange={(vals) => handleFilterChange('n_doc', vals)}
+                  currentSort={sortConfig}
+                  onSortChange={handleSortChange}
+                  getValue={(item) => getColValue(item, 'n_doc')}
+                />
+              </th>
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+                <ExcelHeaderFilter
+                  title="Fecha de Ingreso"
+                  columnKey="fecha_ingreso"
+                  data={activos}
+                  selectedValues={colFilters.fecha_ingreso}
+                  onFilterChange={(vals) => handleFilterChange('fecha_ingreso', vals)}
+                  currentSort={sortConfig}
+                  onSortChange={handleSortChange}
+                  getValue={(item) => formatDate(getColValue(item, 'fecha_ingreso'))}
+                />
+              </th>
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+                <ExcelHeaderFilter
+                  title="Ubicación (Sucursal / Localidad)"
+                  columnKey="ubicacion"
+                  data={activos}
+                  selectedValues={colFilters.ubicacion}
+                  onFilterChange={(vals) => handleFilterChange('ubicacion', vals)}
+                  currentSort={sortConfig}
+                  onSortChange={handleSortChange}
+                  getValue={(item) => getColValue(item, 'ubicacion')}
+                />
+              </th>
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+                <ExcelHeaderFilter
+                  title="Denominación del Activo"
+                  columnKey="denominacion"
+                  data={activos}
+                  selectedValues={colFilters.denominacion}
+                  onFilterChange={(vals) => handleFilterChange('denominacion', vals)}
+                  currentSort={sortConfig}
+                  onSortChange={handleSortChange}
+                  getValue={(item) => getColValue(item, 'denominacion')}
+                />
+              </th>
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+                <ExcelHeaderFilter
+                  title="Características"
+                  columnKey="marca"
+                  data={activos}
+                  selectedValues={colFilters.marca}
+                  onFilterChange={(vals) => handleFilterChange('marca', vals)}
+                  currentSort={sortConfig}
+                  onSortChange={handleSortChange}
+                  getValue={(item) => getColValue(item, 'marca')}
+                />
+              </th>
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+                <ExcelHeaderFilter
+                  title="Especificaciones"
+                  columnKey="placa"
+                  data={activos}
+                  selectedValues={colFilters.placa}
+                  onFilterChange={(vals) => handleFilterChange('placa', vals)}
+                  currentSort={sortConfig}
+                  onSortChange={handleSortChange}
+                  getValue={(item) => getColValue(item, 'placa')}
+                />
+              </th>
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+                <ExcelHeaderFilter
+                  title="Estado"
+                  columnKey="estado"
+                  data={activos}
+                  selectedValues={colFilters.estado}
+                  onFilterChange={(vals) => handleFilterChange('estado', vals)}
+                  currentSort={sortConfig}
+                  onSortChange={handleSortChange}
+                  getValue={(item) => getColValue(item, 'estado')}
+                />
+              </th>
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+                <ExcelHeaderFilter
+                  title="Valor Libros"
+                  columnKey="valor_en_libros"
+                  data={activos}
+                  selectedValues={colFilters.valor_en_libros}
+                  onFilterChange={(vals) => handleFilterChange('valor_en_libros', vals)}
+                  currentSort={sortConfig}
+                  onSortChange={handleSortChange}
+                  getValue={(item) => String(getColValue(item, 'valor_en_libros'))}
+                />
+              </th>
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+                <ExcelHeaderFilter
+                  title="Valor Neto"
+                  columnKey="valor_neto"
+                  data={activos}
+                  selectedValues={colFilters.valor_neto}
+                  onFilterChange={(vals) => handleFilterChange('valor_neto', vals)}
+                  currentSort={sortConfig}
+                  onSortChange={handleSortChange}
+                  getValue={(item) => String(getColValue(item, 'valor_neto'))}
+                />
+              </th>
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+                <ExcelHeaderFilter
+                  title="Responsable"
+                  columnKey="responsable"
+                  data={activos}
+                  selectedValues={colFilters.responsable}
+                  onFilterChange={(vals) => handleFilterChange('responsable', vals)}
+                  currentSort={sortConfig}
+                  onSortChange={handleSortChange}
+                  getValue={(item) => getColValue(item, 'responsable')}
+                />
+                <ExcelHeaderFilter
+                  title="Puesto"
+                  columnKey="puesto"
+                  data={activos}
+                  selectedValues={colFilters.puesto}
+                  onFilterChange={(vals) => handleFilterChange('puesto', vals)}
+                  currentSort={sortConfig}
+                  onSortChange={handleSortChange}
+                  getValue={(item) => getColValue(item, 'puesto')}
+                />
+              </th>
               <th scope="col" className="px-5 py-3 text-center text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Gestión</th>
             </tr>
           </thead>
@@ -112,7 +317,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   <td className="px-5 py-4"><div className="h-5 bg-slate-200 rounded w-12 mx-auto"></div></td>
                 </tr>
               ))
-            ) : activos.length === 0 ? (
+            ) : filteredAndSortedActivos.length === 0 ? (
               <tr>
                 <td colSpan="12" className="px-5 py-12 text-center text-slate-400">
                   <div className="flex flex-col items-center justify-center">
@@ -123,7 +328,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                 </td>
               </tr>
             ) : (
-              activos.map((activo) => (
+              filteredAndSortedActivos.map((activo) => (
                 <tr key={activo.cod_patrimonial} className="table-row-hover text-slate-700">
                   {/* Código Patrimonial */}
                   <td className="px-5 py-4 whitespace-nowrap text-[0.875rem] font-mono font-bold text-slate-900">
@@ -231,8 +436,20 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   </td>
 
                   {/* Responsable */}
-                  <td className="px-5 py-4 whitespace-nowrap text-[0.8125rem] font-semibold text-slate-600">
-                    {activo.responsable || '—'}
+                  <td className="px-5 py-4 min-w-[200px]">
+                    <div className="text-[0.8125rem] font-bold text-slate-800 leading-snug">
+                      {activo.responsable || '—'}
+                    </div>
+                    {activo.puesto && (
+                      <div className="text-[0.6875rem] text-brand-600 font-bold mt-0.5 uppercase tracking-wide">
+                        {activo.puesto}
+                      </div>
+                    )}
+                    {activo.unidad && activo.unidad !== activo.puesto && (
+                      <div className="text-[0.6875rem] text-slate-400 font-semibold mt-0.5 truncate max-w-[190px]" title={activo.unidad}>
+                        {activo.unidad}
+                      </div>
+                    )}
                   </td>
                   
                   {/* Gestión */}

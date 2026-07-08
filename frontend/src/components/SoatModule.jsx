@@ -1,12 +1,14 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   ShieldCheck, Plus, Pencil, Trash2, X, Save, Search,
   AlertTriangle, AlertCircle, CheckCircle2, Loader2, RefreshCw,
   History, Car, Calendar, Building2, DollarSign, Hash,
-  Clock, TrendingDown, ChevronDown, ChevronRight
+  Clock, TrendingDown, ChevronDown, ChevronRight,
+  FileSpreadsheet, FileText
 } from 'lucide-react';
 import Modal from './Modal';
 import SearchableSelect from './SearchableSelect';
+import ExcelHeaderFilter from './ExcelHeaderFilter';
 import { fetchSoat, createSoat, updateSoat, deleteSoat, fetchSoatPorVehiculo, fetchActivos, fetchSucursales, fetchLocalidades, fetchVehiculos } from '../utils/api';
 
 // ─── Config estados SOAT ──────────────────────────────────────────────────────
@@ -387,6 +389,39 @@ export default function SoatModule() {
   const [filtroSucursal, setFiltroSucursal] = useState('');
   const [filtroLocalidad, setFiltroLocalidad] = useState('');
   const [busqueda, setBusqueda] = useState('');
+
+  const [colFilters, setColFilters] = useState({});
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+
+  // Reset filters only when data is reloaded (length changes)
+  const registrosCount = registros.length;
+  useEffect(() => {
+    setColFilters({});
+    setSortConfig({ key: null, direction: null });
+  }, [registrosCount]);
+
+  const handleFilterChange = (columnKey, values) => {
+    setColFilters(prev => ({
+      ...prev,
+      [columnKey]: values
+    }));
+  };
+
+  const handleSortChange = (columnKey, direction) => {
+    setSortConfig({ key: columnKey, direction });
+  };
+
+  const getColValue = (item, key) => {
+    switch (key) {
+      case 'cod_patrimonial': return item.cod_patrimonial || '';
+      case 'placa': return item.placa || '';
+      case 'tipo_vehiculo': return item.tipo_vehiculo || '';
+      case 'sucursal': return item.sucursal || '';
+      case 'vencimiento_soat': return item.vencimiento_soat || '';
+      case 'vencimiento_rev_tec': return item.vencimiento_rev_tec || '';
+      default: return '';
+    }
+  };
   const [sucursales, setSucursales] = useState([]);
   const [localidades, setLocalidades] = useState([]);
 
@@ -409,6 +444,11 @@ export default function SoatModule() {
           dias_vigencia_rev_tec: detail.dias_vigencia_rev_tec !== undefined ? detail.dias_vigencia_rev_tec : null,
           estado_rev_tec: detail.estado_rev_tec || null,
           fecha_alta_factura: asset.fecha_alta_factura || '',
+          fecha_alta: asset.fecha_alta || '',
+          fuente: asset.fuente || '',
+          nota_pedido: asset.nota_pedido || '',
+          centro_costo: asset.centro_costo || '',
+          requerido_por: asset.requerido_por || '',
           fecha_registro_contable: asset.fecha_registro_contable || '',
           estado_activo: asset.estado_activo || '',
         };
@@ -433,6 +473,126 @@ export default function SoatModule() {
     fetchLocalidades().then(setLocalidades).catch(() => {});
   }, [load]);
 
+  const handleExportExcel = () => {
+    if (!window.XLSX) {
+      alert('La librería SheetJS no está cargada.');
+      return;
+    }
+    const dateToExcelSerial = (dateStr) => {
+      if (!dateStr || dateStr === '—') return null;
+      const cleanStr = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr;
+      const parts = cleanStr.split('-');
+      if (parts.length === 3 && parts[0].length === 4) {
+        const y = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10);
+        const d = parseInt(parts[2], 10);
+        const baseDate = Date.UTC(1899, 11, 30);
+        const targetDate = Date.UTC(y, m - 1, d);
+        const msPerDay = 24 * 60 * 60 * 1000;
+        return (targetDate - baseDate) / msPerDay;
+      }
+      return null;
+    };
+
+    const sheetData = filtered.map(r => ({
+      "Cód. Patrimonial": r.cod_patrimonial,
+      "Placa": r.placa || 'Sin placa',
+      "Vehículo": r.denominacion,
+      "Fuente": r.fuente || '—',
+      "Fecha de Alta": dateToExcelSerial(r.fecha_alta_factura || r.fecha_alta),
+      "Fecha Reg. Contable": dateToExcelSerial(r.fecha_registro_contable),
+      "Nota de Pedido": r.nota_pedido || '—',
+      "Centro de Costo": r.centro_costo || '—',
+      "Solicitado Por": r.requerido_por || '—',
+      "Tipo Vehículo": r.tipo_vehiculo || '—',
+      "Sucursal": r.sucursal || '—',
+      "Póliza": r.numero_poliza || 'S/N',
+      "Aseguradora": r.compania_aseguradora || '—',
+      "Fecha Inicio": dateToExcelSerial(r.fecha_inicio),
+      "Fecha Vencimiento": dateToExcelSerial(r.fecha_vencimiento),
+      "Días Vigencia": r.dias_vigencia !== null ? r.dias_vigencia : '—',
+      "Estado SOAT": r.estado_soat,
+      "Monto (S/.)": r.monto ? Number(parseFloat(r.monto).toFixed(4)) : 0
+    }));
+    const ws = window.XLSX.utils.json_to_sheet(sheetData);
+
+    // Force dd/mm/yyyy format on date cells
+    const dateHeaders = ["Fecha de Alta", "Fecha Reg. Contable", "F. Asignación", "Fecha Inicio", "Fecha Vencimiento", "Fecha Ingreso", "Fecha Registro"];
+    if (ws['!ref']) {
+      const range = window.XLSX.utils.decode_range(ws['!ref']);
+      const dateCols = [];
+      for (let c = range.s.c; c <= range.e.c; ++c) {
+        const cellAddress = window.XLSX.utils.encode_cell({ r: 0, c: c });
+        const cell = ws[cellAddress];
+        if (cell && dateHeaders.includes(cell.v)) {
+          dateCols.push(c);
+        }
+      }
+      for (let r = range.s.r + 1; r <= range.e.r; ++r) {
+        for (const colIdx of dateCols) {
+          const cellAddress = window.XLSX.utils.encode_cell({ r: r, c: colIdx });
+          const cell = ws[cellAddress];
+          if (cell && cell.t === 'n') {
+            cell.z = 'dd/mm/yyyy';
+          }
+        }
+      }
+    }
+
+    const wb = window.XLSX.utils.book_new();
+    window.XLSX.utils.book_append_sheet(wb, ws, "SOAT");
+    window.XLSX.writeFile(wb, `Reporte_SOAT_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
+
+  const handleExportPDF = () => {
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+      alert('La librería jsPDF no está cargada.');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', format: 'a4' });
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("EPS SELVA CENTRAL - CONTROL PATRIMONIAL", 14, 18);
+    doc.setFontSize(12);
+    doc.text("REPORTE DE VIGENCIA DE SEGUROS - SOAT", 14, 25);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.text(`Fecha de Reporte: ${new Date().toLocaleDateString('es-PE')}`, 14, 31);
+
+    const headers = [["Código", "Placa", "Vehículo / Denominación", "Póliza", "Aseguradora", "Vencimiento", "Días", "Estado"]];
+    const tableRows = filtered.map(r => [
+      r.cod_patrimonial,
+      r.placa || 'S/P',
+      `${r.denominacion}\n${r.tipo_vehiculo || '—'} · ${r.sucursal || '—'}`,
+      r.numero_poliza || 'S/N',
+      r.compania_aseguradora || '—',
+      r.fecha_vencimiento ? new Date(r.fecha_vencimiento+'T00:00:00').toLocaleDateString('es-PE') : '—',
+      r.dias_vigencia !== null ? String(r.dias_vigencia) : '—',
+      r.estado_soat
+    ]);
+
+    doc.autoTable({
+      startY: 36,
+      head: headers,
+      body: tableRows,
+      theme: 'striped',
+      headStyles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold' },
+      styles: { fontSize: 8 },
+      columnStyles: {
+        0: { cellWidth: 25 },
+        1: { cellWidth: 20 },
+        2: { cellWidth: 95 },
+        3: { cellWidth: 25 },
+        4: { cellWidth: 35 },
+        5: { cellWidth: 25 },
+        6: { cellWidth: 15, halign: 'center' },
+        7: { cellWidth: 25 }
+      }
+    });
+    doc.save(`Reporte_SOAT_${new Date().toISOString().split('T')[0]}.pdf`);
+  };
+
   const filtered = registros.filter(r => {
     if (filtroEstado && r.estado_soat !== filtroEstado) return false;
     if (filtroSucursal && Number(r.id_sucursal) !== Number(filtroSucursal)) return false;
@@ -440,6 +600,36 @@ export default function SoatModule() {
     const q = busqueda.toLowerCase();
     return [r.placa, r.denominacion, r.tipo_vehiculo, r.numero_poliza].some(v => v?.toLowerCase().includes(q));
   });
+
+  const filteredAndSorted = useMemo(() => {
+    let result = [...filtered];
+
+    // Apply column filters
+    Object.keys(colFilters).forEach(key => {
+      const selected = colFilters[key];
+      if (selected && selected.length > 0) {
+        result = result.filter(item => {
+          const val = String(getColValue(item, key)).trim();
+          return selected.includes(val);
+        });
+      }
+    });
+
+    // Apply sort
+    if (sortConfig.key) {
+      result.sort((a, b) => {
+        const valA = getColValue(a, sortConfig.key);
+        const valB = getColValue(b, sortConfig.key);
+
+        const strA = String(valA);
+        const strB = String(valB);
+        const comp = strA.localeCompare(strB, undefined, { numeric: true, sensitivity: 'base' });
+        return sortConfig.direction === 'asc' ? comp : -comp;
+      });
+    }
+
+    return result;
+  }, [filtered, colFilters, sortConfig]);
 
   const vencidos = registros.filter(r => r.estado_soat === 'VENCIDO').length;
   const porVencer = registros.filter(r => r.estado_soat === 'POR_VENCER').length;
@@ -452,7 +642,7 @@ export default function SoatModule() {
   };
 
   return (
-    <div className="space-y-5 animate-fadeIn">
+    <div className="flex-1 flex flex-col min-h-0 space-y-4 overflow-hidden animate-fadeIn h-full">
       {/* ── HEADER ─────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between gap-4">
         <div className="module-heading">
@@ -466,11 +656,25 @@ export default function SoatModule() {
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <button onClick={load} className="p-2 rounded-lg text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-colors" title="Actualizar">
+          <button onClick={load} className="p-2 rounded-lg text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-colors h-10" title="Actualizar">
             <RefreshCw className="w-4 h-4" />
           </button>
+          <button
+            onClick={handleExportExcel}
+            className="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-3.5 rounded-xl text-xs shadow-md shadow-emerald-600/10 hover:shadow-lg active:scale-[0.98] transition-all cursor-pointer border-none h-10"
+          >
+            <FileSpreadsheet className="w-4 h-4" />
+            <span>Excel</span>
+          </button>
+          <button
+            onClick={handleExportPDF}
+            className="flex items-center justify-center gap-1.5 bg-rose-650 hover:bg-rose-700 text-white font-bold py-2 px-3.5 rounded-xl text-xs shadow-md shadow-rose-600/10 hover:shadow-lg active:scale-[0.98] transition-all cursor-pointer border-none h-10"
+          >
+            <FileText className="w-4 h-4" />
+            <span>PDF</span>
+          </button>
           <button onClick={() => { setEditItem(null); setShowForm(true); }}
-            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-brand-600 to-[#00B0F0] text-white text-sm font-bold rounded-xl shadow-lg shadow-brand-500/25 hover:from-brand-700 hover:to-[#009FD6] transition-all active:scale-[0.98]">
+            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-brand-600 to-[#00B0F0] text-white text-sm font-bold rounded-xl shadow-lg shadow-brand-500/25 hover:from-brand-700 hover:to-[#009FD6] transition-all active:scale-[0.98] cursor-pointer h-10 border-none">
             <Plus className="w-4 h-4" />
             Registrar SOAT
           </button>
@@ -540,14 +744,14 @@ export default function SoatModule() {
       )}
 
       {/* ── TABLA ───────────────────────────────────────────────────────── */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col flex-1 min-h-0">
         {loading ? (
-          <div className="flex items-center justify-center py-24 gap-2 text-slate-400">
+          <div className="flex items-center justify-center py-24 gap-2 text-slate-400 flex-1">
             <Loader2 className="w-5 h-5 animate-spin" />
             <span className="text-sm">Cargando registros SOAT...</span>
           </div>
-        ) : filtered.length === 0 ? (
-          <div className="text-center py-24">
+        ) : filteredAndSorted.length === 0 ? (
+          <div className="text-center py-24 flex-1 flex flex-col justify-center items-center">
             <ShieldCheck className="w-12 h-12 text-slate-200 mx-auto mb-3" />
             <p className="text-slate-500 font-semibold">No hay registros SOAT</p>
             <p className="text-slate-400 text-sm mt-1 mb-4">
@@ -561,17 +765,87 @@ export default function SoatModule() {
             )}
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-auto flex-1">
             <table className="w-full text-sm">
               <thead className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
                 <tr>
-                  {['Cód. Patrimonial', 'Placa', 'Tipo de Vehículo', 'Sucursal', 'Vigencia SOAT', 'Rev. Técnica', ''].map(h => (
-                    <th key={h} className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">{h}</th>
-                  ))}
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                    <ExcelHeaderFilter
+                      title="Cód. Patrimonial"
+                      columnKey="cod_patrimonial"
+                      data={registros}
+                      selectedValues={colFilters.cod_patrimonial}
+                      onFilterChange={(vals) => handleFilterChange('cod_patrimonial', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'cod_patrimonial')}
+                    />
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                    <ExcelHeaderFilter
+                      title="Placa"
+                      columnKey="placa"
+                      data={registros}
+                      selectedValues={colFilters.placa}
+                      onFilterChange={(vals) => handleFilterChange('placa', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'placa')}
+                    />
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                    <ExcelHeaderFilter
+                      title="Tipo de Vehículo"
+                      columnKey="tipo_vehiculo"
+                      data={registros}
+                      selectedValues={colFilters.tipo_vehiculo}
+                      onFilterChange={(vals) => handleFilterChange('tipo_vehiculo', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'tipo_vehiculo')}
+                    />
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                    <ExcelHeaderFilter
+                      title="Sucursal"
+                      columnKey="sucursal"
+                      data={registros}
+                      selectedValues={colFilters.sucursal}
+                      onFilterChange={(vals) => handleFilterChange('sucursal', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'sucursal')}
+                    />
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                    <ExcelHeaderFilter
+                      title="Vigencia SOAT"
+                      columnKey="vencimiento_soat"
+                      data={registros}
+                      selectedValues={colFilters.vencimiento_soat}
+                      onFilterChange={(vals) => handleFilterChange('vencimiento_soat', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => formatDate(getColValue(item, 'vencimiento_soat'))}
+                    />
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                    <ExcelHeaderFilter
+                      title="Rev. Técnica"
+                      columnKey="vencimiento_rev_tec"
+                      data={registros}
+                      selectedValues={colFilters.vencimiento_rev_tec}
+                      onFilterChange={(vals) => handleFilterChange('vencimiento_rev_tec', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => formatDate(getColValue(item, 'vencimiento_rev_tec'))}
+                    />
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filtered.map(r => {
+                {filteredAndSorted.map(r => {
                   const cfg = ESTADOS[r.estado_soat] ?? ESTADOS.VIGENTE;
                   return (
                     <tr key={r.id_soat} className={`transition-colors group hover:brightness-[0.97] ${cfg.row}`}>

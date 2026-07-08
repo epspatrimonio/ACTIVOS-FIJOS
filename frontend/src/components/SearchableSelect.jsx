@@ -80,19 +80,12 @@ export default function SearchableSelect({
           {label} {required && <span className="text-rose-500">*</span>}
         </label>
       )}
-      <div className="relative flex items-center w-full bg-slate-50/80 border border-slate-200 rounded-lg shadow-sm focus-within:ring-4 focus-within:ring-brand-500/10 focus-within:border-brand-600 transition-all">
-        {/* Faint suggestion text overlay */}
-        {suggestionText && isOpen && (
-          <div className="absolute left-0 top-0 w-full h-full px-3 py-2 text-sm text-slate-400/40 font-medium pointer-events-none select-none border border-transparent whitespace-pre">
-            {suggestionText}
-          </div>
-        )}
-        
+      <div className="relative flex items-center w-full bg-white border border-slate-300 hover:border-slate-400 rounded-lg shadow-sm focus-within:ring-4 focus-within:ring-brand-500/10 focus-within:border-brand-600 transition-all">
         <input
           type="text"
           name={name}
-          className="block w-full px-3 py-2 pr-12 bg-transparent border-none shadow-none focus:outline-none focus:ring-0 text-slate-800 font-medium placeholder-slate-400 cursor-pointer"
-          placeholder={displayValue || placeholder}
+          className="block w-full px-3 py-2 pr-12 bg-transparent border-none shadow-none focus:outline-none focus:ring-0 text-slate-800 font-medium placeholder-slate-400 cursor-text"
+          placeholder={isOpen ? placeholder : (displayValue || placeholder)}
           value={isOpen ? searchTerm : displayValue}
           onChange={handleInputChange}
           onFocus={handleInputFocus}

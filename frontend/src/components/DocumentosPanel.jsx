@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Save, Plus, FileText, CheckCircle2, AlertCircle, ChevronDown, Edit3 } from 'lucide-react';
 import SearchableSelect from './SearchableSelect';
 import Modal from './Modal';
+import ExcelHeaderFilter from './ExcelHeaderFilter';
 import { 
   fetchCompras, fetchIncorporaciones, createCompra, createIncorporacion,
   fetchLocalidades, fetchCuentasContables, fetchCentrosCosto, fetchFuentes, fetchPersonal,
@@ -33,6 +34,44 @@ export default function DocumentosPanel() {
     fecha_hasta: '',
     cuenta_contable: '',
   });
+
+  const [colFilters, setColFilters] = useState({});
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+
+  // Reset filters if docType changes
+  useEffect(() => {
+    setColFilters({});
+    setSortConfig({ key: null, direction: null });
+  }, [docType]);
+
+  const handleFilterChange = (columnKey, values) => {
+    setColFilters(prev => ({
+      ...prev,
+      [columnKey]: values
+    }));
+  };
+
+  const handleSortChange = (columnKey, direction) => {
+    setSortConfig({ key: columnKey, direction });
+  };
+
+  const getDocColValue = (item, key) => {
+    switch (key) {
+      case 'n_doc': return formatDocNum(item.n_doc, item.documento_tipo || docType);
+      case 'fecha_oc': return item.fecha_oc || '';
+      case 'fecha_doc': return item.fecha_doc || '';
+      case 'id_localidad': return getLocalidadLabel(item.id_localidad);
+      case 'nota_pedido': return item.nota_pedido || '';
+      case 'certificacion_presupuestal': return item.certificacion_presupuestal || '';
+      case 'cuenta_contable': return item.cuenta_contable || '';
+      case 'centro_costo': return item.centro_costo || '';
+      case 'concepto': return item.concepto || '';
+      case 'fuente_origen': return item.fuente_origen || '';
+      case 'origen': return item.origen || '';
+      case 'fecha_alta': return item.fecha_alta || '';
+      default: return '';
+    }
+  };
 
   // Combos
   const [localidades, setLocalidades] = useState([]);
@@ -258,9 +297,9 @@ export default function DocumentosPanel() {
         throw new Error('La Nota de Pedido debe tener exactamente 7 dígitos (números).');
       }
 
-      const certClean = cleanDigits(compraForm.certificacion_presupuestal);
+      let certClean = cleanDigits(compraForm.certificacion_presupuestal);
       if (certClean && certClean.length < 4) {
-        throw new Error('La Certificación Presupuestal debe tener como mínimo 4 dígitos (números).');
+        certClean = certClean.padStart(4, '0');
       }
 
       const cuentaClean = cleanDigits(compraForm.cuenta_contable);
@@ -576,6 +615,78 @@ export default function DocumentosPanel() {
     if (tableFilters.fecha_hasta && o.fecha_doc && o.fecha_doc.split('T')[0] > tableFilters.fecha_hasta) return false;
     return true;
   });
+
+  const filteredAndSortedCompras = useMemo(() => {
+    let result = [...filteredCompras];
+    Object.keys(colFilters).forEach(key => {
+      const selected = colFilters[key];
+      if (selected && selected.length > 0) {
+        result = result.filter(item => {
+          const val = String(getDocColValue(item, key)).trim();
+          return selected.includes(val);
+        });
+      }
+    });
+    if (sortConfig.key) {
+      result.sort((a, b) => {
+        const valA = getDocColValue(a, sortConfig.key);
+        const valB = getDocColValue(b, sortConfig.key);
+        const strA = String(valA);
+        const strB = String(valB);
+        const comp = strA.localeCompare(strB, undefined, { numeric: true, sensitivity: 'base' });
+        return sortConfig.direction === 'asc' ? comp : -comp;
+      });
+    }
+    return result;
+  }, [filteredCompras, colFilters, sortConfig]);
+
+  const filteredAndSortedIncorporaciones = useMemo(() => {
+    let result = [...filteredIncorporaciones];
+    Object.keys(colFilters).forEach(key => {
+      const selected = colFilters[key];
+      if (selected && selected.length > 0) {
+        result = result.filter(item => {
+          const val = String(getDocColValue(item, key)).trim();
+          return selected.includes(val);
+        });
+      }
+    });
+    if (sortConfig.key) {
+      result.sort((a, b) => {
+        const valA = getDocColValue(a, sortConfig.key);
+        const valB = getDocColValue(b, sortConfig.key);
+        const strA = String(valA);
+        const strB = String(valB);
+        const comp = strA.localeCompare(strB, undefined, { numeric: true, sensitivity: 'base' });
+        return sortConfig.direction === 'asc' ? comp : -comp;
+      });
+    }
+    return result;
+  }, [filteredIncorporaciones, colFilters, sortConfig]);
+
+  const filteredAndSortedObras = useMemo(() => {
+    let result = [...filteredObras];
+    Object.keys(colFilters).forEach(key => {
+      const selected = colFilters[key];
+      if (selected && selected.length > 0) {
+        result = result.filter(item => {
+          const val = String(getDocColValue(item, key)).trim();
+          return selected.includes(val);
+        });
+      }
+    });
+    if (sortConfig.key) {
+      result.sort((a, b) => {
+        const valA = getDocColValue(a, sortConfig.key);
+        const valB = getDocColValue(b, sortConfig.key);
+        const strA = String(valA);
+        const strB = String(valB);
+        const comp = strA.localeCompare(strB, undefined, { numeric: true, sensitivity: 'base' });
+        return sortConfig.direction === 'asc' ? comp : -comp;
+      });
+    }
+    return result;
+  }, [filteredObras, colFilters, sortConfig]);
 
   const fuenteOrigenOpts = [
     { value: 'LIQ OBRAS', label: 'LIQ OBRAS (Liquidación de Obras)' },
@@ -1239,8 +1350,8 @@ export default function DocumentosPanel() {
           </div>
 
           {/* Barra de Filtros */}
-          <div className="glass-panel rounded-xl p-4 relative z-30">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="glass-panel rounded-xl p-5 relative z-30">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <SearchableSelect
                 label="Localidad"
                 name="filter_localidad"
@@ -1249,24 +1360,6 @@ export default function DocumentosPanel() {
                 options={localidadOpts}
                 placeholder="Todas las localidades"
               />
-              <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1">Fecha Desde</label>
-                <input
-                  type="date"
-                  value={tableFilters.fecha_desde}
-                  onChange={(e) => setTableFilters(prev => ({ ...prev, fecha_desde: e.target.value }))}
-                  className="block w-full px-3 py-2 text-sm bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-slate-700"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1">Fecha Hasta</label>
-                <input
-                  type="date"
-                  value={tableFilters.fecha_hasta}
-                  onChange={(e) => setTableFilters(prev => ({ ...prev, fecha_hasta: e.target.value }))}
-                  className="block w-full px-3 py-2 text-sm bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-slate-700"
-                />
-              </div>
               <SearchableSelect
                 label="Cuenta Contable"
                 name="filter_cuenta"
@@ -1275,6 +1368,24 @@ export default function DocumentosPanel() {
                 options={cuentaContableOpts}
                 placeholder="Todas las cuentas"
               />
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">Fecha Desde</label>
+                <input
+                  type="date"
+                  value={tableFilters.fecha_desde}
+                  onChange={(e) => setTableFilters(prev => ({ ...prev, fecha_desde: e.target.value }))}
+                  className="block w-full px-3 py-2 text-sm bg-white border border-slate-300 hover:border-slate-400 rounded-lg focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-600 transition-all text-slate-700 font-medium"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">Fecha Hasta</label>
+                <input
+                  type="date"
+                  value={tableFilters.fecha_hasta}
+                  onChange={(e) => setTableFilters(prev => ({ ...prev, fecha_hasta: e.target.value }))}
+                  className="block w-full px-3 py-2 text-sm bg-white border border-slate-300 hover:border-slate-400 rounded-lg focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-600 transition-all text-slate-700 font-medium"
+                />
+              </div>
             </div>
           </div>
 
@@ -1287,30 +1398,118 @@ export default function DocumentosPanel() {
               {docType === 'COMPRA' && (
                 /* TABLA COMPRAS */
                 <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                  <div className="overflow-x-auto">
+                  <div className="overflow-x-auto min-h-[380px]">
                     <table className="min-w-full divide-y divide-slate-100 text-left text-xs">
                       <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider">
                         <tr>
-                          <th className="px-6 py-3.5">N° Documento</th>
-                          <th className="px-6 py-3.5">Fecha O/C</th>
-                          <th className="px-6 py-3.5">Localidad</th>
-                          <th className="px-6 py-3.5">Nota Pedido</th>
-                          <th className="px-6 py-3.5">Certificación</th>
-                          <th className="px-6 py-3.5">Cuenta Contable</th>
-                          <th className="px-6 py-3.5">Centro Costo</th>
-                          <th className="px-6 py-3.5">Concepto</th>
+                          <th className="px-6 py-3.5">
+                            <ExcelHeaderFilter
+                              title="N° Documento"
+                              columnKey="n_doc"
+                              data={compras}
+                              selectedValues={colFilters.n_doc}
+                              onFilterChange={(vals) => handleFilterChange('n_doc', vals)}
+                              currentSort={sortConfig}
+                              onSortChange={handleSortChange}
+                              getValue={(item) => getDocColValue(item, 'n_doc')}
+                            />
+                          </th>
+                          <th className="px-6 py-3.5">
+                            <ExcelHeaderFilter
+                              title="Fecha O/C"
+                              columnKey="fecha_oc"
+                              data={compras}
+                              selectedValues={colFilters.fecha_oc}
+                              onFilterChange={(vals) => handleFilterChange('fecha_oc', vals)}
+                              currentSort={sortConfig}
+                              onSortChange={handleSortChange}
+                              getValue={(item) => formatDate(getDocColValue(item, 'fecha_oc'))}
+                            />
+                          </th>
+                          <th className="px-6 py-3.5">
+                            <ExcelHeaderFilter
+                              title="Localidad"
+                              columnKey="id_localidad"
+                              data={compras}
+                              selectedValues={colFilters.id_localidad}
+                              onFilterChange={(vals) => handleFilterChange('id_localidad', vals)}
+                              currentSort={sortConfig}
+                              onSortChange={handleSortChange}
+                              getValue={(item) => getDocColValue(item, 'id_localidad')}
+                            />
+                          </th>
+                          <th className="px-6 py-3.5">
+                            <ExcelHeaderFilter
+                              title="Nota Pedido"
+                              columnKey="nota_pedido"
+                              data={compras}
+                              selectedValues={colFilters.nota_pedido}
+                              onFilterChange={(vals) => handleFilterChange('nota_pedido', vals)}
+                              currentSort={sortConfig}
+                              onSortChange={handleSortChange}
+                              getValue={(item) => getDocColValue(item, 'nota_pedido')}
+                            />
+                          </th>
+                          <th className="px-6 py-3.5">
+                            <ExcelHeaderFilter
+                              title="Certificación"
+                              columnKey="certificacion_presupuestal"
+                              data={compras}
+                              selectedValues={colFilters.certificacion_presupuestal}
+                              onFilterChange={(vals) => handleFilterChange('certificacion_presupuestal', vals)}
+                              currentSort={sortConfig}
+                              onSortChange={handleSortChange}
+                              getValue={(item) => getDocColValue(item, 'certificacion_presupuestal')}
+                            />
+                          </th>
+                          <th className="px-6 py-3.5">
+                            <ExcelHeaderFilter
+                              title="Cuenta Contable"
+                              columnKey="cuenta_contable"
+                              data={compras}
+                              selectedValues={colFilters.cuenta_contable}
+                              onFilterChange={(vals) => handleFilterChange('cuenta_contable', vals)}
+                              currentSort={sortConfig}
+                              onSortChange={handleSortChange}
+                              getValue={(item) => getDocColValue(item, 'cuenta_contable')}
+                            />
+                          </th>
+                          <th className="px-6 py-3.5">
+                            <ExcelHeaderFilter
+                              title="Centro Costo"
+                              columnKey="centro_costo"
+                              data={compras}
+                              selectedValues={colFilters.centro_costo}
+                              onFilterChange={(vals) => handleFilterChange('centro_costo', vals)}
+                              currentSort={sortConfig}
+                              onSortChange={handleSortChange}
+                              getValue={(item) => getDocColValue(item, 'centro_costo')}
+                            />
+                          </th>
+                          <th className="px-6 py-3.5">
+                            <ExcelHeaderFilter
+                              title="Concepto"
+                              columnKey="concepto"
+                              data={compras}
+                              selectedValues={colFilters.concepto}
+                              onFilterChange={(vals) => handleFilterChange('concepto', vals)}
+                              currentSort={sortConfig}
+                              onSortChange={handleSortChange}
+                              getValue={(item) => getDocColValue(item, 'concepto')}
+                            />
+                          </th>
                           <th className="px-6 py-3.5 text-center">Gestión</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 text-slate-600">
-                        {filteredCompras.length === 0 ? (
+                        {filteredAndSortedCompras.length === 0 ? (
                           <tr>
                             <td colSpan="9" className="px-6 py-8 text-center text-slate-400">
                               No hay órdenes de compra que coincidan con los filtros.
                             </td>
                           </tr>
                         ) : (
-                          filteredCompras.map((c) => (
+                          filteredAndSortedCompras.map((c) => (
                             <tr key={c.n_doc} className="hover:bg-slate-50/50 transition-colors">
                               <td className="px-6 py-3 font-bold font-mono text-slate-800">{formatDocNum(c.n_doc, 'COMPRA')}</td>
                               <td className="px-6 py-3">{formatDate(c.fecha_oc)}</td>
@@ -1341,31 +1540,130 @@ export default function DocumentosPanel() {
               {docType === 'INCORPORACION' && (
                 /* TABLA INCORPORACIONES */
                 <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                  <div className="overflow-x-auto">
+                  <div className="overflow-x-auto min-h-[380px]">
                     <table className="min-w-full divide-y divide-slate-100 text-left text-xs">
                       <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider">
                         <tr>
-                          <th className="px-6 py-3.5">N° Expediente</th>
-                          <th className="px-6 py-3.5">Fecha Pliego</th>
-                          <th className="px-6 py-3.5">Localidad</th>
-                          <th className="px-6 py-3.5">Fuente Origen</th>
-                          <th className="px-6 py-3.5">Origen</th>
-                          <th className="px-6 py-3.5">Fecha Alta</th>
-                          <th className="px-6 py-3.5">Cuenta Contable</th>
-                          <th className="px-6 py-3.5">Centro Costo</th>
-                          <th className="px-6 py-3.5">Concepto</th>
+                          <th className="px-6 py-3.5">
+                            <ExcelHeaderFilter
+                              title="N° Expediente"
+                              columnKey="n_doc"
+                              data={incorporaciones}
+                              selectedValues={colFilters.n_doc}
+                              onFilterChange={(vals) => handleFilterChange('n_doc', vals)}
+                              currentSort={sortConfig}
+                              onSortChange={handleSortChange}
+                              getValue={(item) => getDocColValue(item, 'n_doc')}
+                            />
+                          </th>
+                          <th className="px-6 py-3.5">
+                            <ExcelHeaderFilter
+                              title="Fecha Pliego"
+                              columnKey="fecha_doc"
+                              data={incorporaciones}
+                              selectedValues={colFilters.fecha_doc}
+                              onFilterChange={(vals) => handleFilterChange('fecha_doc', vals)}
+                              currentSort={sortConfig}
+                              onSortChange={handleSortChange}
+                              getValue={(item) => formatDate(getDocColValue(item, 'fecha_doc'))}
+                            />
+                          </th>
+                          <th className="px-6 py-3.5">
+                            <ExcelHeaderFilter
+                              title="Localidad"
+                              columnKey="id_localidad"
+                              data={incorporaciones}
+                              selectedValues={colFilters.id_localidad}
+                              onFilterChange={(vals) => handleFilterChange('id_localidad', vals)}
+                              currentSort={sortConfig}
+                              onSortChange={handleSortChange}
+                              getValue={(item) => getDocColValue(item, 'id_localidad')}
+                            />
+                          </th>
+                          <th className="px-6 py-3.5">
+                            <ExcelHeaderFilter
+                              title="Fuente Origen"
+                              columnKey="fuente_origen"
+                              data={incorporaciones}
+                              selectedValues={colFilters.fuente_origen}
+                              onFilterChange={(vals) => handleFilterChange('fuente_origen', vals)}
+                              currentSort={sortConfig}
+                              onSortChange={handleSortChange}
+                              getValue={(item) => getDocColValue(item, 'fuente_origen')}
+                            />
+                          </th>
+                          <th className="px-6 py-3.5">
+                            <ExcelHeaderFilter
+                              title="Origen"
+                              columnKey="origen"
+                              data={incorporaciones}
+                              selectedValues={colFilters.origen}
+                              onFilterChange={(vals) => handleFilterChange('origen', vals)}
+                              currentSort={sortConfig}
+                              onSortChange={handleSortChange}
+                              getValue={(item) => getDocColValue(item, 'origen')}
+                            />
+                          </th>
+                          <th className="px-6 py-3.5">
+                            <ExcelHeaderFilter
+                              title="Fecha Alta"
+                              columnKey="fecha_alta"
+                              data={incorporaciones}
+                              selectedValues={colFilters.fecha_alta}
+                              onFilterChange={(vals) => handleFilterChange('fecha_alta', vals)}
+                              currentSort={sortConfig}
+                              onSortChange={handleSortChange}
+                              getValue={(item) => formatDate(getDocColValue(item, 'fecha_alta'))}
+                            />
+                          </th>
+                          <th className="px-6 py-3.5">
+                            <ExcelHeaderFilter
+                              title="Cuenta Contable"
+                              columnKey="cuenta_contable"
+                              data={incorporaciones}
+                              selectedValues={colFilters.cuenta_contable}
+                              onFilterChange={(vals) => handleFilterChange('cuenta_contable', vals)}
+                              currentSort={sortConfig}
+                              onSortChange={handleSortChange}
+                              getValue={(item) => getDocColValue(item, 'cuenta_contable')}
+                            />
+                          </th>
+                          <th className="px-6 py-3.5">
+                            <ExcelHeaderFilter
+                              title="Centro Costo"
+                              columnKey="centro_costo"
+                              data={incorporaciones}
+                              selectedValues={colFilters.centro_costo}
+                              onFilterChange={(vals) => handleFilterChange('centro_costo', vals)}
+                              currentSort={sortConfig}
+                              onSortChange={handleSortChange}
+                              getValue={(item) => getDocColValue(item, 'centro_costo')}
+                            />
+                          </th>
+                          <th className="px-6 py-3.5">
+                            <ExcelHeaderFilter
+                              title="Concepto"
+                              columnKey="concepto"
+                              data={incorporaciones}
+                              selectedValues={colFilters.concepto}
+                              onFilterChange={(vals) => handleFilterChange('concepto', vals)}
+                              currentSort={sortConfig}
+                              onSortChange={handleSortChange}
+                              getValue={(item) => getDocColValue(item, 'concepto')}
+                            />
+                          </th>
                           <th className="px-6 py-3.5 text-center">Gestión</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 text-slate-600">
-                        {filteredIncorporaciones.length === 0 ? (
+                        {filteredAndSortedIncorporaciones.length === 0 ? (
                           <tr>
                             <td colSpan="10" className="px-6 py-8 text-center text-slate-400">
                               No hay incorporaciones que coincidan con los filtros.
                             </td>
                           </tr>
                         ) : (
-                          filteredIncorporaciones.map((i) => (
+                          filteredAndSortedIncorporaciones.map((i) => (
                             <tr key={i.n_doc} className="hover:bg-slate-50/50 transition-colors">
                               <td className="px-6 py-3 font-bold font-mono text-slate-800">{formatDocNum(i.n_doc, 'INCORPORACION')}</td>
                               <td className="px-6 py-3">{formatDate(i.fecha_doc)}</td>
@@ -1397,31 +1695,130 @@ export default function DocumentosPanel() {
               {docType === 'OBRA' && (
                 /* TABLA OBRAS */
                 <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                  <div className="overflow-x-auto">
+                  <div className="overflow-x-auto min-h-[380px]">
                     <table className="min-w-full divide-y divide-slate-100 text-left text-xs">
                       <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider">
                         <tr>
-                          <th className="px-6 py-3.5">N° Expediente de Obra</th>
-                          <th className="px-6 py-3.5">Fecha Pliego/Doc</th>
-                          <th className="px-6 py-3.5">Localidad</th>
-                          <th className="px-6 py-3.5">Fuente Origen</th>
-                          <th className="px-6 py-3.5">Origen</th>
-                          <th className="px-6 py-3.5">Fecha Alta</th>
-                          <th className="px-6 py-3.5">Cuenta Contable</th>
-                          <th className="px-6 py-3.5">Centro Costo</th>
-                          <th className="px-6 py-3.5">Concepto</th>
+                          <th className="px-6 py-3.5">
+                            <ExcelHeaderFilter
+                              title="N° Expediente de Obra"
+                              columnKey="n_doc"
+                              data={obras}
+                              selectedValues={colFilters.n_doc}
+                              onFilterChange={(vals) => handleFilterChange('n_doc', vals)}
+                              currentSort={sortConfig}
+                              onSortChange={handleSortChange}
+                              getValue={(item) => getDocColValue(item, 'n_doc')}
+                            />
+                          </th>
+                          <th className="px-6 py-3.5">
+                            <ExcelHeaderFilter
+                              title="Fecha Pliego/Doc"
+                              columnKey="fecha_doc"
+                              data={obras}
+                              selectedValues={colFilters.fecha_doc}
+                              onFilterChange={(vals) => handleFilterChange('fecha_doc', vals)}
+                              currentSort={sortConfig}
+                              onSortChange={handleSortChange}
+                              getValue={(item) => formatDate(getDocColValue(item, 'fecha_doc'))}
+                            />
+                          </th>
+                          <th className="px-6 py-3.5">
+                            <ExcelHeaderFilter
+                              title="Localidad"
+                              columnKey="id_localidad"
+                              data={obras}
+                              selectedValues={colFilters.id_localidad}
+                              onFilterChange={(vals) => handleFilterChange('id_localidad', vals)}
+                              currentSort={sortConfig}
+                              onSortChange={handleSortChange}
+                              getValue={(item) => getDocColValue(item, 'id_localidad')}
+                            />
+                          </th>
+                          <th className="px-6 py-3.5">
+                            <ExcelHeaderFilter
+                              title="Fuente Origen"
+                              columnKey="fuente_origen"
+                              data={obras}
+                              selectedValues={colFilters.fuente_origen}
+                              onFilterChange={(vals) => handleFilterChange('fuente_origen', vals)}
+                              currentSort={sortConfig}
+                              onSortChange={handleSortChange}
+                              getValue={(item) => getDocColValue(item, 'fuente_origen')}
+                            />
+                          </th>
+                          <th className="px-6 py-3.5">
+                            <ExcelHeaderFilter
+                              title="Origen"
+                              columnKey="origen"
+                              data={obras}
+                              selectedValues={colFilters.origen}
+                              onFilterChange={(vals) => handleFilterChange('origen', vals)}
+                              currentSort={sortConfig}
+                              onSortChange={handleSortChange}
+                              getValue={(item) => getDocColValue(item, 'origen')}
+                            />
+                          </th>
+                          <th className="px-6 py-3.5">
+                            <ExcelHeaderFilter
+                              title="Fecha Alta"
+                              columnKey="fecha_alta"
+                              data={obras}
+                              selectedValues={colFilters.fecha_alta}
+                              onFilterChange={(vals) => handleFilterChange('fecha_alta', vals)}
+                              currentSort={sortConfig}
+                              onSortChange={handleSortChange}
+                              getValue={(item) => formatDate(getDocColValue(item, 'fecha_alta'))}
+                            />
+                          </th>
+                          <th className="px-6 py-3.5">
+                            <ExcelHeaderFilter
+                              title="Cuenta Contable"
+                              columnKey="cuenta_contable"
+                              data={obras}
+                              selectedValues={colFilters.cuenta_contable}
+                              onFilterChange={(vals) => handleFilterChange('cuenta_contable', vals)}
+                              currentSort={sortConfig}
+                              onSortChange={handleSortChange}
+                              getValue={(item) => getDocColValue(item, 'cuenta_contable')}
+                            />
+                          </th>
+                          <th className="px-6 py-3.5">
+                            <ExcelHeaderFilter
+                              title="Centro Costo"
+                              columnKey="centro_costo"
+                              data={obras}
+                              selectedValues={colFilters.centro_costo}
+                              onFilterChange={(vals) => handleFilterChange('centro_costo', vals)}
+                              currentSort={sortConfig}
+                              onSortChange={handleSortChange}
+                              getValue={(item) => getDocColValue(item, 'centro_costo')}
+                            />
+                          </th>
+                          <th className="px-6 py-3.5">
+                            <ExcelHeaderFilter
+                              title="Concepto"
+                              columnKey="concepto"
+                              data={obras}
+                              selectedValues={colFilters.concepto}
+                              onFilterChange={(vals) => handleFilterChange('concepto', vals)}
+                              currentSort={sortConfig}
+                              onSortChange={handleSortChange}
+                              getValue={(item) => getDocColValue(item, 'concepto')}
+                            />
+                          </th>
                           <th className="px-6 py-3.5 text-center">Gestión</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 text-slate-600">
-                        {filteredObras.length === 0 ? (
+                        {filteredAndSortedObras.length === 0 ? (
                           <tr>
                             <td colSpan="10" className="px-6 py-8 text-center text-slate-400">
                               No hay expedientes de obra que coincidan con los filtros.
                             </td>
                           </tr>
                         ) : (
-                          filteredObras.map((o) => (
+                          filteredAndSortedObras.map((o) => (
                             <tr key={o.n_doc} className="hover:bg-slate-50/50 transition-colors">
                               <td className="px-6 py-3 font-bold font-mono text-slate-800">{formatDocNum(o.n_doc, 'OBRA')}</td>
                               <td className="px-6 py-3">{formatDate(o.fecha_doc)}</td>

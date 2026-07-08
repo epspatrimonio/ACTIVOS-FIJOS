@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  ClipboardCheck, Plus, Search, Trash2, Edit3, X, AlertCircle, CheckCircle2, ChevronDown 
+  ClipboardCheck, Plus, Search, Trash2, Edit3, X, AlertCircle, CheckCircle2, ChevronDown,
+  FileSpreadsheet, FileText
 } from 'lucide-react';
 import SearchableSelect from './SearchableSelect';
 import Modal from './Modal';
+import ExcelHeaderFilter from './ExcelHeaderFilter';
 import { 
   fetchInventarioFisico, saveInventarioFisico, deleteInventarioFisico, fetchGenerarCodigoSobrante,
   fetchActivos, fetchSubcategorias, fetchSucursales, fetchLocalidades
@@ -42,6 +44,40 @@ export default function InventarioFisicoPanel() {
   // Pestañas y búsqueda
   const [currentTab, setCurrentTab] = useState('ALL'); // ALL | FALTANTE | SOBRANTE
   const [searchTerm, setSearchTerm] = useState('');
+
+  const [colFilters, setColFilters] = useState({});
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+
+  // Reset filters only when data is reloaded (length changes)
+  const itemsCount = items.length;
+  useEffect(() => {
+    setColFilters({});
+    setSortConfig({ key: null, direction: null });
+  }, [itemsCount]);
+
+  const handleFilterChange = (columnKey, values) => {
+    setColFilters(prev => ({
+      ...prev,
+      [columnKey]: values
+    }));
+  };
+
+  const handleSortChange = (columnKey, direction) => {
+    setSortConfig({ key: columnKey, direction });
+  };
+
+  const getColValue = (item, key) => {
+    switch (key) {
+      case 'cod_patrimonial': return item.cod_patrimonial || '';
+      case 'tipo': return item.tipo || '';
+      case 'subcategoria': return item.subcategoria || '';
+      case 'ubicacion': return `${item.sucursal || ''} / ${item.localidad || ''}`;
+      case 'denominacion': return item.denominacion || '';
+      case 'caracteristicas': return `${item.marca || ''} ${item.modelo || ''} ${item.numero_serie || ''}`;
+      case 'observaciones': return item.observaciones || '';
+      default: return '';
+    }
+  };
 
   // Control del modal
   const [showModal, setShowModal] = useState(false);
@@ -87,6 +123,99 @@ export default function InventarioFisicoPanel() {
     loadAuxData();
   }, []);
 
+  const handleExportExcel = () => {
+    if (!window.XLSX) {
+      alert('La librería SheetJS no está cargada.');
+      return;
+    }
+    const parseTimestampToJSDate = (tsStr) => {
+      if (!tsStr) return null;
+      const cleanStr = tsStr.includes('T') ? tsStr.split('T')[0] : tsStr;
+      const parts = cleanStr.split('-');
+      if (parts.length === 3) {
+        const y = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10);
+        const d = parseInt(parts[2], 10);
+        return new Date(Date.UTC(y, m - 1, d));
+      }
+      return null;
+    };
+
+    const sheetData = filteredItems.map(item => ({
+      "Código": item.cod_patrimonial,
+      "Tipo": item.tipo,
+      "Denominación": item.denominacion,
+      "Marca": item.marca || '—',
+      "Modelo": item.modelo || '—',
+      "N° Serie": item.numero_serie || '—',
+      "Color": item.color || '—',
+      "Subcategoría": item.subcategoria || '—',
+      "Sucursal": item.sucursal || '—',
+      "Localidad": item.localidad || '—',
+      "Observaciones": item.observaciones || '—',
+      "Fecha Registro": parseTimestampToJSDate(item.created_at)
+    }));
+    const ws = window.XLSX.utils.json_to_sheet(sheetData, { cellDates: true });
+
+    // Force dd/mm/yyyy format on date cells
+    for (const cellId in ws) {
+      if (ws[cellId] && ws[cellId].t === 'd') {
+        ws[cellId].z = 'dd/mm/yyyy';
+      }
+    }
+
+    const wb = window.XLSX.utils.book_new();
+    window.XLSX.utils.book_append_sheet(wb, ws, "InventarioFisico");
+    window.XLSX.writeFile(wb, `Reporte_Inventario_Fisico_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
+
+  const handleExportPDF = () => {
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+      alert('La librería jsPDF no está cargada.');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', format: 'a4' });
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("EPS SELVA CENTRAL - CONTROL PATRIMONIAL", 14, 18);
+    doc.setFontSize(12);
+    doc.text("REPORTE DE INVENTARIO FÍSICO (FALTANTES Y SOBRANTES)", 14, 25);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.text(`Fecha de Reporte: ${new Date().toLocaleDateString('es-PE')}`, 14, 31);
+
+    const headers = [["Código", "Tipo", "Denominación", "Marca/Modelo/Serie", "Sucursal / Localidad", "Fecha Reg.", "Observaciones"]];
+    const tableRows = filteredItems.map(item => [
+      item.cod_patrimonial,
+      item.tipo,
+      item.denominacion,
+      `M: ${item.marca || 'S/M'}\nMod: ${item.modelo || 'S/M'}\nSerie: ${item.numero_serie || 'S/S'}`,
+      `${item.sucursal || '—'}\n(${item.localidad || '—'})`,
+      item.created_at ? new Date(item.created_at).toLocaleDateString('es-PE') : '—',
+      item.observaciones || '—'
+    ]);
+
+    doc.autoTable({
+      startY: 36,
+      head: headers,
+      body: tableRows,
+      theme: 'striped',
+      headStyles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold' },
+      styles: { fontSize: 8 },
+      columnStyles: {
+        0: { cellWidth: 25 },
+        1: { cellWidth: 20 },
+        2: { cellWidth: 70 },
+        3: { cellWidth: 45 },
+        4: { cellWidth: 45 },
+        5: { cellWidth: 20 },
+        6: { cellWidth: 55 }
+      }
+    });
+    doc.save(`Reporte_Inventario_Fisico_${new Date().toISOString().split('T')[0]}.pdf`);
+  };
+
   // Filtrado de items local
   const filteredItems = items.filter(item => {
     const matchesTab = currentTab === 'ALL' || item.tipo === currentTab;
@@ -104,6 +233,36 @@ export default function InventarioFisicoPanel() {
       item.sucursal?.toLowerCase().includes(searchLower);
     return matchesTab && matchesSearch;
   });
+
+  const filteredAndSortedItems = useMemo(() => {
+    let result = [...filteredItems];
+
+    // Apply column filters
+    Object.keys(colFilters).forEach(key => {
+      const selected = colFilters[key];
+      if (selected && selected.length > 0) {
+        result = result.filter(item => {
+          const val = String(getColValue(item, key)).trim();
+          return selected.includes(val);
+        });
+      }
+    });
+
+    // Apply sort
+    if (sortConfig.key) {
+      result.sort((a, b) => {
+        const valA = getColValue(a, sortConfig.key);
+        const valB = getColValue(b, sortConfig.key);
+
+        const strA = String(valA);
+        const strB = String(valB);
+        const comp = strA.localeCompare(strB, undefined, { numeric: true, sensitivity: 'base' });
+        return sortConfig.direction === 'asc' ? comp : -comp;
+      });
+    }
+
+    return result;
+  }, [filteredItems, colFilters, sortConfig]);
 
   // Métricas
   const totalFaltantes = items.filter(i => i.tipo === 'FALTANTE').length;
@@ -366,6 +525,20 @@ export default function InventarioFisicoPanel() {
           </div>
           
           <button
+            onClick={handleExportExcel}
+            className="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-3.5 rounded-xl text-xs shadow-md shadow-emerald-600/10 hover:shadow-lg active:scale-[0.98] transition-all cursor-pointer border-none h-[2.25rem] shrink-0"
+          >
+            <FileSpreadsheet className="w-4 h-4" />
+            <span>Excel</span>
+          </button>
+          <button
+            onClick={handleExportPDF}
+            className="flex items-center justify-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 px-3.5 rounded-xl text-xs shadow-md shadow-rose-600/10 hover:shadow-lg active:scale-[0.98] transition-all cursor-pointer border-none h-[2.25rem] shrink-0"
+          >
+            <FileText className="w-4 h-4" />
+            <span>PDF</span>
+          </button>
+          <button
             onClick={handleOpenCreate}
             className="flex items-center space-x-1.5 bg-gradient-to-r from-brand-600 to-[#00B0F0] hover:from-brand-700 hover:to-[#00A0E0] text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md transition-all active:scale-95 shrink-0"
           >
@@ -396,7 +569,7 @@ export default function InventarioFisicoPanel() {
             <div className="h-full flex items-center justify-center text-slate-400 text-sm py-12">
               Cargando registros...
             </div>
-          ) : filteredItems.length === 0 ? (
+          ) : filteredAndSortedItems.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-slate-400 text-sm py-16 space-y-2">
               <ClipboardCheck className="w-10 h-10 text-slate-300" />
               <span>No se encontraron registros de inventario físico.</span>
@@ -405,18 +578,95 @@ export default function InventarioFisicoPanel() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50/75 border-b border-slate-200/80 sticky top-0 z-10 text-[0.6875rem] font-bold text-slate-500 uppercase tracking-wider">
-                  <th className="px-5 py-3">Código</th>
-                  <th className="px-4 py-3">Tipo</th>
-                  <th className="px-5 py-3">Subcategoría</th>
-                  <th className="px-5 py-3">Ubicación</th>
-                  <th className="px-5 py-3">Denominación</th>
-                  <th className="px-5 py-3">Características</th>
-                  <th className="px-5 py-3">Observaciones</th>
+                  <th className="px-5 py-3">
+                    <ExcelHeaderFilter
+                      title="Código"
+                      columnKey="cod_patrimonial"
+                      data={items}
+                      selectedValues={colFilters.cod_patrimonial}
+                      onFilterChange={(vals) => handleFilterChange('cod_patrimonial', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'cod_patrimonial')}
+                    />
+                  </th>
+                  <th className="px-4 py-3">
+                    <ExcelHeaderFilter
+                      title="Tipo"
+                      columnKey="tipo"
+                      data={items}
+                      selectedValues={colFilters.tipo}
+                      onFilterChange={(vals) => handleFilterChange('tipo', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'tipo')}
+                    />
+                  </th>
+                  <th className="px-5 py-3">
+                    <ExcelHeaderFilter
+                      title="Subcategoría"
+                      columnKey="subcategoria"
+                      data={items}
+                      selectedValues={colFilters.subcategoria}
+                      onFilterChange={(vals) => handleFilterChange('subcategoria', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'subcategoria')}
+                    />
+                  </th>
+                  <th className="px-5 py-3">
+                    <ExcelHeaderFilter
+                      title="Ubicación"
+                      columnKey="ubicacion"
+                      data={items}
+                      selectedValues={colFilters.ubicacion}
+                      onFilterChange={(vals) => handleFilterChange('ubicacion', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'ubicacion')}
+                    />
+                  </th>
+                  <th className="px-5 py-3">
+                    <ExcelHeaderFilter
+                      title="Denominación"
+                      columnKey="denominacion"
+                      data={items}
+                      selectedValues={colFilters.denominacion}
+                      onFilterChange={(vals) => handleFilterChange('denominacion', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'denominacion')}
+                    />
+                  </th>
+                  <th className="px-5 py-3">
+                    <ExcelHeaderFilter
+                      title="Características"
+                      columnKey="caracteristicas"
+                      data={items}
+                      selectedValues={colFilters.caracteristicas}
+                      onFilterChange={(vals) => handleFilterChange('caracteristicas', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'caracteristicas')}
+                    />
+                  </th>
+                  <th className="px-5 py-3">
+                    <ExcelHeaderFilter
+                      title="Observaciones"
+                      columnKey="observaciones"
+                      data={items}
+                      selectedValues={colFilters.observaciones}
+                      onFilterChange={(vals) => handleFilterChange('observaciones', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'observaciones')}
+                    />
+                  </th>
                   <th className="px-5 py-3 text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-[0.8125rem]">
-                {filteredItems.map((item) => (
+                {filteredAndSortedItems.map((item) => (
                   <tr key={item.cod_patrimonial} className="table-row-hover text-slate-700">
                     <td className="px-5 py-3 font-mono font-bold text-slate-800">{item.cod_patrimonial}</td>
                     <td className="px-4 py-3">

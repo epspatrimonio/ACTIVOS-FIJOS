@@ -1,12 +1,14 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Smartphone, Plus, Pencil, Trash2, X, Save, Search, RefreshCw, Loader2,
   AlertCircle, Phone, Building2, User, Calendar, Tag, Signal,
   CheckCircle2, WifiOff, Wrench, ChevronDown, Clock, AlertTriangle,
-  Sparkles, RotateCcw
+  Sparkles, RotateCcw,
+  FileSpreadsheet, FileText
 } from 'lucide-react';
 import Modal from './Modal';
 import SearchableSelect from './SearchableSelect';
+import ExcelHeaderFilter from './ExcelHeaderFilter';
 import {
   fetchCelulares, createCelular, updateCelular, deleteCelular,
   fetchSucursales, fetchPuestos, fetchPersonal, fetchGenerarCodigoCelular,
@@ -471,6 +473,42 @@ export default function CelularesModule() {
   const [filtroVida, setFiltroVida] = useState('');
   const [filtroSucursal, setFiltroSucursal] = useState('');
   const [filtroLocalidad, setFiltroLocalidad] = useState('');
+
+  const [colFilters, setColFilters] = useState({});
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+
+  // Reset filters only when data is reloaded (length changes)
+  const celularesCount = celulares.length;
+  useEffect(() => {
+    setColFilters({});
+    setSortConfig({ key: null, direction: null });
+  }, [celularesCount]);
+
+  const handleFilterChange = (columnKey, values) => {
+    setColFilters(prev => ({
+      ...prev,
+      [columnKey]: values
+    }));
+  };
+
+  const handleSortChange = (columnKey, direction) => {
+    setSortConfig({ key: columnKey, direction });
+  };
+
+  const getColValue = (item, key) => {
+    switch (key) {
+      case 'cod_control': return item.cod_control || '';
+      case 'imei_linea': return `${item.numero_linea || ''} ${item.imei || ''}`;
+      case 'equipo': return `${item.marca || ''} ${item.modelo || ''}`;
+      case 'sucursal': return item.sucursal || '';
+      case 'responsable': return item.responsable || '';
+      case 'fecha_ingreso': return item.fecha_ingreso || '';
+      case 'fecha_asignacion': return item.fecha_asignacion || '';
+      case 'vida_util': return item.vida_util_estado || '';
+      case 'estado': return item.estado || '';
+      default: return '';
+    }
+  };
   const [sucursales, setSucursales] = useState([]);
   const [localidades, setLocalidades] = useState([]);
   const [personal, setPersonal] = useState([]);
@@ -489,6 +527,104 @@ export default function CelularesModule() {
     fetchLocalidades().then(setLocalidades).catch(() => {});
   }, []);
 
+  const handleExportExcel = () => {
+    if (!window.XLSX) {
+      alert('La librería SheetJS no está cargada.');
+      return;
+    }
+    const parseDateToJSDate = (dateStr) => {
+      if (!dateStr || dateStr === '—') return null;
+      const cleanStr = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr;
+      const parts = cleanStr.split('-');
+      if (parts.length === 3 && parts[0].length === 4) {
+        const y = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10);
+        const d = parseInt(parts[2], 10);
+        return new Date(Date.UTC(y, m - 1, d));
+      }
+      return null;
+    };
+
+    const sheetData = filtered.map(c => ({
+      "Cód. Control": c.cod_control,
+      "Número Línea": c.numero_linea || '—',
+      "IMEI": c.imei || '—',
+      "Operador": c.operador || '—',
+      "Marca": c.marca || '—',
+      "Modelo": c.modelo || '—',
+      "Sucursal": c.sucursal || '—',
+      "Localidad": c.localidad || '—',
+      "Responsable": c.responsable || '—',
+      "Puesto": c.puesto || '—',
+      "Fecha Ingreso": parseDateToJSDate(c.fecha_ingreso),
+      "Fecha Asignación": parseDateToJSDate(c.fecha_asignacion),
+      "Días para Renovar": c.dias_para_renovar !== null ? c.dias_para_renovar : '—',
+      "Estado Vida Útil": c.vida_util_estado || '—',
+      "Estado": c.estado
+    }));
+    const ws = window.XLSX.utils.json_to_sheet(sheetData, { cellDates: true });
+
+    // Force dd/mm/yyyy format on date cells
+    for (const cellId in ws) {
+      if (ws[cellId] && ws[cellId].t === 'd') {
+        ws[cellId].z = 'dd/mm/yyyy';
+      }
+    }
+
+    const wb = window.XLSX.utils.book_new();
+    window.XLSX.utils.book_append_sheet(wb, ws, "Celulares");
+    window.XLSX.writeFile(wb, `Reporte_Celulares_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
+
+  const handleExportPDF = () => {
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+      alert('La librería jsPDF no está cargada.');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', format: 'a4' });
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("EPS SELVA CENTRAL - CONTROL PATRIMONIAL", 14, 18);
+    doc.setFontSize(12);
+    doc.text("REPORTE DE CONTROL DE EQUIPOS MÓVILES - CELULARES", 14, 25);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.text(`Fecha de Reporte: ${new Date().toLocaleDateString('es-PE')}`, 14, 31);
+
+    const headers = [["Cód. Control", "Línea / IMEI", "Equipo / Marca", "Sucursal", "Responsable / Puesto", "Ingreso", "Vigencia Control", "Estado"]];
+    const tableRows = filtered.map(c => [
+      c.cod_control,
+      `${c.numero_linea || 'S/N'}\nIMEI: ${c.imei || 'S/I'}${c.operador ? ` · ${c.operador}` : ''}`,
+      `${c.marca || 'S/M'} ${c.modelo || ''}`,
+      `${c.sucursal || '—'}${c.localidad ? ` (${c.localidad})` : ''}`,
+      `${c.responsable || 'Sin asignar'}${c.puesto ? `\n${c.puesto}` : ''}`,
+      c.fecha_ingreso ? new Date(c.fecha_ingreso+'T00:00:00').toLocaleDateString('es-PE') : '—',
+      c.dias_para_renovar !== null ? (c.dias_para_renovar < 0 ? `Vencido hace ${Math.abs(c.dias_para_renovar)}d` : `${c.dias_para_renovar}d restantes`) : '—',
+      c.estado
+    ]);
+
+    doc.autoTable({
+      startY: 36,
+      head: headers,
+      body: tableRows,
+      theme: 'striped',
+      headStyles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold' },
+      styles: { fontSize: 8 },
+      columnStyles: {
+        0: { cellWidth: 20 },
+        1: { cellWidth: 45 },
+        2: { cellWidth: 40 },
+        3: { cellWidth: 35 },
+        4: { cellWidth: 60 },
+        5: { cellWidth: 20 },
+        6: { cellWidth: 35 },
+        7: { cellWidth: 20 }
+      }
+    });
+    doc.save(`Reporte_Celulares_${new Date().toISOString().split('T')[0]}.pdf`);
+  };
+
   const filtered = celulares.filter(c => {
     if (filtroVida && c.vida_util_estado !== filtroVida) return false;
     if (filtroSucursal && String(c.id_sucursal) !== filtroSucursal) return false;
@@ -498,6 +634,36 @@ export default function CelularesModule() {
     return [c.cod_control, c.marca, c.modelo, c.imei, c.numero_linea, c.responsable, c.sucursal, c.localidad]
       .some(v => v?.toLowerCase().includes(q));
   });
+
+  const filteredAndSorted = useMemo(() => {
+    let result = [...filtered];
+
+    // Apply column filters
+    Object.keys(colFilters).forEach(key => {
+      const selected = colFilters[key];
+      if (selected && selected.length > 0) {
+        result = result.filter(item => {
+          const val = String(getColValue(item, key)).trim();
+          return selected.includes(val);
+        });
+      }
+    });
+
+    // Apply sort
+    if (sortConfig.key) {
+      result.sort((a, b) => {
+        const valA = getColValue(a, sortConfig.key);
+        const valB = getColValue(b, sortConfig.key);
+
+        const strA = String(valA);
+        const strB = String(valB);
+        const comp = strA.localeCompare(strB, undefined, { numeric: true, sensitivity: 'base' });
+        return sortConfig.direction === 'asc' ? comp : -comp;
+      });
+    }
+
+    return result;
+  }, [filtered, colFilters, sortConfig]);
 
   const openNew = () => { setEditItem(null); setShowForm(true); };
   const openEdit = (item) => { setEditItem(item); setShowForm(true); };
@@ -513,7 +679,7 @@ export default function CelularesModule() {
   const activos = celulares.filter(c => c.estado === 'ACTIVO').length;
 
   return (
-    <div style={{ display:'flex', flexDirection:'column', gap:20 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, height: '100%', minHeight: 0, overflow: 'hidden' }} className="flex-1 animate-fadeIn">
       {/* HEADER */}
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:16 }}>
         <div style={{ borderLeft:'4px solid #0e6fdc', paddingLeft:16 }}>
@@ -524,11 +690,25 @@ export default function CelularesModule() {
           <p style={{ margin:0, fontSize:'0.875rem', color:'#64748b' }}>Control, asignación y vida útil de equipos móviles</p>
         </div>
         <div style={{ display:'flex', gap:8, alignItems:'center' }}>
-          <button onClick={load} style={{ padding:8, border:'1px solid #e2e8f0', borderRadius:10, background:'#fff', cursor:'pointer', color:'#64748b' }} title="Actualizar">
+          <button onClick={load} style={{ padding:8, border:'1px solid #e2e8f0', borderRadius:10, background:'#fff', cursor:'pointer', color:'#64748b', height:38 }} title="Actualizar">
             <RefreshCw style={{ width:16, height:16 }} />
           </button>
+          <button
+            onClick={handleExportExcel}
+            style={{ display:'flex', alignItems:'center', gap:6, padding:'9px 16px', background:'#10b981', color:'#fff', border:'none', borderRadius:12, fontWeight:700, fontSize:'0.875rem', cursor:'pointer', height:38 }}
+          >
+            <FileSpreadsheet style={{ width:16, height:16 }} />
+            <span>Excel</span>
+          </button>
+          <button
+            onClick={handleExportPDF}
+            style={{ display:'flex', alignItems:'center', gap:6, padding:'9px 16px', background:'#f43f5e', color:'#fff', border:'none', borderRadius:12, fontWeight:700, fontSize:'0.875rem', cursor:'pointer', height:38 }}
+          >
+            <FileText style={{ width:16, height:16 }} />
+            <span>PDF</span>
+          </button>
           <button onClick={openNew}
-            style={{ display:'flex', alignItems:'center', gap:8, padding:'9px 18px', background:'linear-gradient(135deg,#0e6fdc,#00B0F0)', color:'#fff', border:'none', borderRadius:12, fontWeight:700, fontSize:'0.875rem', cursor:'pointer', boxShadow:'0 2px 12px rgba(14,111,220,.3)' }}>
+            style={{ display:'flex', alignItems:'center', gap:8, padding:'9px 18px', background:'linear-gradient(135deg,#0e6fdc,#00B0F0)', color:'#fff', border:'none', borderRadius:12, fontWeight:700, fontSize:'0.875rem', cursor:'pointer', boxShadow:'0 2px 12px rgba(14,111,220,.3)', height:38 }}>
             <Plus style={{ width:16, height:16 }} /> Registrar Celular
           </button>
         </div>
@@ -637,14 +817,14 @@ export default function CelularesModule() {
       )}
 
       {/* TABLA */}
-      <div style={{ background:'#fff', borderRadius:16, border:'1px solid #e2e8f0', boxShadow:'0 1px 4px rgba(0,0,0,.05)', overflow:'hidden' }}>
+      <div style={{ background:'#fff', borderRadius:16, border:'1px solid #e2e8f0', boxShadow:'0 1px 4px rgba(0,0,0,.05)', overflow:'hidden', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
         {loading ? (
-          <div style={{ display:'flex', justifyContent:'center', alignItems:'center', padding:'5rem', gap:10, color:'#94a3b8' }}>
+          <div style={{ display:'flex', justifyContent:'center', alignItems:'center', padding:'5rem', gap:10, color:'#94a3b8', flex: 1 }}>
             <Loader2 style={{ width:20, height:20, animation:'spin 1s linear infinite' }} />
             <span style={{ fontSize:'0.875rem' }}>Cargando celulares...</span>
           </div>
-        ) : filtered.length === 0 ? (
-          <div style={{ textAlign:'center', padding:'5rem 2rem' }}>
+        ) : filteredAndSorted.length === 0 ? (
+          <div style={{ textAlign:'center', padding:'5rem 2rem', flex: 1, display: 'flex', flexDirection: 'column', justifycontent: 'center', alignItems: 'center' }}>
             <Smartphone style={{ width:48, height:48, color:'#e2e8f0', margin:'0 auto 12px' }} />
             <p style={{ color:'#64748b', fontWeight:600, margin:'0 0 4px' }}>No hay celulares que mostrar</p>
             <p style={{ color:'#94a3b8', fontSize:'0.875rem', margin:'0 0 16px' }}>
@@ -657,17 +837,123 @@ export default function CelularesModule() {
             )}
           </div>
         ) : (
-          <div style={{ overflowX:'auto' }}>
+          <div style={{ overflow: 'auto', flex: 1 }}>
             <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'0.8125rem' }}>
               <thead>
                 <tr style={{ background:'linear-gradient(to right,#f8fafc,#f1f5f9)', borderBottom:'1px solid #e2e8f0' }}>
-                  {['Cód. Control','IMEI / Línea','Equipo','Sucursal','Responsable','Ingreso','Asignación','Vida Útil','Estado',''].map(h => (
-                    <th key={h} style={{ padding:'10px 8px', textAlign:'left', fontSize:'0.6875rem', fontWeight:800, color:'#64748b', textTransform:'uppercase', letterSpacing:'0.04em', whiteSpace:'nowrap' }}>{h}</th>
-                  ))}
+                  <th style={{ padding:'10px 8px', textAlign:'left' }}>
+                    <ExcelHeaderFilter
+                      title="Cód. Control"
+                      columnKey="cod_control"
+                      data={celulares}
+                      selectedValues={colFilters.cod_control}
+                      onFilterChange={(vals) => handleFilterChange('cod_control', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'cod_control')}
+                    />
+                  </th>
+                  <th style={{ padding:'10px 8px', textAlign:'left' }}>
+                    <ExcelHeaderFilter
+                      title="IMEI / Línea"
+                      columnKey="imei_linea"
+                      data={celulares}
+                      selectedValues={colFilters.imei_linea}
+                      onFilterChange={(vals) => handleFilterChange('imei_linea', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'imei_linea')}
+                    />
+                  </th>
+                  <th style={{ padding:'10px 8px', textAlign:'left' }}>
+                    <ExcelHeaderFilter
+                      title="Equipo"
+                      columnKey="equipo"
+                      data={celulares}
+                      selectedValues={colFilters.equipo}
+                      onFilterChange={(vals) => handleFilterChange('equipo', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'equipo')}
+                    />
+                  </th>
+                  <th style={{ padding:'10px 8px', textAlign:'left' }}>
+                    <ExcelHeaderFilter
+                      title="Sucursal"
+                      columnKey="sucursal"
+                      data={celulares}
+                      selectedValues={colFilters.sucursal}
+                      onFilterChange={(vals) => handleFilterChange('sucursal', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'sucursal')}
+                    />
+                  </th>
+                  <th style={{ padding:'10px 8px', textAlign:'left' }}>
+                    <ExcelHeaderFilter
+                      title="Responsable"
+                      columnKey="responsable"
+                      data={celulares}
+                      selectedValues={colFilters.responsable}
+                      onFilterChange={(vals) => handleFilterChange('responsable', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'responsable')}
+                    />
+                  </th>
+                  <th style={{ padding:'10px 8px', textAlign:'left' }}>
+                    <ExcelHeaderFilter
+                      title="Ingreso"
+                      columnKey="fecha_ingreso"
+                      data={celulares}
+                      selectedValues={colFilters.fecha_ingreso}
+                      onFilterChange={(vals) => handleFilterChange('fecha_ingreso', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'fecha_ingreso')}
+                    />
+                  </th>
+                  <th style={{ padding:'10px 8px', textAlign:'left' }}>
+                    <ExcelHeaderFilter
+                      title="Asignación"
+                      columnKey="fecha_asignacion"
+                      data={celulares}
+                      selectedValues={colFilters.fecha_asignacion}
+                      onFilterChange={(vals) => handleFilterChange('fecha_asignacion', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'fecha_asignacion')}
+                    />
+                  </th>
+                  <th style={{ padding:'10px 8px', textAlign:'left' }}>
+                    <ExcelHeaderFilter
+                      title="Vida Útil"
+                      columnKey="vida_util"
+                      data={celulares}
+                      selectedValues={colFilters.vida_util}
+                      onFilterChange={(vals) => handleFilterChange('vida_util', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'vida_util')}
+                    />
+                  </th>
+                  <th style={{ padding:'10px 8px', textAlign:'left' }}>
+                    <ExcelHeaderFilter
+                      title="Estado"
+                      columnKey="estado"
+                      data={celulares}
+                      selectedValues={colFilters.estado}
+                      onFilterChange={(vals) => handleFilterChange('estado', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'estado')}
+                    />
+                  </th>
+                  <th style={{ padding:'10px 8px', textAlign:'left' }}></th>
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((c, i) => {
+                {filteredAndSorted.map((c, i) => {
                   const estadoCfg = ESTADO_MAP[c.estado] ?? ESTADO_MAP['ACTIVO'];
                   return (
                     <tr key={c.id_celular} style={{ borderBottom:'1px solid #f1f5f9', background: i % 2 === 0 ? '#fff' : '#fafafa', transition:'background .15s' }}

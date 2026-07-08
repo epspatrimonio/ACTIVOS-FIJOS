@@ -6,7 +6,7 @@ import {
 import { fetchActivos, fetchCelulares, fetchSoat } from '../utils/api';
 
 export default function AdminDashboard() {
-  const [subTab, setSubTab] = useState('ACTIVOS'); // ACTIVOS | DEPRECIACION | CELULARES | VEHICULOS | SOAT | CUENTAS_Y_CATEGORIAS
+  const [subTab, setSubTab] = useState('ACTIVOS'); // ACTIVOS | DEPRECIACION | OBRAS | CELULARES | VEHICULOS | SOAT | CUENTAS_Y_CATEGORIAS
   const [assets, setAssets] = useState([]);
   const [filteredAssets, setFilteredAssets] = useState([]);
   const [celulares, setCelulares] = useState([]);
@@ -18,13 +18,19 @@ export default function AdminDashboard() {
   const [selectedYear, setSelectedYear] = useState('Todos');
   const [selectedMonth, setSelectedMonth] = useState('Todos');
 
-  // Chart refs
+  // Chart refs (5 charts for ACTIVOS tab)
   const chartRef1 = useRef(null);
   const chartRef2 = useRef(null);
+  const chartRef3 = useRef(null);
+  const chartRef4 = useRef(null);
+  const chartRef5 = useRef(null);
 
   // Chart instances
   const chartInstance1 = useRef(null);
   const chartInstance2 = useRef(null);
+  const chartInstance3 = useRef(null);
+  const chartInstance4 = useRef(null);
+  const chartInstance5 = useRef(null);
 
   // Fetch all data once on mount
   useEffect(() => {
@@ -117,14 +123,9 @@ export default function AdminDashboard() {
 
     // Helper to destroy old charts
     const destroyCharts = () => {
-      if (chartInstance1.current) {
-        chartInstance1.current.destroy();
-        chartInstance1.current = null;
-      }
-      if (chartInstance2.current) {
-        chartInstance2.current.destroy();
-        chartInstance2.current = null;
-      }
+      [chartInstance1, chartInstance2, chartInstance3, chartInstance4, chartInstance5].forEach(ref => {
+        if (ref.current) { ref.current.destroy(); ref.current = null; }
+      });
     };
 
     destroyCharts();
@@ -132,76 +133,87 @@ export default function AdminDashboard() {
     const Chart = window.Chart;
 
     if (subTab === 'ACTIVOS') {
+      // Solo activos fijos (excluir obras en curso: cod 339%)
+      const af = filteredAssets.filter(a => !a.cod_patrimonial?.startsWith('339'));
+
       // 1. Estado Físico (Doughnut)
       const countsEstado = { 'BUENO': 0, 'REGULAR': 0, 'MALO': 0, 'PARA BAJA': 0, 'BAJA': 0 };
-      filteredAssets.forEach(item => {
+      af.forEach(item => {
         const est = (item.estado_activo || '').toUpperCase().trim();
         if (countsEstado[est] !== undefined) countsEstado[est]++;
       });
-
       if (chartRef1.current) {
         chartInstance1.current = new Chart(chartRef1.current.getContext('2d'), {
           type: 'doughnut',
           data: {
             labels: ['Bueno', 'Regular', 'Malo', 'Para Baja', 'Baja'],
-            datasets: [{
-              data: [
-                countsEstado['BUENO'], 
-                countsEstado['REGULAR'], 
-                countsEstado['MALO'], 
-                countsEstado['PARA BAJA'], 
-                countsEstado['BAJA']
-              ],
-              backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#eab308', '#ef4444'],
-              borderWidth: 2,
-              borderColor: '#ffffff'
-            }]
+            datasets: [{ data: [countsEstado['BUENO'], countsEstado['REGULAR'], countsEstado['MALO'], countsEstado['PARA BAJA'], countsEstado['BAJA']], backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#eab308', '#ef4444'], borderWidth: 2, borderColor: '#ffffff' }]
           },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: 'bottom',
-                labels: { boxWidth: 12, font: { size: 11, weight: '600' }, color: '#475569' }
-              }
-            },
-            cutout: '65%'
-          }
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11, weight: '600' }, color: '#475569' } } }, cutout: '65%' }
         });
       }
 
-      // 2. Activos por Sucursal (Horizontal Bar)
-      const countsLocation = {};
-      filteredAssets.forEach(item => {
-        const key = item.sucursal || 'Sin sucursal';
-        countsLocation[key] = (countsLocation[key] || 0) + 1;
-      });
-      const sortedLocations = Object.entries(countsLocation).sort((a, b) => b[1] - a[1]).slice(0, 7);
-
+      // 2. Por Sucursal — cantidad (Horizontal Bar)
+      const countsSucursal = {};
+      af.forEach(item => { const k = item.sucursal || 'Sin sucursal'; countsSucursal[k] = (countsSucursal[k] || 0) + 1; });
+      const sortedSucursal = Object.entries(countsSucursal).sort((a, b) => b[1] - a[1]);
       if (chartRef2.current) {
         chartInstance2.current = new Chart(chartRef2.current.getContext('2d'), {
           type: 'bar',
           data: {
-            labels: sortedLocations.map(e => e[0]),
-            datasets: [{
-              label: 'Bienes Registrados',
-              data: sortedLocations.map(e => e[1]),
-              backgroundColor: '#00B0F0',
-              borderRadius: 6,
-              borderWidth: 0
-            }]
+            labels: sortedSucursal.map(e => e[0]),
+            datasets: [{ label: 'N° Bienes', data: sortedSucursal.map(e => e[1]), backgroundColor: '#00B0F0', borderRadius: 6, borderWidth: 0 }]
+          },
+          options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#f1f5f9' }, ticks: { stepSize: 1, color: '#94a3b8' } }, y: { grid: { display: false }, ticks: { font: { size: 11, weight: '600' }, color: '#475569' } } } }
+        });
+      }
+
+      // 3. Por Localidad — valor en libros (Horizontal Bar)
+      const montoLocalidad = {};
+      af.forEach(item => { const k = item.localidad || 'Sin localidad'; montoLocalidad[k] = (montoLocalidad[k] || 0) + (Number(item.valor_en_libros) || 0); });
+      const sortedLocalidadMonto = Object.entries(montoLocalidad).sort((a, b) => b[1] - a[1]).slice(0, 10);
+      if (chartRef3.current) {
+        chartInstance3.current = new Chart(chartRef3.current.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: sortedLocalidadMonto.map(e => e[0]),
+            datasets: [{ label: 'S/.', data: sortedLocalidadMonto.map(e => e[1]), backgroundColor: '#6366f1', borderRadius: 6, borderWidth: 0 }]
           },
           options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-              x: { grid: { color: '#f1f5f9' }, ticks: { stepSize: 1, color: '#94a3b8' } },
-              y: { grid: { display: false }, ticks: { font: { size: 10, weight: '600' }, color: '#475569' } }
-            }
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => 'S/. ' + ctx.raw.toLocaleString('es-PE', { minimumFractionDigits: 2 }) } } },
+            scales: { x: { grid: { color: '#f1f5f9' }, ticks: { color: '#94a3b8', callback: v => 'S/.' + (v/1000).toFixed(0) + 'k' } }, y: { grid: { display: false }, ticks: { font: { size: 10, weight: '600' }, color: '#475569' } } }
           }
+        });
+      }
+
+      // 4. Por Categoría — cantidad (Bar vertical)
+      const countsCat = {};
+      af.forEach(item => { const k = item.categoria || 'Sin categoría'; countsCat[k] = (countsCat[k] || 0) + 1; });
+      const sortedCat = Object.entries(countsCat).sort((a, b) => b[1] - a[1]);
+      if (chartRef4.current) {
+        chartInstance4.current = new Chart(chartRef4.current.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: sortedCat.map(e => e[0]),
+            datasets: [{ label: 'N° Bienes', data: sortedCat.map(e => e[1]), backgroundColor: '#10b981', borderRadius: 6, borderWidth: 0 }]
+          },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 9, weight: '600' }, color: '#475569', maxRotation: 30 } }, y: { grid: { color: '#f1f5f9' }, ticks: { stepSize: 1, color: '#94a3b8' } } } }
+        });
+      }
+
+      // 5. Por Subcategoría — Top 12 cantidad (Horizontal Bar)
+      const countsSub = {};
+      af.forEach(item => { const k = item.subcategoria || 'Sin subcategoría'; countsSub[k] = (countsSub[k] || 0) + 1; });
+      const sortedSub = Object.entries(countsSub).sort((a, b) => b[1] - a[1]).slice(0, 12);
+      if (chartRef5.current) {
+        chartInstance5.current = new Chart(chartRef5.current.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: sortedSub.map(e => e[0]),
+            datasets: [{ label: 'N° Bienes', data: sortedSub.map(e => e[1]), backgroundColor: '#f59e0b', borderRadius: 6, borderWidth: 0 }]
+          },
+          options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#f1f5f9' }, ticks: { stepSize: 1, color: '#94a3b8' } }, y: { grid: { display: false }, ticks: { font: { size: 9, weight: '600' }, color: '#475569' } } } }
         });
       }
     }
@@ -599,13 +611,19 @@ export default function AdminDashboard() {
     );
   }
 
-  // Common counters (updated to use filteredAssets to react to year/month selection)
-  const totalAssets = filteredAssets.length;
+  // Separar activos fijos de obras en curso (cod patrimonial 339%)
+  const activosFijos = filteredAssets.filter(a => !a.cod_patrimonial?.startsWith('339'));
+  const obrasEnCurso = filteredAssets.filter(a => a.cod_patrimonial?.startsWith('339'));
+
+  // Common counters — activos fijos only (excluye obras en curso)
+  const totalAssets = activosFijos.length;
   const totalVehicles = getVehicles().length;
   const totalCelulares = celulares.length;
-  const totLibros = filteredAssets.reduce((sum, item) => sum + (Number(item.valor_en_libros) || 0), 0);
-  const totDepreciado = filteredAssets.reduce((sum, item) => sum + (Number(item.depreciacion_acumulada) || 0), 0);
+  const totLibros = activosFijos.reduce((sum, item) => sum + (Number(item.valor_en_libros) || 0), 0);
+  const totDepreciado = activosFijos.reduce((sum, item) => sum + (Number(item.depreciacion_acumulada) || 0), 0);
   const totNetValue = totLibros - totDepreciado;
+  // Obras en curso — sin depreciación por diseño
+  const totLibrosObras = obrasEnCurso.reduce((sum, item) => sum + (Number(item.valor_en_libros) || 0), 0);
 
   // Alerts lists for SOAT / RT
   const alertSoat = getVehicles().filter(v => v.estado_activo !== 'PARA BAJA' && v.estado_activo !== 'BAJA').filter(v => v.soat_estado === 'VENCIDO' || v.soat_estado === 'POR_VENCER');
@@ -670,6 +688,7 @@ export default function AdminDashboard() {
           { key: 'ACTIVOS', label: '💼 Activos Fijos' },
           { key: 'DEPRECIACION', label: '🪙 Depreciación' },
           { key: 'CUENTAS_Y_CATEGORIAS', label: '📊 Cuentas y Categorías' },
+          { key: 'OBRAS', label: '🏗️ Obras en Curso' },
           { key: 'CELULARES', label: '📱 Celulares' },
           { key: 'VEHICULOS', label: '🚗 Vehículos' },
           { key: 'SOAT', label: '🛡️ SOAT y Alertas' }
@@ -690,27 +709,25 @@ export default function AdminDashboard() {
 
       {/* RENDER SEGMENTO: ACTIVOS FIJOS */}
       {subTab === 'ACTIVOS' && (
-        <div className="space-y-6 animate-fadeIn">
-          {/* Fila de KPIs */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="space-y-5 animate-fadeIn">
+          {/* KPIs */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[0.6875rem] font-extrabold text-slate-400 uppercase tracking-wider">Bienes Muebles</span>
+                <span className="text-[0.6875rem] font-extrabold text-slate-400 uppercase tracking-wider">Activos Fijos</span>
                 <span className="p-1 rounded-lg bg-brand-50 text-brand-600 text-xs">Total</span>
               </div>
               <p className="text-3xl font-extrabold text-slate-900 tracking-tight">{totalAssets}</p>
-              <span className="text-[11px] text-slate-400 font-semibold block mt-1">Registrados en el período</span>
+              <span className="text-[11px] text-slate-400 font-semibold block mt-1">Bienes depreciables del período</span>
             </div>
-
             <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[0.6875rem] font-extrabold text-slate-400 uppercase tracking-wider">Inversión en Libros</span>
                 <span className="p-1 rounded-lg bg-emerald-50 text-emerald-600 text-xs">Costo</span>
               </div>
               <p className="text-2xl font-extrabold text-emerald-600 tracking-tight">{formatMoney(totLibros)}</p>
-              <span className="text-[11px] text-slate-400 font-semibold block mt-1">Suma total del valor histórico de adquisición</span>
+              <span className="text-[11px] text-slate-400 font-semibold block mt-1">Valor histórico de adquisición</span>
             </div>
-
             <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[0.6875rem] font-extrabold text-slate-400 uppercase tracking-wider">Valor Residual Neto</span>
@@ -721,26 +738,134 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Gráficos */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm flex flex-col min-h-[300px]">
-              <h3 className="text-sm font-extrabold text-slate-800 mb-4 border-b border-slate-100 pb-3 flex items-center gap-1.5">
+          {/* Fila 1: Estado Físico + Por Sucursal */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm flex flex-col min-h-[280px]">
+              <h3 className="text-sm font-extrabold text-slate-800 mb-3 border-b border-slate-100 pb-2.5 flex items-center gap-1.5">
                 <ClipboardList className="w-4 h-4 text-emerald-500" />
                 <span>Estado de Conservación Física</span>
               </h3>
               <div className="flex-1 relative flex items-center justify-center">
-                <canvas ref={chartRef1} className="max-h-[220px] w-full"></canvas>
+                <canvas ref={chartRef1} className="max-h-[200px] w-full"></canvas>
               </div>
             </div>
-
-            <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm flex flex-col min-h-[300px]">
-              <h3 className="text-sm font-extrabold text-slate-800 mb-4 border-b border-slate-100 pb-3 flex items-center gap-1.5">
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm flex flex-col min-h-[280px]">
+              <h3 className="text-sm font-extrabold text-slate-800 mb-3 border-b border-slate-100 pb-2.5 flex items-center gap-1.5">
                 <BarChart3 className="w-4 h-4 text-brand-500" />
-                <span>Distribución cuantitativa por Sucursal (Top 7)</span>
+                <span>Bienes por Sucursal (cantidad)</span>
               </h3>
               <div className="flex-1 relative">
                 <canvas ref={chartRef2} className="max-h-[220px] w-full"></canvas>
               </div>
+            </div>
+          </div>
+
+          {/* Fila 2: Por Localidad (monto) + Por Categoría */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm flex flex-col min-h-[280px]">
+              <h3 className="text-sm font-extrabold text-slate-800 mb-3 border-b border-slate-100 pb-2.5 flex items-center gap-1.5">
+                <Coins className="w-4 h-4 text-indigo-500" />
+                <span>Valor en Libros por Localidad (S/.)</span>
+              </h3>
+              <div className="flex-1 relative">
+                <canvas ref={chartRef3} className="max-h-[220px] w-full"></canvas>
+              </div>
+            </div>
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm flex flex-col min-h-[280px]">
+              <h3 className="text-sm font-extrabold text-slate-800 mb-3 border-b border-slate-100 pb-2.5 flex items-center gap-1.5">
+                <FolderSearch className="w-4 h-4 text-emerald-500" />
+                <span>Bienes por Categoría (cantidad)</span>
+              </h3>
+              <div className="flex-1 relative">
+                <canvas ref={chartRef4} className="max-h-[220px] w-full"></canvas>
+              </div>
+            </div>
+          </div>
+
+          {/* Fila 3: Por Subcategoría (full width) */}
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm flex flex-col min-h-[320px]">
+            <h3 className="text-sm font-extrabold text-slate-800 mb-3 border-b border-slate-100 pb-2.5 flex items-center gap-1.5">
+              <BarChart3 className="w-4 h-4 text-amber-500" />
+              <span>Bienes por Subcategoría — Top 12 (cantidad)</span>
+            </h3>
+            <div className="flex-1 relative">
+              <canvas ref={chartRef5} className="max-h-[260px] w-full"></canvas>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* RENDER SEGMENTO: OBRAS EN CURSO */}
+      {subTab === 'OBRAS' && (
+        <div className="space-y-5 animate-fadeIn">
+          {/* KPIs */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[0.6875rem] font-extrabold text-slate-400 uppercase tracking-wider">Obras en Curso</span>
+                <span className="p-1 rounded-lg bg-amber-50 text-amber-600 text-xs">WIP</span>
+              </div>
+              <p className="text-3xl font-extrabold text-slate-900 tracking-tight">{obrasEnCurso.length}</p>
+              <span className="text-[11px] text-slate-400 font-semibold block mt-1">Bienes no depreciables (cód. 339)</span>
+            </div>
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[0.6875rem] font-extrabold text-slate-400 uppercase tracking-wider">Inversión Acumulada</span>
+                <span className="p-1 rounded-lg bg-indigo-50 text-indigo-600 text-xs">Costo</span>
+              </div>
+              <p className="text-2xl font-extrabold text-indigo-600 tracking-tight">{formatMoney(totLibrosObras)}</p>
+              <span className="text-[11px] text-slate-400 font-semibold block mt-1">Valor en libros sin depreciación</span>
+            </div>
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[0.6875rem] font-extrabold text-slate-400 uppercase tracking-wider">Nota</span>
+                <span className="p-1 rounded-lg bg-slate-100 text-slate-500 text-xs">Info</span>
+              </div>
+              <p className="text-xs font-semibold text-slate-500 mt-2 leading-relaxed">
+                Las obras en curso no forman parte del Activo Fijo depreciable. Se registran en la cuenta 339 y se activan al finalizar la obra.
+              </p>
+            </div>
+          </div>
+          {/* Listado de obras */}
+          <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
+            <div className="px-5 py-3.5 border-b border-slate-100 flex items-center gap-2">
+              <h3 className="text-sm font-extrabold text-slate-800">🏗️ Listado de Bienes — Obras en Curso</h3>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-slate-100 text-xs">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="px-4 py-2.5 text-left font-bold text-slate-500">Cód. Patrimonial</th>
+                    <th className="px-4 py-2.5 text-left font-bold text-slate-500">Denominación</th>
+                    <th className="px-4 py-2.5 text-left font-bold text-slate-500">Sucursal / Localidad</th>
+                    <th className="px-4 py-2.5 text-left font-bold text-slate-500">Estado</th>
+                    <th className="px-4 py-2.5 text-right font-bold text-slate-500">Valor Libros</th>
+                    <th className="px-4 py-2.5 text-left font-bold text-slate-500">Responsable</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {obrasEnCurso.length === 0 ? (
+                    <tr><td colSpan="6" className="text-center py-8 text-slate-400 font-semibold">Sin obras en curso en el período seleccionado</td></tr>
+                  ) : (
+                    obrasEnCurso.map(item => (
+                      <tr key={item.cod_patrimonial} className="hover:bg-amber-50/30 transition-colors">
+                        <td className="px-4 py-2.5 font-mono font-bold text-slate-700">{item.cod_patrimonial}</td>
+                        <td className="px-4 py-2.5 font-medium text-slate-800">{item.denominacion}</td>
+                        <td className="px-4 py-2.5 text-slate-500">{item.sucursal || '—'} / {item.localidad || '—'}</td>
+                        <td className="px-4 py-2.5">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[0.65rem] font-bold border ${
+                            item.estado_activo === 'BUENO' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                            item.estado_activo === 'REGULAR' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                            'bg-slate-100 text-slate-700 border-slate-200'
+                          }`}>{item.estado_activo || '—'}</span>
+                        </td>
+                        <td className="px-4 py-2.5 text-right font-mono font-bold text-slate-900">{formatMoney(item.valor_en_libros)}</td>
+                        <td className="px-4 py-2.5 text-slate-500">{item.responsable || '—'}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

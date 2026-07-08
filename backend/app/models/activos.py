@@ -125,6 +125,13 @@ class VwRegistroActivosDetalle(Base):
     soat_dias_vigencia: Mapped[Optional[int]] = mapped_column(Integer)
     soat_estado: Mapped[Optional[str]] = mapped_column(String(20))
 
+    # Nuevos campos para reportes
+    fuente: Mapped[Optional[str]] = mapped_column(String(100))
+    nota_pedido: Mapped[Optional[str]] = mapped_column(String(80))
+    centro_costo: Mapped[Optional[str]] = mapped_column(String(20))
+    requerido_por: Mapped[Optional[str]] = mapped_column(String(260))
+    fecha_alta: Mapped[Optional[date]] = mapped_column(Date)
+
 
 
 class VwListaSucursal(Base):

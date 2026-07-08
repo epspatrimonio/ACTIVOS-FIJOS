@@ -127,10 +127,7 @@ async def upsert_acquisition_document(db: AsyncSession, activo_in: ActivoCreate)
         cert_clean = clean_digits(activo_in.compra_certificacion_presupuestal)
         if cert_clean:
             if len(cert_clean) < 4:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="La certificación presupuestal debe tener como mínimo 4 dígitos."
-                )
+                cert_clean = cert_clean.zfill(4)
         activo_in.compra_certificacion_presupuestal = cert_clean
 
         cuenta_clean = clean_digits(activo_in.compra_cuenta_contable)
@@ -742,7 +739,7 @@ async def create_compra(compra_in: CompraCreate, db: AsyncSession = Depends(get_
     cert_clean = clean_digits(compra_in.certificacion_presupuestal)
     if cert_clean:
         if len(cert_clean) < 4:
-            raise HTTPException(status_code=400, detail="La certificación presupuestal debe tener como mínimo 4 dígitos.")
+            cert_clean = cert_clean.zfill(4)
     compra_in.certificacion_presupuestal = cert_clean
 
     cuenta_clean = clean_digits(compra_in.cuenta_contable)

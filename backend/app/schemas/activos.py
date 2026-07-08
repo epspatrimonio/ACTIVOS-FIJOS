@@ -101,6 +101,13 @@ class ActivoResponse(ActivoBase):
     soat_dias_vigencia: Optional[int] = None
     soat_estado: Optional[str] = None
 
+    # Nuevos campos para reportes
+    fuente: Optional[str] = None
+    nota_pedido: Optional[str] = None
+    centro_costo: Optional[str] = None
+    requerido_por: Optional[str] = None
+    fecha_alta: Optional[date] = None
+
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 

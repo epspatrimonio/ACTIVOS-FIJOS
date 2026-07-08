@@ -1,11 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Car, Plus, Pencil, Trash2, X, Save, Search, RefreshCw, Loader2,
   AlertCircle, Building2, User, Calendar, Tag,
-  AlertTriangle, CheckCircle2, Hash, ChevronDown, Settings2, Info
+  AlertTriangle, CheckCircle2, Hash, ChevronDown, Settings2, Info,
+  FileSpreadsheet, FileText
 } from 'lucide-react';
 import Modal from './Modal';
 import SearchableSelect from './SearchableSelect';
+import ExcelHeaderFilter from './ExcelHeaderFilter';
 import {
   fetchActivos, fetchVehiculos, upsertVehiculoDetalle,
   fetchSucursales, fetchPuestos, fetchPersonal, fetchLocalidades,
@@ -691,6 +693,39 @@ export default function VehiculosModule() {
   const [filtroSucursal, setFiltroSucursal] = useState('');
   const [filtroLocalidad, setFiltroLocalidad] = useState('');
   const [busqueda, setBusqueda] = useState('');
+
+  const [colFilters, setColFilters] = useState({});
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+
+  // Reset filters only when data is reloaded (length changes)
+  const vehiclesCount = vehicles.length;
+  useEffect(() => {
+    setColFilters({});
+    setSortConfig({ key: null, direction: null });
+  }, [vehiclesCount]);
+
+  const handleFilterChange = (columnKey, values) => {
+    setColFilters(prev => ({
+      ...prev,
+      [columnKey]: values
+    }));
+  };
+
+  const handleSortChange = (columnKey, direction) => {
+    setSortConfig({ key: columnKey, direction });
+  };
+
+  const getColValue = (item, key) => {
+    switch (key) {
+      case 'cod_patrimonial': return item.cod_patrimonial || '';
+      case 'placa': return item.placa || '';
+      case 'denominacion': return item.denominacion || '';
+      case 'sucursal': return item.sucursal || '';
+      case 'responsable': return item.responsable || '';
+      case 'estado_activo': return item.estado_activo || '';
+      default: return '';
+    }
+  };
   
   const [sucursales, setSucursales] = useState([]);
   const [localidades, setLocalidades] = useState([]);
@@ -749,6 +784,128 @@ export default function VehiculosModule() {
     fetchPersonal().then(setPersonal).catch(() => {});
   }, [loadData]);
 
+  const handleExportExcel = () => {
+    if (!window.XLSX) {
+      alert('La librería SheetJS no está cargada.');
+      return;
+    }
+    const dateToExcelSerial = (dateStr) => {
+      if (!dateStr || dateStr === '—') return null;
+      const cleanStr = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr;
+      const parts = cleanStr.split('-');
+      if (parts.length === 3 && parts[0].length === 4) {
+        const y = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10);
+        const d = parseInt(parts[2], 10);
+        const baseDate = Date.UTC(1899, 11, 30);
+        const targetDate = Date.UTC(y, m - 1, d);
+        const msPerDay = 24 * 60 * 60 * 1000;
+        return (targetDate - baseDate) / msPerDay;
+      }
+      return null;
+    };
+
+    const sheetData = filtered.map(v => ({
+      "Cód. Patrimonial": v.cod_patrimonial,
+      "Placa": v.placa || 'Sin placa',
+      "Denominación": v.denominacion,
+      "Tipo": v.tipo_vehiculo || '—',
+      "Carrocería": v.carroceria || '—',
+      "Combustible": v.combustible || '—',
+      "Marca": v.marca || '—',
+      "Modelo": v.modelo || '—',
+      "Color": v.color || '—',
+      "Año": v.anio_fabricacion || '—',
+      "Fuente": v.fuente || '—',
+      "Fecha de Alta": dateToExcelSerial(v.fecha_alta_factura || v.fecha_alta),
+      "Fecha Reg. Contable": dateToExcelSerial(v.fecha_registro_contable),
+      "Nota de Pedido": v.nota_pedido || '—',
+      "Centro de Costo": v.centro_costo || '—',
+      "Solicitado Por": v.requerido_por || '—',
+      "Motor": v.nro_motor || '—',
+      "Chasis": v.nro_chasis || '—',
+      "Tarjeta Propiedad": v.nro_tarjeta_prop || '—',
+      "Sucursal": v.sucursal || '—',
+      "Responsable": v.responsable || '—',
+      "Estado Físico": v.estado_activo
+    }));
+    const ws = window.XLSX.utils.json_to_sheet(sheetData);
+
+    // Force dd/mm/yyyy format on date cells
+    const dateHeaders = ["Fecha de Alta", "Fecha Reg. Contable", "F. Asignación", "Fecha Inicio", "Fecha Vencimiento", "Fecha Ingreso", "Fecha Registro"];
+    if (ws['!ref']) {
+      const range = window.XLSX.utils.decode_range(ws['!ref']);
+      const dateCols = [];
+      for (let c = range.s.c; c <= range.e.c; ++c) {
+        const cellAddress = window.XLSX.utils.encode_cell({ r: 0, c: c });
+        const cell = ws[cellAddress];
+        if (cell && dateHeaders.includes(cell.v)) {
+          dateCols.push(c);
+        }
+      }
+      for (let r = range.s.r + 1; r <= range.e.r; ++r) {
+        for (const colIdx of dateCols) {
+          const cellAddress = window.XLSX.utils.encode_cell({ r: r, c: colIdx });
+          const cell = ws[cellAddress];
+          if (cell && cell.t === 'n') {
+            cell.z = 'dd/mm/yyyy';
+          }
+        }
+      }
+    }
+
+    const wb = window.XLSX.utils.book_new();
+    window.XLSX.utils.book_append_sheet(wb, ws, "Vehiculos");
+    window.XLSX.writeFile(wb, `Reporte_Vehiculos_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
+
+  const handleExportPDF = () => {
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+      alert('La librería jsPDF no está cargada.');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', format: 'a4' });
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("EPS SELVA CENTRAL - CONTROL PATRIMONIAL", 14, 18);
+    doc.setFontSize(12);
+    doc.text("REPORTE DE FLOTA DE VEHÍCULOS", 14, 25);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.text(`Fecha de Reporte: ${new Date().toLocaleDateString('es-PE')}`, 14, 31);
+
+    const headers = [["Código", "Placa", "Denominación del Vehículo", "Tipo", "Sucursal", "Responsable", "Estado"]];
+    const tableRows = filtered.map(v => [
+      v.cod_patrimonial,
+      v.placa || 'S/P',
+      `${v.denominacion}\nM: ${v.marca || 'S/M'} · Mod: ${v.modelo || 'S/M'}\nMotor: ${v.nro_motor || 'S/M'} · Chasis: ${v.nro_chasis || 'S/C'}`,
+      v.tipo_vehiculo || '—',
+      v.sucursal || '—',
+      v.responsable || 'Sin asignar',
+      v.estado_activo
+    ]);
+
+    doc.autoTable({
+      startY: 36,
+      head: headers,
+      body: tableRows,
+      theme: 'striped',
+      headStyles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold' },
+      styles: { fontSize: 8 },
+      columnStyles: {
+        0: { cellWidth: 25 },
+        1: { cellWidth: 20 },
+        2: { cellWidth: 90 },
+        3: { cellWidth: 25 },
+        4: { cellWidth: 35 },
+        5: { cellWidth: 45 },
+        6: { cellWidth: 25 }
+      }
+    });
+    doc.save(`Reporte_Vehiculos_${new Date().toISOString().split('T')[0]}.pdf`);
+  };
+
   // Filtrado
   const filtered = vehicles.filter(v => {
     if (filtroEstadoRev) {
@@ -761,6 +918,36 @@ export default function VehiculosModule() {
     return [v.cod_patrimonial, v.denominacion, v.placa, v.responsable, v.marca, v.modelo]
       .some(val => val?.toLowerCase().includes(q));
   });
+
+  const filteredAndSorted = useMemo(() => {
+    let result = [...filtered];
+
+    // Apply column filters
+    Object.keys(colFilters).forEach(key => {
+      const selected = colFilters[key];
+      if (selected && selected.length > 0) {
+        result = result.filter(item => {
+          const val = String(getColValue(item, key)).trim();
+          return selected.includes(val);
+        });
+      }
+    });
+
+    // Apply sort
+    if (sortConfig.key) {
+      result.sort((a, b) => {
+        const valA = getColValue(a, sortConfig.key);
+        const valB = getColValue(b, sortConfig.key);
+
+        const strA = String(valA);
+        const strB = String(valB);
+        const comp = strA.localeCompare(strB, undefined, { numeric: true, sensitivity: 'base' });
+        return sortConfig.direction === 'asc' ? comp : -comp;
+      });
+    }
+
+    return result;
+  }, [filtered, colFilters, sortConfig]);
 
   const total = vehicles.length;
   const revVigentes = vehicles.filter(v => v.estado_rev_tec === 'VIGENTE').length;
@@ -785,7 +972,7 @@ export default function VehiculosModule() {
   };
 
   return (
-    <div className="space-y-5 animate-fadeIn">
+    <div className="flex-1 flex flex-col min-h-0 space-y-4 overflow-hidden animate-fadeIn h-full">
       {/* HEADER */}
       <div className="flex items-start justify-between gap-4">
         <div className="module-heading">
@@ -799,11 +986,25 @@ export default function VehiculosModule() {
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <button onClick={loadData} className="p-2 rounded-lg text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-colors border border-slate-200 cursor-pointer bg-white" title="Actualizar">
+          <button onClick={loadData} className="p-2 rounded-lg text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-colors border border-slate-200 cursor-pointer bg-white h-10" title="Actualizar">
             <RefreshCw className="w-4 h-4" />
           </button>
+          <button
+            onClick={handleExportExcel}
+            className="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-3.5 rounded-xl text-xs shadow-md shadow-emerald-600/10 hover:shadow-lg active:scale-[0.98] transition-all cursor-pointer border-none h-10"
+          >
+            <FileSpreadsheet className="w-4 h-4" />
+            <span>Excel</span>
+          </button>
+          <button
+            onClick={handleExportPDF}
+            className="flex items-center justify-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 px-3.5 rounded-xl text-xs shadow-md shadow-rose-600/10 hover:shadow-lg active:scale-[0.98] transition-all cursor-pointer border-none h-10"
+          >
+            <FileText className="w-4 h-4" />
+            <span>PDF</span>
+          </button>
           <button onClick={() => { setEditItem(null); setShowForm(true); }}
-            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-brand-600 to-[#00B0F0] text-white text-sm font-bold rounded-xl shadow-lg shadow-brand-500/25 hover:from-brand-700 hover:to-[#009FD6] transition-all active:scale-[0.98] border-none cursor-pointer">
+            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-brand-600 to-[#00B0F0] text-white text-sm font-bold rounded-xl shadow-lg shadow-brand-500/25 hover:from-brand-700 hover:to-[#009FD6] transition-all active:scale-[0.98] border-none cursor-pointer h-10">
             <Plus className="w-4 h-4" />
             Registrar Vehículo
           </button>
@@ -886,14 +1087,14 @@ export default function VehiculosModule() {
       )}
 
       {/* TABLA */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col flex-1 min-h-0">
         {loading ? (
-          <div className="flex items-center justify-center py-24 gap-2 text-slate-400">
+          <div className="flex items-center justify-center py-24 gap-2 text-slate-400 flex-1">
             <Loader2 className="w-5 h-5 animate-spin" />
             <span className="text-sm">Cargando flota de vehículos...</span>
           </div>
-        ) : filtered.length === 0 ? (
-          <div className="text-center py-24">
+        ) : filteredAndSorted.length === 0 ? (
+          <div className="text-center py-24 flex-1 flex flex-col justify-center items-center">
             <Car className="w-12 h-12 text-slate-200 mx-auto mb-3" />
             <p className="text-slate-500 font-semibold">No se encontraron vehículos</p>
             <p className="text-slate-400 text-sm mt-1 mb-4">
@@ -907,17 +1108,87 @@ export default function VehiculosModule() {
             )}
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-auto flex-1">
             <table className="w-full text-sm">
               <thead className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
                 <tr>
-                  {['Cód. Patrimonial', 'Placa', 'Tipo y Características', 'Sucursal', 'Responsable', 'Estado Físico', ''].map(h => (
-                    <th key={h} className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">{h}</th>
-                  ))}
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                    <ExcelHeaderFilter
+                      title="Cód. Patrimonial"
+                      columnKey="cod_patrimonial"
+                      data={vehicles}
+                      selectedValues={colFilters.cod_patrimonial}
+                      onFilterChange={(vals) => handleFilterChange('cod_patrimonial', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'cod_patrimonial')}
+                    />
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                    <ExcelHeaderFilter
+                      title="Placa"
+                      columnKey="placa"
+                      data={vehicles}
+                      selectedValues={colFilters.placa}
+                      onFilterChange={(vals) => handleFilterChange('placa', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'placa')}
+                    />
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                    <ExcelHeaderFilter
+                      title="Tipo y Características"
+                      columnKey="denominacion"
+                      data={vehicles}
+                      selectedValues={colFilters.denominacion}
+                      onFilterChange={(vals) => handleFilterChange('denominacion', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'denominacion')}
+                    />
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                    <ExcelHeaderFilter
+                      title="Sucursal"
+                      columnKey="sucursal"
+                      data={vehicles}
+                      selectedValues={colFilters.sucursal}
+                      onFilterChange={(vals) => handleFilterChange('sucursal', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'sucursal')}
+                    />
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                    <ExcelHeaderFilter
+                      title="Responsable"
+                      columnKey="responsable"
+                      data={vehicles}
+                      selectedValues={colFilters.responsable}
+                      onFilterChange={(vals) => handleFilterChange('responsable', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'responsable')}
+                    />
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                    <ExcelHeaderFilter
+                      title="Estado Físico"
+                      columnKey="estado_activo"
+                      data={vehicles}
+                      selectedValues={colFilters.estado_activo}
+                      onFilterChange={(vals) => handleFilterChange('estado_activo', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'estado_activo')}
+                    />
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filtered.map(v => (
+                {filteredAndSorted.map(v => (
                   <tr key={v.cod_patrimonial} className="transition-colors group hover:bg-slate-50/50">
                     <td className="px-4 py-3 font-mono font-bold text-slate-800 text-xs">
                       {v.cod_patrimonial}

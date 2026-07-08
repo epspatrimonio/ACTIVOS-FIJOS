@@ -6,6 +6,7 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
   const [digitMode, setDigitMode] = useState(10); // 3 | 10
   const [selectedYear, setSelectedYear] = useState('Todos');
   const [selectedMonth, setSelectedMonth] = useState('Todos');
+  const [selectedType, setSelectedType] = useState('Todos'); // 'Todos' | 'ACTIVO' | 'DEPRECIACION' | 'OBRAS_EN_CURSO'
   const [cuentasMap, setCuentasMap] = useState({});
   const [loadingCuentas, setLoadingCuentas] = useState(false);
 
@@ -89,11 +90,11 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
 
     // Para 10 dígitos fallback
     if (code.startsWith('33')) {
-      return `ACTIVO FIJO - CATEGORÍA ${category || 'GENERAL'} (${code})`;
+      return category ? category.toUpperCase() : 'GENERAL';
     } else if (code.startsWith('68')) {
-      return `DEPRECIACIÓN ACUMULADA - CÓDIGO REF (${code})`;
+      return 'DEPRECIACIÓN ACUMULADA';
     }
-    return `CUENTA CONTABLE COMPLEMENTARIA (${code})`;
+    return 'CUENTA CONTABLE COMPLEMENTARIA';
   };
 
   // Filtrado y procesamiento de saldos contables
@@ -101,6 +102,16 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
     const ledger = {};
 
     assets.forEach(item => {
+      const cc = item.cuenta_contable || '';
+      if (!cc || cc === '0000000000' || cc.startsWith('0')) {
+        // Skip dummy/non-existent accounts
+        return;
+      }
+      if (cc.startsWith('339')) {
+        // Skip Obras en curso completely from the Reporte Contable
+        return;
+      }
+
       // 1. Filtrado por período
       const dateStr = item.fecha_alta_factura || item.fecha_registro_contable;
       if (!dateStr && (selectedYear !== 'Todos' || selectedMonth !== 'Todos')) return;
@@ -114,7 +125,6 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
         if (selectedMonth !== 'Todos' && m !== Number(selectedMonth)) return;
       }
 
-      const cc = item.cuenta_contable || '3391010101'; // Default to Obras if empty
       const cost = Number(item.valor_en_libros) || 0;
       const dep = Number(item.depreciacion_acumulada) || 0;
 
@@ -132,27 +142,37 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
         ledger[costKey] = {
           codigo: costKey,
           descripcion: getAccountName(costKey, cc, item.categoria),
-          tipo: 'ACTIVO FIJO (CLASE 33)',
+          tipo: 'ACTIVO',
           monto: 0
         };
       }
       ledger[costKey].monto += cost;
 
-      // Sumar a la depreciación (68)
-      if (!ledger[depKey]) {
-        const baseName = getAccountName(costKey, cc, item.categoria);
-        ledger[depKey] = {
-          codigo: depKey,
-          descripcion: `DEPRECIACIÓN ACUM. - ${baseName}`,
-          tipo: 'DEPRECIACIÓN (CLASE 68)',
-          monto: 0
-        };
+      // Sumar a la depreciación (68) - Terrenos (331) no se deprecian
+      if (!cc.startsWith('331')) {
+        if (!ledger[depKey]) {
+          const baseName = getAccountName(costKey, cc, item.categoria);
+          ledger[depKey] = {
+            codigo: depKey,
+            descripcion: baseName,
+            tipo: 'DEPRECIACIÓN',
+            monto: 0
+          };
+        }
+        ledger[depKey].monto += dep;
       }
-      ledger[depKey].monto += dep;
     });
 
     // Convertir a lista y ordenar por código contable
-    return Object.values(ledger).sort((a, b) => a.codigo.localeCompare(b.codigo));
+    const ledgerList = Object.values(ledger).sort((a, b) => a.codigo.localeCompare(b.codigo));
+
+    // Filtrar por tipo
+    return ledgerList.filter(item => {
+      if (selectedType === 'Todos') return true;
+      if (selectedType === 'ACTIVO') return item.tipo === 'ACTIVO';
+      if (selectedType === 'DEPRECIACION') return item.tipo === 'DEPRECIACIÓN';
+      return true;
+    });
   };
 
   const ledgerData = processLedger();
@@ -188,22 +208,22 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
       "Código Contable": item.codigo,
       "Descripción de la Cuenta": item.descripcion,
       "Clase / Elemento": item.tipo,
-      "Saldo Total (S/.)": Number(item.monto.toFixed(2))
+      "Saldo Total (S/.)": Number(item.monto.toFixed(4))
     }));
 
     // Agregar fila de totales al final
     sheetData.push({});
     sheetData.push({
       "Código Contable": "TOTAL COSTO (33)",
-      "Saldo Total (S/.)": Number(totalCosto.toFixed(2))
+      "Saldo Total (S/.)": Number(totalCosto.toFixed(4))
     });
     sheetData.push({
       "Código Contable": "TOTAL DEPRECIACIÓN (68)",
-      "Saldo Total (S/.)": Number(totalDepreciacion.toFixed(2))
+      "Saldo Total (S/.)": Number(totalDepreciacion.toFixed(4))
     });
     sheetData.push({
       "Código Contable": "VALOR RESIDUAL NETO",
-      "Saldo Total (S/.)": Number(valorNeto.toFixed(2))
+      "Saldo Total (S/.)": Number(valorNeto.toFixed(4))
     });
 
     const ws = XLSX.utils.json_to_sheet(sheetData);
@@ -285,7 +305,7 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
 
       {/* Panel de Filtros y Configuración */}
       <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm shrink-0">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end">
           
           {/* Selector de Dígitos */}
           <div>
@@ -313,6 +333,23 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
                 10 Dígitos (Sub-cuenta)
               </button>
             </div>
+          </div>
+
+          {/* Selector de Tipo de Elemento */}
+          <div>
+            <label className="block text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <Filter className="w-3.5 h-3.5 text-brand-500" />
+              <span>Tipo de Elemento</span>
+            </label>
+            <select
+              value={selectedType}
+              onChange={(e) => setSelectedType(e.target.value)}
+              className="block w-full rounded-xl border border-slate-200 py-2.5 px-3 bg-slate-50 text-xs font-semibold focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-slate-800"
+            >
+              <option value="Todos">Todos los elementos</option>
+              <option value="ACTIVO">Activo Fijo</option>
+              <option value="DEPRECIACION">Depreciación</option>
+            </select>
           </div>
 
           {/* Selector de Año */}
@@ -442,9 +479,9 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
                       </td>
                       <td className="px-5 py-3 text-xs">
                         <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                          item.codigo.startsWith('33') 
-                            ? 'bg-blue-50 text-blue-700 border-blue-200' 
-                            : 'bg-rose-50 text-rose-700 border-rose-200'
+                          item.tipo === 'ACTIVO' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                          item.tipo === 'OBRAS EN CURSO' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                          'bg-rose-50 text-rose-700 border-rose-200'
                         }`}>
                           {item.tipo}
                         </span>
