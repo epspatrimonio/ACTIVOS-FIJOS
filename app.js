@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const sucursalSelect = document.getElementById('filter-sucursal');
   const localidadSelect = document.getElementById('filter-localidad');
   const estadoSelect = document.getElementById('filter-estado');
+  const cuentaSelect = document.getElementById('filter-cuenta');
+  const centroSelect = document.getElementById('filter-centro');
   const emptyState = document.getElementById('empty-state');
   const resultsCount = document.getElementById('results-count');
   const mobileContainer = document.getElementById('assets-mobile-container');
@@ -123,6 +125,8 @@ document.addEventListener('DOMContentLoaded', () => {
         localidadSelect.addEventListener('change', applyFilters);
       }
       estadoSelect.addEventListener('change', applyFilters);
+      if (cuentaSelect) cuentaSelect.addEventListener('change', applyFilters);
+      if (centroSelect) centroSelect.addEventListener('change', applyFilters);
 
       // Event listeners para los dropdowns de categorías y subcategorías
       if (btnSelectCategoria && dropdownCategoria) {
@@ -229,6 +233,8 @@ document.addEventListener('DOMContentLoaded', () => {
           if (sucursalSelect) sucursalSelect.value = '';
           if (localidadSelect) localidadSelect.value = '';
           if (estadoSelect) estadoSelect.value = '';
+          if (cuentaSelect) cuentaSelect.value = '';
+          if (centroSelect) centroSelect.value = '';
           
           // Limpiar filtros de multiselección
           selectedCategories = [];
@@ -557,6 +563,38 @@ document.addEventListener('DOMContentLoaded', () => {
       estadoSelect.appendChild(option);
     });
 
+    // Poblar Cuenta Contable
+    if (cuentaSelect) {
+      const previousCuenta = cuentaSelect.value;
+      cuentaSelect.innerHTML = '<option value="">Todas las Cuentas</option>';
+      const cuentas = [...new Set(allItems.map(item => item.cuenta_contable).filter(Boolean))];
+      cuentas.sort().forEach(cta => {
+        const option = document.createElement('option');
+        option.value = cta;
+        option.textContent = cta;
+        if (cta === previousCuenta) {
+          option.selected = true;
+        }
+        cuentaSelect.appendChild(option);
+      });
+    }
+
+    // Poblar Centro de Costo
+    if (centroSelect) {
+      const previousCentro = centroSelect.value;
+      centroSelect.innerHTML = '<option value="">Todos los Centros</option>';
+      const centros = [...new Set(allItems.map(item => item.centro_costo).filter(Boolean))];
+      centros.sort().forEach(cc => {
+        const option = document.createElement('option');
+        option.value = cc;
+        option.textContent = cc;
+        if (cc === previousCentro) {
+          option.selected = true;
+        }
+        centroSelect.appendChild(option);
+      });
+    }
+
     // Poblar filtros de categorías multiselección
     populateCategoryFilters();
   }
@@ -642,6 +680,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (subcategoriaWrapper) subcategoriaWrapper.classList.add('hidden');
       }
 
+      // Mostrar/Ocultar el filtro de Cuenta Contable y Centro de Costo
+      const cuentaWrapper = document.getElementById('cuenta-filter-wrapper');
+      const centroWrapper = document.getElementById('centro-filter-wrapper');
+      const hasAccounts = currentTab === 'activos' || currentTab === 'obras' || currentTab === 'vehiculos' || currentTab === 'contable';
+      if (hasAccounts) {
+        if (cuentaWrapper) cuentaWrapper.classList.remove('hidden');
+        if (centroWrapper) centroWrapper.classList.remove('hidden');
+      } else {
+        if (cuentaWrapper) cuentaWrapper.classList.add('hidden');
+        if (centroWrapper) centroWrapper.classList.add('hidden');
+      }
+
       // Cerrar paneles desplegables de categorías y resetear rotaciones
       if (dropdownCategoria) dropdownCategoria.classList.add('hidden');
       if (dropdownSubcategoria) dropdownSubcategoria.classList.add('hidden');
@@ -696,6 +746,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    const selectedCuenta = cuentaSelect ? cuentaSelect.value : '';
+    const selectedCentro = centroSelect ? centroSelect.value : '';
+
     // Show/hide Clear Filters button
     const btnClearFilters = document.getElementById('btn-clear-filters');
     if (btnClearFilters) {
@@ -704,6 +757,8 @@ document.addEventListener('DOMContentLoaded', () => {
         (selectedSucursal && selectedSucursal !== '') || 
         (selectedLocalidad && selectedLocalidad !== '') || 
         (selectedEstado && selectedEstado !== '') ||
+        (selectedCuenta && selectedCuenta !== '') ||
+        (selectedCentro && selectedCentro !== '') ||
         selectedCategories.length > 0 ||
         selectedSubcategories.length > 0;
       if (hasActiveFilters) {
@@ -762,6 +817,12 @@ document.addEventListener('DOMContentLoaded', () => {
         (currentTab === 'celulares' ? item.estado === selectedEstado : 
          ((currentTab === 'inventario' || currentTab === 'terceros') ? item.tipo === selectedEstado : item.estado_activo === selectedEstado));
 
+      // Filtro de Cuenta Contable
+      const cuentaMatch = !selectedCuenta || item.cuenta_contable === selectedCuenta;
+
+      // Filtro de Centro de Costo
+      const centroMatch = !selectedCentro || item.centro_costo === selectedCentro;
+
       // Filtro de Categoría y Subcategoría (si aplica)
       const hasCategories = currentTab === 'activos' || currentTab === 'obras' || currentTab === 'vehiculos' || currentTab === 'inventario' || currentTab === 'soat';
       const categoriaMatch = !hasCategories || selectedCategories.length === 0 || selectedCategories.includes(item.categoria);
@@ -817,7 +878,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      return sucursalMatch && localidadMatch && estadoMatch && categoriaMatch && subcategoriaMatch && textMatch;
+      return sucursalMatch && localidadMatch && estadoMatch && cuentaMatch && centroMatch && categoriaMatch && subcategoriaMatch && textMatch;
     });
 
     renderData(filtered);
