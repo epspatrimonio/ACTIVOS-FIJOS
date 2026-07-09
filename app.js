@@ -598,7 +598,7 @@ document.addEventListener('DOMContentLoaded', () => {
         moduleTitle.textContent = 'Catálogo de Activos Fijos';
       } else if (currentTab === 'obras') {
         activeBtn = tabObras;
-        moduleTitle.textContent = 'Obras en Curso (WIP)';
+        moduleTitle.textContent = 'Obras en Curso (PMO)';
       } else if (currentTab === 'vehiculos') {
         activeBtn = tabVehiculos;
         moduleTitle.textContent = 'Control Patrimonial de Vehículos';
@@ -928,7 +928,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </td>
         <td class="px-5 py-4 whitespace-nowrap">
           <span class="px-2.5 py-1 text-xs font-semibold text-brand-600 bg-brand-50/50 border border-brand-200 rounded-full">
-            ${item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OBR-${item.n_doc}` : `INC-${item.n_doc}`) : '—'}
+            ${item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OC-${item.n_doc}` : `INC-${item.n_doc}`) : '—'}
           </span>
         </td>
         <td class="px-5 py-4 whitespace-nowrap">
@@ -1036,7 +1036,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div>
           <dt class="font-semibold text-slate-400">Documento</dt>
-          <dd class="mt-0.5 font-semibold text-slate-700">${item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OBR-${item.n_doc}` : `INC-${item.n_doc}`) : '—'}</dd>
+          <dd class="mt-0.5 font-semibold text-slate-700">${item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OC-${item.n_doc}` : `INC-${item.n_doc}`) : '—'}</dd>
         </div>
         <div>
           <dt class="font-semibold text-slate-400">Valor libros</dt>
@@ -1078,7 +1078,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </td>
         <td class="px-3.5 py-4 whitespace-nowrap">
           <span class="px-2.5 py-1 text-xs font-semibold text-brand-600 bg-brand-50/50 border border-brand-200 rounded-full">
-            ${item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OBR-${item.n_doc}` : `INC-${item.n_doc}`) : '—'}
+            ${item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OC-${item.n_doc}` : `INC-${item.n_doc}`) : '—'}
           </span>
         </td>
         <td class="px-3.5 py-4 whitespace-nowrap">
@@ -1183,7 +1183,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div>
           <dt class="font-semibold text-slate-400">Documento</dt>
-          <dd class="mt-0.5 font-semibold text-slate-700">${item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OBR-${item.n_doc}` : `INC-${item.n_doc}`) : '—'}</dd>
+          <dd class="mt-0.5 font-semibold text-slate-700">${item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OC-${item.n_doc}` : `INC-${item.n_doc}`) : '—'}</dd>
         </div>
         <div>
           <dt class="font-semibold text-slate-400">Valor libros</dt>
@@ -2048,7 +2048,7 @@ document.addEventListener('DOMContentLoaded', () => {
       exportData = currentFilteredData.map(item => ({
         "Código Patrimonial": item.cod_patrimonial,
         "Cuenta Contable": item.cuenta_contable || "",
-        "Documento": item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OBR-${item.n_doc}` : `INC-${item.n_doc}`) : "",
+        "Documento": item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OC-${item.n_doc}` : `INC-${item.n_doc}`) : "",
         "Tipo Adquisición": item.documento_tipo,
         "Categoría": item.categoria,
         "Subcategoría": item.subcategoria,
@@ -2076,7 +2076,7 @@ document.addEventListener('DOMContentLoaded', () => {
       exportData = currentFilteredData.map(item => ({
         "Código Patrimonial": item.cod_patrimonial,
         "Cuenta Contable": item.cuenta_contable || "",
-        "Documento": item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OBR-${item.n_doc}` : `INC-${item.n_doc}`) : "",
+        "Documento": item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OC-${item.n_doc}` : `INC-${item.n_doc}`) : "",
         "Tipo Adquisición": item.documento_tipo,
         "Categoría": item.categoria,
         "Subcategoría": item.subcategoria,
@@ -2288,7 +2288,7 @@ document.addEventListener('DOMContentLoaded', () => {
         data = currentFilteredData.map(item => [
           item.cod_patrimonial || '—',
           item.cuenta_contable || '—',
-          item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OBR-${item.n_doc}` : `INC-${item.n_doc}`) : '—',
+          item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OC-${item.n_doc}` : `INC-${item.n_doc}`) : '—',
           formatDate(item.fecha_alta_factura || item.fecha_registro_contable),
           `${item.sucursal || '—'}${item.localidad ? `\n(${item.localidad})` : ''}`,
           item.denominacion || '',
@@ -2332,7 +2332,7 @@ document.addEventListener('DOMContentLoaded', () => {
         data = currentFilteredData.map(item => [
           item.cod_patrimonial || '—',
           item.cuenta_contable || '—',
-          item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OBR-${item.n_doc}` : `INC-${item.n_doc}`) : '—',
+          item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OC-${item.n_doc}` : `INC-${item.n_doc}`) : '—',
           formatDate(item.fecha_alta_factura || item.fecha_registro_contable),
           `${item.sucursal || '—'}${item.localidad ? `\n(${item.localidad})` : ''}`,
           item.denominacion || '',
@@ -2696,7 +2696,7 @@ document.addEventListener('DOMContentLoaded', () => {
       '336': 'EQUIPOS INFORMÁTICOS Y COMUNICACIONES',
       '337': 'HERRAMIENTAS Y UNIDADES REVALUADAS',
       '338': 'UNIDADES POR RECIBIR / EQUIPOS EN TRÁNSITO',
-      '339': 'OBRAS EN CURSO (WIP)'
+      '339': 'OBRAS EN CURSO (PMO)'
     };
     
     const keyDescriptions = {
