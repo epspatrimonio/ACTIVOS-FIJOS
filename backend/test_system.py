@@ -128,6 +128,8 @@ async def run_tests():
         "igv": 216.0,
         "n_acta": "099",
         "estado_activo": "BUENO",
+        "cuenta_contable": "3341151101",
+        "centro_costo": "90133301",
         "compra_cuenta_contable": "3341151101",
         "compra_centro_costo": "90133301",
         "compra_id_localidad": 100

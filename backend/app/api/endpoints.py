@@ -39,11 +39,13 @@ router = APIRouter()
 async def get_activos(
     estado_activo: Optional[str] = None,
     id_sucursal: Optional[int] = None,
+    cuenta_contable: Optional[str] = None,
+    centro_costo: Optional[str] = None,
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Obtiene la lista de activos fijos con filtros opcionales por estado de activo y sucursal,
-    cargando detalles unidos de dimensiones.
+    Obtiene la lista de activos fijos con filtros opcionales por estado de activo, sucursal,
+    cuenta contable y centro de costo, cargando detalles unidos de dimensiones.
     """
     try:
         query = select(VwRegistroActivosDetalle)
@@ -51,6 +53,10 @@ async def get_activos(
             query = query.where(VwRegistroActivosDetalle.estado_activo == estado_activo)
         if id_sucursal:
             query = query.where(VwRegistroActivosDetalle.id_sucursal == id_sucursal)
+        if cuenta_contable:
+            query = query.where(VwRegistroActivosDetalle.cuenta_contable == cuenta_contable)
+        if centro_costo:
+            query = query.where(VwRegistroActivosDetalle.centro_costo == centro_costo)
             
         result = await db.execute(query)
         activos = result.scalars().all()
@@ -130,37 +136,7 @@ async def upsert_acquisition_document(db: AsyncSession, activo_in: ActivoCreate)
                 cert_clean = cert_clean.zfill(4)
         activo_in.compra_certificacion_presupuestal = cert_clean
 
-        cuenta_clean = clean_digits(activo_in.compra_cuenta_contable)
-        if not cuenta_clean:
-            if not db_compra:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="La Cuenta Contable es requerida."
-                )
-            else:
-                cuenta_clean = db_compra.cuenta_contable
-        else:
-            if len(cuenta_clean) != 10:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="La Cuenta Contable debe tener exactamente 10 dígitos."
-                )
-            activo_in.compra_cuenta_contable = cuenta_clean
-            await ensure_cuenta_contable_exists(db, cuenta_clean)
-
-        cc_clean = clean_digits(activo_in.compra_centro_costo)
-        if cc_clean:
-            if len(cc_clean) != 8:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="El Centro de Costo debe tener exactamente 8 dígitos."
-                )
-            activo_in.compra_centro_costo = cc_clean
-            await ensure_centro_costo_exists(db, cc_clean)
-        elif db_compra:
-            cc_clean = db_compra.centro_costo
-
-        c_cont_3 = cuenta_clean[:3] if cuenta_clean else None
+        c_cont_3 = activo_in.cuenta_contable[:3] if (activo_in.cuenta_contable and len(activo_in.cuenta_contable) >= 3) else None
 
         if db_compra:
             db_compra.fecha_oc = activo_in.compra_fecha_oc or db_compra.fecha_oc
@@ -168,8 +144,6 @@ async def upsert_acquisition_document(db: AsyncSession, activo_in: ActivoCreate)
             db_compra.nota_pedido = np_clean or db_compra.nota_pedido
             db_compra.certificacion_presupuestal = cert_clean or db_compra.certificacion_presupuestal
             db_compra.c_cont_3 = c_cont_3 or db_compra.c_cont_3
-            db_compra.cuenta_contable = cuenta_clean or db_compra.cuenta_contable
-            db_compra.centro_costo = cc_clean or db_compra.centro_costo
             db_compra.id_fuente = activo_in.compra_id_fuente or db_compra.id_fuente
             db_compra.requerido_por = activo_in.compra_requerido_por or db_compra.requerido_por
             db_compra.concepto = activo_in.compra_concepto or db_compra.concepto
@@ -181,8 +155,6 @@ async def upsert_acquisition_document(db: AsyncSession, activo_in: ActivoCreate)
                 nota_pedido=np_clean,
                 certificacion_presupuestal=cert_clean,
                 c_cont_3=c_cont_3,
-                cuenta_contable=cuenta_clean,
-                centro_costo=cc_clean,
                 id_fuente=activo_in.compra_id_fuente,
                 requerido_por=activo_in.compra_requerido_por,
                 concepto=activo_in.compra_concepto
@@ -207,41 +179,26 @@ async def upsert_acquisition_document(db: AsyncSession, activo_in: ActivoCreate)
         result = await db.execute(select(Incorporacion).where(Incorporacion.n_doc == n_doc_clean))
         db_inc = result.scalar_one_or_none()
 
-        cuenta_clean = clean_digits(activo_in.inc_cuenta_contable)
-        if not cuenta_clean:
-            if not db_inc:
+        np_clean = clean_digits(activo_in.inc_nota_pedido) if activo_in.inc_nota_pedido else None
+        if np_clean:
+            if len(np_clean) > 7:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="La Cuenta Contable es requerida."
+                    detail="La Nota de Pedido de la incorporación no debe tener más de 7 dígitos."
                 )
-            else:
-                cuenta_clean = db_inc.cuenta_contable
-        else:
-            if len(cuenta_clean) != 10:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="La Cuenta Contable debe tener exactamente 10 dígitos."
-                )
-            activo_in.inc_cuenta_contable = cuenta_clean
-            await ensure_cuenta_contable_exists(db, cuenta_clean)
+        activo_in.inc_nota_pedido = np_clean
 
-        cc_clean = clean_digits(activo_in.inc_centro_costo)
-        if cc_clean:
-            if len(cc_clean) != 8:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="El Centro de Costo debe tener exactamente 8 dígitos."
-                )
-            activo_in.inc_centro_costo = cc_clean
-            await ensure_centro_costo_exists(db, cc_clean)
-        elif db_inc:
-            cc_clean = db_inc.centro_costo
+        cert_clean = clean_digits(activo_in.inc_certificacion_presupuestal) if activo_in.inc_certificacion_presupuestal else None
+        if cert_clean:
+            if len(cert_clean) < 4:
+                cert_clean = cert_clean.zfill(4)
+        activo_in.inc_certificacion_presupuestal = cert_clean
             
         if db_inc:
             db_inc.fecha_doc = activo_in.inc_fecha_doc or db_inc.fecha_doc
             db_inc.id_localidad = activo_in.inc_id_localidad or db_inc.id_localidad
-            db_inc.cuenta_contable = cuenta_clean or db_inc.cuenta_contable
-            db_inc.centro_costo = cc_clean or db_inc.centro_costo
+            db_inc.nota_pedido = np_clean or db_inc.nota_pedido
+            db_inc.certificacion_presupuestal = cert_clean or db_inc.certificacion_presupuestal
             db_inc.id_fuente = activo_in.inc_id_fuente or db_inc.id_fuente
             db_inc.fuente_origen = activo_in.inc_fuente_origen or db_inc.fuente_origen
             db_inc.origen = activo_in.inc_origen or db_inc.origen
@@ -252,8 +209,8 @@ async def upsert_acquisition_document(db: AsyncSession, activo_in: ActivoCreate)
                 n_doc=n_doc_clean,
                 fecha_doc=activo_in.inc_fecha_doc,
                 id_localidad=activo_in.inc_id_localidad or 1,
-                cuenta_contable=cuenta_clean,
-                centro_costo=cc_clean,
+                nota_pedido=np_clean,
+                certificacion_presupuestal=cert_clean,
                 id_fuente=activo_in.inc_id_fuente,
                 fuente_origen=activo_in.inc_fuente_origen,
                 origen=activo_in.inc_origen,
@@ -280,41 +237,26 @@ async def upsert_acquisition_document(db: AsyncSession, activo_in: ActivoCreate)
         result = await db.execute(select(Obra).where(Obra.n_doc == n_doc_clean))
         db_obra = result.scalar_one_or_none()
 
-        cuenta_clean = clean_digits(activo_in.obra_cuenta_contable)
-        if not cuenta_clean:
-            if not db_obra:
+        np_clean = clean_digits(activo_in.obra_nota_pedido) if activo_in.obra_nota_pedido else None
+        if np_clean:
+            if len(np_clean) > 7:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="La Cuenta Contable es requerida."
+                    detail="La Nota de Pedido de la obra no debe tener más de 7 dígitos."
                 )
-            else:
-                cuenta_clean = db_obra.cuenta_contable
-        else:
-            if len(cuenta_clean) != 10:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="La Cuenta Contable debe tener exactamente 10 dígitos."
-                )
-            activo_in.obra_cuenta_contable = cuenta_clean
-            await ensure_cuenta_contable_exists(db, cuenta_clean)
+        activo_in.obra_nota_pedido = np_clean
 
-        cc_clean = clean_digits(activo_in.obra_centro_costo)
-        if cc_clean:
-            if len(cc_clean) != 8:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="El Centro de Costo debe tener exactamente 8 dígitos."
-                )
-            activo_in.obra_centro_costo = cc_clean
-            await ensure_centro_costo_exists(db, cc_clean)
-        elif db_obra:
-            cc_clean = db_obra.centro_costo
+        cert_clean = clean_digits(activo_in.obra_certificacion_presupuestal) if activo_in.obra_certificacion_presupuestal else None
+        if cert_clean:
+            if len(cert_clean) < 4:
+                cert_clean = cert_clean.zfill(4)
+        activo_in.obra_certificacion_presupuestal = cert_clean
             
         if db_obra:
             db_obra.fecha_doc = activo_in.obra_fecha_doc or db_obra.fecha_doc
             db_obra.id_localidad = activo_in.obra_id_localidad or db_obra.id_localidad
-            db_obra.cuenta_contable = cuenta_clean or db_obra.cuenta_contable
-            db_obra.centro_costo = cc_clean or db_obra.centro_costo
+            db_obra.nota_pedido = np_clean or db_obra.nota_pedido
+            db_obra.certificacion_presupuestal = cert_clean or db_obra.certificacion_presupuestal
             db_obra.id_fuente = activo_in.obra_id_fuente or db_obra.id_fuente
             db_obra.fuente_origen = activo_in.obra_fuente_origen or db_obra.fuente_origen
             db_obra.origen = activo_in.obra_origen or db_obra.origen
@@ -325,8 +267,8 @@ async def upsert_acquisition_document(db: AsyncSession, activo_in: ActivoCreate)
                 n_doc=n_doc_clean,
                 fecha_doc=activo_in.obra_fecha_doc,
                 id_localidad=activo_in.obra_id_localidad or 1,
-                cuenta_contable=cuenta_clean,
-                centro_costo=cc_clean,
+                nota_pedido=np_clean,
+                certificacion_presupuestal=cert_clean,
                 id_fuente=activo_in.obra_id_fuente,
                 fuente_origen=activo_in.obra_fuente_origen,
                 origen=activo_in.obra_origen,
@@ -372,6 +314,23 @@ async def create_activo(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"El activo con código patrimonial '{activo_in.cod_patrimonial}' ya existe."
         )
+
+    # Validar cuenta contable y centro de costo del activo
+    cuenta_clean = clean_digits(activo_in.cuenta_contable) if activo_in.cuenta_contable else ""
+    if not cuenta_clean:
+        raise HTTPException(status_code=400, detail="La Cuenta Contable es obligatoria para el activo fijo.")
+    if len(cuenta_clean) != 10:
+        raise HTTPException(status_code=400, detail="La Cuenta Contable del activo debe tener exactamente 10 dígitos.")
+    activo_in.cuenta_contable = cuenta_clean
+    await ensure_cuenta_contable_exists(db, cuenta_clean)
+
+    cc_clean = clean_digits(activo_in.centro_costo) if activo_in.centro_costo else ""
+    if not cc_clean:
+        raise HTTPException(status_code=400, detail="El Centro de Costo es obligatorio para el activo fijo.")
+    if len(cc_clean) != 8:
+        raise HTTPException(status_code=400, detail="El Centro de Costo del activo debe tener exactamente 8 dígitos.")
+    activo_in.centro_costo = cc_clean
+    await ensure_centro_costo_exists(db, cc_clean)
         
     await upsert_acquisition_document(db, activo_in)
     await db.flush()
@@ -410,6 +369,23 @@ async def update_activo(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"El activo con código patrimonial '{cod_patrimonial}' no existe."
         )
+
+    # Validar cuenta contable y centro de costo del activo
+    cuenta_clean = clean_digits(activo_in.cuenta_contable) if activo_in.cuenta_contable else ""
+    if not cuenta_clean:
+        raise HTTPException(status_code=400, detail="La Cuenta Contable es obligatoria para el activo fijo.")
+    if len(cuenta_clean) != 10:
+        raise HTTPException(status_code=400, detail="La Cuenta Contable del activo debe tener exactamente 10 dígitos.")
+    activo_in.cuenta_contable = cuenta_clean
+    await ensure_cuenta_contable_exists(db, cuenta_clean)
+
+    cc_clean = clean_digits(activo_in.centro_costo) if activo_in.centro_costo else ""
+    if not cc_clean:
+        raise HTTPException(status_code=400, detail="El Centro de Costo es obligatorio para el activo fijo.")
+    if len(cc_clean) != 8:
+        raise HTTPException(status_code=400, detail="El Centro de Costo del activo debe tener exactamente 8 dígitos.")
+    activo_in.centro_costo = cc_clean
+    await ensure_centro_costo_exists(db, cc_clean)
         
     await upsert_acquisition_document(db, activo_in)
     await db.flush()
@@ -742,25 +718,11 @@ async def create_compra(compra_in: CompraCreate, db: AsyncSession = Depends(get_
             cert_clean = cert_clean.zfill(4)
     compra_in.certificacion_presupuestal = cert_clean
 
-    cuenta_clean = clean_digits(compra_in.cuenta_contable)
-    if not cuenta_clean:
-        raise HTTPException(status_code=400, detail="La Cuenta Contable es obligatoria.")
-    if len(cuenta_clean) != 10:
-        raise HTTPException(status_code=400, detail="La Cuenta Contable debe tener exactamente 10 dígitos.")
-    compra_in.cuenta_contable = cuenta_clean
-    await ensure_cuenta_contable_exists(db, cuenta_clean)
-
-    cc_clean = clean_digits(compra_in.centro_costo)
-    if cc_clean:
-        if len(cc_clean) != 8:
-            raise HTTPException(status_code=400, detail="El Centro de Costo debe tener exactamente 8 dígitos.")
-        compra_in.centro_costo = cc_clean
-        await ensure_centro_costo_exists(db, cc_clean)
-
     result = await db.execute(select(Compra).where(Compra.n_doc == n_doc_clean))
     db_compra = result.scalar_one_or_none()
     
-    c_cont_3 = cuenta_clean[:3]
+    # c_cont_3 is derived from the first account code associated with assets of this doc if needed, or left empty
+    c_cont_3 = None
 
     if db_compra:
         db_compra.fecha_oc = compra_in.fecha_oc
@@ -768,8 +730,6 @@ async def create_compra(compra_in: CompraCreate, db: AsyncSession = Depends(get_
         db_compra.nota_pedido = np_clean
         db_compra.certificacion_presupuestal = cert_clean
         db_compra.c_cont_3 = c_cont_3
-        db_compra.cuenta_contable = cuenta_clean
-        db_compra.centro_costo = cc_clean
         db_compra.id_fuente = compra_in.id_fuente
         db_compra.requerido_por = compra_in.requerido_por
         db_compra.concepto = compra_in.concepto
@@ -781,8 +741,6 @@ async def create_compra(compra_in: CompraCreate, db: AsyncSession = Depends(get_
             nota_pedido=np_clean,
             certificacion_presupuestal=cert_clean,
             c_cont_3=c_cont_3,
-            cuenta_contable=cuenta_clean,
-            centro_costo=cc_clean,
             id_fuente=compra_in.id_fuente,
             requerido_por=compra_in.requerido_por,
             concepto=compra_in.concepto
@@ -862,29 +820,26 @@ async def create_incorporacion(inc_in: IncorporacionCreate, db: AsyncSession = D
         raise HTTPException(status_code=400, detail="El N° Expediente de Incorporación no debe exceder los 30 caracteres.")
     inc_in.n_doc = n_doc_clean
 
-    cuenta_clean = clean_digits(inc_in.cuenta_contable)
-    if not cuenta_clean:
-        raise HTTPException(status_code=400, detail="La Cuenta Contable es obligatoria.")
-    if len(cuenta_clean) != 10:
-        raise HTTPException(status_code=400, detail="La Cuenta Contable debe tener exactamente 10 dígitos.")
-    inc_in.cuenta_contable = cuenta_clean
-    await ensure_cuenta_contable_exists(db, cuenta_clean)
+    np_clean = clean_digits(inc_in.nota_pedido) if inc_in.nota_pedido else None
+    if np_clean:
+        if len(np_clean) > 7:
+            raise HTTPException(status_code=400, detail="La Nota de Pedido no debe tener más de 7 dígitos.")
+    inc_in.nota_pedido = np_clean
 
-    cc_clean = clean_digits(inc_in.centro_costo)
-    if cc_clean:
-        if len(cc_clean) != 8:
-            raise HTTPException(status_code=400, detail="El Centro de Costo debe tener exactamente 8 dígitos.")
-        inc_in.centro_costo = cc_clean
-        await ensure_centro_costo_exists(db, cc_clean)
-        
+    cert_clean = clean_digits(inc_in.certificacion_presupuestal) if inc_in.certificacion_presupuestal else None
+    if cert_clean:
+        if len(cert_clean) < 4:
+            cert_clean = cert_clean.zfill(4)
+    inc_in.certificacion_presupuestal = cert_clean
+
     result = await db.execute(select(Incorporacion).where(Incorporacion.n_doc == n_doc_clean))
     db_inc = result.scalar_one_or_none()
     
     if db_inc:
         db_inc.fecha_doc = inc_in.fecha_doc
         db_inc.id_localidad = inc_in.id_localidad
-        db_inc.cuenta_contable = cuenta_clean
-        db_inc.centro_costo = cc_clean
+        db_inc.nota_pedido = np_clean
+        db_inc.certificacion_presupuestal = cert_clean
         db_inc.id_fuente = inc_in.id_fuente
         db_inc.fuente_origen = inc_in.fuente_origen
         db_inc.origen = inc_in.origen
@@ -895,8 +850,8 @@ async def create_incorporacion(inc_in: IncorporacionCreate, db: AsyncSession = D
             n_doc=n_doc_clean,
             fecha_doc=inc_in.fecha_doc,
             id_localidad=inc_in.id_localidad,
-            cuenta_contable=cuenta_clean,
-            centro_costo=cc_clean,
+            nota_pedido=np_clean,
+            certificacion_presupuestal=cert_clean,
             id_fuente=inc_in.id_fuente,
             fuente_origen=inc_in.fuente_origen,
             origen=inc_in.origen,
@@ -978,29 +933,26 @@ async def create_obra(obra_in: ObraCreate, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=400, detail="El N° Expediente de Obra no debe exceder los 30 caracteres.")
     obra_in.n_doc = n_doc_clean
 
-    cuenta_clean = clean_digits(obra_in.cuenta_contable)
-    if not cuenta_clean:
-        raise HTTPException(status_code=400, detail="La Cuenta Contable es obligatoria.")
-    if len(cuenta_clean) != 10:
-        raise HTTPException(status_code=400, detail="La Cuenta Contable debe tener exactamente 10 dígitos.")
-    obra_in.cuenta_contable = cuenta_clean
-    await ensure_cuenta_contable_exists(db, cuenta_clean)
+    np_clean = clean_digits(obra_in.nota_pedido) if obra_in.nota_pedido else None
+    if np_clean:
+        if len(np_clean) > 7:
+            raise HTTPException(status_code=400, detail="La Nota de Pedido no debe tener más de 7 dígitos.")
+    obra_in.nota_pedido = np_clean
 
-    cc_clean = clean_digits(obra_in.centro_costo)
-    if cc_clean:
-        if len(cc_clean) != 8:
-            raise HTTPException(status_code=400, detail="El Centro de Costo debe tener exactamente 8 dígitos.")
-        obra_in.centro_costo = cc_clean
-        await ensure_centro_costo_exists(db, cc_clean)
-        
+    cert_clean = clean_digits(obra_in.certificacion_presupuestal) if obra_in.certificacion_presupuestal else None
+    if cert_clean:
+        if len(cert_clean) < 4:
+            cert_clean = cert_clean.zfill(4)
+    obra_in.certificacion_presupuestal = cert_clean
+
     result = await db.execute(select(Obra).where(Obra.n_doc == n_doc_clean))
     db_obra = result.scalar_one_or_none()
     
     if db_obra:
         db_obra.fecha_doc = obra_in.fecha_doc
         db_obra.id_localidad = obra_in.id_localidad
-        db_obra.cuenta_contable = cuenta_clean
-        db_obra.centro_costo = cc_clean
+        db_obra.nota_pedido = np_clean
+        db_obra.certificacion_presupuestal = cert_clean
         db_obra.id_fuente = obra_in.id_fuente
         db_obra.fuente_origen = obra_in.fuente_origen
         db_obra.origen = obra_in.origen
@@ -1011,8 +963,8 @@ async def create_obra(obra_in: ObraCreate, db: AsyncSession = Depends(get_db)):
             n_doc=n_doc_clean,
             fecha_doc=obra_in.fecha_doc,
             id_localidad=obra_in.id_localidad,
-            cuenta_contable=cuenta_clean,
-            centro_costo=cc_clean,
+            nota_pedido=np_clean,
+            certificacion_presupuestal=cert_clean,
             id_fuente=obra_in.id_fuente,
             fuente_origen=obra_in.fuente_origen,
             origen=obra_in.origen,

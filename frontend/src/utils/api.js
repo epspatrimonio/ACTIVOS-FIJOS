@@ -33,6 +33,12 @@ export async function fetchActivos(filters = {}) {
   if (filters.id_sucursal) {
     url.searchParams.append('id_sucursal', filters.id_sucursal);
   }
+  if (filters.cuenta_contable) {
+    url.searchParams.append('cuenta_contable', filters.cuenta_contable);
+  }
+  if (filters.centro_costo) {
+    url.searchParams.append('centro_costo', filters.centro_costo);
+  }
   
   const response = await fetch(url.toString());
   if (!response.ok) {

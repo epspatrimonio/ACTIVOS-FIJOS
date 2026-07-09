@@ -5,8 +5,26 @@ from sqlalchemy.ext.asyncio import create_async_engine
 async def main():
     engine = create_async_engine('postgresql+asyncpg://postgres:deutschland@localhost:5432/activos_fijos')
     async with engine.begin() as conn:
-        print("Actualizando la vista af.vw_registro_activos_detalle...")
-        await conn.execute(text("DROP VIEW IF EXISTS af.vw_registro_activos_detalle;"))
+        print("Eliminando columnas cuenta_contable y centro_costo de las tablas de documentos...")
+        
+        # 1. fct_compra
+        print("Eliminando de af.fct_compra...")
+        await conn.execute(text("ALTER TABLE af.fct_compra DROP COLUMN IF EXISTS cuenta_contable CASCADE;"))
+        await conn.execute(text("ALTER TABLE af.fct_compra DROP COLUMN IF EXISTS centro_costo CASCADE;"))
+        
+        # 2. fct_incorporacion_af
+        print("Eliminando de af.fct_incorporacion_af...")
+        await conn.execute(text("ALTER TABLE af.fct_incorporacion_af DROP COLUMN IF EXISTS cuenta_contable CASCADE;"))
+        await conn.execute(text("ALTER TABLE af.fct_incorporacion_af DROP COLUMN IF EXISTS centro_costo CASCADE;"))
+        
+        # 3. fct_obra
+        print("Eliminando de af.fct_obra...")
+        await conn.execute(text("ALTER TABLE af.fct_obra DROP COLUMN IF EXISTS cuenta_contable CASCADE;"))
+        await conn.execute(text("ALTER TABLE af.fct_obra DROP COLUMN IF EXISTS centro_costo CASCADE;"))
+        
+        # 4. Recrear la vista consolidada para asegurar consistencia
+        print("Recreando la vista af.vw_registro_activos_detalle...")
+        await conn.execute(text("DROP VIEW IF EXISTS af.vw_registro_activos_detalle CASCADE;"))
         await conn.execute(text("""
             CREATE VIEW af.vw_registro_activos_detalle AS
             SELECT
@@ -151,7 +169,7 @@ async def main():
                 ORDER BY cod_patrimonial, fecha_vencimiento DESC
             ) s_latest ON s_latest.cod_patrimonial = a.cod_patrimonial;
         """))
-        print("Vista actualizada con éxito!")
+        print("Vista recreada exitosamente.")
 
 if __name__ == '__main__':
     asyncio.run(main())

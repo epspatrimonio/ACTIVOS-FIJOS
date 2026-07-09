@@ -28,9 +28,11 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
   const getColValue = (item, key) => {
     switch (key) {
       case 'cod_patrimonial': return item.cod_patrimonial || '';
-      case 'n_doc': return item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : `INC-${item.n_doc}`) : '';
+      case 'n_doc': return item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OBR-${item.n_doc}` : `INC-${item.n_doc}`) : '';
       case 'fecha_ingreso': return item.fecha_alta_factura || '';
       case 'ubicacion': return `${item.sucursal || ''} / ${item.localidad || ''}`;
+      case 'cuenta_contable': return item.cuenta_contable || '';
+      case 'centro_costo': return item.centro_costo || '';
       case 'denominacion': return item.denominacion || '';
       case 'marca': return item.marca || '';
       case 'placa': return item.placa || '';
@@ -138,7 +140,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
     <div className="glass-panel rounded-xl border border-slate-200 overflow-hidden w-full max-w-full h-full flex flex-col">
       {/* Contenedor de scroll con altura máxima para hacer efectiva la cabecera sticky */}
       <div className="overflow-x-auto overflow-y-auto w-full flex-1 min-h-0">
-        <table className="min-w-[1600px] w-full divide-y divide-slate-200 border-collapse">
+        <table className="min-w-[1850px] w-full divide-y divide-slate-200 border-collapse">
           <thead className="sticky top-0 bg-slate-100 z-20 shadow-[0_1px_0_0_rgba(226,232,240,1)]">
             <tr>
               <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
@@ -163,6 +165,30 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   currentSort={sortConfig}
                   onSortChange={handleSortChange}
                   getValue={(item) => getColValue(item, 'n_doc')}
+                />
+              </th>
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+                <ExcelHeaderFilter
+                  title="Cuenta Contable"
+                  columnKey="cuenta_contable"
+                  data={activos}
+                  selectedValues={colFilters.cuenta_contable}
+                  onFilterChange={(vals) => handleFilterChange('cuenta_contable', vals)}
+                  currentSort={sortConfig}
+                  onSortChange={handleSortChange}
+                  getValue={(item) => getColValue(item, 'cuenta_contable')}
+                />
+              </th>
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+                <ExcelHeaderFilter
+                  title="Centro de Costo"
+                  columnKey="centro_costo"
+                  data={activos}
+                  selectedValues={colFilters.centro_costo}
+                  onFilterChange={(vals) => handleFilterChange('centro_costo', vals)}
+                  currentSort={sortConfig}
+                  onSortChange={handleSortChange}
+                  getValue={(item) => getColValue(item, 'centro_costo')}
                 />
               </th>
               <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
@@ -293,6 +319,8 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                 <tr key={idx} className="animate-pulse">
                   <td className="px-5 py-4"><div className="h-4 bg-slate-200 rounded w-20"></div></td>
                   <td className="px-5 py-4"><div className="h-5 bg-slate-200 rounded-full w-24"></div></td>
+                  <td className="px-5 py-4"><div className="h-4 bg-slate-200 rounded w-16"></div></td>
+                  <td className="px-5 py-4"><div className="h-4 bg-slate-200 rounded w-16"></div></td>
                   <td className="px-5 py-4"><div className="h-5 bg-slate-200 rounded-full w-20"></div></td>
                   <td className="px-5 py-4">
                     <div className="h-4 bg-slate-200 rounded w-16 mb-1"></div>
@@ -319,7 +347,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
               ))
             ) : filteredAndSortedActivos.length === 0 ? (
               <tr>
-                <td colSpan="12" className="px-5 py-12 text-center text-slate-400">
+                <td colSpan="14" className="px-5 py-12 text-center text-slate-400">
                   <div className="flex flex-col items-center justify-center">
                     <Package className="w-12 h-12 text-slate-300 mb-3" />
                     <p className="text-sm font-semibold">No se encontraron activos fijos</p>
@@ -337,8 +365,18 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   
                   <td className="px-5 py-4 whitespace-nowrap">
                     <span className="px-2.5 py-1 text-xs font-semibold text-brand-600 bg-brand-50/50 border border-brand-200 rounded-full">
-                      {activo.n_doc ? (activo.documento_tipo === 'COMPRA' ? `OC-${activo.n_doc}` : `INC-${activo.n_doc}`) : '—'}
+                      {activo.n_doc ? (activo.documento_tipo === 'COMPRA' ? `OC-${activo.n_doc}` : activo.documento_tipo === 'OBRA' ? `OBR-${activo.n_doc}` : `INC-${activo.n_doc}`) : '—'}
                     </span>
+                  </td>
+
+                  {/* Cuenta Contable */}
+                  <td className="px-5 py-4 whitespace-nowrap text-xs font-mono font-semibold text-slate-700">
+                    {activo.cuenta_contable || '—'}
+                  </td>
+                  
+                  {/* Centro de Costo */}
+                  <td className="px-5 py-4 whitespace-nowrap text-xs font-mono font-semibold text-slate-700">
+                    {activo.centro_costo || '—'}
                   </td>
                   
                   {/* Fecha de Ingreso */}

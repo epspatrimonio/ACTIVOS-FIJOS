@@ -30,6 +30,8 @@ class ActivoBase(BaseModel):
     informe_conformidad: Optional[str] = Field(None, max_length=80)
     n_acta: Optional[str] = Field(None, max_length=40)
     estado_activo: Literal["BUENO", "REGULAR", "MALO", "PARA BAJA", "BAJA"] = Field("BUENO")
+    cuenta_contable: str = Field(..., max_length=20, description="Cuenta contable del activo")
+    centro_costo: str = Field(..., max_length=20, description="Centro de costo del activo")
 
 class ActivoCreate(ActivoBase):
     # Campos opcionales para la creación/actualización del documento de adquisición inline
@@ -37,16 +39,14 @@ class ActivoCreate(ActivoBase):
     compra_id_localidad: Optional[int] = None
     compra_nota_pedido: Optional[str] = None
     compra_certificacion_presupuestal: Optional[str] = None
-    compra_cuenta_contable: Optional[str] = None
-    compra_centro_costo: Optional[str] = None
     compra_id_fuente: Optional[int] = None
     compra_requerido_por: Optional[str] = None
     compra_concepto: Optional[str] = None
 
     inc_fecha_doc: Optional[date] = None
     inc_id_localidad: Optional[int] = None
-    inc_cuenta_contable: Optional[str] = None
-    inc_centro_costo: Optional[str] = None
+    inc_nota_pedido: Optional[str] = None
+    inc_certificacion_presupuestal: Optional[str] = None
     inc_id_fuente: Optional[int] = None
     inc_fuente_origen: Optional[str] = None
     inc_origen: Optional[str] = None
@@ -55,8 +55,8 @@ class ActivoCreate(ActivoBase):
 
     obra_fecha_doc: Optional[date] = None
     obra_id_localidad: Optional[int] = None
-    obra_cuenta_contable: Optional[str] = None
-    obra_centro_costo: Optional[str] = None
+    obra_nota_pedido: Optional[str] = None
+    obra_certificacion_presupuestal: Optional[str] = None
     obra_id_fuente: Optional[int] = None
     obra_fuente_origen: Optional[str] = None
     obra_origen: Optional[str] = None
@@ -104,6 +104,7 @@ class ActivoResponse(ActivoBase):
     # Nuevos campos para reportes
     fuente: Optional[str] = None
     nota_pedido: Optional[str] = None
+    certificacion_presupuestal: Optional[str] = None
     centro_costo: Optional[str] = None
     requerido_por: Optional[str] = None
     fecha_alta: Optional[date] = None
@@ -148,6 +149,7 @@ class ActivoPublicoDTO(BaseModel):
     valor_neto: Optional[Decimal] = None
     estado_activo: str
     cuenta_contable: Optional[str] = None
+    centro_costo: Optional[str] = None
 
     # Datos adicionales de vehículos
     placa: Optional[str] = None
@@ -243,8 +245,6 @@ class CompraCreate(BaseModel):
     id_localidad: int
     nota_pedido: Optional[str] = None
     certificacion_presupuestal: Optional[str] = None
-    cuenta_contable: str
-    centro_costo: Optional[str] = None
     id_fuente: Optional[int] = None
     requerido_por: Optional[str] = None
     concepto: Optional[str] = None
@@ -255,8 +255,6 @@ class CompraResponse(BaseModel):
     id_localidad: int
     nota_pedido: Optional[str] = None
     certificacion_presupuestal: Optional[str] = None
-    cuenta_contable: str
-    centro_costo: Optional[str] = None
     id_fuente: Optional[int] = None
     requerido_por: Optional[str] = None
     concepto: Optional[str] = None
@@ -268,8 +266,8 @@ class IncorporacionCreate(BaseModel):
     n_doc: str = Field(..., max_length=30)
     fecha_doc: Optional[date] = None
     id_localidad: int
-    cuenta_contable: str
-    centro_costo: Optional[str] = None
+    nota_pedido: Optional[str] = None
+    certificacion_presupuestal: Optional[str] = None
     id_fuente: Optional[int] = None
     fuente_origen: Optional[str] = None
     origen: Optional[str] = None
@@ -280,8 +278,8 @@ class IncorporacionResponse(BaseModel):
     n_doc: str
     fecha_doc: Optional[date] = None
     id_localidad: int
-    cuenta_contable: str
-    centro_costo: Optional[str] = None
+    nota_pedido: Optional[str] = None
+    certificacion_presupuestal: Optional[str] = None
     id_fuente: Optional[int] = None
     fuente_origen: Optional[str] = None
     origen: Optional[str] = None
@@ -296,8 +294,8 @@ class ObraCreate(BaseModel):
     n_doc: str = Field(..., max_length=30)
     fecha_doc: Optional[date] = None
     id_localidad: int
-    cuenta_contable: str
-    centro_costo: Optional[str] = None
+    nota_pedido: Optional[str] = None
+    certificacion_presupuestal: Optional[str] = None
     id_fuente: Optional[int] = None
     fuente_origen: Optional[str] = None
     origen: Optional[str] = None
@@ -308,8 +306,8 @@ class ObraResponse(BaseModel):
     n_doc: str
     fecha_doc: Optional[date] = None
     id_localidad: int
-    cuenta_contable: str
-    centro_costo: Optional[str] = None
+    nota_pedido: Optional[str] = None
+    certificacion_presupuestal: Optional[str] = None
     id_fuente: Optional[int] = None
     fuente_origen: Optional[str] = None
     origen: Optional[str] = None

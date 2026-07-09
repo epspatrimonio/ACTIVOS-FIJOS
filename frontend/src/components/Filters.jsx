@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Search, Filter, RotateCcw } from 'lucide-react';
-import { fetchSucursales, fetchPersonal } from '../utils/api';
+import { fetchSucursales, fetchPersonal, fetchCuentasContables, fetchCentrosCosto } from '../utils/api';
 import SearchableSelect from './SearchableSelect';
 
 const ESTADOS_ACTIVO = [
@@ -14,6 +14,8 @@ const ESTADOS_ACTIVO = [
 export default function Filters({ filters, onChange }) {
   const [sucursales, setSucursales] = useState([]);
   const [personal, setPersonal] = useState([]);
+  const [cuentas, setCuentas] = useState([]);
+  const [centros, setCentros] = useState([]);
 
   useEffect(() => {
     fetchSucursales()
@@ -23,6 +25,14 @@ export default function Filters({ filters, onChange }) {
     fetchPersonal()
       .then(setPersonal)
       .catch(() => setPersonal([]));
+
+    fetchCuentasContables()
+      .then(setCuentas)
+      .catch(() => setCuentas([]));
+
+    fetchCentrosCosto()
+      .then(setCentros)
+      .catch(() => setCentros([]));
   }, []);
 
   const handleTextChange = (e) => {
@@ -34,7 +44,7 @@ export default function Filters({ filters, onChange }) {
   };
 
   const handleReset = () => {
-    onChange({ search: '', estado_activo: '', id_sucursal: '', cod_personal: '' });
+    onChange({ search: '', estado_activo: '', id_sucursal: '', cod_personal: '', cuenta_contable: '', centro_costo: '' });
   };
 
   return (
@@ -46,12 +56,12 @@ export default function Filters({ filters, onChange }) {
           </span>
           <div>
             <span className="text-sm font-bold text-slate-800">Filtros de búsqueda</span>
-            <p className="text-[0.75rem] text-slate-500">Refina el inventario por ubicación, estado o responsable.</p>
+            <p className="text-[0.75rem] text-slate-500">Refina el inventario por ubicación, estado, responsable, cuenta o centro de costo.</p>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {/* Buscador Global */}
         <div className="relative">
           <label className="block text-[0.8125rem] font-semibold text-slate-600 mb-1.5">Búsqueda rápida</label>
@@ -64,7 +74,7 @@ export default function Filters({ filters, onChange }) {
               value={filters.search || ''}
               onChange={handleTextChange}
               placeholder="Buscar por código, denominación..."
-              className="block w-full pl-9 pr-3 py-2 bg-slate-50/80 border border-slate-200 rounded-lg focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-600 transition-all placeholder-slate-400"
+              className="block w-full pl-9 pr-3 py-2 bg-slate-50/80 border border-slate-200 rounded-lg focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-600 transition-all placeholder-slate-400 text-xs"
             />
           </div>
         </div>
@@ -81,7 +91,7 @@ export default function Filters({ filters, onChange }) {
           />
         </div>
 
-        {/* Sucursales — cargadas desde la API */}
+        {/* Sucursales */}
         <div>
           <SearchableSelect
             label="Sucursal"
@@ -96,17 +106,47 @@ export default function Filters({ filters, onChange }) {
           />
         </div>
 
-        {/* Responsable — cargado desde la API */}
+        {/* Responsable */}
+        <div>
+          <SearchableSelect
+            label="Responsable"
+            name="cod_personal"
+            value={filters.cod_personal || ''}
+            onChange={(e) => handleSelectChange('cod_personal', e.target.value)}
+            options={personal}
+            placeholder="Todos los responsables"
+          />
+        </div>
+
+        {/* Cuenta Contable */}
+        <div>
+          <SearchableSelect
+            label="Cuenta Contable"
+            name="cuenta_contable"
+            value={filters.cuenta_contable || ''}
+            onChange={(e) => handleSelectChange('cuenta_contable', e.target.value)}
+            options={cuentas.map(cta => ({
+              value: cta.value,
+              label: cta.label
+            }))}
+            placeholder="Todas las cuentas"
+          />
+        </div>
+
+        {/* Centro de Costo */}
         <div>
           <div className="flex items-end space-x-2 w-full">
             <div className="flex-grow">
               <SearchableSelect
-                label="Responsable"
-                name="cod_personal"
-                value={filters.cod_personal || ''}
-                onChange={(e) => handleSelectChange('cod_personal', e.target.value)}
-                options={personal}
-                placeholder="Todos los responsables"
+                label="Centro de Costo"
+                name="centro_costo"
+                value={filters.centro_costo || ''}
+                onChange={(e) => handleSelectChange('centro_costo', e.target.value)}
+                options={centros.map(cc => ({
+                  value: cc.value,
+                  label: cc.label
+                }))}
+                placeholder="Todos los centros"
               />
             </div>
 

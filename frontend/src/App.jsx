@@ -132,6 +132,15 @@ export default function App() {
   const [error, setError] = useState(null);
   const [editingActivo, setEditingActivo] = useState(null);
   const [isFormDirty, setIsFormDirty] = useState(false);
+  const [preSelectedDoc, setPreSelectedDoc] = useState(null);
+
+  const handleDocumentRegistered = (tipo, n_doc) => {
+    const confirmRegisterAsset = window.confirm("¿Se va a registrar un activo fijo?");
+    if (confirmRegisterAsset) {
+      setPreSelectedDoc({ tipo, n_doc });
+      setActiveTab('REGISTRO');
+    }
+  };
 
   const handleTabChange = (newTab) => {
     if (isFormDirty) {
@@ -140,6 +149,9 @@ export default function App() {
     }
     setIsFormDirty(false);
     setEditingActivo(null);
+    if (newTab !== 'REGISTRO') {
+      setPreSelectedDoc(null);
+    }
     setActiveTab(newTab);
   };
 
@@ -304,6 +316,8 @@ export default function App() {
       const data = await fetchActivos({
         estado_activo: filters.estado_activo,
         id_sucursal: filters.id_sucursal,
+        cuenta_contable: filters.cuenta_contable,
+        centro_costo: filters.centro_costo,
       });
       setActivos(data);
     } catch (err) {
@@ -318,7 +332,7 @@ export default function App() {
     if (isLoggedIn && (activeTab === 'INVENTARIO' || activeTab === 'OBRAS' || activeTab === 'CONTABLE')) {
       loadActivos();
     }
-  }, [filters.estado_activo, filters.id_sucursal, activeTab, isLoggedIn]);
+  }, [filters.estado_activo, filters.id_sucursal, filters.cuenta_contable, filters.centro_costo, activeTab, isLoggedIn]);
 
   // Filtro del buscador y responsable en memoria local (cliente)
   useEffect(() => {
@@ -672,7 +686,7 @@ export default function App() {
 
         {activeTab === 'DOCUMENTOS' && (
           <div className="space-y-4 animate-fadeIn w-full max-w-full overflow-hidden">
-            <DocumentosPanel />
+            <DocumentosPanel onDocumentRegistered={handleDocumentRegistered} />
           </div>
         )}
 
@@ -695,6 +709,9 @@ export default function App() {
               editingActivo={editingActivo} 
               onCancelEdit={handleCancelEdit}
               setIsDirty={setIsFormDirty}
+              preSelectedDoc={preSelectedDoc}
+              onClearPreSelectedDoc={() => setPreSelectedDoc(null)}
+              onNavigateTab={handleTabChange}
             />
           </div>
         )}

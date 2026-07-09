@@ -87,7 +87,9 @@ def test_flow():
         "igv": 18.0,
         "informe_conformidad": "INF-001",
         "n_acta": "ACTA-001",
-        "estado_activo": "BUENO"
+        "estado_activo": "BUENO",
+        "cuenta_contable": "3391010101",
+        "centro_costo": "90133301"
     }
     
     status, res = make_request(f"{API_URL}/activos", method="POST", data=asset_payload)

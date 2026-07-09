@@ -10,7 +10,7 @@ import {
   fetchObras, createObra, renameObra
 } from '../utils/api';
 
-export default function DocumentosPanel() {
+export default function DocumentosPanel({ onDocumentRegistered }) {
   const [docType, setDocType] = useState('COMPRA'); // COMPRA | INCORPORACION | OBRA
   const [compras, setCompras] = useState([]);
   const [incorporaciones, setIncorporaciones] = useState([]);
@@ -98,6 +98,8 @@ export default function DocumentosPanel() {
     n_doc: '',
     fecha_doc: '',
     id_localidad: '101',
+    nota_pedido: '',
+    certificacion_presupuestal: '',
     cuenta_contable: '',
     centro_costo: '',
     id_fuente: '',
@@ -111,6 +113,8 @@ export default function DocumentosPanel() {
     n_doc: '',
     fecha_doc: '',
     id_localidad: '101',
+    nota_pedido: '',
+    certificacion_presupuestal: '',
     cuenta_contable: '',
     centro_costo: '',
     id_fuente: '',
@@ -209,6 +213,8 @@ export default function DocumentosPanel() {
         n_doc: doc.n_doc || '',
         fecha_doc: doc.fecha_doc ? doc.fecha_doc.split('T')[0] : '',
         id_localidad: doc.id_localidad !== undefined && doc.id_localidad !== null ? String(doc.id_localidad) : '',
+        nota_pedido: doc.nota_pedido || '',
+        certificacion_presupuestal: doc.certificacion_presupuestal || '',
         cuenta_contable: doc.cuenta_contable || '',
         centro_costo: doc.centro_costo || '',
         id_fuente: doc.id_fuente !== undefined && doc.id_fuente !== null ? String(doc.id_fuente) : '',
@@ -222,6 +228,8 @@ export default function DocumentosPanel() {
         n_doc: doc.n_doc || '',
         fecha_doc: doc.fecha_doc ? doc.fecha_doc.split('T')[0] : '',
         id_localidad: doc.id_localidad !== undefined && doc.id_localidad !== null ? String(doc.id_localidad) : '',
+        nota_pedido: doc.nota_pedido || '',
+        certificacion_presupuestal: doc.certificacion_presupuestal || '',
         cuenta_contable: doc.cuenta_contable || '',
         centro_costo: doc.centro_costo || '',
         id_fuente: doc.id_fuente !== undefined && doc.id_fuente !== null ? String(doc.id_fuente) : '',
@@ -254,6 +262,8 @@ export default function DocumentosPanel() {
       n_doc: '',
       fecha_doc: '',
       id_localidad: '101',
+      nota_pedido: '',
+      certificacion_presupuestal: '',
       cuenta_contable: '',
       centro_costo: '',
       id_fuente: '',
@@ -266,6 +276,8 @@ export default function DocumentosPanel() {
       n_doc: '',
       fecha_doc: '',
       id_localidad: '101',
+      nota_pedido: '',
+      certificacion_presupuestal: '',
       cuenta_contable: '',
       centro_costo: '',
       id_fuente: '',
@@ -302,24 +314,14 @@ export default function DocumentosPanel() {
         certClean = certClean.padStart(4, '0');
       }
 
-      const cuentaClean = cleanDigits(compraForm.cuenta_contable);
-      if (cuentaClean.length !== 10) {
-        throw new Error('La Cuenta Contable debe tener exactamente 10 dígitos (números).');
-      }
-
-      const ccClean = cleanDigits(compraForm.centro_costo);
-      if (ccClean && ccClean.length !== 8) {
-        throw new Error('El Centro de Costo debe tener exactamente 8 dígitos (números).');
-      }
-
       const payload = {
         ...compraForm,
         n_doc: nDocClean,
         fecha_oc: compraForm.fecha_oc || null,
         nota_pedido: notaPedidoClean || null,
         certificacion_presupuestal: certClean || null,
-        cuenta_contable: cuentaClean,
-        centro_costo: ccClean || null,
+        cuenta_contable: null,
+        centro_costo: null,
         id_localidad: Number(compraForm.id_localidad),
         id_fuente: compraForm.id_fuente ? Number(compraForm.id_fuente) : null,
       };
@@ -341,6 +343,9 @@ export default function DocumentosPanel() {
       });
       setShowForm(false);
       loadData();
+      if (onDocumentRegistered) {
+        onDocumentRegistered('COMPRA', nDocClean);
+      }
     } catch (err) {
       setError(err.message || 'Error al guardar la orden de compra.');
     }
@@ -362,16 +367,6 @@ export default function DocumentosPanel() {
         throw new Error('El N° de Expediente no debe exceder los 30 caracteres.');
       }
 
-      const cuentaClean = cleanDigits(incForm.cuenta_contable);
-      if (cuentaClean.length !== 10) {
-        throw new Error('La Cuenta Contable debe tener exactamente 10 dígitos (números).');
-      }
-
-      const ccClean = cleanDigits(incForm.centro_costo);
-      if (ccClean && ccClean.length !== 8) {
-        throw new Error('El Centro de Costo debe tener exactamente 8 dígitos (números).');
-      }
-
       // Resolve fuente_origen from id_fuente automatically
       let resolvedFuenteOrigen = '';
       const selectedFuenteId = incForm.id_fuente ? Number(incForm.id_fuente) : null;
@@ -379,13 +374,24 @@ export default function DocumentosPanel() {
       else if (selectedFuenteId === 6) resolvedFuenteOrigen = 'TRANSFERENCIA';
       else if (selectedFuenteId === 7) resolvedFuenteOrigen = 'DONACION';
 
+      const npClean = cleanDigits(incForm.nota_pedido) || null;
+      if (npClean && npClean.length > 7) {
+        throw new Error('La Nota de Pedido de la incorporación no debe tener más de 7 dígitos.');
+      }
+      let certClean = cleanDigits(incForm.certificacion_presupuestal) || null;
+      if (certClean && certClean.length < 4) {
+        certClean = certClean.padStart(4, '0');
+      }
+
       const payload = {
         ...incForm,
         n_doc: nDocClean,
         fecha_doc: incForm.fecha_doc || null,
         fecha_alta: incForm.fecha_alta || null,
-        cuenta_contable: cuentaClean,
-        centro_costo: ccClean || null,
+        nota_pedido: npClean,
+        certificacion_presupuestal: certClean,
+        cuenta_contable: null,
+        centro_costo: null,
         id_localidad: Number(incForm.id_localidad),
         id_fuente: selectedFuenteId,
         fuente_origen: resolvedFuenteOrigen,
@@ -398,6 +404,8 @@ export default function DocumentosPanel() {
         n_doc: '',
         fecha_doc: '',
         id_localidad: '101',
+        nota_pedido: '',
+        certificacion_presupuestal: '',
         cuenta_contable: '',
         centro_costo: '',
         id_fuente: '',
@@ -408,6 +416,9 @@ export default function DocumentosPanel() {
       });
       setShowForm(false);
       loadData();
+      if (onDocumentRegistered) {
+        onDocumentRegistered('INCORPORACION', nDocClean);
+      }
     } catch (err) {
       setError(err.message || 'Error al guardar la incorporación.');
     }
@@ -429,16 +440,6 @@ export default function DocumentosPanel() {
         throw new Error('El N° de Expediente no debe exceder los 30 caracteres.');
       }
 
-      const cuentaClean = cleanDigits(obraForm.cuenta_contable);
-      if (cuentaClean.length !== 10) {
-        throw new Error('La Cuenta Contable debe tener exactamente 10 dígitos (números).');
-      }
-
-      const ccClean = cleanDigits(obraForm.centro_costo);
-      if (ccClean && ccClean.length !== 8) {
-        throw new Error('El Centro de Costo debe tener exactamente 8 dígitos (números).');
-      }
-
       // Resolve fuente_origen from id_fuente automatically
       let resolvedFuenteOrigen = '';
       const selectedFuenteId = obraForm.id_fuente ? Number(obraForm.id_fuente) : null;
@@ -446,13 +447,24 @@ export default function DocumentosPanel() {
       else if (selectedFuenteId === 6) resolvedFuenteOrigen = 'TRANSFERENCIA';
       else if (selectedFuenteId === 7) resolvedFuenteOrigen = 'DONACION';
 
+      const npClean = cleanDigits(obraForm.nota_pedido) || null;
+      if (npClean && npClean.length > 7) {
+        throw new Error('La Nota de Pedido de la obra no debe tener más de 7 dígitos.');
+      }
+      let certClean = cleanDigits(obraForm.certificacion_presupuestal) || null;
+      if (certClean && certClean.length < 4) {
+        certClean = certClean.padStart(4, '0');
+      }
+
       const payload = {
         ...obraForm,
         n_doc: nDocClean,
         fecha_doc: obraForm.fecha_doc || null,
         fecha_alta: obraForm.fecha_alta || null,
-        cuenta_contable: cuentaClean,
-        centro_costo: ccClean || null,
+        nota_pedido: npClean,
+        certificacion_presupuestal: certClean,
+        cuenta_contable: null,
+        centro_costo: null,
         id_localidad: Number(obraForm.id_localidad),
         id_fuente: selectedFuenteId,
         fuente_origen: resolvedFuenteOrigen,
@@ -465,6 +477,8 @@ export default function DocumentosPanel() {
         n_doc: '',
         fecha_doc: '',
         id_localidad: '101',
+        nota_pedido: '',
+        certificacion_presupuestal: '',
         cuenta_contable: '',
         centro_costo: '',
         id_fuente: '',
@@ -475,6 +489,9 @@ export default function DocumentosPanel() {
       });
       setShowForm(false);
       loadData();
+      if (onDocumentRegistered) {
+        onDocumentRegistered('OBRA', nDocClean);
+      }
     } catch (err) {
       setError(err.message || 'Error al guardar el expediente de obra.');
     }
@@ -594,7 +611,6 @@ export default function DocumentosPanel() {
   // Client-side filtering
   const filteredCompras = compras.filter(c => {
     if (tableFilters.id_localidad && Number(c.id_localidad) !== Number(tableFilters.id_localidad)) return false;
-    if (tableFilters.cuenta_contable && c.cuenta_contable !== tableFilters.cuenta_contable) return false;
     if (tableFilters.fecha_desde && c.fecha_oc && c.fecha_oc.split('T')[0] < tableFilters.fecha_desde) return false;
     if (tableFilters.fecha_hasta && c.fecha_oc && c.fecha_oc.split('T')[0] > tableFilters.fecha_hasta) return false;
     return true;
@@ -602,7 +618,6 @@ export default function DocumentosPanel() {
 
   const filteredIncorporaciones = incorporaciones.filter(i => {
     if (tableFilters.id_localidad && Number(i.id_localidad) !== Number(tableFilters.id_localidad)) return false;
-    if (tableFilters.cuenta_contable && i.cuenta_contable !== tableFilters.cuenta_contable) return false;
     if (tableFilters.fecha_desde && i.fecha_doc && i.fecha_doc.split('T')[0] < tableFilters.fecha_desde) return false;
     if (tableFilters.fecha_hasta && i.fecha_doc && i.fecha_doc.split('T')[0] > tableFilters.fecha_hasta) return false;
     return true;
@@ -610,7 +625,6 @@ export default function DocumentosPanel() {
 
   const filteredObras = obras.filter(o => {
     if (tableFilters.id_localidad && Number(o.id_localidad) !== Number(tableFilters.id_localidad)) return false;
-    if (tableFilters.cuenta_contable && o.cuenta_contable !== tableFilters.cuenta_contable) return false;
     if (tableFilters.fecha_desde && o.fecha_doc && o.fecha_doc.split('T')[0] < tableFilters.fecha_desde) return false;
     if (tableFilters.fecha_hasta && o.fecha_doc && o.fecha_doc.split('T')[0] > tableFilters.fecha_hasta) return false;
     return true;
@@ -869,50 +883,6 @@ export default function DocumentosPanel() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1">
-                    Cuenta Contable <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="cuenta_contable"
-                    required
-                    maxLength={10}
-                    value={compraForm.cuenta_contable}
-                    onChange={handleCompraChange}
-                    list="cuentas-compras"
-                    placeholder="Ej: 3341151101 (10 dígitos)"
-                    className="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#00B0F0]/20 focus:border-[#00B0F0] transition-all font-mono"
-                  />
-                  <datalist id="cuentas-compras">
-                    {cuentaContableOpts.map(o => (
-                      <option key={o.value} value={o.value}>{o.label}</option>
-                    ))}
-                  </datalist>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1">
-                    Centro de Costo <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="centro_costo"
-                    required
-                    maxLength={8}
-                    value={compraForm.centro_costo}
-                    onChange={handleCompraChange}
-                    list="cc-compras"
-                    placeholder="Ej: 90133301 (8 dígitos)"
-                    className="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#00B0F0]/20 focus:border-[#00B0F0] transition-all font-mono"
-                  />
-                  <datalist id="cc-compras">
-                    {centroCostoOpts.map(o => (
-                      <option key={o.value} value={o.value}>{o.label}</option>
-                    ))}
-                  </datalist>
-                </div>
-
                 <SearchableSelect
                   label="Fuente de Financiamiento"
                   name="id_fuente"
@@ -1055,51 +1025,35 @@ export default function DocumentosPanel() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1">
-                    Cuenta Contable <span className="text-rose-500">*</span>
-                  </label>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1">N° Nota de Pedido</label>
                   <input
                     type="text"
-                    name="cuenta_contable"
-                    required
-                    maxLength={10}
-                    value={incForm.cuenta_contable}
+                    name="nota_pedido"
+                    maxLength={7}
+                    value={incForm.nota_pedido}
                     onChange={handleIncChange}
-                    list="cuentas-inc"
-                    placeholder="Ej: 3341151101 (10 dígitos)"
+                    placeholder="Ej: 0012456"
                     className="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#00B0F0]/20 focus:border-[#00B0F0] transition-all font-mono"
                   />
-                  <datalist id="cuentas-inc">
-                    {cuentaContableOpts.map(o => (
-                      <option key={o.value} value={o.value}>{o.label}</option>
-                    ))}
-                  </datalist>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1">
-                    Centro de Costo <span className="text-rose-500">*</span>
-                  </label>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1">N° Certificación Presupuestal</label>
                   <input
                     type="text"
-                    name="centro_costo"
-                    required
-                    maxLength={8}
-                    value={incForm.centro_costo}
+                    name="certificacion_presupuestal"
+                    maxLength={6}
+                    value={incForm.certificacion_presupuestal}
                     onChange={handleIncChange}
-                    list="cc-inc"
-                    placeholder="Ej: 90133301 (8 dígitos)"
+                    placeholder="Ej: 1502"
                     className="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#00B0F0]/20 focus:border-[#00B0F0] transition-all font-mono"
                   />
-                  <datalist id="cc-inc">
-                    {centroCostoOpts.map(o => (
-                      <option key={o.value} value={o.value}>{o.label}</option>
-                    ))}
-                  </datalist>
                 </div>
               </div>
+
+
 
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-1">Concepto/Detalle de Incorporación</label>
@@ -1233,51 +1187,35 @@ export default function DocumentosPanel() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1">
-                    Cuenta Contable <span className="text-rose-500">*</span>
-                  </label>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1">N° Nota de Pedido</label>
                   <input
                     type="text"
-                    name="cuenta_contable"
-                    required
-                    maxLength={10}
-                    value={obraForm.cuenta_contable}
+                    name="nota_pedido"
+                    maxLength={7}
+                    value={obraForm.nota_pedido}
                     onChange={handleObraChange}
-                    list="cuentas-obras"
-                    placeholder="Ej: 339... (10 dígitos)"
+                    placeholder="Ej: 0012456"
                     className="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#00B0F0]/20 focus:border-[#00B0F0] transition-all font-mono"
                   />
-                  <datalist id="cuentas-obras">
-                    {cuentaContableOpts.map(o => (
-                      <option key={o.value} value={o.value}>{o.label}</option>
-                    ))}
-                  </datalist>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1">
-                    Centro de Costo <span className="text-rose-500">*</span>
-                  </label>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1">N° Certificación Presupuestal</label>
                   <input
                     type="text"
-                    name="centro_costo"
-                    required
-                    maxLength={8}
-                    value={obraForm.centro_costo}
+                    name="certificacion_presupuestal"
+                    maxLength={6}
+                    value={obraForm.certificacion_presupuestal}
                     onChange={handleObraChange}
-                    list="cc-obras"
-                    placeholder="Ej: 90133301 (8 dígitos)"
+                    placeholder="Ej: 1502"
                     className="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#00B0F0]/20 focus:border-[#00B0F0] transition-all font-mono"
                   />
-                  <datalist id="cc-obras">
-                    {centroCostoOpts.map(o => (
-                      <option key={o.value} value={o.value}>{o.label}</option>
-                    ))}
-                  </datalist>
                 </div>
               </div>
+
+
 
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-1">Concepto/Detalle de Obra</label>
@@ -1360,14 +1298,7 @@ export default function DocumentosPanel() {
                 options={localidadOpts}
                 placeholder="Todas las localidades"
               />
-              <SearchableSelect
-                label="Cuenta Contable"
-                name="filter_cuenta"
-                value={tableFilters.cuenta_contable}
-                onChange={(e) => setTableFilters(prev => ({ ...prev, cuenta_contable: e.target.value }))}
-                options={cuentaContableOpts}
-                placeholder="Todas las cuentas"
-              />
+
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-1">Fecha Desde</label>
                 <input
@@ -1462,30 +1393,7 @@ export default function DocumentosPanel() {
                               getValue={(item) => getDocColValue(item, 'certificacion_presupuestal')}
                             />
                           </th>
-                          <th className="px-6 py-3.5">
-                            <ExcelHeaderFilter
-                              title="Cuenta Contable"
-                              columnKey="cuenta_contable"
-                              data={compras}
-                              selectedValues={colFilters.cuenta_contable}
-                              onFilterChange={(vals) => handleFilterChange('cuenta_contable', vals)}
-                              currentSort={sortConfig}
-                              onSortChange={handleSortChange}
-                              getValue={(item) => getDocColValue(item, 'cuenta_contable')}
-                            />
-                          </th>
-                          <th className="px-6 py-3.5">
-                            <ExcelHeaderFilter
-                              title="Centro Costo"
-                              columnKey="centro_costo"
-                              data={compras}
-                              selectedValues={colFilters.centro_costo}
-                              onFilterChange={(vals) => handleFilterChange('centro_costo', vals)}
-                              currentSort={sortConfig}
-                              onSortChange={handleSortChange}
-                              getValue={(item) => getDocColValue(item, 'centro_costo')}
-                            />
-                          </th>
+
                           <th className="px-6 py-3.5">
                             <ExcelHeaderFilter
                               title="Concepto"
@@ -1504,7 +1412,7 @@ export default function DocumentosPanel() {
                       <tbody className="divide-y divide-slate-100 text-slate-600">
                         {filteredAndSortedCompras.length === 0 ? (
                           <tr>
-                            <td colSpan="9" className="px-6 py-8 text-center text-slate-400">
+                            <td colSpan="7" className="px-6 py-8 text-center text-slate-400">
                               No hay órdenes de compra que coincidan con los filtros.
                             </td>
                           </tr>
@@ -1516,8 +1424,6 @@ export default function DocumentosPanel() {
                               <td className="px-6 py-3 text-xs font-semibold text-slate-700">{getLocalidadLabel(c.id_localidad)}</td>
                               <td className="px-6 py-3 font-mono">{c.nota_pedido || '—'}</td>
                               <td className="px-6 py-3 font-mono">{c.certificacion_presupuestal || '—'}</td>
-                              <td className="px-6 py-3 font-mono">{c.cuenta_contable}</td>
-                              <td className="px-6 py-3 font-mono">{c.centro_costo || '—'}</td>
                               <td className="px-6 py-3 truncate max-w-xs" title={c.concepto}>{c.concepto || '—'}</td>
                               <td className="px-6 py-3 text-center">
                                 <button
@@ -1616,30 +1522,7 @@ export default function DocumentosPanel() {
                               getValue={(item) => formatDate(getDocColValue(item, 'fecha_alta'))}
                             />
                           </th>
-                          <th className="px-6 py-3.5">
-                            <ExcelHeaderFilter
-                              title="Cuenta Contable"
-                              columnKey="cuenta_contable"
-                              data={incorporaciones}
-                              selectedValues={colFilters.cuenta_contable}
-                              onFilterChange={(vals) => handleFilterChange('cuenta_contable', vals)}
-                              currentSort={sortConfig}
-                              onSortChange={handleSortChange}
-                              getValue={(item) => getDocColValue(item, 'cuenta_contable')}
-                            />
-                          </th>
-                          <th className="px-6 py-3.5">
-                            <ExcelHeaderFilter
-                              title="Centro Costo"
-                              columnKey="centro_costo"
-                              data={incorporaciones}
-                              selectedValues={colFilters.centro_costo}
-                              onFilterChange={(vals) => handleFilterChange('centro_costo', vals)}
-                              currentSort={sortConfig}
-                              onSortChange={handleSortChange}
-                              getValue={(item) => getDocColValue(item, 'centro_costo')}
-                            />
-                          </th>
+
                           <th className="px-6 py-3.5">
                             <ExcelHeaderFilter
                               title="Concepto"
@@ -1658,7 +1541,7 @@ export default function DocumentosPanel() {
                       <tbody className="divide-y divide-slate-100 text-slate-600">
                         {filteredAndSortedIncorporaciones.length === 0 ? (
                           <tr>
-                            <td colSpan="10" className="px-6 py-8 text-center text-slate-400">
+                            <td colSpan="8" className="px-6 py-8 text-center text-slate-400">
                               No hay incorporaciones que coincidan con los filtros.
                             </td>
                           </tr>
@@ -1671,8 +1554,6 @@ export default function DocumentosPanel() {
                               <td className="px-6 py-3">{i.fuente_origen || '—'}</td>
                               <td className="px-6 py-3">{i.origen || '—'}</td>
                               <td className="px-6 py-3">{formatDate(i.fecha_alta)}</td>
-                              <td className="px-6 py-3 font-mono">{i.cuenta_contable}</td>
-                              <td className="px-6 py-3 font-mono">{i.centro_costo || '—'}</td>
                               <td className="px-6 py-3 truncate max-w-xs" title={i.concepto}>{i.concepto || '—'}</td>
                               <td className="px-6 py-3 text-center">
                                 <button
@@ -1771,30 +1652,7 @@ export default function DocumentosPanel() {
                               getValue={(item) => formatDate(getDocColValue(item, 'fecha_alta'))}
                             />
                           </th>
-                          <th className="px-6 py-3.5">
-                            <ExcelHeaderFilter
-                              title="Cuenta Contable"
-                              columnKey="cuenta_contable"
-                              data={obras}
-                              selectedValues={colFilters.cuenta_contable}
-                              onFilterChange={(vals) => handleFilterChange('cuenta_contable', vals)}
-                              currentSort={sortConfig}
-                              onSortChange={handleSortChange}
-                              getValue={(item) => getDocColValue(item, 'cuenta_contable')}
-                            />
-                          </th>
-                          <th className="px-6 py-3.5">
-                            <ExcelHeaderFilter
-                              title="Centro Costo"
-                              columnKey="centro_costo"
-                              data={obras}
-                              selectedValues={colFilters.centro_costo}
-                              onFilterChange={(vals) => handleFilterChange('centro_costo', vals)}
-                              currentSort={sortConfig}
-                              onSortChange={handleSortChange}
-                              getValue={(item) => getDocColValue(item, 'centro_costo')}
-                            />
-                          </th>
+
                           <th className="px-6 py-3.5">
                             <ExcelHeaderFilter
                               title="Concepto"
@@ -1813,7 +1671,7 @@ export default function DocumentosPanel() {
                       <tbody className="divide-y divide-slate-100 text-slate-600">
                         {filteredAndSortedObras.length === 0 ? (
                           <tr>
-                            <td colSpan="10" className="px-6 py-8 text-center text-slate-400">
+                            <td colSpan="8" className="px-6 py-8 text-center text-slate-400">
                               No hay expedientes de obra que coincidan con los filtros.
                             </td>
                           </tr>
@@ -1826,8 +1684,6 @@ export default function DocumentosPanel() {
                               <td className="px-6 py-3">{o.fuente_origen || '—'}</td>
                               <td className="px-6 py-3">{o.origen || '—'}</td>
                               <td className="px-6 py-3">{formatDate(o.fecha_alta)}</td>
-                              <td className="px-6 py-3 font-mono">{o.cuenta_contable}</td>
-                              <td className="px-6 py-3 font-mono">{o.centro_costo || '—'}</td>
                               <td className="px-6 py-3 truncate max-w-xs" title={o.concepto}>{o.concepto || '—'}</td>
                               <td className="px-6 py-3 text-center">
                                 <button
