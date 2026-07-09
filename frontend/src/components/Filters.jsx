@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Search, Filter, RotateCcw } from 'lucide-react';
-import { fetchSucursales, fetchPersonal, fetchCuentasContables, fetchCentrosCosto } from '../utils/api';
+import { fetchSucursales, fetchPersonal, fetchCompras, fetchIncorporaciones } from '../utils/api';
 import SearchableSelect from './SearchableSelect';
 
 const ESTADOS_ACTIVO = [
@@ -11,11 +11,11 @@ const ESTADOS_ACTIVO = [
   { value: 'BAJA', label: 'BAJA' },
 ];
 
-export default function Filters({ filters, onChange }) {
+export default function Filters({ filters, onChange, activeTab }) {
   const [sucursales, setSucursales] = useState([]);
   const [personal, setPersonal] = useState([]);
-  const [cuentas, setCuentas] = useState([]);
-  const [centros, setCentros] = useState([]);
+  const [compras, setCompras] = useState([]);
+  const [incorporaciones, setIncorporaciones] = useState([]);
 
   useEffect(() => {
     fetchSucursales()
@@ -26,14 +26,15 @@ export default function Filters({ filters, onChange }) {
       .then(setPersonal)
       .catch(() => setPersonal([]));
 
-    fetchCuentasContables()
-      .then(setCuentas)
-      .catch(() => setCuentas([]));
-
-    fetchCentrosCosto()
-      .then(setCentros)
-      .catch(() => setCentros([]));
-  }, []);
+    if (activeTab === 'INVENTARIO') {
+      fetchCompras()
+        .then(setCompras)
+        .catch(() => setCompras([]));
+      fetchIncorporaciones()
+        .then(setIncorporaciones)
+        .catch(() => setIncorporaciones([]));
+    }
+  }, [activeTab]);
 
   const handleTextChange = (e) => {
     onChange({ ...filters, search: e.target.value });
@@ -44,8 +45,23 @@ export default function Filters({ filters, onChange }) {
   };
 
   const handleReset = () => {
-    onChange({ search: '', estado_activo: '', id_sucursal: '', cod_personal: '', cuenta_contable: '', centro_costo: '' });
+    onChange({ search: '', estado_activo: '', id_sucursal: '', cod_personal: '', cuenta_contable: '', centro_costo: '', n_doc: '' });
   };
+
+  const documentoOptions = [
+    ...compras.map(c => ({
+      value: c.n_doc,
+      label: `OC-${c.n_doc}`
+    })),
+    ...incorporaciones.map(i => ({
+      value: i.n_doc,
+      label: `INC-${i.n_doc}`
+    }))
+  ];
+
+  const gridColsClass = activeTab === 'INVENTARIO'
+    ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
+    : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4";
 
   return (
     <div className="glass-panel rounded-xl p-4 sm:p-5 mb-6 relative z-30">
@@ -56,12 +72,16 @@ export default function Filters({ filters, onChange }) {
           </span>
           <div>
             <span className="text-sm font-bold text-slate-800">Filtros de búsqueda</span>
-            <p className="text-[0.75rem] text-slate-500">Refina el inventario por ubicación, estado, responsable, cuenta o centro de costo.</p>
+            <p className="text-[0.75rem] text-slate-500">
+              {activeTab === 'INVENTARIO' 
+                ? 'Refina el inventario por ubicación, estado, responsable o documento.'
+                : 'Refina las obras en curso por ubicación, estado o responsable.'}
+            </p>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className={gridColsClass}>
         {/* Buscador Global */}
         <div className="relative">
           <label className="block text-[0.8125rem] font-semibold text-slate-600 mb-1.5">Búsqueda rápida</label>
@@ -79,17 +99,19 @@ export default function Filters({ filters, onChange }) {
           </div>
         </div>
 
-        {/* Estado del Activo */}
-        <div>
-          <SearchableSelect
-            label="Estado Operativo"
-            name="estado_activo"
-            value={filters.estado_activo || ''}
-            onChange={(e) => handleSelectChange('estado_activo', e.target.value)}
-            options={ESTADOS_ACTIVO}
-            placeholder="Todos los estados"
-          />
-        </div>
+        {/* N° Documento (solo para Inventario) */}
+        {activeTab === 'INVENTARIO' && (
+          <div>
+            <SearchableSelect
+              label="N° Documento"
+              name="n_doc"
+              value={filters.n_doc || ''}
+              onChange={(e) => handleSelectChange('n_doc', e.target.value)}
+              options={documentoOptions}
+              placeholder="Todos los documentos"
+            />
+          </div>
+        )}
 
         {/* Sucursales */}
         <div>
@@ -118,38 +140,19 @@ export default function Filters({ filters, onChange }) {
           />
         </div>
 
-        {/* Cuenta Contable */}
-        <div>
-          <SearchableSelect
-            label="Cuenta Contable"
-            name="cuenta_contable"
-            value={filters.cuenta_contable || ''}
-            onChange={(e) => handleSelectChange('cuenta_contable', e.target.value)}
-            options={cuentas.map(cta => ({
-              value: cta.value,
-              label: cta.label
-            }))}
-            placeholder="Todas las cuentas"
-          />
-        </div>
-
-        {/* Centro de Costo */}
+        {/* Estado Operativo */}
         <div>
           <div className="flex items-end space-x-2 w-full">
             <div className="flex-grow">
               <SearchableSelect
-                label="Centro de Costo"
-                name="centro_costo"
-                value={filters.centro_costo || ''}
-                onChange={(e) => handleSelectChange('centro_costo', e.target.value)}
-                options={centros.map(cc => ({
-                  value: cc.value,
-                  label: cc.label
-                }))}
-                placeholder="Todos los centros"
+                label="Estado Operativo"
+                name="estado_activo"
+                value={filters.estado_activo || ''}
+                onChange={(e) => handleSelectChange('estado_activo', e.target.value)}
+                options={ESTADOS_ACTIVO}
+                placeholder="Todos los estados"
               />
             </div>
-
             <button
               onClick={handleReset}
               title="Restablecer filtros"

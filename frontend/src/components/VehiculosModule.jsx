@@ -685,6 +685,76 @@ export default function VehiculosModule() {
     }
   };
 
+  const getSoatBadge = (item) => {
+    const isBaja = item.estado_activo === 'PARA BAJA' || item.estado_activo === 'BAJA';
+    if (isBaja) {
+      return (
+        <span className="px-2 py-0.5 inline-flex text-[10px] font-bold rounded bg-slate-100 text-slate-400 border border-slate-200">
+          No requiere (Baja)
+        </span>
+      );
+    }
+    const estado = item.soat_estado;
+    const vencimiento = item.soat_vencimiento;
+    const dias = item.soat_dias_vigencia;
+
+    if (!estado) {
+      return <span className="text-xs text-slate-400 italic">No registrado</span>;
+    }
+    const styles = {
+      VIGENTE: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      POR_VENCER: 'bg-amber-50 text-amber-700 border-amber-200',
+      VENCIDO: 'bg-rose-50 text-rose-700 border-rose-200'
+    };
+    const style = styles[estado] || 'bg-slate-100 text-slate-700 border-slate-200';
+    const label = estado === 'POR_VENCER' ? 'Por Vencer' : estado;
+    const diasText = dias !== null ? (dias < 0 ? `(Hace ${Math.abs(dias)} d)` : `(${dias} d restantes)`) : '';
+    
+    return (
+      <div className="flex flex-col gap-1">
+        <span className={`inline-flex items-center self-start px-2 py-0.5 rounded text-[10px] font-bold border ${style}`}>
+          {label} {diasText}
+        </span>
+        <span className="text-[11px] text-slate-500 font-medium font-mono">{vencimiento ? formatDate(vencimiento) : ''}</span>
+      </div>
+    );
+  };
+
+  const getRevTecBadge = (item) => {
+    const isBaja = item.estado_activo === 'PARA BAJA' || item.estado_activo === 'BAJA';
+    if (isBaja) {
+      return (
+        <span className="px-2 py-0.5 inline-flex text-[10px] font-bold rounded bg-slate-100 text-slate-400 border border-slate-200">
+          No requiere (Baja)
+        </span>
+      );
+    }
+    const estado = item.estado_rev_tec;
+    const vencimiento = item.vencimiento_rev_tec;
+    const dias = item.dias_vigencia_rev_tec;
+
+    if (!vencimiento) {
+      return <span className="text-xs text-slate-400 italic">No registrado</span>;
+    }
+    const styles = {
+      VIGENTE: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      POR_VENCER: 'bg-amber-50 text-amber-700 border-amber-200',
+      VENCIDO: 'bg-rose-50 text-rose-700 border-rose-200'
+    };
+    const style = styles[estado] || 'bg-slate-100 text-slate-700 border-slate-200';
+    const label = estado === 'POR_VENCER' ? 'Por Vencer' : estado;
+    const diasText = dias !== null ? (dias < 0 ? `(Hace ${Math.abs(dias)} d)` : `(${dias} d restantes)`) : '';
+
+    return (
+      <div className="flex flex-col gap-1">
+        <span className={`inline-flex items-center self-start px-2 py-0.5 rounded text-[10px] font-bold border ${style}`}>
+          {label} {diasText}
+        </span>
+        <span className="text-[11px] text-slate-500 font-medium font-mono">{formatDate(vencimiento)}</span>
+      </div>
+    );
+  };
+
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -719,6 +789,7 @@ export default function VehiculosModule() {
     switch (key) {
       case 'cod_patrimonial': return item.cod_patrimonial || '';
       case 'placa': return item.placa || '';
+      case 'tipo_vehiculo': return item.tipo_vehiculo || '';
       case 'denominacion': return item.denominacion || '';
       case 'sucursal': return item.sucursal || '';
       case 'responsable': return item.responsable || '';
@@ -1109,21 +1180,9 @@ export default function VehiculosModule() {
           </div>
         ) : (
           <div className="overflow-auto flex-1">
-            <table className="w-full text-sm">
+            <table className="min-w-[1750px] w-full text-sm">
               <thead className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
                 <tr>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
-                    <ExcelHeaderFilter
-                      title="Cód. Patrimonial"
-                      columnKey="cod_patrimonial"
-                      data={vehicles}
-                      selectedValues={colFilters.cod_patrimonial}
-                      onFilterChange={(vals) => handleFilterChange('cod_patrimonial', vals)}
-                      currentSort={sortConfig}
-                      onSortChange={handleSortChange}
-                      getValue={(item) => getColValue(item, 'cod_patrimonial')}
-                    />
-                  </th>
                   <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                     <ExcelHeaderFilter
                       title="Placa"
@@ -1138,7 +1197,43 @@ export default function VehiculosModule() {
                   </th>
                   <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                     <ExcelHeaderFilter
-                      title="Tipo y Características"
+                      title="Cód. Patrimonial"
+                      columnKey="cod_patrimonial"
+                      data={vehicles}
+                      selectedValues={colFilters.cod_patrimonial}
+                      onFilterChange={(vals) => handleFilterChange('cod_patrimonial', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'cod_patrimonial')}
+                    />
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                    <ExcelHeaderFilter
+                      title="Tipo / Subcat"
+                      columnKey="tipo_vehiculo"
+                      data={vehicles}
+                      selectedValues={colFilters.tipo_vehiculo}
+                      onFilterChange={(vals) => handleFilterChange('tipo_vehiculo', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'tipo_vehiculo')}
+                    />
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                    <ExcelHeaderFilter
+                      title="Ubicación"
+                      columnKey="sucursal"
+                      data={vehicles}
+                      selectedValues={colFilters.sucursal}
+                      onFilterChange={(vals) => handleFilterChange('sucursal', vals)}
+                      currentSort={sortConfig}
+                      onSortChange={handleSortChange}
+                      getValue={(item) => getColValue(item, 'sucursal')}
+                    />
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                    <ExcelHeaderFilter
+                      title="Denominación / Marca / Modelo"
                       columnKey="denominacion"
                       data={vehicles}
                       selectedValues={colFilters.denominacion}
@@ -1149,16 +1244,25 @@ export default function VehiculosModule() {
                     />
                   </th>
                   <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                    Especificaciones Técnicas
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                     <ExcelHeaderFilter
-                      title="Sucursal"
-                      columnKey="sucursal"
+                      title="Estado"
+                      columnKey="estado_activo"
                       data={vehicles}
-                      selectedValues={colFilters.sucursal}
-                      onFilterChange={(vals) => handleFilterChange('sucursal', vals)}
+                      selectedValues={colFilters.estado_activo}
+                      onFilterChange={(vals) => handleFilterChange('estado_activo', vals)}
                       currentSort={sortConfig}
                       onSortChange={handleSortChange}
-                      getValue={(item) => getColValue(item, 'sucursal')}
+                      getValue={(item) => getColValue(item, 'estado_activo')}
                     />
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                    SOAT
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                    Rev. Técnica
                   </th>
                   <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                     <ExcelHeaderFilter
@@ -1172,98 +1276,88 @@ export default function VehiculosModule() {
                       getValue={(item) => getColValue(item, 'responsable')}
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
-                    <ExcelHeaderFilter
-                      title="Estado Físico"
-                      columnKey="estado_activo"
-                      data={vehicles}
-                      selectedValues={colFilters.estado_activo}
-                      onFilterChange={(vals) => handleFilterChange('estado_activo', vals)}
-                      currentSort={sortConfig}
-                      onSortChange={handleSortChange}
-                      getValue={(item) => getColValue(item, 'estado_activo')}
-                    />
-                  </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap"></th>
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">Gestión</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filteredAndSorted.map(v => (
                   <tr key={v.cod_patrimonial} className="transition-colors group hover:bg-slate-50/50">
-                    <td className="px-4 py-3 font-mono font-bold text-slate-800 text-xs">
-                      {v.cod_patrimonial}
-                    </td>
+                    {/* Placa */}
                     <td className="px-4 py-3 whitespace-nowrap">
                       {v.placa ? (
-                        <span className="font-mono font-bold text-slate-700 bg-slate-900 text-white px-2 py-0.5 rounded-lg text-xs tracking-wider shadow-sm whitespace-nowrap">
+                        <span className="font-mono font-bold text-slate-900 bg-white border-2 border-slate-900 px-3 py-1 rounded text-xs tracking-wider shadow-sm whitespace-nowrap">
                           {v.placa}
                         </span>
                       ) : (
                         <span className="text-slate-400 text-xs italic">Sin placa</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 max-w-[450px]">
-                      <p className="font-bold text-slate-900 text-xs leading-tight uppercase" title={v.denominacion}>{v.denominacion}</p>
-                      
-                      {/* Badges de clasificación */}
-                      <div className="flex flex-wrap gap-1 mt-1.5">
-                        <span className="bg-slate-900/5 text-slate-800 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide">
-                          {v.tipo_vehiculo || 'VEHÍCULO'}
-                        </span>
-                        {v.carroceria && (
-                          <span className="bg-amber-50 text-amber-800 border border-amber-200/40 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase">
-                            {v.carroceria}
-                          </span>
-                        )}
-                        {v.combustible && (
-                          <span className="bg-sky-50 text-sky-800 border border-sky-200/40 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase">
-                            {v.combustible}
-                          </span>
-                        )}
-                        {v.categoria_vehiculo && (
-                          <span className="bg-purple-50 text-purple-800 border border-purple-200/40 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase">
-                            CAT: {v.categoria_vehiculo}
-                          </span>
-                        )}
-                      </div>
 
-                      {/* Características y seriales */}
-                      <div className="text-[11px] text-slate-500 mt-2 space-y-1">
-                        <p className="leading-snug">
-                          <span className="text-slate-400 font-medium">Ficha:</span>{' '}
-                          {v.marca && <span>Marca: <strong className="text-slate-700 font-semibold">{v.marca}</strong></span>}
-                          {v.modelo && <span> · Mod: <strong className="text-slate-700 font-semibold">{v.modelo}</strong></span>}
-                          {v.color && <span> · Color: <strong className="text-slate-600 font-medium">{v.color}</strong></span>}
-                          {v.anio_fabricacion && <span> · Año: <strong className="text-slate-600 font-medium">{v.anio_fabricacion}</strong></span>}
-                        </p>
-                        <p className="text-[10px] font-mono leading-none">
-                          <span className="text-slate-400 font-medium font-sans">Identificación:</span>{' '}
-                          {v.nro_motor && <span>Motor: <strong className="text-slate-500 font-normal">{v.nro_motor}</strong></span>}
-                          {v.nro_chasis && <span>{v.nro_motor ? ' · ' : ''}Chasis: <strong className="text-slate-500 font-normal">{v.nro_chasis}</strong></span>}
-                        </p>
-                        <p className="text-[10px] text-slate-500 flex flex-wrap gap-1.5 mt-1 font-medium leading-none">
-                          <span className="bg-slate-50 text-slate-500 border border-slate-200/60 px-1.5 py-0.5 rounded">
-                            Ingreso: <strong>{formatDate(v.fecha_alta_factura)}</strong>
-                          </span>
-                          <span className="bg-slate-50 text-slate-500 border border-slate-200/60 px-1.5 py-0.5 rounded">
-                            Asignación: <strong>{formatDate(v.fecha_registro_contable)}</strong>
-                          </span>
-                        </p>
+                    {/* Código Patrimonial */}
+                    <td className="px-4 py-3 whitespace-nowrap font-mono font-bold text-slate-800 text-xs">
+                      {v.cod_patrimonial}
+                    </td>
+
+                    {/* Tipo / Subcategoria */}
+                    <td className="px-4 py-3 whitespace-nowrap text-xs font-semibold text-brand-600">
+                      {v.subcategoria || 'VEHÍCULO'}
+                    </td>
+
+                    {/* Ubicación */}
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="font-bold text-slate-800 text-[0.8125rem]">
+                        {v.sucursal || '—'}
+                      </div>
+                      <div className="text-[0.6875rem] text-brand-500 font-bold uppercase tracking-wide mt-0.5">
+                        {v.localidad || '—'}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-xs text-slate-600 font-semibold text-slate-700">
-                      {v.sucursal || '—'}
+
+                    {/* Denominación / Marca / Modelo */}
+                    <td className="px-4 py-3 min-w-[200px]">
+                      <div className="text-[0.875rem] font-bold text-slate-800 leading-snug">
+                        {v.denominacion}
+                      </div>
+                      <div className="text-[0.75rem] text-slate-400 mt-1">
+                        Año: {v.vehiculo_anio || '—'} &bull; Marca: {v.marca || '—'} &bull; Modelo: {v.modelo || '—'}
+                      </div>
                     </td>
-                    <td className="px-4 py-3 text-xs text-slate-650 text-slate-500 font-medium">
-                      {v.responsable || 'Sin asignar'}
+
+                    {/* Especificaciones Técnicas */}
+                    <td className="px-4 py-3 text-[0.8125rem] min-w-[220px] text-slate-500 leading-relaxed">
+                      <div><span className="font-medium text-slate-400">Motor:</span> {v.nro_motor || '—'}</div>
+                      <div><span className="font-medium text-slate-400">Chasis:</span> {v.nro_chasis || '—'}</div>
+                      <div><span className="font-medium text-slate-400">Combustible:</span> {v.combustible || '—'}</div>
+                      {v.carroceria && <div><span className="font-medium text-slate-400">Carrocería:</span> {v.carroceria}</div>}
+                      {v.categoria_vehiculo && <div><span className="font-medium text-slate-400">Categoría:</span> {v.categoria_vehiculo}</div>}
+                      {v.nro_tarjeta_prop && <div><span className="font-medium text-slate-400">Tarjeta Prop:</span> {v.nro_tarjeta_prop}</div>}
                     </td>
-                    <td className="px-4 py-3">
+
+                    {/* Estado Físico */}
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${
                         v.estado_activo === 'BUENO' ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' :
                         v.estado_activo === 'REGULAR' ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-200' :
                         'bg-rose-50 text-rose-700 ring-1 ring-rose-200'
                       }`}>{v.estado_activo}</span>
                     </td>
+
+                    {/* SOAT */}
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      {getSoatBadge(v)}
+                    </td>
+
+                    {/* Revisión Técnica */}
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      {getRevTecBadge(v)}
+                    </td>
+
+                    {/* Responsable */}
+                    <td className="px-4 py-3 text-xs text-slate-650 text-slate-500 font-medium min-w-[150px]">
+                      {v.responsable || 'Sin asignar'}
+                    </td>
+
+                    {/* Gestión */}
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button onClick={() => { setEditItem(v); setShowForm(true); }} title="Editar Vehículo"

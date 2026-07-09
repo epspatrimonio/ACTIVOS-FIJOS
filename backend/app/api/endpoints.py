@@ -325,12 +325,15 @@ async def create_activo(
     await ensure_cuenta_contable_exists(db, cuenta_clean)
 
     cc_clean = clean_digits(activo_in.centro_costo) if activo_in.centro_costo else ""
-    if not cc_clean:
-        raise HTTPException(status_code=400, detail="El Centro de Costo es obligatorio para el activo fijo.")
-    if len(cc_clean) != 8:
-        raise HTTPException(status_code=400, detail="El Centro de Costo del activo debe tener exactamente 8 dígitos.")
-    activo_in.centro_costo = cc_clean
-    await ensure_centro_costo_exists(db, cc_clean)
+    if activo_in.documento_tipo == "OBRA":
+        activo_in.centro_costo = None
+    else:
+        if not cc_clean:
+            raise HTTPException(status_code=400, detail="El Centro de Costo es obligatorio para el activo fijo.")
+        if len(cc_clean) != 8:
+            raise HTTPException(status_code=400, detail="El Centro de Costo del activo debe tener exactamente 8 dígitos.")
+        activo_in.centro_costo = cc_clean
+        await ensure_centro_costo_exists(db, cc_clean)
         
     await upsert_acquisition_document(db, activo_in)
     await db.flush()
@@ -380,12 +383,15 @@ async def update_activo(
     await ensure_cuenta_contable_exists(db, cuenta_clean)
 
     cc_clean = clean_digits(activo_in.centro_costo) if activo_in.centro_costo else ""
-    if not cc_clean:
-        raise HTTPException(status_code=400, detail="El Centro de Costo es obligatorio para el activo fijo.")
-    if len(cc_clean) != 8:
-        raise HTTPException(status_code=400, detail="El Centro de Costo del activo debe tener exactamente 8 dígitos.")
-    activo_in.centro_costo = cc_clean
-    await ensure_centro_costo_exists(db, cc_clean)
+    if activo_in.documento_tipo == "OBRA":
+        activo_in.centro_costo = None
+    else:
+        if not cc_clean:
+            raise HTTPException(status_code=400, detail="El Centro de Costo es obligatorio para el activo fijo.")
+        if len(cc_clean) != 8:
+            raise HTTPException(status_code=400, detail="El Centro de Costo del activo debe tener exactamente 8 dígitos.")
+        activo_in.centro_costo = cc_clean
+        await ensure_centro_costo_exists(db, cc_clean)
         
     await upsert_acquisition_document(db, activo_in)
     await db.flush()
@@ -691,7 +697,18 @@ async def get_compras(db: AsyncSession = Depends(get_db)):
     """Obtiene la lista de todos los expedientes de compra registrados."""
     try:
         result = await db.execute(select(Compra).order_by(Compra.n_doc))
-        return result.scalars().all()
+        compras = result.scalars().all()
+        
+        # Check which ones are in use
+        in_use_res = await db.execute(
+            select(Activo.n_doc_compra).where(Activo.n_doc_compra.isnot(None)).distinct()
+        )
+        in_use_docs = set(in_use_res.scalars().all())
+        
+        for c in compras:
+            c.en_uso = c.n_doc in in_use_docs
+            
+        return compras
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -766,6 +783,31 @@ async def get_compra(n_doc: str, db: AsyncSession = Depends(get_db)):
     return db_compra
 
 
+@router.delete("/compras/{n_doc}", status_code=status.HTTP_204_NO_CONTENT, tags=["Documentos"])
+async def delete_compra(n_doc: str, db: AsyncSession = Depends(get_db)):
+    """Elimina una compra si no está vinculada a ningún activo fijo."""
+    result = await db.execute(select(Compra).where(Compra.n_doc == n_doc))
+    db_compra = result.scalar_one_or_none()
+    if not db_compra:
+        raise HTTPException(status_code=404, detail="Compra no encontrada.")
+    
+    # Validar vínculo
+    vinculos_res = await db.execute(select(Activo).where(Activo.n_doc_compra == n_doc))
+    if vinculos_res.scalars().first():
+        raise HTTPException(
+            status_code=400,
+            detail="No se puede eliminar la Orden de Compra porque está vinculada a uno o más activos fijos."
+        )
+    
+    try:
+        await db.delete(db_compra)
+        await db.commit()
+        return None
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail=f"Error al eliminar la orden de compra: {str(e)}")
+
+
 @router.put("/compras/{n_doc}/rename", response_model=CompraResponse, tags=["Documentos"])
 async def rename_compra(n_doc: str, rename_in: DocumentRename, db: AsyncSession = Depends(get_db)):
     """Renombra un expediente de compra modificando su clave primaria y propagando a activos fijos."""
@@ -805,7 +847,18 @@ async def get_incorporaciones(db: AsyncSession = Depends(get_db)):
     """Obtiene la lista de todas las incorporaciones registradas."""
     try:
         result = await db.execute(select(Incorporacion).order_by(Incorporacion.n_doc))
-        return result.scalars().all()
+        incorporaciones = result.scalars().all()
+        
+        # Check which ones are in use
+        in_use_res = await db.execute(
+            select(Activo.n_doc_incorporacion).where(Activo.n_doc_incorporacion.isnot(None)).distinct()
+        )
+        in_use_docs = set(in_use_res.scalars().all())
+        
+        for i in incorporaciones:
+            i.en_uso = i.n_doc in in_use_docs
+            
+        return incorporaciones
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -913,12 +966,48 @@ async def rename_incorporacion(n_doc: str, rename_in: DocumentRename, db: AsyncS
         raise HTTPException(status_code=400, detail=f"Error al renombrar la resolución de incorporación: {str(e)}")
 
 
+@router.delete("/incorporaciones/{n_doc}", status_code=status.HTTP_204_NO_CONTENT, tags=["Documentos"])
+async def delete_incorporacion(n_doc: str, db: AsyncSession = Depends(get_db)):
+    """Elimina una incorporación si no está vinculada a ningún activo fijo."""
+    result = await db.execute(select(Incorporacion).where(Incorporacion.n_doc == n_doc))
+    db_inc = result.scalar_one_or_none()
+    if not db_inc:
+        raise HTTPException(status_code=404, detail="Incorporación no encontrada.")
+        
+    # Validar vínculo
+    vinculos_res = await db.execute(select(Activo).where(Activo.n_doc_incorporacion == n_doc))
+    if vinculos_res.scalars().first():
+        raise HTTPException(
+            status_code=400,
+            detail="No se puede eliminar la Incorporación porque está vinculada a uno o más activos fijos."
+        )
+        
+    try:
+        await db.delete(db_inc)
+        await db.commit()
+        return None
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail=f"Error al eliminar la incorporación: {str(e)}")
+
+
 @router.get("/obras", response_model=List[ObraResponse], tags=["Documentos"])
 async def get_obras(db: AsyncSession = Depends(get_db)):
     """Obtiene la lista de todas las obras en curso registradas."""
     try:
         result = await db.execute(select(Obra).order_by(Obra.n_doc))
-        return result.scalars().all()
+        obras = result.scalars().all()
+        
+        # Check which ones are in use
+        in_use_res = await db.execute(
+            select(Activo.n_doc_obra).where(Activo.n_doc_obra.isnot(None)).distinct()
+        )
+        in_use_docs = set(in_use_res.scalars().all())
+        
+        for o in obras:
+            o.en_uso = o.n_doc in in_use_docs
+            
+        return obras
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -982,6 +1071,60 @@ async def create_obra(obra_in: ObraCreate, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=400, detail=f"Error al registrar el expediente de obra: {str(e)}")
 
 
+@router.get("/obras/generar-codigo-patrimonial/{id_localidad}", tags=["Documentos"])
+async def generar_codigo_patrimonial_obra(id_localidad: int, db: AsyncSession = Depends(get_db)):
+    """
+    Genera el siguiente código patrimonial disponible para una obra en curso (PMO/Localidad)
+    Formato: 339 + id_localidad (3d) + siguiente (3d)
+    """
+    try:
+        # Validar que exista la localidad
+        loc_res = await db.execute(
+            select(VwListaLocalidad).where(VwListaLocalidad.value == id_localidad)
+        )
+        if not loc_res.scalar_one_or_none():
+            raise HTTPException(status_code=404, detail="Localidad no encontrada.")
+
+        prefix = f"339{id_localidad:03d}"
+        
+        # Obtener todos los activos que empiecen con el prefijo
+        result = await db.execute(
+            select(Activo).where(Activo.cod_patrimonial.like(f"{prefix}%"))
+        )
+        activos = result.scalars().all()
+        
+        max_seq = 0
+        import re
+        for a in activos:
+            if a.cod_patrimonial:
+                # Buscar patrón prefix + 3 dígitos
+                match = re.match(rf"^{prefix}(\d{{3}})$", a.cod_patrimonial)
+                if match:
+                    try:
+                        seq = int(match.group(1))
+                        if seq > max_seq:
+                            max_seq = seq
+                    except ValueError:
+                        pass
+        
+        siguiente = max_seq + 1
+        codigo = f"{prefix}{siguiente:03d}"
+        
+        # Verificar que sea único
+        for _ in range(100):
+            existe = await db.execute(select(Activo).where(Activo.cod_patrimonial == codigo))
+            if not existe.scalar_one_or_none():
+                break
+            siguiente += 1
+            codigo = f"{prefix}{siguiente:03d}"
+            
+        return {"codigo": codigo, "siguiente": siguiente}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/obras/{n_doc}", tags=["Documentos"])
 async def get_obra(n_doc: str, db: AsyncSession = Depends(get_db)):
     """Busca un expediente de obra en curso por su número de documento."""
@@ -1024,6 +1167,31 @@ async def rename_obra(n_doc: str, rename_in: DocumentRename, db: AsyncSession = 
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=400, detail=f"Error al renombrar el expediente de obra: {str(e)}")
+
+
+@router.delete("/obras/{n_doc}", status_code=status.HTTP_204_NO_CONTENT, tags=["Documentos"])
+async def delete_obra(n_doc: str, db: AsyncSession = Depends(get_db)):
+    """Elimina un expediente de obra si no está vinculado a ningún activo fijo."""
+    result = await db.execute(select(Obra).where(Obra.n_doc == n_doc))
+    db_obra = result.scalar_one_or_none()
+    if not db_obra:
+        raise HTTPException(status_code=404, detail="Expediente de obra no encontrado.")
+        
+    # Validar vínculo
+    vinculos_res = await db.execute(select(Activo).where(Activo.n_doc_obra == n_doc))
+    if vinculos_res.scalars().first():
+        raise HTTPException(
+            status_code=400,
+            detail="No se puede eliminar la Obra en Curso porque está vinculada a uno o más activos fijos."
+        )
+        
+    try:
+        await db.delete(db_obra)
+        await db.commit()
+        return None
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail=f"Error al eliminar el expediente de obra: {str(e)}")
 
 
 # ═══════════════════════════════════════════════════════════

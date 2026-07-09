@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Save, Plus, FileText, CheckCircle2, AlertCircle, ChevronDown, Edit3 } from 'lucide-react';
+import { Save, Plus, FileText, CheckCircle2, AlertCircle, ChevronDown, Edit3, Trash2 } from 'lucide-react';
 import SearchableSelect from './SearchableSelect';
 import Modal from './Modal';
 import ExcelHeaderFilter from './ExcelHeaderFilter';
@@ -7,7 +7,8 @@ import {
   fetchCompras, fetchIncorporaciones, createCompra, createIncorporacion,
   fetchLocalidades, fetchCuentasContables, fetchCentrosCosto, fetchFuentes, fetchPersonal,
   renameCompra, renameIncorporacion,
-  fetchObras, createObra, renameObra
+  fetchObras, createObra, renameObra,
+  deleteCompra, deleteIncorporacion, deleteObra
 } from '../utils/api';
 
 export default function DocumentosPanel({ onDocumentRegistered }) {
@@ -26,6 +27,12 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
   const [newDocNum, setNewDocNum] = useState('');
   const [renameLoading, setRenameLoading] = useState(false);
   const [renameError, setRenameError] = useState(null);
+
+  // Eliminar Documento
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [docToDelete, setDocToDelete] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
 
   // Filtros de la lista de expedientes
   const [tableFilters, setTableFilters] = useState({
@@ -185,7 +192,7 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
     let prefix = '';
     if (type === 'COMPRA') prefix = 'OC-';
     else if (type === 'INCORPORACION') prefix = 'INC-';
-    else if (type === 'OBRA') prefix = 'OBR-';
+    else if (type === 'OBRA') prefix = 'OC-';
     if (n_doc.startsWith(prefix)) {
       return n_doc;
     }
@@ -440,34 +447,19 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
         throw new Error('El N° de Expediente no debe exceder los 30 caracteres.');
       }
 
-      // Resolve fuente_origen from id_fuente automatically
-      let resolvedFuenteOrigen = '';
-      const selectedFuenteId = obraForm.id_fuente ? Number(obraForm.id_fuente) : null;
-      if (selectedFuenteId === 5) resolvedFuenteOrigen = 'LIQ OBRAS';
-      else if (selectedFuenteId === 6) resolvedFuenteOrigen = 'TRANSFERENCIA';
-      else if (selectedFuenteId === 7) resolvedFuenteOrigen = 'DONACION';
-
-      const npClean = cleanDigits(obraForm.nota_pedido) || null;
-      if (npClean && npClean.length > 7) {
-        throw new Error('La Nota de Pedido de la obra no debe tener más de 7 dígitos.');
-      }
-      let certClean = cleanDigits(obraForm.certificacion_presupuestal) || null;
-      if (certClean && certClean.length < 4) {
-        certClean = certClean.padStart(4, '0');
-      }
-
       const payload = {
-        ...obraForm,
         n_doc: nDocClean,
         fecha_doc: obraForm.fecha_doc || null,
-        fecha_alta: obraForm.fecha_alta || null,
-        nota_pedido: npClean,
-        certificacion_presupuestal: certClean,
+        id_localidad: Number(obraForm.id_localidad),
+        concepto: obraForm.concepto || null,
+        fecha_alta: null,
+        nota_pedido: null,
+        certificacion_presupuestal: null,
+        id_fuente: null,
+        fuente_origen: null,
+        origen: null,
         cuenta_contable: null,
         centro_costo: null,
-        id_localidad: Number(obraForm.id_localidad),
-        id_fuente: selectedFuenteId,
-        fuente_origen: resolvedFuenteOrigen,
       };
 
       await createObra(payload);
@@ -554,6 +546,32 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
       setRenameError(err.message || 'Error al renombrar el documento.');
     } finally {
       setRenameLoading(false);
+    }
+  };
+
+  const handleDeleteSubmit = async (e) => {
+    e.preventDefault();
+    if (!docToDelete) return;
+    setDeleteLoading(true);
+    setDeleteError(null);
+    try {
+      if (docType === 'COMPRA') {
+        await deleteCompra(docToDelete.n_doc);
+      } else if (docType === 'INCORPORACION') {
+        await deleteIncorporacion(docToDelete.n_doc);
+      } else {
+        await deleteObra(docToDelete.n_doc);
+      }
+      
+      // Refrescar los expedientes
+      await loadData();
+      
+      setShowDeleteModal(false);
+      setDocToDelete(null);
+    } catch (err) {
+      setDeleteError(err.message || 'Error al eliminar el documento.');
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -1093,7 +1111,7 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
             <form onSubmit={handleObraSubmit} className="space-y-4">
               <h3 className="text-sm font-bold text-[#00B0F0] uppercase tracking-wide mb-2">Datos del Expediente de Obra en Curso</h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 mb-1">
                     N° Expediente de Obra <span className="text-rose-500">*</span>
@@ -1107,7 +1125,7 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
                       maxLength={30}
                       value={obraForm.n_doc}
                       onChange={handleObraChange}
-                      placeholder="Ej: OBR-2026-001"
+                      placeholder="Ej: OC-2026-001"
                       className="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#00B0F0]/20 focus:border-[#00B0F0] transition-all font-mono font-bold text-slate-700 disabled:opacity-60 disabled:cursor-not-allowed"
                     />
                     {!!editingDoc && (
@@ -1127,7 +1145,7 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1">Fecha del Documento</label>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1">Fecha O/C</label>
                   <input
                     type="date"
                     name="fecha_doc"
@@ -1137,21 +1155,9 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
                     className="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#00B0F0]/20 focus:border-[#00B0F0] transition-all text-slate-700"
                   />
                 </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1">Fecha de Alta</label>
-                  <input
-                    type="date"
-                    name="fecha_alta"
-                    required
-                    value={obraForm.fecha_alta}
-                    onChange={handleObraChange}
-                    className="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#00B0F0]/20 focus:border-[#00B0F0] transition-all text-slate-700"
-                  />
-                </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <SearchableSelect
                   label="Localidad"
                   name="id_localidad"
@@ -1161,61 +1167,7 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
                   required
                   placeholder="Seleccionar localidad..."
                 />
-
-                <SearchableSelect
-                  label="Procedencia"
-                  name="id_fuente"
-                  value={obraForm.id_fuente}
-                  onChange={handleObraChange}
-                  options={incProcedenciaOpts}
-                  placeholder="Seleccionar procedencia..."
-                />
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1">
-                    Entidad de Origen <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="origen"
-                    required
-                    value={obraForm.origen}
-                    onChange={handleObraChange}
-                    placeholder="Ej: Municipalidad de cualquier distrito, tercero..."
-                    className="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#00B0F0]/20 focus:border-[#00B0F0] transition-all text-slate-700 font-semibold"
-                  />
-                </div>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1">N° Nota de Pedido</label>
-                  <input
-                    type="text"
-                    name="nota_pedido"
-                    maxLength={7}
-                    value={obraForm.nota_pedido}
-                    onChange={handleObraChange}
-                    placeholder="Ej: 0012456"
-                    className="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#00B0F0]/20 focus:border-[#00B0F0] transition-all font-mono"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1">N° Certificación Presupuestal</label>
-                  <input
-                    type="text"
-                    name="certificacion_presupuestal"
-                    maxLength={6}
-                    value={obraForm.certificacion_presupuestal}
-                    onChange={handleObraChange}
-                    placeholder="Ej: 1502"
-                    className="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#00B0F0]/20 focus:border-[#00B0F0] transition-all font-mono"
-                  />
-                </div>
-              </div>
-
-
 
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-1">Concepto/Detalle de Obra</label>
@@ -1425,7 +1377,7 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
                               <td className="px-6 py-3 font-mono">{c.nota_pedido || '—'}</td>
                               <td className="px-6 py-3 font-mono">{c.certificacion_presupuestal || '—'}</td>
                               <td className="px-6 py-3 truncate max-w-xs" title={c.concepto}>{c.concepto || '—'}</td>
-                              <td className="px-6 py-3 text-center">
+                              <td className="px-6 py-3 text-center flex items-center justify-center gap-1.5">
                                 <button
                                   onClick={() => handleEditDoc('COMPRA', c)}
                                   title="Editar Documento"
@@ -1433,6 +1385,15 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
                                 >
                                   <Edit3 className="w-3.5 h-3.5" />
                                 </button>
+                                {!c.en_uso && (
+                                  <button
+                                    onClick={() => { setDocToDelete(c); setShowDeleteModal(true); setDeleteError(null); }}
+                                    title="Eliminar Documento"
+                                    className="p-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 hover:text-rose-700 rounded-lg transition-all duration-200 active:scale-95 inline-flex items-center cursor-pointer"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
                               </td>
                             </tr>
                           ))
@@ -1555,7 +1516,7 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
                               <td className="px-6 py-3">{i.origen || '—'}</td>
                               <td className="px-6 py-3">{formatDate(i.fecha_alta)}</td>
                               <td className="px-6 py-3 truncate max-w-xs" title={i.concepto}>{i.concepto || '—'}</td>
-                              <td className="px-6 py-3 text-center">
+                              <td className="px-6 py-3 text-center flex items-center justify-center gap-1.5">
                                 <button
                                   onClick={() => handleEditDoc('INCORPORACION', i)}
                                   title="Editar Documento"
@@ -1563,6 +1524,15 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
                                 >
                                   <Edit3 className="w-3.5 h-3.5" />
                                 </button>
+                                {!i.en_uso && (
+                                  <button
+                                    onClick={() => { setDocToDelete(i); setShowDeleteModal(true); setDeleteError(null); }}
+                                    title="Eliminar Documento"
+                                    className="p-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 hover:text-rose-700 rounded-lg transition-all duration-200 active:scale-95 inline-flex items-center cursor-pointer"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
                               </td>
                             </tr>
                           ))
@@ -1582,7 +1552,7 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
                         <tr>
                           <th className="px-6 py-3.5">
                             <ExcelHeaderFilter
-                              title="N° Expediente de Obra"
+                              title="N° Documento"
                               columnKey="n_doc"
                               data={obras}
                               selectedValues={colFilters.n_doc}
@@ -1594,7 +1564,7 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
                           </th>
                           <th className="px-6 py-3.5">
                             <ExcelHeaderFilter
-                              title="Fecha Pliego/Doc"
+                              title="Fecha O/C"
                               columnKey="fecha_doc"
                               data={obras}
                               selectedValues={colFilters.fecha_doc}
@@ -1618,43 +1588,6 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
                           </th>
                           <th className="px-6 py-3.5">
                             <ExcelHeaderFilter
-                              title="Fuente Origen"
-                              columnKey="fuente_origen"
-                              data={obras}
-                              selectedValues={colFilters.fuente_origen}
-                              onFilterChange={(vals) => handleFilterChange('fuente_origen', vals)}
-                              currentSort={sortConfig}
-                              onSortChange={handleSortChange}
-                              getValue={(item) => getDocColValue(item, 'fuente_origen')}
-                            />
-                          </th>
-                          <th className="px-6 py-3.5">
-                            <ExcelHeaderFilter
-                              title="Origen"
-                              columnKey="origen"
-                              data={obras}
-                              selectedValues={colFilters.origen}
-                              onFilterChange={(vals) => handleFilterChange('origen', vals)}
-                              currentSort={sortConfig}
-                              onSortChange={handleSortChange}
-                              getValue={(item) => getDocColValue(item, 'origen')}
-                            />
-                          </th>
-                          <th className="px-6 py-3.5">
-                            <ExcelHeaderFilter
-                              title="Fecha Alta"
-                              columnKey="fecha_alta"
-                              data={obras}
-                              selectedValues={colFilters.fecha_alta}
-                              onFilterChange={(vals) => handleFilterChange('fecha_alta', vals)}
-                              currentSort={sortConfig}
-                              onSortChange={handleSortChange}
-                              getValue={(item) => formatDate(getDocColValue(item, 'fecha_alta'))}
-                            />
-                          </th>
-
-                          <th className="px-6 py-3.5">
-                            <ExcelHeaderFilter
                               title="Concepto"
                               columnKey="concepto"
                               data={obras}
@@ -1671,7 +1604,7 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
                       <tbody className="divide-y divide-slate-100 text-slate-600">
                         {filteredAndSortedObras.length === 0 ? (
                           <tr>
-                            <td colSpan="8" className="px-6 py-8 text-center text-slate-400">
+                            <td colSpan="5" className="px-6 py-8 text-center text-slate-400">
                               No hay expedientes de obra que coincidan con los filtros.
                             </td>
                           </tr>
@@ -1681,11 +1614,8 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
                               <td className="px-6 py-3 font-bold font-mono text-slate-800">{formatDocNum(o.n_doc, 'OBRA')}</td>
                               <td className="px-6 py-3">{formatDate(o.fecha_doc)}</td>
                               <td className="px-6 py-3 text-xs font-semibold text-slate-700">{getLocalidadLabel(o.id_localidad)}</td>
-                              <td className="px-6 py-3">{o.fuente_origen || '—'}</td>
-                              <td className="px-6 py-3">{o.origen || '—'}</td>
-                              <td className="px-6 py-3">{formatDate(o.fecha_alta)}</td>
                               <td className="px-6 py-3 truncate max-w-xs" title={o.concepto}>{o.concepto || '—'}</td>
-                              <td className="px-6 py-3 text-center">
+                              <td className="px-6 py-3 text-center flex items-center justify-center gap-1.5">
                                 <button
                                   onClick={() => handleEditDoc('OBRA', o)}
                                   title="Editar Documento"
@@ -1693,6 +1623,15 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
                                 >
                                   <Edit3 className="w-3.5 h-3.5" />
                                 </button>
+                                {!o.en_uso && (
+                                  <button
+                                    onClick={() => { setDocToDelete(o); setShowDeleteModal(true); setDeleteError(null); }}
+                                    title="Eliminar Documento"
+                                    className="p-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 hover:text-rose-700 rounded-lg transition-all duration-200 active:scale-95 inline-flex items-center cursor-pointer"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
                               </td>
                             </tr>
                           ))
@@ -1753,6 +1692,45 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
               className="px-4 py-2 bg-gradient-to-r from-brand-600 to-[#00B0F0] hover:from-brand-700 hover:to-[#00A0E0] text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 disabled:opacity-60"
             >
               {renameLoading ? 'Guardando...' : 'Confirmar'}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN */}
+      <Modal open={showDeleteModal} onClose={() => setShowDeleteModal(false)} maxWidth="420px">
+        <form onSubmit={handleDeleteSubmit} className="p-6 space-y-4">
+          <div>
+            <h3 className="text-lg font-bold text-slate-900">Eliminar Documento</h3>
+            <p className="text-xs text-slate-500 mt-1">
+              ¿Estás seguro de que deseas eliminar el documento{' '}
+              <strong className="font-mono text-slate-800">
+                {docToDelete ? formatDocNum(docToDelete.n_doc, docType) : ''}
+              </strong>? Esta acción no se puede deshacer.
+            </p>
+          </div>
+          
+          {deleteError && (
+            <div className="bg-rose-50 border border-rose-200 text-rose-800 text-xs p-3 rounded-xl animate-fadeIn">
+              {deleteError}
+            </div>
+          )}
+
+          <div className="flex justify-end space-x-3 pt-2">
+            <button
+              type="button"
+              disabled={deleteLoading}
+              onClick={() => setShowDeleteModal(false)}
+              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all disabled:opacity-60 cursor-pointer border-none"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={deleteLoading}
+              className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 disabled:opacity-60 cursor-pointer border-none"
+            >
+              {deleteLoading ? 'Eliminando...' : 'Eliminar'}
             </button>
           </div>
         </form>

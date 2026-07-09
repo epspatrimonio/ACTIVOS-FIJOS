@@ -803,7 +803,7 @@ export default function AdminDashboard() {
             <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[0.6875rem] font-extrabold text-slate-400 uppercase tracking-wider">Obras en Curso</span>
-                <span className="p-1 rounded-lg bg-amber-50 text-amber-600 text-xs">WIP</span>
+                <span className="p-1 rounded-lg bg-amber-50 text-amber-600 text-xs">PMO</span>
               </div>
               <p className="text-3xl font-extrabold text-slate-900 tracking-tight">{obrasEnCurso.length}</p>
               <span className="text-[11px] text-slate-400 font-semibold block mt-1">Bienes no depreciables (cód. 339)</span>

@@ -124,7 +124,7 @@ export default function App() {
     return localStorage.getItem('isLoggedIn') === 'true';
   });
   const [activeTab, setActiveTab] = useState('INVENTARIO'); // INVENTARIO | OBRAS | REGISTRO | DOCUMENTOS | CELULARES | VEHICULOS | SOAT | SINCRONIZAR
-  const [filters, setFilters] = useState({ search: '', estado_activo: '', id_sucursal: '', cod_personal: '' });
+  const [filters, setFilters] = useState({ search: '', estado_activo: '', id_sucursal: '', cod_personal: '', n_doc: '' });
   const [activos, setActivos] = useState([]);
   const [filteredActivos, setFilteredActivos] = useState([]);
   const [filteredObras, setFilteredObras] = useState([]);
@@ -178,7 +178,7 @@ export default function App() {
 
     const sheetData = data.map(item => ({
       "Código Patrimonial": item.cod_patrimonial,
-      "Documento": item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OBR-${item.n_doc}` : `INC-${item.n_doc}`) : '—',
+      "Documento": item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OC-${item.n_doc}` : `INC-${item.n_doc}`) : '—',
       "Fuente": item.fuente || '—',
       "Fecha de Alta": dateToExcelSerial(item.fecha_alta_factura || item.fecha_alta),
       "Fecha Reg. Contable": dateToExcelSerial(item.fecha_registro_contable),
@@ -250,7 +250,7 @@ export default function App() {
     const headers = [["Código", "Documento", "Sucursal / Localidad", "Denominación del Activo", "Marca/Modelo/Serie", "Estado", "Valor Libros", "Valor Neto", "Responsable"]];
     const tableRows = data.map(item => [
       item.cod_patrimonial,
-      item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OBR-${item.n_doc}` : `INC-${item.n_doc}`) : '—',
+      item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OC-${item.n_doc}` : `INC-${item.n_doc}`) : '—',
       `${item.sucursal || '—'}\n(${item.localidad || '—'})`,
       item.denominacion,
       `M: ${item.marca || 'S/M'}\nMod: ${item.modelo || 'S/M'}\nSerie: ${item.numero_serie || 'S/S'}`,
@@ -316,8 +316,6 @@ export default function App() {
       const data = await fetchActivos({
         estado_activo: filters.estado_activo,
         id_sucursal: filters.id_sucursal,
-        cuenta_contable: filters.cuenta_contable,
-        centro_costo: filters.centro_costo,
       });
       setActivos(data);
     } catch (err) {
@@ -332,7 +330,7 @@ export default function App() {
     if (isLoggedIn && (activeTab === 'INVENTARIO' || activeTab === 'OBRAS' || activeTab === 'CONTABLE')) {
       loadActivos();
     }
-  }, [filters.estado_activo, filters.id_sucursal, filters.cuenta_contable, filters.centro_costo, activeTab, isLoggedIn]);
+  }, [filters.estado_activo, filters.id_sucursal, activeTab, isLoggedIn]);
 
   // Filtro del buscador y responsable en memoria local (cliente)
   useEffect(() => {
@@ -353,13 +351,17 @@ export default function App() {
       result = result.filter((act) => act.cod_personal === filters.cod_personal);
     }
 
+    if (filters.n_doc) {
+      result = result.filter((act) => act.n_doc === filters.n_doc);
+    }
+
     // Dividir los bienes muebles en Activos Fijos generales y Obras en Curso (inician con 339)
     const assetsOnly = result.filter((act) => !act.cod_patrimonial?.startsWith('339'));
     const obrasOnly = result.filter((act) => act.cod_patrimonial?.startsWith('339'));
 
     setFilteredActivos(assetsOnly);
     setFilteredObras(obrasOnly);
-  }, [filters.search, filters.cod_personal, activos]);
+  }, [filters.search, filters.cod_personal, filters.n_doc, activos]);
 
   if (!isLoggedIn) {
     return <Login onLogin={handleLogin} />;
@@ -369,7 +371,7 @@ export default function App() {
     <div className="app-shell h-screen overflow-hidden flex flex-col">
       {/* Barra de Navegación Superior */}
       <header className="app-topbar">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
           {/* Fila 1: Logo + Título + Logout */}
           <div className="flex items-center justify-between py-2.5">
             <div className="flex items-center space-x-3">
@@ -583,7 +585,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className={`flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-w-0 ${
+      <main className={`flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-w-0 ${
         ['INVENTARIO', 'OBRAS', 'CONTABLE', 'VEHICULOS', 'SOAT', 'CELULARES', 'INVENTARIO_FISICO', 'BIENES_TERCEROS'].includes(activeTab) ? 'overflow-hidden flex flex-col' : 'overflow-y-auto'
       }`}>
         {activeTab === 'INVENTARIO' && (
@@ -616,7 +618,7 @@ export default function App() {
             </div>
             
             <div className="shrink-0">
-              <Filters filters={filters} onChange={setFilters} />
+              <Filters filters={filters} onChange={setFilters} activeTab={activeTab} />
             </div>
 
             <div className="flex-1 min-h-0 overflow-hidden">
@@ -626,6 +628,7 @@ export default function App() {
                 error={error} 
                 onEdit={handleEdit} 
                 onDeleteSuccess={loadActivos} 
+                activeTab={activeTab}
               />
             </div>
           </div>
@@ -637,7 +640,7 @@ export default function App() {
               <div className="module-heading">
                 <p className="module-kicker">Obras en ejecución y proyectos</p>
                 <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">OBRAS EN CURSO</h2>
-                <p className="text-sm text-slate-500">Listado de bienes patrimoniales asociados a proyectos y obras en curso (WIP).</p>
+                <p className="text-sm text-slate-500">Listado de bienes patrimoniales asociados a proyectos y obras en curso (PMO).</p>
               </div>
               <div className="flex flex-wrap items-center gap-2 shrink-0">
                 <div className="metric-pill">
@@ -661,7 +664,7 @@ export default function App() {
             </div>
             
             <div className="shrink-0">
-              <Filters filters={filters} onChange={setFilters} />
+              <Filters filters={filters} onChange={setFilters} activeTab={activeTab} />
             </div>
 
             <div className="flex-1 min-h-0 overflow-hidden">
@@ -671,6 +674,7 @@ export default function App() {
                 error={error} 
                 onEdit={handleEdit} 
                 onDeleteSuccess={loadActivos} 
+                activeTab={activeTab}
               />
             </div>
           </div>
@@ -761,7 +765,7 @@ export default function App() {
 
       {/* Pie de Página */}
       <footer className="bg-white border-t border-slate-200/80 py-4 mt-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-[0.8125rem] text-slate-400">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 text-center text-[0.8125rem] text-slate-400">
           Control Patrimonial v1.0.0 © {new Date().getFullYear()} - Juan Eder Systems
         </div>
       </footer>

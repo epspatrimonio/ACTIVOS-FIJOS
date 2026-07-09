@@ -286,6 +286,39 @@ export async function renameObra(oldNDoc, newNDoc) {
   return response.json();
 }
 
+export async function fetchCodigoPatrimonialObra(idLocalidad) {
+  const response = await fetch(`${API_BASE_URL}/obras/generar-codigo-patrimonial/${idLocalidad}`);
+  if (!response.ok) throw new Error('Error al generar el código patrimonial automático para la obra.');
+  return response.json();
+}
+
+export async function deleteCompra(nDoc) {
+  const response = await fetch(`${API_BASE_URL}/compras/${encodeURIComponent(nDoc)}`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) {
+    await handleResponseError(response, 'Error al eliminar la orden de compra.');
+  }
+}
+
+export async function deleteIncorporacion(nDoc) {
+  const response = await fetch(`${API_BASE_URL}/incorporaciones/${encodeURIComponent(nDoc)}`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) {
+    await handleResponseError(response, 'Error al eliminar la incorporación.');
+  }
+}
+
+export async function deleteObra(nDoc) {
+  const response = await fetch(`${API_BASE_URL}/obras/${encodeURIComponent(nDoc)}`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) {
+    await handleResponseError(response, 'Error al eliminar el expediente de obra.');
+  }
+}
+
 // ── Celulares (activos sujetos a control) ────────────────────────────────────
 
 export async function fetchCelulares(filters = {}) {

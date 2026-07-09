@@ -77,7 +77,7 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
       '336': 'EQUIPOS INFORMÁTICOS Y COMUNICACIONES',
       '337': 'HERRAMIENTAS Y UNIDADES REVALUADAS',
       '338': 'UNIDADES POR RECIBIR / EQUIPOS EN TRÁNSITO',
-      '339': 'OBRAS EN CURSO (WIP)'
+      '339': 'OBRAS EN CURSO (PMO)'
     };
 
     if (digitMode === 3) {

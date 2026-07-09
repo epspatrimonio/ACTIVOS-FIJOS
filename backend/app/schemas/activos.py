@@ -31,7 +31,7 @@ class ActivoBase(BaseModel):
     n_acta: Optional[str] = Field(None, max_length=40)
     estado_activo: Literal["BUENO", "REGULAR", "MALO", "PARA BAJA", "BAJA"] = Field("BUENO")
     cuenta_contable: str = Field(..., max_length=20, description="Cuenta contable del activo")
-    centro_costo: str = Field(..., max_length=20, description="Centro de costo del activo")
+    centro_costo: Optional[str] = Field(None, max_length=20, description="Centro de costo del activo")
 
 class ActivoCreate(ActivoBase):
     # Campos opcionales para la creación/actualización del documento de adquisición inline
@@ -260,6 +260,7 @@ class CompraResponse(BaseModel):
     concepto: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+    en_uso: Optional[bool] = False
     model_config = ConfigDict(from_attributes=True)
 
 class IncorporacionCreate(BaseModel):
@@ -287,6 +288,7 @@ class IncorporacionResponse(BaseModel):
     concepto: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+    en_uso: Optional[bool] = False
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -315,6 +317,7 @@ class ObraResponse(BaseModel):
     concepto: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+    en_uso: Optional[bool] = False
     model_config = ConfigDict(from_attributes=True)
 
 
