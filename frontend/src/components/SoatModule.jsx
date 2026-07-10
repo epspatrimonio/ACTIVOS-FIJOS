@@ -231,7 +231,7 @@ function SoatFormModal({ open, item, vehicles = [], onSave, onClose }) {
           </p>
         </div>
         {isRenew && item.placa && (
-          <div className="shrink-0 bg-slate-900 text-white text-xs font-bold font-mono px-3 py-1.5 rounded-xl shadow-sm">
+          <div className="shrink-0 bg-blue-50 text-blue-700 border border-blue-200 text-sm font-bold font-mono px-4 py-1.5 rounded-xl shadow-sm tracking-wider">
             {item.placa}
           </div>
         )}
@@ -453,8 +453,13 @@ export default function SoatModule() {
           estado_activo: asset.estado_activo || '',
         };
       }).filter(r => r.estado_activo !== 'PARA BAJA' && r.estado_activo !== 'BAJA');
-
-      setRegistros(combined);
+ 
+      const sortedCombined = combined.sort((a, b) => {
+        const dateA = a.fecha_vencimiento || '0000-00-00';
+        const dateB = b.fecha_vencimiento || '0000-00-00';
+        return dateB.localeCompare(dateA);
+      });
+      setRegistros(sortedCombined);
       
       const baseVehicles = activosList.filter(
         a => ((a.categoria && a.categoria.toLowerCase().startsWith('vehiculo')) ||
@@ -850,17 +855,17 @@ export default function SoatModule() {
                   return (
                     <tr key={r.id_soat} className={`transition-colors group hover:brightness-[0.97] ${cfg.row}`}>
                       <td className="px-4 py-3 max-w-[200px]">
-                        <p className="font-mono font-bold text-slate-800 text-xs">{r.cod_patrimonial}</p>
-                        <p className="text-slate-500 text-[10px] mt-0.5 truncate max-w-[180px]" title={r.denominacion}>{r.denominacion}</p>
+                        <p className="font-mono font-bold text-slate-800 text-sm">{r.cod_patrimonial}</p>
+                        <p className="text-slate-500 text-xs mt-0.5 truncate max-w-[180px]" title={r.denominacion}>{r.denominacion}</p>
                         <button onClick={() => setHistorialItem(r)}
-                          className="flex items-center gap-1 text-[10px] font-semibold text-brand-600 hover:underline mt-1 bg-transparent border-none p-0 cursor-pointer">
+                          className="flex items-center gap-1 text-[11px] font-semibold text-brand-600 hover:underline mt-1 bg-transparent border-none p-0 cursor-pointer">
                           <History className="w-2.5 h-2.5" /> Ver Historial
                         </button>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         {r.placa
-                          ? <span className="font-mono font-bold text-slate-700 bg-slate-900 text-white px-2 py-0.5 rounded-lg text-xs whitespace-nowrap">{r.placa}</span>
-                          : <span className="text-slate-400 text-xs italic">Sin placa</span>}
+                          ? <span className="font-mono font-bold text-blue-700 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-lg text-sm whitespace-nowrap tracking-wider shadow-sm">{r.placa}</span>
+                          : <span className="text-slate-400 text-sm italic">Sin placa</span>}
                       </td>
                       <td className="px-4 py-3 text-xs text-slate-650 font-medium">
                         <p className="font-bold text-slate-800">{r.tipo_vehiculo || '—'}</p>

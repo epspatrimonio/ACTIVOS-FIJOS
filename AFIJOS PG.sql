@@ -474,6 +474,7 @@ SELECT
     a.informe_conformidad,
     a.n_acta,
     a.n_acta_entrega,
+    COALESCE((SELECT personal FROM af.dim_personal WHERE cod_personal = cop.requerido_por), cop.requerido_por) AS requerido_por,
     /* Depreciación acumulada – NIC 16 Línea Recta (mensual)
        dep_mensual = valor_en_libros / (vida_util_anios * 12)
        meses = meses transcurridos desde fecha_registro_contable hasta hoy

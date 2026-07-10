@@ -317,7 +317,12 @@ export default function App() {
         estado_activo: filters.estado_activo,
         id_sucursal: filters.id_sucursal,
       });
-      setActivos(data);
+      const sorted = [...data].sort((a, b) => {
+        const dateA = a.fecha_alta_factura || a.fecha_registro_contable || a.fecha_asignacion || '0000-00-00';
+        const dateB = b.fecha_alta_factura || b.fecha_registro_contable || b.fecha_asignacion || '0000-00-00';
+        return dateB.localeCompare(dateA);
+      });
+      setActivos(sorted);
     } catch (err) {
       setError(err.message || 'Error al conectar con el servidor.');
     } finally {

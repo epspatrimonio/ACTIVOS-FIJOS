@@ -5,6 +5,9 @@ from sqlalchemy.ext.asyncio import create_async_engine
 async def main():
     engine = create_async_engine('postgresql+asyncpg://postgres:deutschland@localhost:5432/activos_fijos')
     async with engine.begin() as conn:
+        print("Actualizando nombre de responsable en la base de datos...")
+        await conn.execute(text("UPDATE af.dim_personal SET personal = 'SORIA VALDIVIA E. DAVID' WHERE personal = 'SORIA VALDIVIA EMILIO DAVID';"))
+        
         print("Actualizando la vista af.vw_registro_activos_detalle...")
         await conn.execute(text("DROP VIEW IF EXISTS af.vw_registro_activos_detalle;"))
         await conn.execute(text("""
@@ -123,7 +126,7 @@ async def main():
                 COALESCE(cop.nota_pedido, inc.nota_pedido, lo.nota_pedido) AS nota_pedido,
                 COALESCE(cop.certificacion_presupuestal, inc.certificacion_presupuestal, lo.certificacion_presupuestal) AS certificacion_presupuestal,
                 a.centro_costo AS centro_costo,
-                cop.requerido_por AS requerido_por,
+                COALESCE((SELECT personal FROM af.dim_personal WHERE cod_personal = cop.requerido_por), cop.requerido_por) AS requerido_por,
                 COALESCE(inc.fecha_alta, lo.fecha_alta, a.fecha_alta_factura) AS fecha_alta
 
             FROM af.fct_registro_activos a

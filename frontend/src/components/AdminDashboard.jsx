@@ -43,9 +43,30 @@ export default function AdminDashboard() {
           fetchCelulares(),
           fetchSoat()
         ]);
-        setAssets(assetsData);
-        setCelulares(celularesData);
-        setSoatList(soatData);
+        // Ordenar activos descendente por fecha
+        const sortedAssets = [...assetsData].sort((a, b) => {
+          const dateA = a.fecha_alta_factura || a.fecha_registro_contable || a.fecha_asignacion || '0000-00-00';
+          const dateB = b.fecha_alta_factura || b.fecha_registro_contable || b.fecha_asignacion || '0000-00-00';
+          return dateB.localeCompare(dateA);
+        });
+        
+        // Ordenar celulares descendente por fecha de ingreso
+        const sortedCelulares = [...celularesData].sort((a, b) => {
+          const dateA = a.fecha_ingreso || '0000-00-00';
+          const dateB = b.fecha_ingreso || '0000-00-00';
+          return dateB.localeCompare(dateA);
+        });
+
+        // Ordenar SOAT descendente por fecha de vencimiento
+        const sortedSoat = [...soatData].sort((a, b) => {
+          const dateA = a.fecha_vencimiento || '0000-00-00';
+          const dateB = b.fecha_vencimiento || '0000-00-00';
+          return dateB.localeCompare(dateA);
+        });
+
+        setAssets(sortedAssets);
+        setCelulares(sortedCelulares);
+        setSoatList(sortedSoat);
       } catch (err) {
         console.error(err);
         setError('Error al obtener datos para el dashboard.');

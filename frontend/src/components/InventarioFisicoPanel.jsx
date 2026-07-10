@@ -92,7 +92,8 @@ export default function InventarioFisicoPanel() {
     setError(null);
     try {
       const data = await fetchInventarioFisico();
-      setItems(data);
+      const sorted = data.sort((a, b) => (b.cod_patrimonial || '').localeCompare(a.cod_patrimonial || ''));
+      setItems(sorted);
     } catch (err) {
       setError(err.message || 'Error al cargar los datos del inventario físico.');
     } finally {

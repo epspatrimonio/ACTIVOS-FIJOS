@@ -594,7 +594,7 @@ INSERT INTO af.dim_personal (cod_personal, personal, activo) VALUES
 ('S020', 'SINCHE RODRIGUEZ ISAAC RUBEN', true),
 ('S023', 'SOTOMAYOR OSEDA ELMER', true),
 ('S024', 'SHIRORIMA SABEL RUBEN IGNACIO', true),
-('S025', 'SORIA VALDIVIA EMILIO DAVID', true),
+('S025', 'SORIA VALDIVIA E. DAVID', true),
 ('S026', 'SOTO', true),
 ('S027', 'SIGNORI VEGA ANA MARIA', true),
 ('S028', 'SINCHE JAVIER RONALD JHON', true),

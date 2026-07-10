@@ -515,7 +515,11 @@ export default function CelularesModule() {
 
   const load = useCallback(async () => {
     setLoading(true); setError(null);
-    try { const d = await fetchCelulares({ estado: filtroEstado || undefined }); setCelulares(d); }
+    try {
+      const d = await fetchCelulares({ estado: filtroEstado || undefined });
+      const sorted = [...d].sort((a, b) => (b.fecha_ingreso || '').localeCompare(a.fecha_ingreso || ''));
+      setCelulares(sorted);
+    }
     catch (e) { setError(e.message); }
     finally { setLoading(false); }
   }, [filtroEstado]);

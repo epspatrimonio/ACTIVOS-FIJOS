@@ -90,7 +90,8 @@ export default function BienesTercerosPanel() {
     setError(null);
     try {
       const data = await fetchBienesTerceros();
-      setItems(data);
+      const sorted = data.sort((a, b) => (b.cod_patrimonial || '').localeCompare(a.cod_patrimonial || ''));
+      setItems(sorted);
     } catch (err) {
       setError(err.message || 'Error al cargar los bienes.');
     } finally {

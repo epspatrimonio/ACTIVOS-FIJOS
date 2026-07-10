@@ -150,6 +150,7 @@ class ActivoPublicoDTO(BaseModel):
     estado_activo: str
     cuenta_contable: Optional[str] = None
     centro_costo: Optional[str] = None
+    requerido_por: Optional[str] = None
 
     # Datos adicionales de vehículos
     placa: Optional[str] = None

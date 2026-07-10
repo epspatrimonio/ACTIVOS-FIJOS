@@ -7,7 +7,7 @@ import {
   createActivo, updateActivo, fetchSucursales, fetchSubcategorias, fetchPuestos, fetchPersonal,
   fetchLocalidades, fetchCuentasContables, fetchCentrosCosto, fetchFuentes, fetchCompra, fetchIncorporacion,
   fetchCompras, fetchIncorporaciones, fetchVehiculoDetalle, upsertVehiculoDetalle,
-  fetchObras, fetchObra, fetchCodigoPatrimonialObra
+  fetchObras, fetchObra, fetchCodigoPatrimonialObra, fetchUltimasActas
 } from '../utils/api';
 
 const INITIAL_FORM_STATE = {
@@ -32,7 +32,7 @@ const INITIAL_FORM_STATE = {
   fecha_alta_factura: '',
   fecha_registro_contable: '',
   fecha_asignacion: '',
-  valor_en_libros: 0,
+  valor_en_libros: '0.00',
   igv: '',
   informe_conformidad: '',
   n_acta: '',
@@ -75,6 +75,33 @@ const INITIAL_FORM_STATE = {
 };
 
 
+const formatMonetaryInput = (val) => {
+  if (val === null || val === undefined) return '';
+  let clean = String(val).replace(/[^\d.]/g, '');
+  const parts = clean.split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  if (parts.length > 2) {
+    clean = parts[0] + '.' + parts.slice(1).join('');
+    const newParts = clean.split('.');
+    return newParts[0] + '.' + newParts[1].substring(0, 4);
+  }
+  if (parts.length === 2) {
+    return parts[0] + '.' + parts[1].substring(0, 4);
+  }
+  return parts[0];
+};
+
+const formatMonetaryValue = (val) => {
+  if (val === null || val === undefined || val === '') return '';
+  return formatMonetaryInput(String(val));
+};
+
+const cleanMoney = (val) => {
+  if (!val) return 0;
+  const cleaned = String(val).replace(/,/g, '');
+  return Number(cleaned) || 0;
+};
+
 export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEdit = null, setIsDirty, preSelectedDoc, onClearPreSelectedDoc, onNavigateTab }) {
   const [form, setForm] = useState(INITIAL_FORM_STATE);
   const [submitting, setSubmitting] = useState(false);
@@ -94,6 +121,7 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
   const [compras, setCompras] = useState([]);
   const [incorporaciones, setIncorporaciones] = useState([]);
   const [obras, setObras] = useState([]);
+  const [ultimasActas, setUltimasActas] = useState([]);
   
   const [docSelectionMode, setDocSelectionMode] = useState('EXISTING_COMPRA'); // EXISTING_COMPRA | EXISTING_INCORPORACION | EXISTING_OBRA | NEW_DOCUMENT
   const [selectedCompraDetail, setSelectedCompraDetail] = useState(null);
@@ -179,6 +207,13 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
     } catch (err) {}
   };
 
+  const reloadUltimasActas = async () => {
+    try {
+      const actas = await fetchUltimasActas();
+      setUltimasActas(actas);
+    } catch (err) {}
+  };
+
   useEffect(() => {
     Promise.all([
       fetchSucursales(), 
@@ -190,9 +225,10 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
       fetchFuentes(),
       fetchCompras(),
       fetchIncorporaciones(),
-      fetchObras()
+      fetchObras(),
+      fetchUltimasActas().catch(() => [])
     ])
-      .then(([suc, subcat, pers, loc, cta, cc, fte, cps, incs, obrs]) => {
+      .then(([suc, subcat, pers, loc, cta, cc, fte, cps, incs, obrs, actas]) => {
         setSucursales(suc);
         setSubcategorias(subcat);
         setPersonal(pers);
@@ -203,6 +239,7 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
         setCompras(cps);
         setIncorporaciones(incs);
         setObras(obrs);
+        setUltimasActas(actas);
       })
       .catch(() => {})
       .finally(() => setLoadingListas(false));
@@ -238,8 +275,8 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
         fecha_alta_factura: editingActivo.fecha_alta_factura || '',
         fecha_registro_contable: editingActivo.fecha_registro_contable || '',
         fecha_asignacion: editingActivo.fecha_asignacion || '',
-        valor_en_libros: editingActivo.valor_en_libros || 0,
-        igv: editingActivo.igv || '',
+        valor_en_libros: formatMonetaryValue(editingActivo.valor_en_libros),
+        igv: formatMonetaryValue(editingActivo.igv),
         informe_conformidad: editingActivo.informe_conformidad || '',
         n_acta: editingActivo.n_acta || '',
         estado_activo: editingActivo.estado_activo || 'REGISTRADO',
@@ -520,7 +557,10 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === 'unidad') {
+    if (name === 'valor_en_libros' || name === 'igv') {
+      const formatted = formatMonetaryInput(value);
+      setForm((prev) => ({ ...prev, [name]: formatted }));
+    } else if (name === 'unidad') {
       const selectedSucursal = sucursales.find(s => Number(s.value) === Number(form.id_sucursal));
       const isSedeCentral = selectedSucursal?.tipo_sucursal === 'SEDE_CENTRAL';
       if (isSedeCentral) {
@@ -669,9 +709,9 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
         cod_categoria: Number(form.cod_categoria),
         id_sucursal: Number(form.id_sucursal),
         vida_util_anios: Number(form.vida_util_anios) || 0,
-        valor_en_libros: Number(form.valor_en_libros) || 0,
+        valor_en_libros: cleanMoney(form.valor_en_libros),
         puesto_id: form.puesto_id ? Number(form.puesto_id) : null,
-        igv: form.igv ? Number(form.igv) : null,
+        igv: form.igv ? cleanMoney(form.igv) : null,
         cuenta_contable: ccClean,
         centro_costo: ccCostoClean,
         
@@ -745,6 +785,7 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
           await upsertVehiculoDetalle(form.cod_patrimonial, vehiculoDetalleData);
         }
         setSuccess(true);
+        reloadUltimasActas();
         if (onSuccess) onSuccess();
         if (onCancelEdit) onCancelEdit();
       } else {
@@ -753,6 +794,7 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
           await upsertVehiculoDetalle(form.cod_patrimonial, vehiculoDetalleData);
         }
         setSuccess(true);
+        reloadUltimasActas();
         const confirmAnother = window.confirm("¿Desea registrar otro activo fijo?");
         if (confirmAnother) {
           setForm((prev) => ({
@@ -1853,18 +1895,23 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
             <label className="block text-xs font-semibold text-slate-500 mb-1">
               Valor en Libros <span className="text-rose-500">*</span>
             </label>
-            <input type="number" step="0.0001" name="valor_en_libros" required value={form.valor_en_libros} onChange={handleChange} placeholder="0.00"
+            <input type="text" name="valor_en_libros" required value={form.valor_en_libros} onChange={handleChange} placeholder="0.00"
               className="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all font-semibold" />
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-500 mb-1">IGV</label>
-            <input type="number" step="0.0001" name="igv" value={form.igv} onChange={handleChange} placeholder="Opcional"
+            <input type="text" name="igv" value={form.igv} onChange={handleChange} placeholder="Opcional"
               className="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all" />
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-500 mb-1">N° Acta (Física)</label>
             <input type="text" name="n_acta" value={form.n_acta} onChange={handleChange} placeholder="Ej: 004"
               className="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all" />
+            {ultimasActas && ultimasActas.length > 0 && (
+              <div className="mt-1 text-[10px] text-slate-400 font-medium max-w-[200px] leading-tight">
+                Última registrada: <span className="font-semibold text-slate-500">{`${ultimasActas[0].n_acta} (${ultimasActas[0].anio})`}</span>
+              </div>
+            )}
           </div>
           <SearchableSelect
             label="Estado del Bien"

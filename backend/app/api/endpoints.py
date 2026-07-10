@@ -35,6 +35,32 @@ from app.schemas.activos import (
 
 router = APIRouter()
 
+@router.get("/activos/ultimas-actas")
+async def get_ultimas_actas(db: AsyncSession = Depends(get_db)):
+    """
+    Obtiene la lista de los últimos números de acta registrados con sus años correspondientes.
+    """
+    try:
+        from sqlalchemy import text
+        query = text("""
+            SELECT n_acta, anio
+            FROM (
+                SELECT DISTINCT n_acta, EXTRACT(YEAR FROM fecha_alta_factura)::integer as anio
+                FROM af.fct_registro_activos
+                WHERE n_acta IS NOT NULL AND n_acta <> '' AND fecha_alta_factura IS NOT NULL
+            ) sub
+            ORDER BY anio DESC, CASE WHEN n_acta ~ '^[0-9]+$' THEN n_acta::integer ELSE 0 END DESC
+            LIMIT 15
+        """)
+        result = await db.execute(query)
+        rows = result.fetchall()
+        return [{"n_acta": r[0], "anio": r[1]} for r in rows]
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error al obtener las últimas actas: {str(e)}"
+        )
+
 @router.get("/activos", response_model=List[ActivoResponse])
 async def get_activos(
     estado_activo: Optional[str] = None,

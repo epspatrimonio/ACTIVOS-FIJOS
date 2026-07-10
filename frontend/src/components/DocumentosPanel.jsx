@@ -40,6 +40,7 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
     fecha_desde: '',
     fecha_hasta: '',
     cuenta_contable: '',
+    n_doc: '',
   });
 
   const [colFilters, setColFilters] = useState({});
@@ -144,9 +145,9 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
         fetchFuentes(),
         fetchPersonal()
       ]);
-      setCompras(cps);
-      setIncorporaciones(incs);
-      setObras(obrs);
+      setCompras([...cps].sort((a, b) => (b.fecha_oc || '').localeCompare(a.fecha_oc || '')));
+      setIncorporaciones([...incs].sort((a, b) => (b.fecha_doc || '').localeCompare(a.fecha_doc || '')));
+      setObras([...obrs].sort((a, b) => (b.fecha_doc || '').localeCompare(a.fecha_doc || '')));
       setLocalidades(locs);
       setCuentasContables(ctas);
       setCentrosCosto(ccs);
@@ -631,6 +632,7 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
     if (tableFilters.id_localidad && Number(c.id_localidad) !== Number(tableFilters.id_localidad)) return false;
     if (tableFilters.fecha_desde && c.fecha_oc && c.fecha_oc.split('T')[0] < tableFilters.fecha_desde) return false;
     if (tableFilters.fecha_hasta && c.fecha_oc && c.fecha_oc.split('T')[0] > tableFilters.fecha_hasta) return false;
+    if (tableFilters.n_doc && c.n_doc && !String(c.n_doc).toLowerCase().includes(tableFilters.n_doc.trim().toLowerCase())) return false;
     return true;
   });
 
@@ -638,6 +640,7 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
     if (tableFilters.id_localidad && Number(i.id_localidad) !== Number(tableFilters.id_localidad)) return false;
     if (tableFilters.fecha_desde && i.fecha_doc && i.fecha_doc.split('T')[0] < tableFilters.fecha_desde) return false;
     if (tableFilters.fecha_hasta && i.fecha_doc && i.fecha_doc.split('T')[0] > tableFilters.fecha_hasta) return false;
+    if (tableFilters.n_doc && i.n_doc && !String(i.n_doc).toLowerCase().includes(tableFilters.n_doc.trim().toLowerCase())) return false;
     return true;
   });
 
@@ -645,6 +648,7 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
     if (tableFilters.id_localidad && Number(o.id_localidad) !== Number(tableFilters.id_localidad)) return false;
     if (tableFilters.fecha_desde && o.fecha_doc && o.fecha_doc.split('T')[0] < tableFilters.fecha_desde) return false;
     if (tableFilters.fecha_hasta && o.fecha_doc && o.fecha_doc.split('T')[0] > tableFilters.fecha_hasta) return false;
+    if (tableFilters.n_doc && o.n_doc && !String(o.n_doc).toLowerCase().includes(tableFilters.n_doc.trim().toLowerCase())) return false;
     return true;
   });
 
@@ -1241,7 +1245,7 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
 
           {/* Barra de Filtros */}
           <div className="glass-panel rounded-xl p-5 relative z-30">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <SearchableSelect
                 label="Localidad"
                 name="filter_localidad"
@@ -1250,6 +1254,17 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
                 options={localidadOpts}
                 placeholder="Todas las localidades"
               />
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">N° Documento / Expediente</label>
+                <input
+                  type="text"
+                  placeholder="Buscar por N°..."
+                  value={tableFilters.n_doc}
+                  onChange={(e) => setTableFilters(prev => ({ ...prev, n_doc: e.target.value }))}
+                  className="block w-full px-3 py-2 text-sm bg-white border border-slate-300 hover:border-slate-400 rounded-lg focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-600 transition-all text-slate-700 font-medium placeholder-slate-400"
+                />
+              </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-1">Fecha Desde</label>

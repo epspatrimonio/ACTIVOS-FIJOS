@@ -47,6 +47,12 @@ export async function fetchActivos(filters = {}) {
   return response.json();
 }
 
+export async function fetchUltimasActas() {
+  const response = await fetch(`${API_BASE_URL}/activos/ultimas-actas`);
+  if (!response.ok) throw new Error('Error al cargar las últimas actas.');
+  return response.json();
+}
+
 /**
  * Registra un nuevo activo en la base de datos local.
  */

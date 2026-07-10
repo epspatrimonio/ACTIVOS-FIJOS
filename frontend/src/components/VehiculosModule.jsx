@@ -840,7 +840,12 @@ export default function VehiculosModule() {
         };
       });
 
-      setVehicles(combined);
+      const sortedCombined = combined.sort((a, b) => {
+        const dateA = a.fecha_alta_factura || a.fecha_registro_contable || a.fecha_asignacion || '0000-00-00';
+        const dateB = b.fecha_alta_factura || b.fecha_registro_contable || b.fecha_asignacion || '0000-00-00';
+        return dateB.localeCompare(dateA);
+      });
+      setVehicles(sortedCombined);
     } catch (e) {
       setError(e.message || 'Error al sincronizar datos del módulo vehículos.');
     } finally {
