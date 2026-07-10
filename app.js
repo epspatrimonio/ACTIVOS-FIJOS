@@ -2934,7 +2934,28 @@ document.addEventListener('DOMContentLoaded', () => {
       else if (item.codigo.startsWith('68')) sumDep += item.monto;
 
       row.innerHTML = `
-        <td class="px-5 py-3 whitespace-nowrap text-xs font-mono font-bo    tbody.appendChild(totalRow);
+        <td class="px-5 py-3 whitespace-nowrap text-xs font-mono font-bold text-slate-800">${item.codigo}</td>
+        <td class="px-5 py-3 text-xs font-medium text-slate-700">${item.descripcion}</td>
+        <td class="px-5 py-3 whitespace-nowrap">
+          <span class="px-2 py-0.5 text-[10px] font-bold border rounded-full ${
+            item.codigo.startsWith('33') ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-rose-50 text-rose-700 border-rose-200'
+          }">
+            ${item.tipo}
+          </span>
+        </td>
+        <td class="px-5 py-3 whitespace-nowrap text-xs font-mono font-bold text-slate-900 text-right">${formatMoney(item.monto)}</td>
+      `;
+      tbody.appendChild(row);
+    });
+
+    const totalRow = document.createElement('tr');
+    totalRow.className = 'bg-slate-100/80 font-bold text-slate-900 border-t border-slate-300';
+    totalRow.innerHTML = `
+      <td class="px-5 py-3" colspan="2">TOTAL COSTO (33) vs DEPRECIACIÓN (68)</td>
+      <td class="px-5 py-3 text-xs text-slate-500">Neto: ${formatMoney(sumCost - sumDep)}</td>
+      <td class="px-5 py-3 text-right font-mono">${formatMoney(sumCost)} / <span class="text-rose-600">${formatMoney(sumDep)}</span></td>
+    `;
+    tbody.appendChild(totalRow);
   }
 
   // Helper para codificar el búfer a base64
@@ -2967,10 +2988,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let maxNum = 0;
     const currentYear = 2026;
     Object.keys(actasMap).forEach(acta => {
-      const parts = acta.split('-');
-      if (parts.length === 2) {
-        const num = parseInt(parts[0], 10);
-        const year = parseInt(parts[1], 10);
+      const match = acta.match(/^(\d+)-(\d+)/);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        const year = parseInt(match[2], 10);
         if (year === currentYear && !isNaN(num) && num > maxNum) {
           maxNum = num;
         }
@@ -3020,8 +3041,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. Filtrar actas existentes
     const filtered = list.filter(acta => 
-      acta.toLowerCase().includes(query) || 
-      (actasMap[acta] && actasMap[acta].responsable.toLowerCase().includes(query))
+      acta.toLowerCase().includes(query)
     );
 
     if (filtered.length === 0 && selectedActaKey !== 'NUEVA') {
@@ -3153,6 +3173,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderPreviewBienes(bienes) {
     const tbody = document.getElementById('asignacion-tbody');
+    if (!tbody) return;
     tbody.innerHTML = '';
 
     bienes.forEach(b => {
@@ -3165,17 +3186,20 @@ document.addEventListener('DOMContentLoaded', () => {
       const serieVal = b.numero_serie || 'S/S';
       const vidaUtilVal = b.vida_util_anios ? `${b.vida_util_anios} AÑOS` : '—';
       const ocVal = b.n_doc ? `OC-${b.n_doc}` : '—';
+      const accVal = b.caracteristicas_accesorios || '—';
 
       row.innerHTML = `
         <td class="px-4 py-3 whitespace-nowrap text-xs font-mono font-bold text-slate-800">${b.cod_patrimonial}</td>
         <td class="px-4 py-3 text-xs font-bold text-slate-800">${b.denominacion}</td>
         <td class="px-4 py-3 text-xs text-slate-500">${colorVal}</td>
-        <td class="px-4 py-3 text-xs text-slate-650 font-medium">${b.marca ? b.marca : 'S/M'} / ${b.modelo ? b.modelo : 'S/M'}</td>
+        <td class="px-4 py-3 text-xs text-slate-650 font-medium">${marcaVal}</td>
+        <td class="px-4 py-3 text-xs text-slate-650 font-medium">${modeloVal}</td>
         <td class="px-4 py-3 text-xs font-mono text-slate-500">${serieVal}</td>
         <td class="px-4 py-3 text-xs text-slate-500">${vidaUtilVal}</td>
         <td class="px-4 py-3 whitespace-nowrap">${getEstadoBadgeHTML(b.estado_activo)}</td>
         <td class="px-4 py-3 text-xs font-mono text-slate-500">${ocVal}</td>
         <td class="px-4 py-3 text-xs font-mono text-slate-500">${b.cuenta_contable || '—'}</td>
+        <td class="px-4 py-3 text-xs text-slate-500 max-w-[200px] truncate" title="${accVal}">${accVal}</td>
       `;
       tbody.appendChild(row);
     });
@@ -3305,16 +3329,16 @@ document.addEventListener('DOMContentLoaded', () => {
       doc.autoTable({
         head: headers,
         body: data,
-        startY: 56, 
+        startY: 59, 
         theme: 'grid',
         styles: { fontSize: 7, cellPadding: 2, valign: 'middle' },
         headStyles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold' },
         columnStyles: columnStyles,
-        margin: { top: 56, bottom: 58 } 
+        margin: { top: 59, bottom: 42 } 
       });
 
       const totalPages = doc.internal.getNumberOfPages();
-      const signatureBlockY = 175;
+      const signatureBlockY = 182;
 
       for (let i = 1; i <= totalPages; i++) {
         doc.setPage(i);
@@ -3374,12 +3398,7 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.setFont("helvetica", "normal");
         doc.text(actaFechaFormateada, 235, 28);
 
-        // Línea de separación antes de la tabla
-        doc.setLineWidth(0.2);
-        doc.line(14, 44, 283, 44);
-
-        // --- PIE DE PÁGINA REPETITIVO ---
-        // 5. Nota legal de responsabilidad
+        // 5. Nota legal de responsabilidad (Ubicada arriba, bajo los datos del responsable)
         if (agencyFontBase64) {
           doc.setFont("Agency FB", "normal");
         } else {
@@ -3387,7 +3406,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         doc.setFontSize(7.5);
         doc.setTextColor(0, 0, 0);
-        doc.text("NOTA", 14, 145);
+        doc.text("NOTA", 14, 45);
 
         if (agencyFontBase64) {
           doc.setFont("Agency FB", "normal");
@@ -3398,7 +3417,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const notaText = "EL TRABAJADOR ES RESPONSABLE DIRECTO Y ABSOLUTO DE LA EXISTENCIA, PERMANENCIA, CONSERVACIÓN DEL BIEN EN USO, EVITAR PERDIDA, SUSTRACCIÓN, DETERIODO ETC. EN CASO DE PÉRDIDA, EXTRAVIO O DETERIORO POR EL MAL USO DE LOS BIENES PATRIMONIALES DESCRITOS, ESTOS SERÁN REPUESTOS O REPARADOS POR EL TRABAJADOR RESPONSABLE DE LOS MISMOS. CUALQUIER MOVIMIENTOS DENTRO O FUERA DE LA ENTIDAD DEBERA SER COMUNICADO AL RESPONSABLE DE CONTROL PATRIMONIAL, BAJO RESPONSABILIDAD.";
         
         const splitNota = doc.splitTextToSize(notaText, 269);
-        doc.text(splitNota, 14, 148);
+        doc.text(splitNota, 14, 48);
 
         // Resetear a helvetica para el resto de elementos
         doc.setFont("helvetica", "normal");
