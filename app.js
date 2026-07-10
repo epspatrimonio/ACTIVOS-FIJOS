@@ -3094,9 +3094,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectResp = document.getElementById('nueva-acta-responsable');
     const inputNro = document.getElementById('acta-nro');
     const inputFecha = document.getElementById('acta-fecha');
+    const inputSolicitante = document.getElementById('acta-solicitante');
     const tbody = document.getElementById('asignacion-tbody');
 
     tbody.innerHTML = '';
+    if (inputSolicitante) inputSolicitante.value = '';
 
     if (acta === 'NUEVA') {
       if (wrapperNueva) wrapperNueva.classList.remove('hidden');
@@ -3214,6 +3216,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputNro = document.getElementById('acta-nro');
     const actaNroVal = inputNro ? inputNro.value.trim() : '015-2026';
 
+    const inputSolicitante = document.getElementById('acta-solicitante');
+    const solicitanteVal = (inputSolicitante && inputSolicitante.value.trim()) ? inputSolicitante.value.trim() : '—';
+
     if (selectedActaKey === 'NUEVA') {
       const selectResp = document.getElementById('nueva-acta-responsable');
       const selectedRespName = selectResp ? selectResp.value : '';
@@ -3329,12 +3334,12 @@ document.addEventListener('DOMContentLoaded', () => {
       doc.autoTable({
         head: headers,
         body: data,
-        startY: 59, 
+        startY: 61, 
         theme: 'grid',
         styles: { fontSize: 7, cellPadding: 2, valign: 'middle' },
         headStyles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold' },
         columnStyles: columnStyles,
-        margin: { top: 59, bottom: 42 } 
+        margin: { top: 61, bottom: 42 } 
       });
 
       const totalPages = doc.internal.getNumberOfPages();
@@ -3366,58 +3371,56 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.setTextColor(0, 0, 0);
         doc.text(`ACTA Nº ${actaNroVal} – ASIGNACIÓN DE BIENES PATRIMONIALES`, 158, 13, { align: 'center' });
         
-        // Línea bajo el título
-        doc.setLineWidth(0.4);
-        doc.setDrawColor(0, 0, 0);
-        doc.line(75, 15, 241, 15);
+        // Línea bajo el título (ELIMINADA por requerimiento)
+        // doc.setLineWidth(0.4);
+        // doc.setDrawColor(0, 0, 0);
+        // doc.line(75, 15, 241, 15);
 
         // Subtítulo
         doc.setFont("helvetica", "bold");
         doc.setFontSize(6.5);
         doc.text("AUTORIZADO POR LA GERENCIA DE ADMINISTRACIÓN Y FINANZAS, JEFATURA DE PLANIFICACIÓN Y DESARROLLO EMPRESARIAL, JEFATURA DEL DEPARTAMENTO DE LOGÍSTICA Y CONTROL PATRIMONIAL.", 158, 20, { align: 'center' });
 
-        // Línea bajo el subtítulo
-        doc.setLineWidth(0.2);
-        doc.line(14, 22, 283, 22);
+        // Línea bajo el subtítulo (ELIMINADA por requerimiento)
+        // doc.setLineWidth(0.2);
+        // doc.line(14, 22, 283, 22);
 
-        // 4. Datos del Responsable
+        // 4. Datos del Responsable y Solicitante
         doc.setFont("helvetica", "bold");
         doc.setFontSize(8.5);
-        doc.text("USUARIO:", 14, 28);
-        doc.text("PUESTO:", 14, 34);
-        doc.text("SUCURSAL:", 14, 40);
+        doc.text("SOLICITANTE:", 14, 26);
+        doc.text("USUARIO:", 14, 31);
+        doc.text("PUESTO:", 14, 36);
+        doc.text("SUCURSAL:", 14, 41);
 
         doc.setFont("helvetica", "normal");
-        doc.text(respName, 34, 28);
-        doc.text(puesto, 34, 34);
-        const sucursalPrefix = sucursal.toUpperCase().startsWith("UO ") ? sucursal : `UO ${sucursal}`;
-        doc.text(sucursalPrefix, 34, 40);
+        doc.text(solicitanteVal.toUpperCase(), 38, 26);
+        doc.text(respName.toUpperCase(), 38, 31);
+        doc.text(puesto.toUpperCase(), 38, 36);
+        const sucursalPrefix = sucursal.toUpperCase().startsWith("UO ") ? sucursal.toUpperCase() : `UO ${sucursal.toUpperCase()}`;
+        doc.text(sucursalPrefix, 38, 41);
 
+        // FECHA DE ALTA (Alineada a la derecha)
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8.5);
+        const dateWidth = doc.getTextWidth(actaFechaFormateada);
+        doc.text(actaFechaFormateada, 283, 26, { align: 'right' });
+        
         doc.setFont("helvetica", "bold");
-        doc.text("FECHA DE ALTA:", 205, 28);
-        doc.setFont("helvetica", "normal");
-        doc.text(actaFechaFormateada, 235, 28);
+        doc.text("FECHA DE ALTA:", 283 - dateWidth - 2, 26, { align: 'right' });
 
-        // 5. Nota legal de responsabilidad (Ubicada arriba, bajo los datos del responsable)
-        if (agencyFontBase64) {
-          doc.setFont("Agency FB", "normal");
-        } else {
-          doc.setFont("helvetica", "bold");
-        }
-        doc.setFontSize(7.5);
+        // 5. Nota legal de responsabilidad (Ubicada arriba, bajo los datos del responsable - Usando helvetica por legibilidad)
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8);
         doc.setTextColor(0, 0, 0);
-        doc.text("NOTA", 14, 45);
+        doc.text("NOTA", 14, 46);
 
-        if (agencyFontBase64) {
-          doc.setFont("Agency FB", "normal");
-        } else {
-          doc.setFont("helvetica", "normal");
-        }
+        doc.setFont("helvetica", "normal");
         doc.setFontSize(6.5);
         const notaText = "EL TRABAJADOR ES RESPONSABLE DIRECTO Y ABSOLUTO DE LA EXISTENCIA, PERMANENCIA, CONSERVACIÓN DEL BIEN EN USO, EVITAR PERDIDA, SUSTRACCIÓN, DETERIODO ETC. EN CASO DE PÉRDIDA, EXTRAVIO O DETERIORO POR EL MAL USO DE LOS BIENES PATRIMONIALES DESCRITOS, ESTOS SERÁN REPUESTOS O REPARADOS POR EL TRABAJADOR RESPONSABLE DE LOS MISMOS. CUALQUIER MOVIMIENTOS DENTRO O FUERA DE LA ENTIDAD DEBERA SER COMUNICADO AL RESPONSABLE DE CONTROL PATRIMONIAL, BAJO RESPONSABILIDAD.";
         
         const splitNota = doc.splitTextToSize(notaText, 269);
-        doc.text(splitNota, 14, 48);
+        doc.text(splitNota, 14, 49);
 
         // Resetear a helvetica para el resto de elementos
         doc.setFont("helvetica", "normal");
@@ -3455,9 +3458,9 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.text("Vº Bº", 257.5, yLine + 4, { align: 'center' });
         doc.text("LOGISTICA", 257.5, yLine + 8, { align: 'center' });
 
-        // Sello Post Firma CP1 (Ubicado más abajo)
+        // Sello Post Firma CP1 (Ubicado más arriba de la línea para no tapar los textos)
         if (selloImg) {
-          doc.addImage(selloImg, 'PNG', 108, yLine - 13, 44, 20);
+          doc.addImage(selloImg, 'PNG', 108, yLine - 22, 44, 20);
         }
 
         // 7. Número de Página
