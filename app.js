@@ -3352,12 +3352,12 @@ document.addEventListener('DOMContentLoaded', () => {
       doc.autoTable({
         head: headers,
         body: data,
-        startY: 61, 
+        startY: 64, 
         theme: 'grid',
         styles: { fontSize: 7, cellPadding: 2, valign: 'middle' },
         headStyles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold' },
         columnStyles: columnStyles,
-        margin: { top: 61, bottom: 42 } 
+        margin: { top: 64, bottom: 42 } 
       });
 
       const totalPages = doc.internal.getNumberOfPages();
@@ -3383,21 +3383,21 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.text('Pasaje San Pedro N° 253-257 La Merced Chyo.', 38, 14);
         doc.text('RUC: N° 20121876290 Telefono 064-532363', 38, 16.5);
 
-        // 3. Título Centrado
+        // 3. Título Centrado (bajada a Y=15 por requerimiento)
         doc.setFont("helvetica", "bold");
         doc.setFontSize(13);
         doc.setTextColor(0, 0, 0);
-        doc.text(`ACTA Nº ${actaNroVal} – ASIGNACIÓN DE BIENES PATRIMONIALES`, 158, 13, { align: 'center' });
+        doc.text(`ACTA Nº ${actaNroVal} – ASIGNACIÓN DE BIENES PATRIMONIALES`, 158, 15, { align: 'center' });
         
         // Línea bajo el título (ELIMINADA por requerimiento)
         // doc.setLineWidth(0.4);
         // doc.setDrawColor(0, 0, 0);
         // doc.line(75, 15, 241, 15);
 
-        // Subtítulo
+        // Subtítulo (bajada a Y=21 por requerimiento)
         doc.setFont("helvetica", "bold");
         doc.setFontSize(6.5);
-        doc.text("AUTORIZADO POR LA GERENCIA DE ADMINISTRACIÓN Y FINANZAS, JEFATURA DE PLANIFICACIÓN Y DESARROLLO EMPRESARIAL, JEFATURA DEL DEPARTAMENTO DE LOGÍSTICA Y CONTROL PATRIMONIAL.", 158, 20, { align: 'center' });
+        doc.text("AUTORIZADO POR LA GERENCIA DE ADMINISTRACIÓN Y FINANZAS, JEFATURA DE PLANIFICACIÓN Y DESARROLLO EMPRESARIAL, JEFATURA DEL DEPARTAMENTO DE LOGÍSTICA Y CONTROL PATRIMONIAL.", 158, 21, { align: 'center' });
 
         // Línea bajo el subtítulo (ELIMINADA por requerimiento)
         // doc.setLineWidth(0.2);
@@ -3431,14 +3431,14 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.setFont("helvetica", "bold");
         doc.setFontSize(8);
         doc.setTextColor(0, 0, 0);
-        doc.text("NOTA", 14, 46);
+        doc.text("NOTA", 14, 48);
 
         doc.setFont("helvetica", "normal");
         doc.setFontSize(6.5);
         const notaText = "EL TRABAJADOR ES RESPONSABLE DIRECTO Y ABSOLUTO DE LA EXISTENCIA, PERMANENCIA, CONSERVACIÓN DEL BIEN EN USO, EVITAR PERDIDA, SUSTRACCIÓN, DETERIODO ETC. EN CASO DE PÉRDIDA, EXTRAVIO O DETERIORO POR EL MAL USO DE LOS BIENES PATRIMONIALES DESCRITOS, ESTOS SERÁN REPUESTOS O REPARADOS POR EL TRABAJADOR RESPONSABLE DE LOS MISMOS. CUALQUIER MOVIMIENTOS DENTRO O FUERA DE LA ENTIDAD DEBERA SER COMUNICADO AL RESPONSABLE DE CONTROL PATRIMONIAL, BAJO RESPONSABILIDAD.";
         
         const splitNota = doc.splitTextToSize(notaText, 269);
-        doc.text(splitNota, 14, 49);
+        doc.text(splitNota, 14, 51);
 
         // Resetear a helvetica para el resto de elementos
         doc.setFont("helvetica", "normal");
@@ -3476,9 +3476,9 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.text("Vº Bº", 257.5, yLine + 4, { align: 'center' });
         doc.text("LOGISTICA", 257.5, yLine + 8, { align: 'center' });
 
-        // Sello Post Firma CP1 (Ubicado más arriba de la línea para no tapar los textos)
+        // Sello Post Firma CP1 (Ubicado casi al ras de ENTREGUÉ CONFORME)
         if (selloImg) {
-          doc.addImage(selloImg, 'PNG', 108, yLine - 22, 44, 20);
+          doc.addImage(selloImg, 'PNG', 108, yLine - 17, 44, 20);
         }
 
         // 7. Número de Página
