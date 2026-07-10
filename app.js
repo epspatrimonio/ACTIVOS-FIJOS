@@ -3352,12 +3352,12 @@ document.addEventListener('DOMContentLoaded', () => {
       doc.autoTable({
         head: headers,
         body: data,
-        startY: 64, 
+        startY: 66, 
         theme: 'grid',
         styles: { fontSize: 7, cellPadding: 2, valign: 'middle' },
         headStyles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold' },
         columnStyles: columnStyles,
-        margin: { top: 64, bottom: 42 } 
+        margin: { top: 66, bottom: 42 } 
       });
 
       const totalPages = doc.internal.getNumberOfPages();
@@ -3403,42 +3403,42 @@ document.addEventListener('DOMContentLoaded', () => {
         // doc.setLineWidth(0.2);
         // doc.line(14, 22, 283, 22);
 
-        // 4. Datos del Responsable y Solicitante
+        // 4. Datos del Responsable y Solicitante (Y desplazado para espaciado de 7mm con respecto al subtítulo)
         doc.setFont("helvetica", "bold");
         doc.setFontSize(8.5);
-        doc.text("SOLICITANTE:", 14, 26);
-        doc.text("USUARIO:", 14, 31);
-        doc.text("PUESTO:", 14, 36);
-        doc.text("SUCURSAL:", 14, 41);
+        doc.text("SOLICITANTE:", 14, 28);
+        doc.text("USUARIO:", 14, 33);
+        doc.text("PUESTO:", 14, 38);
+        doc.text("SUCURSAL:", 14, 43);
 
         doc.setFont("helvetica", "normal");
-        doc.text(solicitanteVal.toUpperCase(), 38, 26);
-        doc.text(respName.toUpperCase(), 38, 31);
-        doc.text(puesto.toUpperCase(), 38, 36);
+        doc.text(solicitanteVal.toUpperCase(), 38, 28);
+        doc.text(respName.toUpperCase(), 38, 33);
+        doc.text(puesto.toUpperCase(), 38, 38);
         const sucursalPrefix = sucursal.toUpperCase().startsWith("UO ") ? sucursal.toUpperCase() : `UO ${sucursal.toUpperCase()}`;
-        doc.text(sucursalPrefix, 38, 41);
+        doc.text(sucursalPrefix, 38, 43);
 
         // FECHA DE ALTA (Alineada a la derecha)
         doc.setFont("helvetica", "normal");
         doc.setFontSize(8.5);
         const dateWidth = doc.getTextWidth(actaFechaFormateada);
-        doc.text(actaFechaFormateada, 283, 26, { align: 'right' });
+        doc.text(actaFechaFormateada, 283, 28, { align: 'right' });
         
         doc.setFont("helvetica", "bold");
-        doc.text("FECHA DE ALTA:", 283 - dateWidth - 2, 26, { align: 'right' });
+        doc.text("FECHA DE ALTA:", 283 - dateWidth - 2, 28, { align: 'right' });
 
         // 5. Nota legal de responsabilidad (Ubicada arriba, bajo los datos del responsable - Usando helvetica por legibilidad)
         doc.setFont("helvetica", "bold");
         doc.setFontSize(8);
         doc.setTextColor(0, 0, 0);
-        doc.text("NOTA", 14, 48);
+        doc.text("NOTA", 14, 50);
 
         doc.setFont("helvetica", "normal");
         doc.setFontSize(6.5);
         const notaText = "EL TRABAJADOR ES RESPONSABLE DIRECTO Y ABSOLUTO DE LA EXISTENCIA, PERMANENCIA, CONSERVACIÓN DEL BIEN EN USO, EVITAR PERDIDA, SUSTRACCIÓN, DETERIODO ETC. EN CASO DE PÉRDIDA, EXTRAVIO O DETERIORO POR EL MAL USO DE LOS BIENES PATRIMONIALES DESCRITOS, ESTOS SERÁN REPUESTOS O REPARADOS POR EL TRABAJADOR RESPONSABLE DE LOS MISMOS. CUALQUIER MOVIMIENTOS DENTRO O FUERA DE LA ENTIDAD DEBERA SER COMUNICADO AL RESPONSABLE DE CONTROL PATRIMONIAL, BAJO RESPONSABILIDAD.";
         
         const splitNota = doc.splitTextToSize(notaText, 269);
-        doc.text(splitNota, 14, 51);
+        doc.text(splitNota, 14, 53);
 
         // Resetear a helvetica para el resto de elementos
         doc.setFont("helvetica", "normal");
@@ -3478,7 +3478,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Sello Post Firma CP1 (Ubicado casi al ras de ENTREGUÉ CONFORME)
         if (selloImg) {
-          doc.addImage(selloImg, 'PNG', 108, yLine - 17, 44, 20);
+          doc.addImage(selloImg, 'PNG', 108, yLine - 20, 44, 20);
         }
 
         // 7. Número de Página
