@@ -3389,9 +3389,9 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.setTextColor(0, 0, 0);
         doc.text(`ACTA Nº ${actaNroVal} – ASIGNACIÓN DE BIENES PATRIMONIALES`, 148.5, 25, { align: 'center' });
         
-        // Subtítulo (Centrado, Y=32, tamaño 6)
+        // Subtítulo (Centrado, Y=32, tamaño 7)
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(6);
+        doc.setFontSize(7);
         doc.text("AUTORIZADO POR LA GERENCIA DE ADMINISTRACIÓN Y FINANZAS, JEFATURA DE PLANIFICACIÓN Y DESARROLLO EMPRESARIAL, JEFATURA DEL DEPARTAMENTO DE LOGÍSTICA Y CONTROL PATRIMONIAL.", 148.5, 32, { align: 'center' });
 
         // 4. Datos del Responsable y Solicitante (Y desplazado para espaciado de 7mm con respecto al subtítulo a Y=32)
