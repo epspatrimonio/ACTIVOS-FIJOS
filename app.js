@@ -3,8 +3,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let celulares = [];
   let inventario = [];
   let terceros = [];
-  let currentTab = 'activos'; // activos | vehiculos | celulares | inventario | terceros | soat
+  let currentTab = 'activos'; // activos | vehiculos | celulares | inventario | terceros | soat | asignacion
   let currentFilteredData = [];
+  let responsablesMap = {};
+  let selectedResponsableKey = null;
   
   // Estado de Filtros de Categoría y Subcategoría (Multiselección)
   let selectedCategories = [];
@@ -80,6 +82,34 @@ document.addEventListener('DOMContentLoaded', () => {
         terceros = [];
       }
       
+      // Construir responsablesMap para la pestaña de asignación
+      responsablesMap = {};
+      assets.forEach(item => {
+        const resp = item.responsable ? item.responsable.trim() : '';
+        if (resp) {
+          if (!responsablesMap[resp]) {
+            responsablesMap[resp] = {
+              nombre: resp,
+              puesto: item.puesto || item.unidad || '',
+              sucursal: item.sucursal || '',
+              bienes: []
+            };
+          }
+          responsablesMap[resp].bienes.push(item);
+          if (!responsablesMap[resp].puesto && (item.puesto || item.unidad)) {
+            responsablesMap[resp].puesto = item.puesto || item.unidad;
+          }
+          if (!responsablesMap[resp].sucursal && item.sucursal) {
+            responsablesMap[resp].sucursal = item.sucursal;
+          }
+        }
+      });
+      // Fallbacks
+      Object.keys(responsablesMap).forEach(k => {
+        responsablesMap[k].puesto = responsablesMap[k].puesto || '—';
+        responsablesMap[k].sucursal = responsablesMap[k].sucursal || '—';
+      });
+
       hideStatus();
       
       // Inicializar controladores de pestañas y filtros
@@ -560,9 +590,7 @@ document.addEventListener('DOMContentLoaded', () => {
       estadoSelect.appendChild(option);
     });
 
-
-
-    // Poblar filtros de categorías multiselección
+    // Poblar filtros de categorías
     populateCategoryFilters();
   }
 
@@ -575,6 +603,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabCelulares = document.getElementById('tab-celulares');
     const tabInventario = document.getElementById('tab-inventario');
     const tabTerceros = document.getElementById('tab-terceros');
+    const tabAsignacion = document.getElementById('tab-asignacion');
     const tabContable = document.getElementById('tab-contable');
     const moduleTitle = document.getElementById('module-title');
     
@@ -586,7 +615,7 @@ document.addEventListener('DOMContentLoaded', () => {
       selectedSubcategories = [];
       
       // Resetear clases de pestañas
-      [tabActivos, tabObras, tabVehiculos, tabSoat, tabCelulares, tabInventario, tabTerceros, tabContable].forEach(btn => {
+      [tabActivos, tabObras, tabVehiculos, tabSoat, tabCelulares, tabInventario, tabTerceros, tabAsignacion, tabContable].forEach(btn => {
         if (btn) {
           btn.className = "flex-none sm:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 bg-transparent text-slate-600 hover:bg-white hover:text-slate-900 whitespace-nowrap";
         }
@@ -614,6 +643,9 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (currentTab === 'terceros') {
         activeBtn = tabTerceros;
         moduleTitle.textContent = 'Control de Bienes de Terceros y Control';
+      } else if (currentTab === 'asignacion') {
+        activeBtn = tabAsignacion;
+        moduleTitle.textContent = 'Asignación de Bienes';
       } else if (currentTab === 'contable') {
         activeBtn = tabContable;
         moduleTitle.textContent = 'Reporte Contable Agrupado';
@@ -627,7 +659,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const sucursalWrapper = document.getElementById('sucursal-filter-wrapper');
       const localidadWrapper = document.getElementById('localidad-filter-wrapper');
       
-      if (currentTab === 'contable') {
+      if (currentTab === 'contable' || currentTab === 'asignacion') {
         if (sucursalWrapper) sucursalWrapper.classList.add('hidden');
         if (localidadWrapper) localidadWrapper.classList.add('hidden');
       } else {
@@ -639,15 +671,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const categoriaWrapper = document.getElementById('categoria-filter-wrapper');
       const subcategoriaWrapper = document.getElementById('subcategoria-filter-wrapper');
       const hasCategories = currentTab === 'activos' || currentTab === 'obras' || currentTab === 'vehiculos' || currentTab === 'inventario' || currentTab === 'soat';
-      if (hasCategories && currentTab !== 'contable') {
+      if (hasCategories && currentTab !== 'contable' && currentTab !== 'asignacion') {
         if (categoriaWrapper) categoriaWrapper.classList.remove('hidden');
         if (subcategoriaWrapper) subcategoriaWrapper.classList.remove('hidden');
       } else {
         if (categoriaWrapper) categoriaWrapper.classList.add('hidden');
         if (subcategoriaWrapper) subcategoriaWrapper.classList.add('hidden');
       }
-
-
 
       // Cerrar paneles desplegables de categorías y resetear rotaciones
       if (dropdownCategoria) dropdownCategoria.classList.add('hidden');
@@ -663,7 +693,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const excelBtn = document.getElementById('btn-export-excel');
       const pdfBtn = document.getElementById('btn-export-pdf');
 
-      if (currentTab === 'contable') {
+      if (currentTab === 'contable' || currentTab === 'asignacion') {
         searchWrapper.classList.add('hidden');
         estadoWrapper.classList.add('hidden');
       } else {
@@ -671,9 +701,15 @@ document.addEventListener('DOMContentLoaded', () => {
         estadoWrapper.classList.remove('hidden');
       }
       
-      resultsCount.classList.remove('hidden');
-      if (excelBtn) excelBtn.classList.remove('hidden');
-      if (pdfBtn) pdfBtn.classList.remove('hidden');
+      if (currentTab === 'asignacion') {
+        resultsCount.classList.add('hidden');
+        if (excelBtn) excelBtn.classList.add('hidden');
+        if (pdfBtn) pdfBtn.classList.add('hidden');
+      } else {
+        resultsCount.classList.remove('hidden');
+        if (excelBtn) excelBtn.classList.remove('hidden');
+        if (pdfBtn) pdfBtn.classList.remove('hidden');
+      }
     }
     
     if (tabActivos) tabActivos.addEventListener('click', () => switchTab('activos'));
@@ -683,11 +719,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tabCelulares) tabCelulares.addEventListener('click', () => switchTab('celulares'));
     if (tabInventario) tabInventario.addEventListener('click', () => switchTab('inventario'));
     if (tabTerceros) tabTerceros.addEventListener('click', () => switchTab('terceros'));
+    if (tabAsignacion) tabAsignacion.addEventListener('click', () => switchTab('asignacion'));
     if (tabContable) tabContable.addEventListener('click', () => switchTab('contable'));
   }
 
   // Filtrado del cliente
   function applyFilters() {
+    if (currentTab === 'asignacion') {
+      renderData([]);
+      return;
+    }
     const query = searchInput.value.toLowerCase().trim();
     const selectedSucursal = sucursalSelect.value;
     const selectedLocalidad = localidadSelect ? localidadSelect.value : '';
@@ -859,8 +900,23 @@ document.addEventListener('DOMContentLoaded', () => {
       'celulares-table-container',
       'inventario-table-container',
       'terceros-table-container',
-      'contable-table-container'
+      'contable-table-container',
+      'asignacion-table-container'
     ];
+
+    if (currentTab === 'asignacion') {
+      emptyState.classList.add('hidden');
+      allContainers.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          if (id === 'asignacion-table-container') el.classList.remove('hidden');
+          else el.classList.add('hidden');
+        }
+      });
+      mobileContainer.classList.add('hidden');
+      renderAsignacionTab();
+      return;
+    }
 
     if (data.length === 0) {
       emptyState.classList.remove('hidden');
@@ -2676,6 +2732,17 @@ document.addEventListener('DOMContentLoaded', () => {
   if (excelBtn) excelBtn.addEventListener('click', exportToExcel);
   if (pdfBtn) pdfBtn.addEventListener('click', exportToPDF);
 
+  const btnGenerarActaPdf = document.getElementById('btn-generar-acta-pdf');
+  if (btnGenerarActaPdf) btnGenerarActaPdf.addEventListener('click', exportAsignacionPDF);
+
+  const searchRespInput = document.getElementById('search-responsable');
+  if (searchRespInput) {
+    searchRespInput.addEventListener('input', () => {
+      const listResponsables = Object.values(responsablesMap).sort((a, b) => a.nombre.localeCompare(b.nombre));
+      renderResponsablesList(listResponsables, searchRespInput.value.trim().toLowerCase());
+    });
+  }
+
   function renderContableRows(filteredAssets) {
     const digitSelect = document.getElementById('contable-digit-select');
     const typeSelect = document.getElementById('contable-type-select');
@@ -2840,5 +2907,379 @@ document.addEventListener('DOMContentLoaded', () => {
       <td class="px-5 py-3 text-right font-mono">${formatMoney(sumCost)} / <span class="text-rose-600">${formatMoney(sumDep)}</span></td>
     `;
     tbody.appendChild(totalRow);
+  }
+
+  function renderAsignacionTab() {
+    const listResponsables = Object.values(responsablesMap).sort((a, b) => a.nombre.localeCompare(b.nombre));
+    const searchRespInput = document.getElementById('search-responsable');
+    const query = searchRespInput ? searchRespInput.value.trim().toLowerCase() : '';
+    renderResponsablesList(listResponsables, query);
+  }
+
+  function renderResponsablesList(list, query = '') {
+    const container = document.getElementById('responsables-list');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const filtered = list.filter(r => r.nombre.toLowerCase().includes(query) || r.puesto.toLowerCase().includes(query));
+
+    if (filtered.length === 0) {
+      container.innerHTML = '<div class="text-xs text-slate-400 text-center py-4">No se encontraron responsables</div>';
+      return;
+    }
+
+    filtered.forEach(r => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `w-full text-left p-2.5 rounded-lg text-xs font-semibold flex flex-col gap-1 transition-all border border-solid ${
+        selectedResponsableKey === r.nombre 
+          ? 'bg-brand-50 border-brand-300 text-brand-700 shadow-sm' 
+          : 'bg-white border-slate-100 text-slate-650 hover:bg-slate-50 hover:border-slate-200'
+      } cursor-pointer`;
+      
+      btn.innerHTML = `
+        <div class="font-extrabold text-[0.8125rem] truncate">${r.nombre}</div>
+        <div class="flex items-center justify-between gap-2 mt-0.5 text-slate-400">
+          <span class="truncate font-medium text-[0.6875rem]">${r.puesto}</span>
+          <span class="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0">${r.bienes.length} bienes</span>
+        </div>
+      `;
+
+      btn.addEventListener('click', () => {
+        selectedResponsableKey = r.nombre;
+        renderResponsablesList(list, query); // Re-render to update active styling
+        selectResponsable(r);
+      });
+
+      container.appendChild(btn);
+    });
+
+    // Auto-select first responsible if none is selected yet and we have items
+    if (!selectedResponsableKey && filtered.length > 0) {
+      selectedResponsableKey = filtered[0].nombre;
+      selectResponsable(filtered[0]);
+      // Re-run list render to apply active styling to the first item
+      renderResponsablesList(list, query);
+    }
+  }
+
+  function selectResponsable(r) {
+    if (!r) return;
+    
+    // Rellenar datos del formulario
+    document.getElementById('acta-usuario-nombre').textContent = r.nombre;
+    document.getElementById('acta-usuario-puesto').textContent = r.puesto;
+    document.getElementById('acta-usuario-sucursal').textContent = r.sucursal;
+
+    // Rellenar fecha con la fecha del primer bien asignado, o la fecha de hoy si no se ha elegido antes
+    const actaFechaInput = document.getElementById('acta-fecha');
+    if (actaFechaInput && !actaFechaInput.value) {
+      let firstDate = null;
+      r.bienes.forEach(b => {
+        const d = b.fecha_asignacion || b.fecha_alta_factura || b.fecha_registro_contable;
+        if (d && (!firstDate || d < firstDate)) {
+          firstDate = d;
+        }
+      });
+      actaFechaInput.value = firstDate ? firstDate.split('T')[0] : new Date().toISOString().split('T')[0];
+    }
+
+    // Acta Nro: buscar si alguno de sus bienes tiene acta asignada, o generar por defecto
+    const actaNroInput = document.getElementById('acta-nro');
+    if (actaNroInput) {
+      let existingActa = null;
+      r.bienes.forEach(b => {
+        if (b.n_acta_entrega) {
+          existingActa = b.n_acta_entrega;
+        }
+      });
+      // Limpiar y estandarizar formato
+      if (existingActa) {
+        existingActa = existingActa.trim();
+      }
+      actaNroInput.value = existingActa || "015-2026/RCP";
+    }
+
+    // Renderizar la tabla de bienes asignados
+    const tbody = document.getElementById('asignacion-tbody');
+    tbody.innerHTML = '';
+
+    r.bienes.forEach(b => {
+      const row = document.createElement('tr');
+      row.className = 'hover:bg-slate-50 text-slate-700 transition-colors border-b border-slate-150';
+
+      const colorVal = b.color || '—';
+      const marcaVal = b.marca || 'S/M';
+      const modeloVal = b.modelo || 'S/M';
+      const serieVal = b.numero_serie || 'S/S';
+      const vidaUtilVal = b.vida_util_anios ? `${b.vida_util_anios} AÑOS` : '—';
+      const ocVal = b.n_doc ? `OC-${b.n_doc}` : '—';
+
+      row.innerHTML = `
+        <td class="px-4 py-3 whitespace-nowrap text-xs font-mono font-bold text-slate-800">${b.cod_patrimonial}</td>
+        <td class="px-4 py-3 text-xs font-bold text-slate-800">${b.denominacion}</td>
+        <td class="px-4 py-3 text-xs text-slate-500">${colorVal}</td>
+        <td class="px-4 py-3 text-xs text-slate-650 font-medium">${b.marca ? b.marca : 'S/M'} / ${b.modelo ? b.modelo : 'S/M'}</td>
+        <td class="px-4 py-3 text-xs font-mono text-slate-500">${serieVal}</td>
+        <td class="px-4 py-3 text-xs text-slate-500">${vidaUtilVal}</td>
+        <td class="px-4 py-3 whitespace-nowrap">${getEstadoBadgeHTML(b.estado_activo)}</td>
+        <td class="px-4 py-3 text-xs font-mono text-slate-500">${ocVal}</td>
+        <td class="px-4 py-3 text-xs font-mono text-slate-500">${b.cuenta_contable || '—'}</td>
+      `;
+      tbody.appendChild(row);
+    });
+  }
+
+  async function exportAsignacionPDF() {
+    if (!selectedResponsableKey) {
+      alert("Por favor seleccione un responsable.");
+      return;
+    }
+
+    const respData = responsablesMap[selectedResponsableKey];
+    if (!respData || respData.bienes.length === 0) {
+      alert("El responsable seleccionado no tiene bienes asignados.");
+      return;
+    }
+
+    const pdfBtn = document.getElementById('btn-generar-acta-pdf');
+    let originalText = "";
+    if (pdfBtn) {
+      originalText = pdfBtn.innerHTML;
+      pdfBtn.innerHTML = '⏳ Generando Acta...';
+      pdfBtn.disabled = true;
+    }
+
+    try {
+      // Cargar imágenes en paralelo
+      const [logoImg, selloImg] = await Promise.all([
+        loadImage('logo_eps2.png').catch(() => null),
+        loadImage('Sello Post Firma - CP1.png').catch(() => null)
+      ]);
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+      // Acta metadata from inputs
+      const actaNroVal = document.getElementById('acta-nro').value.trim() || '015-2026/RCP';
+      const actaFechaVal = document.getElementById('acta-fecha').value || new Date().toISOString().split('T')[0];
+
+      // Formatear fecha a DD/MM/AAAA
+      const dateParts = actaFechaVal.split('-');
+      const actaFechaFormateada = dateParts.length === 3 ? `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}` : actaFechaVal;
+
+      doc.setProperties({
+        title: `Acta de Asignación - ${selectedResponsableKey}`,
+        subject: 'Acta de Asignación de Bienes',
+        author: 'EPS Selva Central'
+      });
+
+      // Headers de la Tabla (Nested layout matching template)
+      const headers = [
+        [
+          { content: 'COD.\\nPATRIMONIAL', rowSpan: 2, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold' } },
+          { content: 'DENOMINACIÓN', rowSpan: 2, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold' } },
+          { content: 'CARACTERÍSTICAS DEL BIEN', colSpan: 5, styles: { halign: 'center', fontStyle: 'bold' } },
+          { content: 'ESTADO', rowSpan: 2, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold' } },
+          { content: 'ORDEN\\nCOMPRA', rowSpan: 2, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold' } },
+          { content: 'CUENTA\\nCONTABLE', rowSpan: 2, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold' } },
+          { content: 'ESPECIFICACIONES /\\nACCESORIOS', rowSpan: 2, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold' } }
+        ],
+        [
+          { content: 'COLOR', styles: { halign: 'center', fontStyle: 'bold' } },
+          { content: 'MARCA', styles: { halign: 'center', fontStyle: 'bold' } },
+          { content: 'MODELO', styles: { halign: 'center', fontStyle: 'bold' } },
+          { content: 'NUMERO DE SERIE', styles: { halign: 'center', fontStyle: 'bold' } },
+          { content: 'VIDA UTIL', styles: { halign: 'center', fontStyle: 'bold' } }
+        ]
+      ];
+
+      // Body data
+      const data = respData.bienes.map(b => [
+        b.cod_patrimonial || '—',
+        b.denominacion || '—',
+        b.color || 'NEGRO',
+        b.marca || 'S/M',
+        b.modelo || 'S/M',
+        b.numero_serie || 'S/S',
+        b.vida_util_anios ? `${b.vida_util_anios} AÑOS` : '—',
+        b.estado_activo || '—',
+        b.n_doc ? `OC-${b.n_doc}` : '—',
+        b.cuenta_contable || '—',
+        b.caracteristicas_accesorios || '—'
+      ]);
+
+      const columnStyles = {
+        0: { cellWidth: 24, fontStyle: 'bold' },
+        1: { cellWidth: 32 },
+        2: { cellWidth: 16 },
+        3: { cellWidth: 20 },
+        4: { cellWidth: 22 },
+        5: { cellWidth: 30 },
+        6: { cellWidth: 16 },
+        7: { cellWidth: 18 },
+        8: { cellWidth: 20 },
+        9: { cellWidth: 22 },
+        10: { cellWidth: 49 }
+      };
+
+      // Renderizar tabla principal
+      doc.autoTable({
+        head: headers,
+        body: data,
+        startY: 56, // Iniciar tabla después de los datos del responsable
+        theme: 'grid',
+        styles: { fontSize: 7, cellPadding: 2, valign: 'middle' },
+        headStyles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold' },
+        columnStyles: columnStyles,
+        margin: { top: 56, bottom: 58 } // Espacio para el repeating header y footer
+      });
+
+      const totalPages = doc.internal.getNumberOfPages();
+      const signatureBlockY = 175;
+
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+
+        // --- ENCABEZADO REPETITIVO ---
+        // 1. Logo superior izquierdo
+        if (logoImg) {
+          doc.addImage(logoImg, 'PNG', 14, 6, 22, 11);
+        }
+
+        // 2. Información de Entidad (bajo/junto al logo)
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(6.5);
+        doc.setTextColor(30, 41, 59);
+        doc.text('E.P.S. "SELVA CENTRAL" S.A.', 38, 9);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(5.5);
+        doc.text('CHANCHAMAYO - OXAPAMPA - SATIPO', 38, 11.5);
+        doc.text('Pasaje San Pedro N° 253-257 La Merced Chyo.', 38, 14);
+        doc.text('RUC: N° 20121876290 Telefono 064-532363', 38, 16.5);
+
+        // 3. Título Centrado
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(13);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`ACTA Nº ${actaNroVal} – ASIGNACIÓN DE BIENES PATRIMONIALES`, 158, 13, { align: 'center' });
+        
+        // Línea bajo el título
+        doc.setLineWidth(0.4);
+        doc.setDrawColor(0, 0, 0);
+        doc.line(75, 15, 241, 15);
+
+        // Subtítulo
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(6.5);
+        doc.text("AUTORIZADO POR LA GERENCIA DE ADMINISTRACIÓN Y FINANZAS, JEFATURA DE PLANIFICACIÓN Y DESARROLLO EMPRESARIAL, JEFATURA DEL DEPARTAMENTO DE LOGÍSTICA Y CONTROL PATRIMONIAL.", 158, 20, { align: 'center' });
+
+        // Línea bajo el subtítulo
+        doc.setLineWidth(0.2);
+        doc.line(14, 22, 283, 22);
+
+        // 4. Datos del Responsable
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8.5);
+        doc.text("USUARIO:", 14, 28);
+        doc.text("PUESTO:", 14, 34);
+        doc.text("SUCURSAL:", 14, 40);
+
+        doc.setFont("helvetica", "normal");
+        doc.text(respData.nombre, 34, 28);
+        doc.text(respData.puesto, 34, 34);
+        // Agregar prefijo UO a sucursal si no lo tiene
+        const sucursalPrefix = respData.sucursal.toUpperCase().startsWith("UO ") ? respData.sucursal : `UO ${respData.sucursal}`;
+        doc.text(sucursalPrefix, 34, 40);
+
+        doc.setFont("helvetica", "bold");
+        doc.text("FECHA DE ALTA:", 205, 28);
+        doc.setFont("helvetica", "normal");
+        doc.text(actaFechaFormateada, 235, 28);
+
+        // Línea de separación antes de la tabla
+        doc.setLineWidth(0.2);
+        doc.line(14, 44, 283, 44);
+
+        // --- PIE DE PÁGINA REPETITIVO ---
+        // 5. Nota legal de responsabilidad
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(6.5);
+        doc.setTextColor(0, 0, 0);
+        doc.text("NOTA", 14, 146);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(5.5);
+        const notaText = "EL TRABAJADOR ES RESPONSABLE DIRECTO Y ABSOLUTO DE LA EXISTENCIA, PERMANENCIA, CONSERVACIÓN DEL BIEN EN USO, EVITAR PERDIDA, SUSTRACCIÓN, DETERIODO ETC. EN CASO DE PÉRDIDA, EXTRAVIO O DETERIORO POR EL MAL USO DE LOS BIENES PATRIMONIALES DESCRITOS, ESTOS SERÁN REPUESTOS O REPARADOS POR EL TRABAJADOR RESPONSABLE DE LOS MISMOS. CUALQUIER MOVIMIENTOS DENTRO O FUERA DE LA ENTIDAD DEBERA SER COMUNICADO AL RESPONSABLE DE CONTROL PATRIMONIAL, BAJO RESPONSABILIDAD.";
+        
+        // Dividir texto para acomodarlo a la página
+        const splitNota = doc.splitTextToSize(notaText, 269);
+        doc.text(splitNota, 14, 149);
+
+        // 6. Líneas y bloque de firmas
+        const yLine = signatureBlockY + 11;
+        doc.setDrawColor(150, 150, 150);
+        doc.setLineWidth(0.25);
+        
+        // Dibujar las 4 líneas
+        doc.line(20, yLine, 80, yLine);     // Usuario
+        doc.line(100, yLine, 160, yLine);   // Control Patrimonial
+        doc.line(185, yLine, 220, yLine);   // GAF
+        doc.line(240, yLine, 275, yLine);   // Logística
+
+        // Escribir los textos de firma
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(7.5);
+        
+        // Usuario
+        doc.text("RECIBÍ CONFORME", 50, yLine + 4, { align: 'center' });
+        doc.setFont("helvetica", "bold");
+        doc.text("USUARIO RESPONSABLE", 50, yLine + 8, { align: 'center' });
+
+        // Control Patrimonial
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(7.5);
+        doc.text("ING. JUAN E. BOHORQUEZ AGUILAR", 130, yLine - 8, { align: 'center' });
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(6.5);
+        doc.text("Responsable de Control Patrimonial", 130, yLine - 4, { align: 'center' });
+        doc.setFontSize(7.5);
+        doc.text("ENTREGUÉ CONFORME", 130, yLine + 4, { align: 'center' });
+        doc.setFont("helvetica", "bold");
+        doc.text("CONTROL PATRIMONIAL", 130, yLine + 8, { align: 'center' });
+
+        // GAF
+        doc.text("Vº Bº", 202.5, yLine + 4, { align: 'center' });
+        doc.text("GAF", 202.5, yLine + 8, { align: 'center' });
+
+        // Logística
+        doc.text("Vº Bº", 257.5, yLine + 4, { align: 'center' });
+        doc.text("LOGISTICA", 257.5, yLine + 8, { align: 'center' });
+
+        // Sello Post Firma CP1
+        if (selloImg) {
+          doc.addImage(selloImg, 'PNG', 112, yLine - 25, 36, 17);
+        }
+
+        // 7. Número de Página
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(7);
+        doc.setTextColor(148, 163, 184);
+        doc.text(`Página ${i} de ${totalPages}`, 283, yLine + 8, { align: 'right' });
+      }
+
+      // Guardar PDF
+      const sanitizeName = selectedResponsableKey.replace(/[^a-zA-Z0-9]/g, "_");
+      const filename = `Acta_Asignacion_${sanitizeName}_${actaNroVal.replace(/\//g, "-")}.pdf`;
+      doc.save(filename);
+
+    } catch (err) {
+      console.error(err);
+      alert("Error al generar el PDF de asignación: " + err.message);
+    } finally {
+      if (pdfBtn) {
+        pdfBtn.innerHTML = originalText;
+        pdfBtn.disabled = false;
+      }
+    }
   }
 });
