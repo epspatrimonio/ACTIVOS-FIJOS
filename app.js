@@ -8,6 +8,13 @@ document.addEventListener('DOMContentLoaded', () => {
   let responsablesMap = {};
   let selectedResponsableKey = null;
   
+  // Estructuras de datos para la pestaña de Asignación (Acta-céntrica)
+  let actasMap = {};
+  let selectedActaKey = null;
+  let bienesSinActa = [];
+  let responsablesSinActaMap = {};
+  let agencyFontBase64 = null;
+  
   // Estado de Filtros de Categoría y Subcategoría (Multiselección)
   let selectedCategories = [];
   let selectedSubcategories = [];
@@ -82,6 +89,9 @@ document.addEventListener('DOMContentLoaded', () => {
         terceros = [];
       }
       
+      // Cargar tipografía en paralelo
+      loadAgencyFont();
+
       // Construir responsablesMap para la pestaña de asignación
       responsablesMap = {};
       assets.forEach(item => {
@@ -108,6 +118,47 @@ document.addEventListener('DOMContentLoaded', () => {
       Object.keys(responsablesMap).forEach(k => {
         responsablesMap[k].puesto = responsablesMap[k].puesto || '—';
         responsablesMap[k].sucursal = responsablesMap[k].sucursal || '—';
+      });
+
+      // Agrupar bienes por Acta y recopilar bienes sin Acta
+      actasMap = {};
+      bienesSinActa = [];
+      responsablesSinActaMap = {};
+
+      assets.forEach(item => {
+        let acta = item.n_acta_entrega ? item.n_acta_entrega.trim() : '';
+        if (acta) {
+          // Normalizar formato a XXX-YYYY (sin espacios)
+          acta = acta.replace(/\s*-\s*/g, '-');
+          if (!actasMap[acta]) {
+            actasMap[acta] = {
+              n_acta: acta,
+              responsable: item.responsable || '—',
+              puesto: item.puesto || item.unidad || '—',
+              sucursal: item.sucursal || '—',
+              bienes: []
+            };
+          }
+          actasMap[acta].bienes.push(item);
+          
+          if (item.responsable) actasMap[acta].responsable = item.responsable;
+          if (item.puesto || item.unidad) actasMap[acta].puesto = item.puesto || item.unidad;
+          if (item.sucursal) actasMap[acta].sucursal = item.sucursal;
+        } else {
+          bienesSinActa.push(item);
+          const resp = item.responsable ? item.responsable.trim() : '';
+          if (resp) {
+            if (!responsablesSinActaMap[resp]) {
+              responsablesSinActaMap[resp] = {
+                nombre: resp,
+                puesto: item.puesto || item.unidad || '—',
+                sucursal: item.sucursal || '—',
+                bienes: []
+              };
+            }
+            responsablesSinActaMap[resp].bienes.push(item);
+          }
+        }
       });
 
       hideStatus();
@@ -2735,11 +2786,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnGenerarActaPdf = document.getElementById('btn-generar-acta-pdf');
   if (btnGenerarActaPdf) btnGenerarActaPdf.addEventListener('click', exportAsignacionPDF);
 
-  const searchRespInput = document.getElementById('search-responsable');
-  if (searchRespInput) {
-    searchRespInput.addEventListener('input', () => {
-      const listResponsables = Object.values(responsablesMap).sort((a, b) => a.nombre.localeCompare(b.nombre));
-      renderResponsablesList(listResponsables, searchRespInput.value.trim().toLowerCase());
+  const searchActaInput = document.getElementById('search-acta');
+  if (searchActaInput) {
+    searchActaInput.addEventListener('input', () => {
+      const listActas = Object.keys(actasMap).sort((a, b) => b.localeCompare(a));
+      renderActasList(listActas, searchActaInput.value.trim().toLowerCase());
     });
   }
 
@@ -2883,128 +2934,228 @@ document.addEventListener('DOMContentLoaded', () => {
       else if (item.codigo.startsWith('68')) sumDep += item.monto;
 
       row.innerHTML = `
-        <td class="px-5 py-3 whitespace-nowrap text-xs font-mono font-bold text-slate-800">${item.codigo}</td>
-        <td class="px-5 py-3 text-xs font-medium text-slate-700">${item.descripcion}</td>
-        <td class="px-5 py-3 whitespace-nowrap">
-          <span class="px-2 py-0.5 text-[10px] font-bold border rounded-full ${
-            item.tipo === 'ACTIVO' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-            item.tipo === 'OBRAS EN CURSO' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-            'bg-rose-50 text-rose-700 border-rose-200'
-          }">
-            ${item.tipo}
-          </span>
-        </td>
-        <td class="px-5 py-3 whitespace-nowrap text-xs font-mono font-bold text-slate-900 text-right">${formatMoney(item.monto)}</td>
-      `;
-      tbody.appendChild(row);
-    });
+        <td class="px-5 py-3 whitespace-nowrap text-xs font-mono font-bo    tbody.appendChild(totalRow);
+  }
 
-    const totalRow = document.createElement('tr');
-    totalRow.className = 'bg-slate-100/80 font-bold text-slate-900 border-t border-slate-300';
-    totalRow.innerHTML = `
-      <td class="px-5 py-3" colspan="2">TOTAL COSTO (33) vs DEPRECIACIÓN (68)</td>
-      <td class="px-5 py-3 text-xs text-slate-500">Neto: ${formatMoney(sumCost - sumDep)}</td>
-      <td class="px-5 py-3 text-right font-mono">${formatMoney(sumCost)} / <span class="text-rose-600">${formatMoney(sumDep)}</span></td>
-    `;
-    tbody.appendChild(totalRow);
+  // Helper para codificar el búfer a base64
+  function arrayBufferToBase64(buffer) {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+  }
+
+  async function loadAgencyFont() {
+    try {
+      const res = await fetch('./AGENCYR.TTF');
+      if (res.ok) {
+        const buffer = await res.arrayBuffer();
+        agencyFontBase64 = arrayBufferToBase64(buffer);
+        console.log("Agency FB font loaded successfully!");
+      } else {
+        console.warn("Could not find AGENCYR.TTF on web server");
+      }
+    } catch (e) {
+      console.warn("Error loading Agency FB font:", e);
+    }
+  }
+
+  function getNextActaNumber() {
+    let maxNum = 0;
+    const currentYear = 2026;
+    Object.keys(actasMap).forEach(acta => {
+      const parts = acta.split('-');
+      if (parts.length === 2) {
+        const num = parseInt(parts[0], 10);
+        const year = parseInt(parts[1], 10);
+        if (year === currentYear && !isNaN(num) && num > maxNum) {
+          maxNum = num;
+        }
+      }
+    });
+    const nextNum = maxNum + 1;
+    return `${String(nextNum).padStart(3, '0')}-${currentYear}`;
   }
 
   function renderAsignacionTab() {
-    const listResponsables = Object.values(responsablesMap).sort((a, b) => a.nombre.localeCompare(b.nombre));
-    const searchRespInput = document.getElementById('search-responsable');
-    const query = searchRespInput ? searchRespInput.value.trim().toLowerCase() : '';
-    renderResponsablesList(listResponsables, query);
+    const listActas = Object.keys(actasMap).sort((a, b) => b.localeCompare(a));
+    const searchActaInput = document.getElementById('search-acta');
+    const query = searchActaInput ? searchActaInput.value.trim().toLowerCase() : '';
+    renderActasList(listActas, query);
   }
 
-  function renderResponsablesList(list, query = '') {
-    const container = document.getElementById('responsables-list');
+  function renderActasList(list, query = '') {
+    const container = document.getElementById('actas-list');
     if (!container) return;
     container.innerHTML = '';
 
-    const filtered = list.filter(r => r.nombre.toLowerCase().includes(query) || r.puesto.toLowerCase().includes(query));
+    const nextActaNro = getNextActaNumber();
 
-    if (filtered.length === 0) {
-      container.innerHTML = '<div class="text-xs text-slate-400 text-center py-4">No se encontraron responsables</div>';
+    // 1. Mostrar la opción [NUEVA ACTA]
+    if (!query || '[nueva acta]'.includes(query) || 'nueva'.includes(query) || nextActaNro.includes(query)) {
+      const btnNueva = document.createElement('button');
+      btnNueva.type = 'button';
+      btnNueva.className = `w-full text-left p-2.5 rounded-lg text-xs font-semibold flex flex-col gap-1 transition-all border border-solid ${
+        selectedActaKey === 'NUEVA' 
+          ? 'bg-amber-50 border-amber-300 text-amber-700 shadow-sm' 
+          : 'bg-white border-slate-100 text-slate-650 hover:bg-slate-50 hover:border-slate-200'
+      } cursor-pointer mb-2`;
+      btnNueva.innerHTML = `
+        <div class="font-extrabold text-[0.8125rem] text-amber-600">✨ [NUEVA ACTA]</div>
+        <div class="flex items-center justify-between gap-2 mt-0.5 text-slate-400">
+          <span class="truncate font-medium text-[0.6875rem]">Crear Acta Siguiente</span>
+          <span class="bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0">${nextActaNro}</span>
+        </div>
+      `;
+      btnNueva.addEventListener('click', () => {
+        selectedActaKey = 'NUEVA';
+        renderActasList(list, query);
+        selectActa('NUEVA');
+      });
+      container.appendChild(btnNueva);
+    }
+
+    // 2. Filtrar actas existentes
+    const filtered = list.filter(acta => 
+      acta.toLowerCase().includes(query) || 
+      (actasMap[acta] && actasMap[acta].responsable.toLowerCase().includes(query))
+    );
+
+    if (filtered.length === 0 && selectedActaKey !== 'NUEVA') {
+      container.innerHTML += '<div class="text-xs text-slate-400 text-center py-4">No se encontraron actas</div>';
       return;
     }
 
-    filtered.forEach(r => {
+    filtered.forEach(acta => {
+      const data = actasMap[acta];
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = `w-full text-left p-2.5 rounded-lg text-xs font-semibold flex flex-col gap-1 transition-all border border-solid ${
-        selectedResponsableKey === r.nombre 
+        selectedActaKey === acta 
           ? 'bg-brand-50 border-brand-300 text-brand-700 shadow-sm' 
           : 'bg-white border-slate-100 text-slate-650 hover:bg-slate-50 hover:border-slate-200'
       } cursor-pointer`;
       
       btn.innerHTML = `
-        <div class="font-extrabold text-[0.8125rem] truncate">${r.nombre}</div>
+        <div class="font-extrabold text-[0.8125rem] truncate">Acta N° ${acta}</div>
         <div class="flex items-center justify-between gap-2 mt-0.5 text-slate-400">
-          <span class="truncate font-medium text-[0.6875rem]">${r.puesto}</span>
-          <span class="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0">${r.bienes.length} bienes</span>
+          <span class="truncate font-medium text-[0.6875rem]">${data.responsable}</span>
+          <span class="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0">${data.bienes.length} bienes</span>
         </div>
       `;
 
       btn.addEventListener('click', () => {
-        selectedResponsableKey = r.nombre;
-        renderResponsablesList(list, query); // Re-render to update active styling
-        selectResponsable(r);
+        selectedActaKey = acta;
+        renderActasList(list, query);
+        selectActa(acta);
       });
 
       container.appendChild(btn);
     });
 
-    // Auto-select first responsible if none is selected yet and we have items
-    if (!selectedResponsableKey && filtered.length > 0) {
-      selectedResponsableKey = filtered[0].nombre;
-      selectResponsable(filtered[0]);
-      // Re-run list render to apply active styling to the first item
-      renderResponsablesList(list, query);
+    // Auto-seleccionar primera acta si no hay nada seleccionado
+    if (!selectedActaKey) {
+      if (filtered.length > 0) {
+        selectedActaKey = filtered[0];
+        selectActa(filtered[0]);
+      } else {
+        selectedActaKey = 'NUEVA';
+        selectActa('NUEVA');
+      }
+      renderActasList(list, query);
     }
   }
 
-  function selectResponsable(r) {
-    if (!r) return;
-    
-    // Rellenar datos del formulario
-    document.getElementById('acta-usuario-nombre').textContent = r.nombre;
-    document.getElementById('acta-usuario-puesto').textContent = r.puesto;
-    document.getElementById('acta-usuario-sucursal').textContent = r.sucursal;
+  function selectActa(acta) {
+    const wrapperNueva = document.getElementById('nueva-acta-responsable-wrapper');
+    const selectResp = document.getElementById('nueva-acta-responsable');
+    const inputNro = document.getElementById('acta-nro');
+    const inputFecha = document.getElementById('acta-fecha');
+    const tbody = document.getElementById('asignacion-tbody');
 
-    // Rellenar fecha con la fecha del primer bien asignado, o la fecha de hoy si no se ha elegido antes
-    const actaFechaInput = document.getElementById('acta-fecha');
-    if (actaFechaInput && !actaFechaInput.value) {
-      let firstDate = null;
-      r.bienes.forEach(b => {
-        const d = b.fecha_asignacion || b.fecha_alta_factura || b.fecha_registro_contable;
-        if (d && (!firstDate || d < firstDate)) {
-          firstDate = d;
-        }
-      });
-      actaFechaInput.value = firstDate ? firstDate.split('T')[0] : new Date().toISOString().split('T')[0];
-    }
+    tbody.innerHTML = '';
 
-    // Acta Nro: buscar si alguno de sus bienes tiene acta asignada, o generar por defecto
-    const actaNroInput = document.getElementById('acta-nro');
-    if (actaNroInput) {
-      let existingActa = null;
-      r.bienes.forEach(b => {
-        if (b.n_acta_entrega) {
-          existingActa = b.n_acta_entrega;
-        }
-      });
-      // Limpiar y estandarizar formato
-      if (existingActa) {
-        existingActa = existingActa.trim();
+    if (acta === 'NUEVA') {
+      if (wrapperNueva) wrapperNueva.classList.remove('hidden');
+      
+      document.getElementById('acta-usuario-nombre').textContent = '—';
+      document.getElementById('acta-usuario-puesto').textContent = '—';
+      document.getElementById('acta-usuario-sucursal').textContent = '—';
+
+      const nextNro = getNextActaNumber();
+      if (inputNro) {
+        inputNro.value = nextNro;
+        inputNro.readOnly = false; 
       }
-      actaNroInput.value = existingActa || "015-2026/RCP";
-    }
+      if (inputFecha) {
+        inputFecha.value = new Date().toISOString().split('T')[0];
+      }
 
-    // Renderizar la tabla de bienes asignados
+      if (selectResp) {
+        selectResp.innerHTML = '<option value="">-- Seleccione un trabajador --</option>';
+        const listResps = Object.values(responsablesSinActaMap).sort((a, b) => a.nombre.localeCompare(b.nombre));
+        
+        listResps.forEach(r => {
+          const opt = document.createElement('option');
+          opt.value = r.nombre;
+          opt.textContent = `${r.nombre} (${r.bienes.length} bienes sin acta)`;
+          selectResp.appendChild(opt);
+        });
+
+        selectResp.onchange = () => {
+          const selectedRespName = selectResp.value;
+          if (selectedRespName && responsablesSinActaMap[selectedRespName]) {
+            const r = responsablesSinActaMap[selectedRespName];
+            document.getElementById('acta-usuario-nombre').textContent = r.nombre;
+            document.getElementById('acta-usuario-puesto').textContent = r.puesto;
+            document.getElementById('acta-usuario-sucursal').textContent = r.sucursal;
+            renderPreviewBienes(r.bienes);
+          } else {
+            document.getElementById('acta-usuario-nombre').textContent = '—';
+            document.getElementById('acta-usuario-puesto').textContent = '—';
+            document.getElementById('acta-usuario-sucursal').textContent = '—';
+            tbody.innerHTML = '';
+          }
+        };
+      }
+    } else {
+      if (wrapperNueva) wrapperNueva.classList.add('hidden');
+      
+      const data = actasMap[acta];
+      if (!data) return;
+
+      document.getElementById('acta-usuario-nombre').textContent = data.responsable;
+      document.getElementById('acta-usuario-puesto').textContent = data.puesto;
+      document.getElementById('acta-usuario-sucursal').textContent = data.sucursal;
+
+      if (inputNro) {
+        inputNro.value = data.n_acta;
+        inputNro.readOnly = true; 
+      }
+
+      if (inputFecha) {
+        let firstDate = null;
+        data.bienes.forEach(b => {
+          const d = b.fecha_asignacion || b.fecha_alta_factura || b.fecha_registro_contable;
+          if (d && (!firstDate || d < firstDate)) {
+            firstDate = d;
+          }
+        });
+        inputFecha.value = firstDate ? firstDate.split('T')[0] : new Date().toISOString().split('T')[0];
+      }
+
+      renderPreviewBienes(data.bienes);
+    }
+  }
+
+  function renderPreviewBienes(bienes) {
     const tbody = document.getElementById('asignacion-tbody');
     tbody.innerHTML = '';
 
-    r.bienes.forEach(b => {
+    bienes.forEach(b => {
       const row = document.createElement('tr');
       row.className = 'hover:bg-slate-50 text-slate-700 transition-colors border-b border-slate-150';
 
@@ -3031,15 +3182,40 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function exportAsignacionPDF() {
-    if (!selectedResponsableKey) {
-      alert("Por favor seleccione un responsable.");
-      return;
-    }
+    let respName = '';
+    let bienes = [];
+    let puesto = '—';
+    let sucursal = '—';
 
-    const respData = responsablesMap[selectedResponsableKey];
-    if (!respData || respData.bienes.length === 0) {
-      alert("El responsable seleccionado no tiene bienes asignados.");
-      return;
+    const inputNro = document.getElementById('acta-nro');
+    const actaNroVal = inputNro ? inputNro.value.trim() : '015-2026';
+
+    if (selectedActaKey === 'NUEVA') {
+      const selectResp = document.getElementById('nueva-acta-responsable');
+      const selectedRespName = selectResp ? selectResp.value : '';
+      if (!selectedRespName) {
+        alert("Por favor seleccione un responsable para la nueva acta.");
+        return;
+      }
+      const r = responsablesSinActaMap[selectedRespName];
+      if (!r || r.bienes.length === 0) {
+        alert("El responsable seleccionado no tiene bienes sin acta.");
+        return;
+      }
+      respName = r.nombre;
+      bienes = r.bienes;
+      puesto = r.puesto;
+      sucursal = r.sucursal;
+    } else {
+      const data = actasMap[selectedActaKey];
+      if (!data || data.bienes.length === 0) {
+        alert("El acta seleccionada no tiene bienes.");
+        return;
+      }
+      respName = data.responsable;
+      bienes = data.bienes;
+      puesto = data.puesto;
+      sucursal = data.sucursal;
     }
 
     const pdfBtn = document.getElementById('btn-generar-acta-pdf');
@@ -3060,16 +3236,18 @@ document.addEventListener('DOMContentLoaded', () => {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
-      // Acta metadata from inputs
-      const actaNroVal = document.getElementById('acta-nro').value.trim() || '015-2026/RCP';
-      const actaFechaVal = document.getElementById('acta-fecha').value || new Date().toISOString().split('T')[0];
+      // Cargar tipografía si está disponible
+      if (agencyFontBase64) {
+        doc.addFileToVFS('AgencyFB.ttf', agencyFontBase64);
+        doc.addFont('AgencyFB.ttf', 'Agency FB', 'normal');
+      }
 
-      // Formatear fecha a DD/MM/AAAA
+      const actaFechaVal = document.getElementById('acta-fecha').value || new Date().toISOString().split('T')[0];
       const dateParts = actaFechaVal.split('-');
       const actaFechaFormateada = dateParts.length === 3 ? `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}` : actaFechaVal;
 
       doc.setProperties({
-        title: `Acta de Asignación - ${selectedResponsableKey}`,
+        title: `Acta de Asignación - ${respName}`,
         subject: 'Acta de Asignación de Bienes',
         author: 'EPS Selva Central'
       });
@@ -3077,13 +3255,13 @@ document.addEventListener('DOMContentLoaded', () => {
       // Headers de la Tabla (Nested layout matching template)
       const headers = [
         [
-          { content: 'COD.\\nPATRIMONIAL', rowSpan: 2, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold' } },
+          { content: 'COD.\nPATRIMONIAL', rowSpan: 2, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold' } },
           { content: 'DENOMINACIÓN', rowSpan: 2, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold' } },
           { content: 'CARACTERÍSTICAS DEL BIEN', colSpan: 5, styles: { halign: 'center', fontStyle: 'bold' } },
           { content: 'ESTADO', rowSpan: 2, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold' } },
-          { content: 'ORDEN\\nCOMPRA', rowSpan: 2, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold' } },
-          { content: 'CUENTA\\nCONTABLE', rowSpan: 2, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold' } },
-          { content: 'ESPECIFICACIONES /\\nACCESORIOS', rowSpan: 2, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold' } }
+          { content: 'ORDEN\nCOMPRA', rowSpan: 2, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold' } },
+          { content: 'CUENTA\nCONTABLE', rowSpan: 2, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold' } },
+          { content: 'ESPECIFICACIONES /\nACCESORIOS', rowSpan: 2, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold' } }
         ],
         [
           { content: 'COLOR', styles: { halign: 'center', fontStyle: 'bold' } },
@@ -3095,7 +3273,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ];
 
       // Body data
-      const data = respData.bienes.map(b => [
+      const data = bienes.map(b => [
         b.cod_patrimonial || '—',
         b.denominacion || '—',
         b.color || 'NEGRO',
@@ -3127,12 +3305,12 @@ document.addEventListener('DOMContentLoaded', () => {
       doc.autoTable({
         head: headers,
         body: data,
-        startY: 56, // Iniciar tabla después de los datos del responsable
+        startY: 56, 
         theme: 'grid',
         styles: { fontSize: 7, cellPadding: 2, valign: 'middle' },
         headStyles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold' },
         columnStyles: columnStyles,
-        margin: { top: 56, bottom: 58 } // Espacio para el repeating header y footer
+        margin: { top: 56, bottom: 58 } 
       });
 
       const totalPages = doc.internal.getNumberOfPages();
@@ -3147,7 +3325,7 @@ document.addEventListener('DOMContentLoaded', () => {
           doc.addImage(logoImg, 'PNG', 14, 6, 22, 11);
         }
 
-        // 2. Información de Entidad (bajo/junto al logo)
+        // 2. Información de Entidad
         doc.setFont("helvetica", "bold");
         doc.setFontSize(6.5);
         doc.setTextColor(30, 41, 59);
@@ -3186,10 +3364,9 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.text("SUCURSAL:", 14, 40);
 
         doc.setFont("helvetica", "normal");
-        doc.text(respData.nombre, 34, 28);
-        doc.text(respData.puesto, 34, 34);
-        // Agregar prefijo UO a sucursal si no lo tiene
-        const sucursalPrefix = respData.sucursal.toUpperCase().startsWith("UO ") ? respData.sucursal : `UO ${respData.sucursal}`;
+        doc.text(respName, 34, 28);
+        doc.text(puesto, 34, 34);
+        const sucursalPrefix = sucursal.toUpperCase().startsWith("UO ") ? sucursal : `UO ${sucursal}`;
         doc.text(sucursalPrefix, 34, 40);
 
         doc.setFont("helvetica", "bold");
@@ -3203,30 +3380,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- PIE DE PÁGINA REPETITIVO ---
         // 5. Nota legal de responsabilidad
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(6.5);
+        if (agencyFontBase64) {
+          doc.setFont("Agency FB", "normal");
+        } else {
+          doc.setFont("helvetica", "bold");
+        }
+        doc.setFontSize(7.5);
         doc.setTextColor(0, 0, 0);
-        doc.text("NOTA", 14, 146);
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(5.5);
+        doc.text("NOTA", 14, 145);
+
+        if (agencyFontBase64) {
+          doc.setFont("Agency FB", "normal");
+        } else {
+          doc.setFont("helvetica", "normal");
+        }
+        doc.setFontSize(6.5);
         const notaText = "EL TRABAJADOR ES RESPONSABLE DIRECTO Y ABSOLUTO DE LA EXISTENCIA, PERMANENCIA, CONSERVACIÓN DEL BIEN EN USO, EVITAR PERDIDA, SUSTRACCIÓN, DETERIODO ETC. EN CASO DE PÉRDIDA, EXTRAVIO O DETERIORO POR EL MAL USO DE LOS BIENES PATRIMONIALES DESCRITOS, ESTOS SERÁN REPUESTOS O REPARADOS POR EL TRABAJADOR RESPONSABLE DE LOS MISMOS. CUALQUIER MOVIMIENTOS DENTRO O FUERA DE LA ENTIDAD DEBERA SER COMUNICADO AL RESPONSABLE DE CONTROL PATRIMONIAL, BAJO RESPONSABILIDAD.";
         
-        // Dividir texto para acomodarlo a la página
         const splitNota = doc.splitTextToSize(notaText, 269);
-        doc.text(splitNota, 14, 149);
+        doc.text(splitNota, 14, 148);
+
+        // Resetear a helvetica para el resto de elementos
+        doc.setFont("helvetica", "normal");
 
         // 6. Líneas y bloque de firmas
         const yLine = signatureBlockY + 11;
         doc.setDrawColor(150, 150, 150);
         doc.setLineWidth(0.25);
         
-        // Dibujar las 4 líneas
-        doc.line(20, yLine, 80, yLine);     // Usuario
-        doc.line(100, yLine, 160, yLine);   // Control Patrimonial
-        doc.line(185, yLine, 220, yLine);   // GAF
-        doc.line(240, yLine, 275, yLine);   // Logística
+        doc.line(20, yLine, 80, yLine);     
+        doc.line(100, yLine, 160, yLine);   
+        doc.line(185, yLine, 220, yLine);   
+        doc.line(240, yLine, 275, yLine);   
 
-        // Escribir los textos de firma
         doc.setFont("helvetica", "normal");
         doc.setFontSize(7.5);
         
@@ -3235,13 +3421,8 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.setFont("helvetica", "bold");
         doc.text("USUARIO RESPONSABLE", 50, yLine + 8, { align: 'center' });
 
-        // Control Patrimonial
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(7.5);
-        doc.text("ING. JUAN E. BOHORQUEZ AGUILAR", 130, yLine - 8, { align: 'center' });
+        // Control Patrimonial (Texto "ING. JUAN EDER... RESPONSABLE..." eliminado porque ya viene en el sello)
         doc.setFont("helvetica", "normal");
-        doc.setFontSize(6.5);
-        doc.text("Responsable de Control Patrimonial", 130, yLine - 4, { align: 'center' });
         doc.setFontSize(7.5);
         doc.text("ENTREGUÉ CONFORME", 130, yLine + 4, { align: 'center' });
         doc.setFont("helvetica", "bold");
@@ -3255,9 +3436,9 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.text("Vº Bº", 257.5, yLine + 4, { align: 'center' });
         doc.text("LOGISTICA", 257.5, yLine + 8, { align: 'center' });
 
-        // Sello Post Firma CP1
+        // Sello Post Firma CP1 (Ubicado más abajo)
         if (selloImg) {
-          doc.addImage(selloImg, 'PNG', 112, yLine - 25, 36, 17);
+          doc.addImage(selloImg, 'PNG', 108, yLine - 13, 44, 20);
         }
 
         // 7. Número de Página
@@ -3268,7 +3449,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // Guardar PDF
-      const sanitizeName = selectedResponsableKey.replace(/[^a-zA-Z0-9]/g, "_");
+      const sanitizeName = respName.replace(/[^a-zA-Z0-9]/g, "_");
       const filename = `Acta_Asignacion_${sanitizeName}_${actaNroVal.replace(/\//g, "-")}.pdf`;
       doc.save(filename);
 

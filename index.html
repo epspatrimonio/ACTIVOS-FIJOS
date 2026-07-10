@@ -549,16 +549,16 @@
 
     <!-- Tabla / Panel: Asignación de Bienes -->
     <div id="asignacion-table-container" class="hidden flex flex-col md:flex-row flex-1 min-h-0 gap-5 overflow-hidden w-full">
-      <!-- Panel Izquierdo: Lista de Usuarios con Activos -->
+      <!-- Panel Izquierdo: Lista de Actas -->
       <div class="w-full md:w-80 bg-white border border-slate-200 rounded-xl p-4 flex flex-col shrink-0 shadow-sm min-h-0">
-        <label for="search-responsable" class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Buscar Responsable</label>
+        <label for="search-acta" class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Filtrar por N° de Acta</label>
         <input 
           type="text" 
-          id="search-responsable" 
-          placeholder="Escriba nombre..." 
+          id="search-acta" 
+          placeholder="Ej: 016-2026..." 
           class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all placeholder:text-slate-400 mb-3"
         >
-        <div id="responsables-list" class="flex-1 overflow-y-auto space-y-1 pr-1">
+        <div id="actas-list" class="flex-1 overflow-y-auto space-y-1 pr-1">
           <!-- Se poblará vía JS -->
         </div>
       </div>
@@ -572,13 +572,24 @@
           </div>
         </div>
 
+        <!-- Selección de Responsable para Nueva Acta (Sólo visible si es Nueva Acta) -->
+        <div id="nueva-acta-responsable-wrapper" class="hidden bg-amber-50/50 border border-amber-200 rounded-xl p-3.5 mb-4">
+          <label for="nueva-acta-responsable" class="block text-xs font-bold text-amber-800 mb-1.5 uppercase tracking-wide">Seleccionar Responsable (con bienes sin acta)</label>
+          <select 
+            id="nueva-acta-responsable" 
+            class="w-full px-3 py-2 text-sm bg-white border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-slate-700 font-semibold cursor-pointer"
+          >
+            <option value="">-- Seleccione un trabajador --</option>
+          </select>
+        </div>
+
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-5">
           <div>
             <label class="block text-[0.75rem] font-bold text-slate-500 mb-1 uppercase tracking-wide">Nro de Acta</label>
             <input 
               type="text" 
               id="acta-nro" 
-              value="015-2026/RCP" 
+              value="017-2026" 
               class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all font-mono font-bold text-slate-700"
             >
           </div>
@@ -593,7 +604,7 @@
           <div class="sm:col-span-2 md:col-span-1 flex items-end">
             <button 
               id="btn-generar-acta-pdf" 
-              class="w-full py-2.5 px-4 bg-[#00B0F0] hover:bg-brand-600 active:scale-[0.98] text-white font-extrabold text-sm rounded-lg transition-all shadow-md shadow-brand-500/10 flex items-center justify-center gap-2 cursor-pointer border-none"
+              class="w-full py-2.5 px-4 bg-[#00B0F0] hover:bg-[#009ad4] active:scale-[0.98] text-white font-extrabold text-sm rounded-lg transition-all shadow-md shadow-brand-500/10 flex items-center justify-center gap-2 cursor-pointer border-none"
             >
               📕 Generar Acta PDF
             </button>
