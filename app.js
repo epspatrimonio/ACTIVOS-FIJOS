@@ -3013,38 +3013,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!container) return;
     container.innerHTML = '';
 
-    const nextActaNro = getNextActaNumber();
-
-    // 1. Mostrar la opción [NUEVA ACTA]
-    if (!query || '[nueva acta]'.includes(query) || 'nueva'.includes(query) || nextActaNro.includes(query)) {
-      const btnNueva = document.createElement('button');
-      btnNueva.type = 'button';
-      btnNueva.className = `w-full text-left p-2.5 rounded-lg text-xs font-semibold flex flex-col gap-1 transition-all border border-solid ${
-        selectedActaKey === 'NUEVA' 
-          ? 'bg-amber-50 border-amber-300 text-amber-700 shadow-sm' 
-          : 'bg-white border-slate-100 text-slate-650 hover:bg-slate-50 hover:border-slate-200'
-      } cursor-pointer mb-2`;
-      btnNueva.innerHTML = `
-        <div class="font-extrabold text-[0.8125rem] text-amber-600">✨ [NUEVA ACTA]</div>
-        <div class="flex items-center justify-between gap-2 mt-0.5 text-slate-400">
-          <span class="truncate font-medium text-[0.6875rem]">Crear Acta Siguiente</span>
-          <span class="bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0">${nextActaNro}</span>
-        </div>
-      `;
-      btnNueva.addEventListener('click', () => {
-        selectedActaKey = 'NUEVA';
-        renderActasList(list, query);
-        selectActa('NUEVA');
-      });
-      container.appendChild(btnNueva);
-    }
-
-    // 2. Filtrar actas existentes
+    // 1. Filtrar actas existentes
     const filtered = list.filter(acta => 
       acta.toLowerCase().includes(query)
     );
 
-    if (filtered.length === 0 && selectedActaKey !== 'NUEVA') {
+    if (filtered.length === 0) {
       container.innerHTML += '<div class="text-xs text-slate-400 text-center py-4">No se encontraron actas</div>';
       return;
     }
@@ -3057,7 +3031,7 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedActaKey === acta 
           ? 'bg-brand-50 border-brand-300 text-brand-700 shadow-sm' 
           : 'bg-white border-slate-100 text-slate-650 hover:bg-slate-50 hover:border-slate-200'
-      } cursor-pointer`;
+      } cursor-pointer mb-2`;
       
       btn.innerHTML = `
         <div class="font-extrabold text-[0.8125rem] truncate">Acta N° ${acta}</div>
@@ -3082,13 +3056,12 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedActaKey = filtered[0];
         selectActa(filtered[0]);
       } else {
-        selectedActaKey = 'NUEVA';
-        selectActa('NUEVA');
+        selectedActaKey = null;
+        selectActa(null);
       }
       renderActasList(list, query);
     }
   }
-
   function selectActa(acta) {
     const wrapperNueva = document.getElementById('nueva-acta-responsable-wrapper');
     const selectResp = document.getElementById('nueva-acta-responsable');
@@ -3099,96 +3072,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
     tbody.innerHTML = '';
     if (inputSolicitante) inputSolicitante.value = '';
+    if (wrapperNueva) wrapperNueva.classList.add('hidden');
 
-    if (acta === 'NUEVA') {
-      if (wrapperNueva) wrapperNueva.classList.remove('hidden');
-      
+    const data = actasMap[acta];
+    if (!data) {
       document.getElementById('acta-usuario-nombre').textContent = '—';
       document.getElementById('acta-usuario-puesto').textContent = '—';
       document.getElementById('acta-usuario-sucursal').textContent = '—';
-
-      const nextNro = getNextActaNumber();
-      if (inputNro) {
-        inputNro.value = nextNro;
-        inputNro.readOnly = false; 
-      }
-      if (inputFecha) {
-        inputFecha.value = new Date().toISOString().split('T')[0];
-      }
-
-      if (selectResp) {
-        selectResp.innerHTML = '<option value="">-- Seleccione un trabajador --</option>';
-        const listResps = Object.values(responsablesSinActaMap).sort((a, b) => a.nombre.localeCompare(b.nombre));
-        
-        listResps.forEach(r => {
-          const opt = document.createElement('option');
-          opt.value = r.nombre;
-          opt.textContent = `${r.nombre} (${r.bienes.length} bienes sin acta)`;
-          selectResp.appendChild(opt);
-        });
-
-        selectResp.onchange = () => {
-          const selectedRespName = selectResp.value;
-          if (selectedRespName && responsablesSinActaMap[selectedRespName]) {
-            const r = responsablesSinActaMap[selectedRespName];
-            document.getElementById('acta-usuario-nombre').textContent = r.nombre;
-            document.getElementById('acta-usuario-puesto').textContent = r.puesto;
-            document.getElementById('acta-usuario-sucursal').textContent = r.sucursal;
-            
-            // Auto-populate Solicitante from first asset having requerido_por
-            let defaultSolicitante = '';
-            const foundReq = r.bienes.find(b => b.requerido_por && b.requerido_por.trim() && b.requerido_por !== '—');
-            if (foundReq) {
-              defaultSolicitante = foundReq.requerido_por;
-            }
-            if (inputSolicitante) inputSolicitante.value = defaultSolicitante;
-
-            renderPreviewBienes(r.bienes);
-          } else {
-            document.getElementById('acta-usuario-nombre').textContent = '—';
-            document.getElementById('acta-usuario-puesto').textContent = '—';
-            document.getElementById('acta-usuario-sucursal').textContent = '—';
-            if (inputSolicitante) inputSolicitante.value = '';
-            tbody.innerHTML = '';
-          }
-        };
-      }
-    } else {
-      if (wrapperNueva) wrapperNueva.classList.add('hidden');
-      
-      const data = actasMap[acta];
-      if (!data) return;
-
-      document.getElementById('acta-usuario-nombre').textContent = data.responsable;
-      document.getElementById('acta-usuario-puesto').textContent = data.puesto;
-      document.getElementById('acta-usuario-sucursal').textContent = data.sucursal;
-
-      if (inputNro) {
-        inputNro.value = data.n_acta;
-        inputNro.readOnly = true; 
-      }
-
-      if (inputFecha) {
-        let firstDate = null;
-        data.bienes.forEach(b => {
-          const d = b.fecha_asignacion || b.fecha_alta_factura || b.fecha_registro_contable;
-          if (d && (!firstDate || d < firstDate)) {
-            firstDate = d;
-          }
-        });
-        inputFecha.value = firstDate ? firstDate.split('T')[0] : new Date().toISOString().split('T')[0];
-      }
-
-      // Auto-populate Solicitante from first asset having requerido_por
-      let defaultSolicitante = '';
-      const foundReq = data.bienes.find(b => b.requerido_por && b.requerido_por.trim() && b.requerido_por !== '—');
-      if (foundReq) {
-        defaultSolicitante = foundReq.requerido_por;
-      }
-      if (inputSolicitante) inputSolicitante.value = defaultSolicitante;
-
-      renderPreviewBienes(data.bienes);
+      if (inputNro) inputNro.value = '';
+      if (inputFecha) inputFecha.value = '';
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-slate-400">Seleccione un acta para visualizar</td></tr>';
+      return;
     }
+
+    document.getElementById('acta-usuario-nombre').textContent = data.responsable;
+    document.getElementById('acta-usuario-puesto').textContent = data.puesto;
+    document.getElementById('acta-usuario-sucursal').textContent = data.sucursal;
+
+    if (inputNro) {
+      inputNro.value = data.n_acta;
+      inputNro.readOnly = true; 
+    }
+
+    if (inputFecha) {
+      let firstDate = null;
+      data.bienes.forEach(b => {
+        const d = b.fecha_asignacion || b.fecha_alta_factura || b.fecha_registro_contable;
+        if (d && (!firstDate || d < firstDate)) {
+          firstDate = d;
+        }
+      });
+      inputFecha.value = firstDate ? firstDate.split('T')[0] : new Date().toISOString().split('T')[0];
+    }
+
+    // Auto-populate Solicitante from first asset having requerido_por
+    let defaultSolicitante = '';
+    const foundReq = data.bienes.find(b => b.requerido_por && b.requerido_por.trim() && b.requerido_por !== '—');
+    if (foundReq) {
+      defaultSolicitante = foundReq.requerido_por;
+    }
+    if (inputSolicitante) inputSolicitante.value = defaultSolicitante;
+
+    renderPreviewBienes(data.bienes);
   }
 
   function renderPreviewBienes(bienes) {
@@ -3237,33 +3162,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputSolicitante = document.getElementById('acta-solicitante');
     const solicitanteVal = (inputSolicitante && inputSolicitante.value.trim()) ? inputSolicitante.value.trim() : '—';
 
-    if (selectedActaKey === 'NUEVA') {
-      const selectResp = document.getElementById('nueva-acta-responsable');
-      const selectedRespName = selectResp ? selectResp.value : '';
-      if (!selectedRespName) {
-        alert("Por favor seleccione un responsable para la nueva acta.");
-        return;
-      }
-      const r = responsablesSinActaMap[selectedRespName];
-      if (!r || r.bienes.length === 0) {
-        alert("El responsable seleccionado no tiene bienes sin acta.");
-        return;
-      }
-      respName = r.nombre;
-      bienes = r.bienes;
-      puesto = r.puesto;
-      sucursal = r.sucursal;
-    } else {
-      const data = actasMap[selectedActaKey];
-      if (!data || data.bienes.length === 0) {
-        alert("El acta seleccionada no tiene bienes.");
-        return;
-      }
-      respName = data.responsable;
-      bienes = data.bienes;
-      puesto = data.puesto;
-      sucursal = data.sucursal;
+    const data = actasMap[selectedActaKey];
+    if (!data || data.bienes.length === 0) {
+      alert("Por favor seleccione un acta válida para exportar.");
+      return;
     }
+    respName = data.responsable;
+    bienes = data.bienes;
+    puesto = data.puesto;
+    sucursal = data.sucursal;
 
     const pdfBtn = document.getElementById('btn-generar-acta-pdf');
     let originalText = "";
