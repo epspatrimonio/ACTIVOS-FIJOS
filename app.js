@@ -3002,7 +3002,22 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderAsignacionTab() {
-    const listActas = Object.keys(actasMap).sort((a, b) => b.localeCompare(a));
+    const listActas = Object.keys(actasMap).sort((a, b) => {
+      const matchA = a.match(/^(\d+)-(\d+)/);
+      const matchB = b.match(/^(\d+)-(\d+)/);
+      if (matchA && matchB) {
+        const numA = parseInt(matchA[1], 10);
+        const yearA = parseInt(matchA[2], 10);
+        const numB = parseInt(matchB[1], 10);
+        const yearB = parseInt(matchB[2], 10);
+        
+        if (yearA !== yearB) {
+          return yearB - yearA; // Año descendente
+        }
+        return numB - numA; // Número descendente dentro del mismo año
+      }
+      return b.localeCompare(a); // Fallback
+    });
     const searchActaInput = document.getElementById('search-acta');
     const query = searchActaInput ? searchActaInput.value.trim().toLowerCase() : '';
     renderActasList(listActas, query);
