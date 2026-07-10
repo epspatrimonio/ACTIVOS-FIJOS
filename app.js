@@ -3472,11 +3472,11 @@ document.addEventListener('DOMContentLoaded', () => {
           doc.addImage(selloImg, 'PNG', 108, yLine - 20, 44, 20);
         }
 
-        // 7. Número de Página
+        // 7. Número de Página (Ubicado en la parte superior derecha en gris oscuro)
         doc.setFont("helvetica", "normal");
         doc.setFontSize(7);
-        doc.setTextColor(148, 163, 184);
-        doc.text(`Página ${i} de ${totalPages}`, 283, yLine + 8, { align: 'right' });
+        doc.setTextColor(100, 116, 139);
+        doc.text(`Página ${i} de ${totalPages}`, 283, 9, { align: 'right' });
       }
 
       // Guardar PDF
