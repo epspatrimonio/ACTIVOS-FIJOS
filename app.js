@@ -3352,12 +3352,12 @@ document.addEventListener('DOMContentLoaded', () => {
       doc.autoTable({
         head: headers,
         body: data,
-        startY: 66, 
+        startY: 77, 
         theme: 'grid',
         styles: { fontSize: 7, cellPadding: 2, valign: 'middle' },
         headStyles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold' },
         columnStyles: columnStyles,
-        margin: { top: 66, bottom: 42 } 
+        margin: { top: 77, bottom: 42 } 
       });
 
       const totalPages = doc.internal.getNumberOfPages();
@@ -3383,62 +3383,53 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.text('Pasaje San Pedro N° 253-257 La Merced Chyo.', 38, 14);
         doc.text('RUC: N° 20121876290 Telefono 064-532363', 38, 16.5);
 
-        // 3. Título Centrado (bajada a Y=15 por requerimiento)
+        // 3. Título Centrado (Ubicado en el centro, debajo del logo/datos de la izquierda - Y=25, tamaño 16)
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(13);
+        doc.setFontSize(16);
         doc.setTextColor(0, 0, 0);
-        doc.text(`ACTA Nº ${actaNroVal} – ASIGNACIÓN DE BIENES PATRIMONIALES`, 158, 15, { align: 'center' });
+        doc.text(`ACTA Nº ${actaNroVal} – ASIGNACIÓN DE BIENES PATRIMONIALES`, 148.5, 25, { align: 'center' });
         
-        // Línea bajo el título (ELIMINADA por requerimiento)
-        // doc.setLineWidth(0.4);
-        // doc.setDrawColor(0, 0, 0);
-        // doc.line(75, 15, 241, 15);
-
-        // Subtítulo (bajada a Y=21 por requerimiento)
+        // Subtítulo (Centrado, Y=32, tamaño 10)
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(6.5);
-        doc.text("AUTORIZADO POR LA GERENCIA DE ADMINISTRACIÓN Y FINANZAS, JEFATURA DE PLANIFICACIÓN Y DESARROLLO EMPRESARIAL, JEFATURA DEL DEPARTAMENTO DE LOGÍSTICA Y CONTROL PATRIMONIAL.", 158, 21, { align: 'center' });
+        doc.setFontSize(10);
+        doc.text("AUTORIZADO POR LA GERENCIA DE ADMINISTRACIÓN Y FINANZAS, JEFATURA DE PLANIFICACIÓN Y DESARROLLO EMPRESARIAL, JEFATURA DEL DEPARTAMENTO DE LOGÍSTICA Y CONTROL PATRIMONIAL.", 148.5, 32, { align: 'center' });
 
-        // Línea bajo el subtítulo (ELIMINADA por requerimiento)
-        // doc.setLineWidth(0.2);
-        // doc.line(14, 22, 283, 22);
-
-        // 4. Datos del Responsable y Solicitante (Y desplazado para espaciado de 7mm con respecto al subtítulo)
+        // 4. Datos del Responsable y Solicitante (Y desplazado para espaciado de 7mm con respecto al subtítulo a Y=32)
         doc.setFont("helvetica", "bold");
         doc.setFontSize(8.5);
-        doc.text("SOLICITANTE:", 14, 28);
-        doc.text("USUARIO:", 14, 33);
-        doc.text("PUESTO:", 14, 38);
-        doc.text("SUCURSAL:", 14, 43);
+        doc.text("SOLICITANTE:", 14, 39);
+        doc.text("USUARIO:", 14, 44);
+        doc.text("PUESTO:", 14, 49);
+        doc.text("SUCURSAL:", 14, 54);
 
         doc.setFont("helvetica", "normal");
-        doc.text(solicitanteVal.toUpperCase(), 38, 28);
-        doc.text(respName.toUpperCase(), 38, 33);
-        doc.text(puesto.toUpperCase(), 38, 38);
+        doc.text(solicitanteVal.toUpperCase(), 38, 39);
+        doc.text(respName.toUpperCase(), 38, 44);
+        doc.text(puesto.toUpperCase(), 38, 49);
         const sucursalPrefix = sucursal.toUpperCase().startsWith("UO ") ? sucursal.toUpperCase() : `UO ${sucursal.toUpperCase()}`;
-        doc.text(sucursalPrefix, 38, 43);
+        doc.text(sucursalPrefix, 38, 54);
 
         // FECHA DE ALTA (Alineada a la derecha)
         doc.setFont("helvetica", "normal");
         doc.setFontSize(8.5);
         const dateWidth = doc.getTextWidth(actaFechaFormateada);
-        doc.text(actaFechaFormateada, 283, 28, { align: 'right' });
+        doc.text(actaFechaFormateada, 283, 39, { align: 'right' });
         
         doc.setFont("helvetica", "bold");
-        doc.text("FECHA DE ALTA:", 283 - dateWidth - 2, 28, { align: 'right' });
+        doc.text("FECHA DE ALTA:", 283 - dateWidth - 2, 39, { align: 'right' });
 
         // 5. Nota legal de responsabilidad (Ubicada arriba, bajo los datos del responsable - Usando helvetica por legibilidad)
         doc.setFont("helvetica", "bold");
         doc.setFontSize(8);
         doc.setTextColor(0, 0, 0);
-        doc.text("NOTA", 14, 50);
+        doc.text("NOTA", 14, 61);
 
         doc.setFont("helvetica", "normal");
         doc.setFontSize(6.5);
         const notaText = "EL TRABAJADOR ES RESPONSABLE DIRECTO Y ABSOLUTO DE LA EXISTENCIA, PERMANENCIA, CONSERVACIÓN DEL BIEN EN USO, EVITAR PERDIDA, SUSTRACCIÓN, DETERIODO ETC. EN CASO DE PÉRDIDA, EXTRAVIO O DETERIORO POR EL MAL USO DE LOS BIENES PATRIMONIALES DESCRITOS, ESTOS SERÁN REPUESTOS O REPARADOS POR EL TRABAJADOR RESPONSABLE DE LOS MISMOS. CUALQUIER MOVIMIENTOS DENTRO O FUERA DE LA ENTIDAD DEBERA SER COMUNICADO AL RESPONSABLE DE CONTROL PATRIMONIAL, BAJO RESPONSABILIDAD.";
         
         const splitNota = doc.splitTextToSize(notaText, 269);
-        doc.text(splitNota, 14, 53);
+        doc.text(splitNota, 14, 64);
 
         // Resetear a helvetica para el resto de elementos
         doc.setFont("helvetica", "normal");
