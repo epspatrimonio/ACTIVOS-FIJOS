@@ -307,32 +307,32 @@
   <main class="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 overflow-hidden flex flex-col min-h-0">
 
     <!-- Selector de Pestañas (Tabs Switcher) -->
-    <div class="flex bg-slate-200/50 p-1.5 rounded-2xl mb-5 self-center sm:self-start shrink-0 gap-1.5 w-full max-w-5xl overflow-x-auto scrollbar-none border border-slate-200/60 shadow-sm">
-      <button id="tab-activos" class="flex-none sm:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 bg-brand-500 text-white shadow-md shadow-brand-500/15 whitespace-nowrap">
+    <div class="grid grid-cols-2 sm:grid-cols-3 xl:flex bg-slate-200/50 p-1.5 rounded-2xl mb-5 shrink-0 gap-1.5 w-full border border-slate-200/60 shadow-sm">
+      <button id="tab-activos" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 bg-brand-500 text-white shadow-md shadow-brand-500/15 whitespace-nowrap">
         💼 Activos Fijos
       </button>
-      <button id="tab-obras" class="flex-none sm:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
+      <button id="tab-obras" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
         🚧 Obras en Curso
       </button>
-      <button id="tab-vehiculos" class="flex-none sm:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
+      <button id="tab-vehiculos" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
         🚗 Vehículos
       </button>
-      <button id="tab-soat" class="flex-none sm:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
+      <button id="tab-soat" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
         🛡️ SOAT y RT
       </button>
-      <button id="tab-celulares" class="flex-none sm:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
+      <button id="tab-celulares" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
         📱 Celulares
       </button>
-      <button id="tab-inventario" class="flex-none sm:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
+      <button id="tab-inventario" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
         🔍 Inventario Físico
       </button>
-      <button id="tab-terceros" class="flex-none sm:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
+      <button id="tab-terceros" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
         🤝 Bienes de Terceros
       </button>
-      <button id="tab-asignacion" class="flex-none sm:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
+      <button id="tab-asignacion" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
         📋 Asignación de Bienes
       </button>
-      <button id="tab-contable" class="flex-none sm:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
+      <button id="tab-contable" class="w-full xl:w-auto xl:flex-1 col-span-2 sm:col-span-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
         📊 Reporte Contable
       </button>
     </div>

@@ -668,7 +668,10 @@ document.addEventListener('DOMContentLoaded', () => {
       // Resetear clases de pestañas
       [tabActivos, tabObras, tabVehiculos, tabSoat, tabCelulares, tabInventario, tabTerceros, tabAsignacion, tabContable].forEach(btn => {
         if (btn) {
-          btn.className = "flex-none sm:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 bg-transparent text-slate-600 hover:bg-white hover:text-slate-900 whitespace-nowrap";
+          btn.className = "w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 bg-transparent text-slate-600 hover:bg-white hover:text-slate-900 whitespace-nowrap";
+          if (btn.id === 'tab-contable') {
+            btn.classList.add('col-span-2', 'sm:col-span-1');
+          }
         }
       });
       
@@ -703,7 +706,10 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       
       if (activeBtn) {
-        activeBtn.className = "flex-none sm:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 bg-brand-500 text-white shadow-md shadow-brand-500/15 whitespace-nowrap";
+        activeBtn.className = "w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 bg-brand-500 text-white shadow-md shadow-brand-500/15 whitespace-nowrap";
+        if (activeBtn.id === 'tab-contable') {
+          activeBtn.classList.add('col-span-2', 'sm:col-span-1');
+        }
       }
 
       // Mostrar/Ocultar el filtro de Sucursal y Localidad
