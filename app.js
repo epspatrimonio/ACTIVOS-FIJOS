@@ -3134,11 +3134,21 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('acta-usuario-nombre').textContent = r.nombre;
             document.getElementById('acta-usuario-puesto').textContent = r.puesto;
             document.getElementById('acta-usuario-sucursal').textContent = r.sucursal;
+            
+            // Auto-populate Solicitante from first asset having requerido_por
+            let defaultSolicitante = '';
+            const foundReq = r.bienes.find(b => b.requerido_por && b.requerido_por.trim() && b.requerido_por !== '—');
+            if (foundReq) {
+              defaultSolicitante = foundReq.requerido_por;
+            }
+            if (inputSolicitante) inputSolicitante.value = defaultSolicitante;
+
             renderPreviewBienes(r.bienes);
           } else {
             document.getElementById('acta-usuario-nombre').textContent = '—';
             document.getElementById('acta-usuario-puesto').textContent = '—';
             document.getElementById('acta-usuario-sucursal').textContent = '—';
+            if (inputSolicitante) inputSolicitante.value = '';
             tbody.innerHTML = '';
           }
         };
@@ -3168,6 +3178,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         inputFecha.value = firstDate ? firstDate.split('T')[0] : new Date().toISOString().split('T')[0];
       }
+
+      // Auto-populate Solicitante from first asset having requerido_por
+      let defaultSolicitante = '';
+      const foundReq = data.bienes.find(b => b.requerido_por && b.requerido_por.trim() && b.requerido_por !== '—');
+      if (foundReq) {
+        defaultSolicitante = foundReq.requerido_por;
+      }
+      if (inputSolicitante) inputSolicitante.value = defaultSolicitante;
 
       renderPreviewBienes(data.bienes);
     }
