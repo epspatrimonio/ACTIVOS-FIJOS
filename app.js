@@ -675,6 +675,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
       
+      // Resetear clases de pestañas móviles
+      const mobileMenuItems = document.querySelectorAll('.mobile-menu-item');
+      mobileMenuItems.forEach(btn => {
+        const tabKey = btn.getAttribute('data-tab');
+        if (tabKey === currentTab) {
+          btn.className = "mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-extrabold rounded-xl transition-all border-none bg-brand-500 text-white shadow-md shadow-brand-500/15 cursor-pointer text-left";
+        } else {
+          btn.className = "mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left";
+        }
+      });
+      
       let activeBtn;
       if (currentTab === 'activos') {
         activeBtn = tabActivos;
@@ -778,6 +789,61 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tabTerceros) tabTerceros.addEventListener('click', () => switchTab('terceros'));
     if (tabAsignacion) tabAsignacion.addEventListener('click', () => switchTab('asignacion'));
     if (tabContable) tabContable.addEventListener('click', () => switchTab('contable'));
+
+    // Controladores del Menú Lateral Móvil (Drawer)
+    const drawer = document.getElementById('mobile-menu-drawer');
+    const overlay = document.getElementById('mobile-menu-overlay');
+    const drawerContent = document.getElementById('mobile-menu-content');
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const closeMenuBtn = document.getElementById('close-menu-btn');
+
+    function openMobileMenu() {
+      if (!drawer) return;
+      drawer.classList.remove('invisible');
+      drawer.offsetWidth; // Forzar reflow
+      overlay.classList.remove('opacity-0');
+      overlay.classList.add('opacity-100');
+      drawerContent.classList.remove('-translate-x-full');
+      drawerContent.classList.add('translate-x-0');
+      document.body.classList.add('overflow-hidden');
+    }
+
+    function closeMobileMenu() {
+      if (!drawer) return;
+      overlay.classList.remove('opacity-100');
+      overlay.classList.add('opacity-0');
+      drawerContent.classList.remove('translate-x-0');
+      drawerContent.classList.add('-translate-x-full');
+      
+      setTimeout(() => {
+        drawer.classList.add('invisible');
+      }, 300);
+      document.body.classList.remove('overflow-hidden');
+    }
+
+    if (hamburgerBtn) hamburgerBtn.addEventListener('click', openMobileMenu);
+    if (closeMenuBtn) closeMenuBtn.addEventListener('click', closeMobileMenu);
+    if (overlay) overlay.addEventListener('click', closeMobileMenu);
+
+    // Configurar botones del menú móvil
+    const mobileMenuItemsList = document.querySelectorAll('.mobile-menu-item');
+    mobileMenuItemsList.forEach(item => {
+      item.addEventListener('click', () => {
+        const tabKey = item.getAttribute('data-tab');
+        const desktopTabId = `tab-${tabKey === 'activos' ? 'activos' : tabKey}`;
+        const desktopBtn = document.getElementById(desktopTabId);
+        if (desktopBtn) {
+          desktopBtn.click();
+        }
+        closeMobileMenu();
+      });
+    });
+
+    // Inicializar estado del menú móvil
+    const activeMobileMenuButton = Array.from(mobileMenuItemsList).find(item => item.getAttribute('data-tab') === currentTab);
+    if (activeMobileMenuButton) {
+      activeMobileMenuButton.className = "mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-extrabold rounded-xl transition-all border-none bg-brand-500 text-white shadow-md shadow-brand-500/15 cursor-pointer text-left";
+    }
   }
 
   // Filtrado del cliente
@@ -1003,7 +1069,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
       });
-      mobileContainer.classList.remove('hidden');
+      
+      if (currentTab === 'contable') {
+        const activeEl = document.getElementById('contable-table-container');
+        if (activeEl) activeEl.classList.remove('hidden');
+        mobileContainer.classList.add('hidden');
+      } else {
+        mobileContainer.classList.remove('hidden');
+      }
     }
 
     // Inyectar datos específicos

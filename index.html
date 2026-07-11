@@ -96,8 +96,22 @@
       flex-direction: column;
     }
     @media (max-width: 767px) {
+      html, body {
+        overflow-y: auto !important;
+        height: auto !important;
+      }
       body {
         font-size: 0.875rem;
+      }
+      main {
+        overflow: visible !important;
+        height: auto !important;
+        flex: none !important;
+      }
+      #assets-mobile-container {
+        overflow-y: visible !important;
+        height: auto !important;
+        flex: none !important;
       }
       #assets-mobile-container:not(.hidden) {
         display: grid;
@@ -124,6 +138,15 @@
         padding-bottom: 1rem;
         margin-top: 2rem !important;
       }
+    }
+
+    /* Estilos del menú lateral móvil */
+    #mobile-menu-drawer.invisible {
+      pointer-events: none;
+      visibility: hidden;
+    }
+    #mobile-menu-drawer:not(.invisible) {
+      visibility: visible;
     }
 
     /* Scrollbar estilizado y visible para navegación horizontal cómoda */
@@ -166,9 +189,17 @@
             <h1 class="text-base sm:text-lg font-bold leading-tight mt-0.5">CONTROL PATRIMONIAL</h1>
           </div>
         </div>
-        <p class="text-white/85 text-[0.75rem] font-semibold tracking-wider uppercase hidden sm:block">
-          Consulta de Activos Fijos
-        </p>
+        <div class="flex items-center gap-2">
+          <p class="text-white/85 text-[0.75rem] font-semibold tracking-wider uppercase hidden md:block">
+            Consulta de Activos Fijos
+          </p>
+          <!-- Botón de Menú Hamburguesa en Móvil -->
+          <button id="hamburger-btn" class="md:hidden flex items-center justify-center p-2 rounded-lg text-white hover:bg-white/10 active:bg-white/20 transition-colors focus:outline-none cursor-pointer" aria-label="Abrir menú">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
+        </div>
       </div>
     </header>
     
@@ -307,7 +338,7 @@
   <main class="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 overflow-hidden flex flex-col min-h-0">
 
     <!-- Selector de Pestañas (Tabs Switcher) -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 xl:flex bg-slate-200/50 p-1.5 rounded-2xl mb-5 shrink-0 gap-1.5 w-full border border-slate-200/60 shadow-sm">
+    <div class="hidden md:grid md:grid-cols-3 xl:flex bg-slate-200/50 p-1.5 rounded-2xl mb-5 shrink-0 gap-1.5 w-full border border-slate-200/60 shadow-sm">
       <button id="tab-activos" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 bg-brand-500 text-white shadow-md shadow-brand-500/15 whitespace-nowrap">
         💼 Activos Fijos
       </button>
@@ -656,7 +687,7 @@
     </div>
 
     <!-- Tabla: Reporte Contable -->
-    <div id="contable-table-container" class="hidden md:flex flex-col flex-1 min-h-0 rounded-xl shadow-sm border border-slate-200 bg-white overflow-hidden">
+    <div id="contable-table-container" class="hidden flex flex-col flex-1 min-h-0 rounded-xl shadow-sm border border-slate-200 bg-white overflow-hidden">
       <!-- Period Filters and Digit Switch for Public Dashboard -->
       <div class="p-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 shrink-0">
         <div class="flex items-center gap-2">
@@ -733,6 +764,67 @@
       Control Patrimonial - Juan Eder Systems © 2026
     </div>
   </footer>
+
+  <!-- Menú Lateral Responsive (Drawer) -->
+  <div id="mobile-menu-drawer" class="fixed inset-0 z-50 invisible transition-all duration-300" role="dialog" aria-modal="true">
+    <!-- Overlay de fondo -->
+    <div id="mobile-menu-overlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm opacity-0 transition-opacity duration-300"></div>
+    
+    <!-- Contenido del Drawer -->
+    <div id="mobile-menu-content" class="fixed inset-y-0 left-0 w-full max-w-xs bg-white shadow-2xl flex flex-col transform -translate-x-full transition-transform duration-300">
+      <!-- Encabezado del Drawer -->
+      <div class="p-4 bg-[#00B0F0] text-white flex items-center justify-between shadow-sm">
+        <div class="flex items-center gap-2.5">
+          <img src="logo.jpg" alt="Logo EPS Selva Central" class="w-8 h-8 object-contain rounded-lg bg-white p-0.5">
+          <div class="text-left">
+            <span class="text-[9px] bg-white/20 text-white px-1.5 py-0.2 rounded-full uppercase font-bold">EPS Selva Central</span>
+            <div class="text-xs font-bold leading-none mt-0.5">Control Patrimonial</div>
+          </div>
+        </div>
+        <button id="close-menu-btn" class="text-white hover:text-slate-100 p-2 rounded-lg hover:bg-white/10 active:bg-white/20 transition-colors focus:outline-none cursor-pointer" aria-label="Cerrar menú">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Cuerpo del Drawer (Lista vertical de opciones) -->
+      <nav class="flex-1 py-4 overflow-y-auto px-3 space-y-1 bg-slate-50">
+        <button data-tab="activos" class="mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left">
+          💼 Activos Fijos
+        </button>
+        <button data-tab="obras" class="mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left">
+          🚧 Obras en Curso
+        </button>
+        <button data-tab="vehiculos" class="mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left">
+          🚗 Vehículos
+        </button>
+        <button data-tab="soat" class="mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left">
+          🛡️ SOAT y RT
+        </button>
+        <button data-tab="celulares" class="mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left">
+          📱 Celulares
+        </button>
+        <button data-tab="inventario" class="mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left">
+          🔍 Inventario Físico
+        </button>
+        <button data-tab="terceros" class="mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left">
+          🤝 Bienes de Terceros
+        </button>
+        <button data-tab="asignacion" class="mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left">
+          📋 Asignación de Bienes
+        </button>
+        <button data-tab="contable" class="mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left">
+          📊 Reporte Contable
+        </button>
+      </nav>
+      
+      <!-- Footer del Drawer -->
+      <div class="p-4 border-t border-slate-150 bg-white text-center text-xs text-slate-400 font-semibold">
+        Juan Eder Systems © 2026
+      </div>
+    </div>
+  </div>
 
   <script src="app.js?v=5"></script>
 </body>
