@@ -648,6 +648,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Inicialización de pestañas
   function initTabs() {
     const tabActivos = document.getElementById('tab-activos');
+    const tabFicha = document.getElementById('tab-ficha');
     const tabObras = document.getElementById('tab-obras');
     const tabVehiculos = document.getElementById('tab-vehiculos');
     const tabSoat = document.getElementById('tab-soat');
@@ -666,7 +667,7 @@ document.addEventListener('DOMContentLoaded', () => {
       selectedSubcategories = [];
       
       // Resetear clases de pestañas
-      [tabActivos, tabObras, tabVehiculos, tabSoat, tabCelulares, tabInventario, tabTerceros, tabAsignacion, tabContable].forEach(btn => {
+      [tabActivos, tabFicha, tabObras, tabVehiculos, tabSoat, tabCelulares, tabInventario, tabTerceros, tabAsignacion, tabContable].forEach(btn => {
         if (btn) {
           btn.className = "w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 bg-transparent text-slate-600 hover:bg-white hover:text-slate-900 whitespace-nowrap";
           if (btn.id === 'tab-contable') {
@@ -690,6 +691,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (currentTab === 'activos') {
         activeBtn = tabActivos;
         moduleTitle.textContent = 'Catálogo de Activos Fijos';
+      } else if (currentTab === 'ficha') {
+        activeBtn = tabFicha;
+        moduleTitle.textContent = 'Ficha del Activo';
       } else if (currentTab === 'obras') {
         activeBtn = tabObras;
         moduleTitle.textContent = 'Obras en Curso (PMO)';
@@ -727,7 +731,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const sucursalWrapper = document.getElementById('sucursal-filter-wrapper');
       const localidadWrapper = document.getElementById('localidad-filter-wrapper');
       
-      if (currentTab === 'contable' || currentTab === 'asignacion') {
+      if (currentTab === 'contable' || currentTab === 'asignacion' || currentTab === 'ficha') {
         if (sucursalWrapper) sucursalWrapper.classList.add('hidden');
         if (localidadWrapper) localidadWrapper.classList.add('hidden');
       } else {
@@ -739,7 +743,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const categoriaWrapper = document.getElementById('categoria-filter-wrapper');
       const subcategoriaWrapper = document.getElementById('subcategoria-filter-wrapper');
       const hasCategories = currentTab === 'activos' || currentTab === 'obras' || currentTab === 'vehiculos' || currentTab === 'inventario' || currentTab === 'soat';
-      if (hasCategories && currentTab !== 'contable' && currentTab !== 'asignacion') {
+      if (hasCategories && currentTab !== 'contable' && currentTab !== 'asignacion' && currentTab !== 'ficha') {
         if (categoriaWrapper) categoriaWrapper.classList.remove('hidden');
         if (subcategoriaWrapper) subcategoriaWrapper.classList.remove('hidden');
       } else {
@@ -761,7 +765,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const excelBtn = document.getElementById('btn-export-excel');
       const pdfBtn = document.getElementById('btn-export-pdf');
 
-      if (currentTab === 'contable' || currentTab === 'asignacion') {
+      if (currentTab === 'contable' || currentTab === 'asignacion' || currentTab === 'ficha') {
         searchWrapper.classList.add('hidden');
         estadoWrapper.classList.add('hidden');
       } else {
@@ -769,7 +773,7 @@ document.addEventListener('DOMContentLoaded', () => {
         estadoWrapper.classList.remove('hidden');
       }
       
-      if (currentTab === 'asignacion') {
+      if (currentTab === 'asignacion' || currentTab === 'ficha') {
         resultsCount.classList.add('hidden');
         if (excelBtn) excelBtn.classList.add('hidden');
         if (pdfBtn) pdfBtn.classList.add('hidden');
@@ -781,6 +785,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     if (tabActivos) tabActivos.addEventListener('click', () => switchTab('activos'));
+    if (tabFicha) tabFicha.addEventListener('click', () => switchTab('ficha'));
     if (tabObras) tabObras.addEventListener('click', () => switchTab('obras'));
     if (tabVehiculos) tabVehiculos.addEventListener('click', () => switchTab('vehiculos'));
     if (tabSoat) tabSoat.addEventListener('click', () => switchTab('soat'));
@@ -848,7 +853,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Filtrado del cliente
   function applyFilters() {
-    if (currentTab === 'asignacion') {
+    if (currentTab === 'asignacion' || currentTab === 'ficha') {
       renderData([]);
       return;
     }
@@ -1024,8 +1029,23 @@ document.addEventListener('DOMContentLoaded', () => {
       'inventario-table-container',
       'terceros-table-container',
       'contable-table-container',
-      'asignacion-table-container'
+      'asignacion-table-container',
+      'ficha-container'
     ];
+
+    if (currentTab === 'ficha') {
+      emptyState.classList.add('hidden');
+      allContainers.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          if (id === 'ficha-container') el.classList.remove('hidden');
+          else el.classList.add('hidden');
+        }
+      });
+      mobileContainer.classList.add('hidden');
+      renderFichaTab();
+      return;
+    }
 
     if (currentTab === 'asignacion') {
       emptyState.classList.add('hidden');
@@ -3493,6 +3513,338 @@ document.addEventListener('DOMContentLoaded', () => {
         pdfBtn.innerHTML = originalText;
         pdfBtn.disabled = false;
       }
+    }
+  }
+
+  let selectedFichaActivo = null;
+
+  function renderFichaTab() {
+    const searchCodInput = document.getElementById('ficha-search-cod');
+    const visualContent = document.getElementById('ficha-visual-content');
+    const emptyState = document.getElementById('ficha-empty-state');
+    const exportBtn = document.getElementById('btn-generar-ficha-pdf');
+
+    if (!searchCodInput || !visualContent || !emptyState || !exportBtn) return;
+
+    const formatDateStr = (dateVal) => {
+      if (!dateVal) return '—';
+      const parts = dateVal.split('T')[0].split('-');
+      if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      return dateVal;
+    };
+
+    const handleFichaSearch = () => {
+      const cod = searchCodInput.value.trim();
+      if (!cod) {
+        visualContent.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        emptyState.innerHTML = '<span class="text-3xl">📄</span><p class="text-sm font-semibold mt-2">Ingrese un código patrimonial para consultar la ficha.</p>';
+        selectedFichaActivo = null;
+        return;
+      }
+
+      const activo = assets.find(a => String(a.cod_patrimonial) === cod);
+      if (!activo) {
+        visualContent.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        emptyState.innerHTML = '<span class="text-3xl">⚠️</span><p class="text-sm font-semibold mt-2 text-rose-500">Código patrimonial no encontrado.</p>';
+        selectedFichaActivo = null;
+        return;
+      }
+
+      selectedFichaActivo = activo;
+
+      document.getElementById('ficha-val-localidad').textContent = activo.localidad || 'LA MERCED';
+      document.getElementById('ficha-val-cod-patrimonial').textContent = activo.cod_patrimonial;
+      document.getElementById('ficha-val-denominacion').textContent = activo.denominacion || '—';
+      
+      const now = new Date();
+      document.getElementById('ficha-val-fecha').textContent = `Fecha: ${now.toLocaleDateString('es-PE')}`;
+      document.getElementById('ficha-val-hora').textContent = `Hora: ${now.toLocaleTimeString('es-PE')}`;
+
+      document.getElementById('ficha-val-fec-ingreso').textContent = formatDateStr(activo.fecha_registro_contable);
+      document.getElementById('ficha-val-fec-alta').textContent = formatDateStr(activo.fecha_alta_factura);
+      document.getElementById('ficha-val-fec-entrega').textContent = formatDateStr(activo.fecha_asignacion);
+      document.getElementById('ficha-val-estado').textContent = activo.estado_activo || '—';
+      document.getElementById('ficha-val-vida-util').textContent = activo.vida_util_anios ? `${activo.vida_util_anios} Años` : '—';
+      
+      const valLibros = activo.valor_en_libros ? `S/. ${Number(activo.valor_en_libros).toFixed(2)}` : '—';
+      document.getElementById('ficha-val-historico').textContent = valLibros;
+      document.getElementById('ficha-val-libros').textContent = valLibros;
+      document.getElementById('ficha-val-n-doc').textContent = activo.n_doc || '—';
+      document.getElementById('ficha-val-serie').textContent = activo.numero_serie || '—';
+      
+      document.getElementById('ficha-val-localizacion').textContent = activo.sucursal || '—';
+      document.getElementById('ficha-val-responsable').textContent = activo.responsable || '—';
+      document.getElementById('ficha-val-cuenta').textContent = activo.cuenta_contable || '—';
+      document.getElementById('ficha-val-c-costo').textContent = activo.centro_costo || '—';
+      document.getElementById('ficha-val-mod-adq').textContent = activo.documento_tipo || '—';
+
+      const detParts = [];
+      if (activo.n_doc_compra) detParts.push(`O/C: ${activo.n_doc_compra}`);
+      if (activo.nota_pedido) detParts.push(`NOTA DE PEDIDO: ${activo.nota_pedido}`);
+      if (activo.certificacion_presupuestal) detParts.push(`CERTIFICACIÓN PRESUPUESTAL: ${activo.certificacion_presupuestal}`);
+      if (activo.numero_factura) detParts.push(`FACTURA: ${activo.numero_factura}`);
+      detParts.push(activo.denominacion);
+      document.getElementById('ficha-val-detalle-activo').textContent = detParts.join(" / ");
+
+      const imgContainer = document.getElementById('ficha-images-container');
+      const imgWrapper = document.getElementById('ficha-images-wrapper');
+      imgContainer.innerHTML = '';
+      const imgPaths = [activo.imagen_1_path, activo.imagen_2_path, activo.imagen_3_path].filter(Boolean);
+      if (imgPaths.length > 0) {
+        imgPaths.forEach((path, idx) => {
+          const div = document.createElement('div');
+          div.className = 'border border-slate-200 rounded-xl overflow-hidden aspect-[4/3] bg-slate-100 flex items-center justify-center';
+          const img = document.createElement('img');
+          img.src = `.${path}`;
+          img.className = 'w-full h-full object-cover';
+          img.alt = `Imagen ${idx + 1}`;
+          div.appendChild(img);
+          imgContainer.appendChild(div);
+        });
+        imgWrapper.classList.remove('hidden');
+      } else {
+        imgWrapper.classList.add('hidden');
+      }
+
+      emptyState.classList.add('hidden');
+      visualContent.classList.remove('hidden');
+    };
+
+    if (!searchCodInput.dataset.listenerRegistered) {
+      searchCodInput.addEventListener('input', handleFichaSearch);
+      searchCodInput.dataset.listenerRegistered = 'true';
+    }
+
+    if (!exportBtn.dataset.listenerRegistered) {
+      exportBtn.addEventListener('click', async () => {
+        if (!selectedFichaActivo) {
+          alert("Por favor busque un activo válido primero.");
+          return;
+        }
+        
+        const originalText = exportBtn.innerHTML;
+        exportBtn.innerHTML = '⏳ Exportando Ficha...';
+        exportBtn.disabled = true;
+
+        try {
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
+          
+          const marginX = 14;
+          let posY = 15;
+          
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(8);
+          doc.text("EPS SELVA CENTRAL S.A.", marginX, posY);
+          posY += 4;
+          doc.text(selectedFichaActivo.localidad || "LA MERCED", marginX, posY);
+          posY += 4;
+          doc.text("Versión: 2026.1.1-Sinergia Digital-AMD", marginX, posY);
+          
+          const now = new Date();
+          const dateStr = now.toLocaleDateString('es-PE');
+          const timeStr = now.toLocaleTimeString('es-PE');
+          doc.text(`Fecha: ${dateStr}`, 196, 15, { align: 'right' });
+          doc.text(`Hora: ${timeStr}`, 196, 19, { align: 'right' });
+          
+          posY += 10;
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(12);
+          doc.text("FICHA DE REGISTRO DEL BIEN", 105, posY, { align: 'center' });
+          
+          posY += 3;
+          doc.setDrawColor(200, 200, 200);
+          doc.line(marginX, posY, 196, posY);
+          
+          posY += 6;
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(10);
+          doc.text(`${selectedFichaActivo.cod_patrimonial}   ${selectedFichaActivo.denominacion}`, marginX, posY);
+          
+          posY += 2;
+          doc.line(marginX, posY, 196, posY);
+          
+          posY += 6;
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(8.5);
+          
+          doc.setFont("helvetica", "bold"); doc.text("Fec Ingreso:", marginX, posY);
+          doc.setFont("helvetica", "normal"); doc.text(formatDateStr(selectedFichaActivo.fecha_registro_contable) || '—', marginX + 22, posY);
+          
+          doc.setFont("helvetica", "bold"); doc.text("Histórico:", 105, posY);
+          doc.setFont("helvetica", "normal"); doc.text(`S/. ${Number(selectedFichaActivo.valor_en_libros || 0).toFixed(2)}`, 105 + 22, posY);
+          
+          doc.setFont("helvetica", "bold"); doc.text("Tipo ing:", 155, posY);
+          doc.setFont("helvetica", "normal"); doc.text("CO - Compra", 155 + 20, posY);
+          
+          posY += 5;
+          doc.setFont("helvetica", "bold"); doc.text("Fec Alta:", marginX, posY);
+          doc.setFont("helvetica", "normal"); doc.text(formatDateStr(selectedFichaActivo.fecha_alta_factura) || '—', marginX + 22, posY);
+          
+          doc.setFont("helvetica", "bold"); doc.text("Libros:", 105, posY);
+          doc.setFont("helvetica", "normal"); doc.text(`S/. ${Number(selectedFichaActivo.valor_en_libros || 0).toFixed(2)}`, 105 + 22, posY);
+          
+          doc.setFont("helvetica", "bold"); doc.text("Docum:", 155, posY);
+          doc.setFont("helvetica", "normal"); doc.text("OC - Orden de Compra", 155 + 20, posY);
+          
+          posY += 5;
+          doc.setFont("helvetica", "bold"); doc.text("Fec Entrega:", marginX, posY);
+          doc.setFont("helvetica", "normal"); doc.text(formatDateStr(selectedFichaActivo.fecha_asignacion) || '—', marginX + 22, posY);
+          
+          doc.setFont("helvetica", "bold"); doc.text("Tasación:", 105, posY);
+          doc.setFont("helvetica", "normal"); doc.text("0.00", 105 + 22, posY);
+          
+          doc.setFont("helvetica", "bold"); doc.text("Nº Docum:", 155, posY);
+          doc.setFont("helvetica", "normal"); doc.text(selectedFichaActivo.n_doc || '—', 155 + 20, posY);
+          
+          posY += 5;
+          doc.setFont("helvetica", "bold"); doc.text("Estado:", marginX, posY);
+          doc.setFont("helvetica", "normal"); doc.text(selectedFichaActivo.estado_activo || '—', marginX + 22, posY);
+          
+          doc.setFont("helvetica", "bold"); doc.text("Residual:", 105, posY);
+          doc.setFont("helvetica", "normal"); doc.text(`S/. ${Number(selectedFichaActivo.valor_neto || 0).toFixed(2)}`, 105 + 22, posY);
+          
+          doc.setFont("helvetica", "bold"); doc.text("Seguro:", 155, posY);
+          doc.setFont("helvetica", "normal"); doc.text("Si", 155 + 20, posY);
+          
+          posY += 5;
+          doc.setFont("helvetica", "bold"); doc.text("Proyecto:", marginX, posY);
+          doc.setFont("helvetica", "normal"); doc.text("—", marginX + 22, posY);
+          
+          doc.setFont("helvetica", "bold"); doc.text("Reposición:", 105, posY);
+          doc.setFont("helvetica", "normal"); doc.text("0.00", 105 + 22, posY);
+          
+          doc.setFont("helvetica", "bold"); doc.text("Serie:", 155, posY);
+          doc.setFont("helvetica", "normal"); doc.text(selectedFichaActivo.numero_serie || '—', 155 + 20, posY);
+          
+          posY += 5;
+          doc.setFont("helvetica", "bold"); doc.text("Principal:", marginX, posY);
+          doc.setFont("helvetica", "normal"); doc.text("Si", marginX + 22, posY);
+          
+          doc.setFont("helvetica", "bold"); doc.text("Revaluado:", 105, posY);
+          doc.setFont("helvetica", "normal"); doc.text("0.00", 105 + 22, posY);
+          
+          doc.setFont("helvetica", "bold"); doc.text("Vida util:", 155, posY);
+          doc.setFont("helvetica", "normal"); doc.text(`${selectedFichaActivo.vida_util_anios} Años`, 155 + 20, posY);
+          
+          posY += 5;
+          doc.setFont("helvetica", "bold"); doc.text("Dep Inic:", 105, posY);
+          doc.setFont("helvetica", "normal"); doc.text("0.00", 105 + 22, posY);
+          
+          doc.setFont("helvetica", "bold"); doc.text("Factor:", 155, posY);
+          doc.setFont("helvetica", "normal"); doc.text("—", 155 + 20, posY);
+
+          posY += 3;
+          doc.line(marginX, posY, 196, posY);
+          
+          posY += 6;
+          doc.setFont("helvetica", "bold"); doc.text("Localización:", marginX, posY);
+          doc.setFont("helvetica", "normal"); doc.text(selectedFichaActivo.sucursal || '—', marginX + 22, posY);
+          
+          posY += 5;
+          doc.setFont("helvetica", "bold"); doc.text("Responsable:", marginX, posY);
+          doc.setFont("helvetica", "normal"); doc.text(selectedFichaActivo.responsable || '—', marginX + 22, posY);
+          
+          posY += 5;
+          doc.setFont("helvetica", "bold"); doc.text("Cuenta:", marginX, posY);
+          doc.setFont("helvetica", "normal"); doc.text(selectedFichaActivo.cuenta_contable || '—', marginX + 22, posY);
+          
+          posY += 5;
+          doc.setFont("helvetica", "bold"); doc.text("C.Costo:", marginX, posY);
+          doc.setFont("helvetica", "normal"); doc.text(selectedFichaActivo.centro_costo || '—', marginX + 22, posY);
+          
+          posY += 3;
+          doc.line(marginX, posY, 196, posY);
+          
+          posY += 6;
+          doc.setFont("helvetica", "bold"); doc.text("Cod. Regulatorio:", marginX, posY);
+          doc.setFont("helvetica", "normal"); doc.text("—", marginX + 32, posY);
+          
+          doc.setFont("helvetica", "bold"); doc.text("Cla. SUNASS:", 105, posY);
+          doc.setFont("helvetica", "normal"); doc.text("clasificacion", 105 + 25, posY);
+          
+          posY += 5;
+          doc.setFont("helvetica", "bold"); doc.text("Tipo Serv. SUNASS:", marginX, posY);
+          doc.setFont("helvetica", "normal"); doc.text("servicios", marginX + 32, posY);
+          
+          doc.setFont("helvetica", "bold"); doc.text("Mod. Adquisicion:", 105, posY);
+          doc.setFont("helvetica", "normal"); doc.text(selectedFichaActivo.documento_tipo || '—', 105 + 25, posY);
+          
+          posY += 3;
+          doc.line(marginX, posY, 196, posY);
+          
+          posY += 6;
+          doc.setFont("helvetica", "bold");
+          doc.text("Historial de Depreciación:", marginX, posY);
+          
+          const depHeaders = [["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Setiembre", "Octubre", "Noviembre", "Diciembre", "Total"]];
+          const depData = [["0.00", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00"]];
+          
+          doc.autoTable({
+            startY: posY + 2,
+            head: depHeaders,
+            body: depData,
+            theme: 'plain',
+            styles: { fontSize: 7.5, halign: 'center' },
+            headStyles: { fontStyle: 'bold', fillColor: [240, 240, 240] },
+            margin: { left: marginX, right: marginX }
+          });
+          
+          posY = doc.lastAutoTable.finalY + 6;
+          
+          doc.line(marginX, posY, 196, posY);
+          posY += 5;
+          doc.setFont("helvetica", "bold"); doc.text("Detalle Activo:", marginX, posY);
+          
+          const detParts = [];
+          if (selectedFichaActivo.n_doc_compra) detParts.push(`O/C: ${selectedFichaActivo.n_doc_compra}`);
+          if (selectedFichaActivo.nota_pedido) detParts.push(`NOTA DE PEDIDO: ${selectedFichaActivo.nota_pedido}`);
+          if (selectedFichaActivo.certificacion_presupuestal) detParts.push(`CERTIFICACIÓN PRESUPUESTAL: ${selectedFichaActivo.certificacion_presupuestal}`);
+          if (selectedFichaActivo.numero_factura) detParts.push(`FACTURA: ${selectedFichaActivo.numero_factura}`);
+          detParts.push(selectedFichaActivo.denominacion);
+          
+          posY += 4;
+          doc.setFont("helvetica", "normal");
+          doc.text(detParts.join(" / "), marginX, posY, { maxWidth: 180 });
+          
+          const imagesToDraw = [];
+          if (selectedFichaActivo.imagen_1_path) imagesToDraw.push(selectedFichaActivo.imagen_1_path);
+          if (selectedFichaActivo.imagen_2_path) imagesToDraw.push(selectedFichaActivo.imagen_2_path);
+          if (selectedFichaActivo.imagen_3_path) imagesToDraw.push(selectedFichaActivo.imagen_3_path);
+          
+          if (imagesToDraw.length > 0) {
+            posY += 10;
+            doc.line(marginX, posY, 196, posY);
+            posY += 6;
+            doc.setFont("helvetica", "bold");
+            doc.text("Imágenes del Activo:", marginX, posY);
+            posY += 4;
+            
+            const imgWidth = 55;
+            const imgHeight = 40;
+            const spacing = 6;
+            
+            for (let i = 0; i < imagesToDraw.length; i++) {
+              const fullUrl = `.${imagesToDraw[i]}`;
+              const imgElement = await loadImage(fullUrl).catch(() => null);
+              if (imgElement) {
+                doc.addImage(imgElement, 'JPEG', marginX + i * (imgWidth + spacing), posY, imgWidth, imgHeight);
+              }
+            }
+          }
+          
+          doc.save(`Ficha_Activo_${selectedFichaActivo.cod_patrimonial}.pdf`);
+        } catch (err) {
+          console.error(err);
+          alert("Error al exportar ficha: " + err.message);
+        } finally {
+          exportBtn.innerHTML = originalText;
+          exportBtn.disabled = false;
+        }
+      });
+      exportBtn.dataset.listenerRegistered = 'true';
     }
   }
 });

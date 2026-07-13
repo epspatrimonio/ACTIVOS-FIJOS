@@ -342,6 +342,9 @@
       <button id="tab-activos" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 bg-brand-500 text-white shadow-md shadow-brand-500/15 whitespace-nowrap">
         💼 Activos Fijos
       </button>
+      <button id="tab-ficha" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
+        📄 Ficha de Activo
+      </button>
       <button id="tab-obras" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
         🚧 Obras en Curso
       </button>
@@ -749,6 +752,163 @@
       </div>
     </div>
 
+    <!-- Contenedor: Ficha de Activo -->
+    <div id="ficha-container" class="hidden flex flex-col flex-1 min-h-0 bg-white border border-slate-200 rounded-xl p-5 shadow-sm overflow-y-auto w-full">
+      <div class="border-b border-slate-100 pb-3 mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h3 class="text-base font-extrabold text-slate-800 uppercase tracking-tight">Ficha de Registro del Bien</h3>
+          <p class="text-xs text-slate-400 mt-0.5">Consulte la ficha técnica oficial del activo por su código patrimonial.</p>
+        </div>
+      </div>
+      
+      <!-- Buscador de Ficha -->
+      <div class="flex flex-col sm:flex-row gap-3 mb-6 items-end">
+        <div class="flex-grow">
+          <label for="ficha-search-cod" class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Código Patrimonial (9 dígitos)</label>
+          <input 
+            type="text" 
+            id="ficha-search-cod" 
+            placeholder="Ej: 310040041..." 
+            class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all font-mono font-bold text-slate-700"
+          >
+        </div>
+        <div>
+          <button 
+            id="btn-generar-ficha-pdf" 
+            class="w-full sm:w-auto py-2.5 px-4 bg-rose-600 hover:bg-rose-700 active:scale-[0.98] text-white font-extrabold text-sm rounded-lg transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer border-none"
+          >
+            📕 Exportar Ficha PDF
+          </button>
+        </div>
+      </div>
+
+      <!-- Ficha Visual Layout -->
+      <div id="ficha-visual-content" class="hidden border border-slate-200 rounded-xl p-6 bg-slate-50/50 max-w-4xl mx-auto w-full space-y-6">
+        <!-- Cabecera -->
+        <div class="flex justify-between items-start border-b border-slate-200 pb-4">
+          <div class="text-[10px] text-slate-500 leading-tight space-y-0.5">
+            <div class="font-bold text-slate-700">EPS SELVA CENTRAL S.A.</div>
+            <div id="ficha-val-localidad">LA MERCED</div>
+            <div>Versión: 2026.1.1-Sinergia Digital-AMD</div>
+          </div>
+          <div class="text-[10px] text-slate-500 text-right leading-tight space-y-0.5">
+            <div id="ficha-val-fecha">Fecha: 13-07-2026</div>
+            <div id="ficha-val-hora">Hora: 09:23:08</div>
+          </div>
+        </div>
+
+        <div class="text-center font-bold text-lg text-slate-800 tracking-wide uppercase">
+          FICHA DE REGISTRO DEL BIEN
+        </div>
+
+        <div class="border-b border-slate-200 pb-2">
+          <span id="ficha-val-cod-patrimonial" class="font-bold text-base text-brand-600">310040041</span>
+          <span id="ficha-val-denominacion" class="font-bold text-base text-slate-700 ml-4">LAPTOP</span>
+        </div>
+
+        <!-- Dos Columnas de Datos -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-600">
+          <div class="space-y-2">
+            <div><span class="font-bold text-slate-500">Fec Ingreso:</span> <span id="ficha-val-fec-ingreso">—</span></div>
+            <div><span class="font-bold text-slate-500">Fec Alta:</span> <span id="ficha-val-fec-alta">—</span></div>
+            <div><span class="font-bold text-slate-500">Fec Entrega:</span> <span id="ficha-val-fec-entrega">—</span></div>
+            <div><span class="font-bold text-slate-500">Estado:</span> <span id="ficha-val-estado">—</span></div>
+            <div><span class="font-bold text-slate-500">Proyecto:</span> <span>—</span></div>
+            <div><span class="font-bold text-slate-500">Principal:</span> <span>Si</span></div>
+            <div><span class="font-bold text-slate-500">Vida útil:</span> <span id="ficha-val-vida-util">—</span></div>
+          </div>
+          <div class="space-y-2">
+            <div><span class="font-bold text-slate-500">Histórico:</span> <span id="ficha-val-historico">—</span></div>
+            <div><span class="font-bold text-slate-500">Libros:</span> <span id="ficha-val-libros">—</span></div>
+            <div><span class="font-bold text-slate-500">Tasación:</span> <span>0.00</span></div>
+            <div><span class="font-bold text-slate-500">Reposición:</span> <span>0.00</span></div>
+            <div><span class="font-bold text-slate-500">Revaluado:</span> <span>0.00</span></div>
+            <div><span class="font-bold text-slate-500">Dep Inic:</span> <span>0.00</span></div>
+            <div><span class="font-bold text-slate-500">Factor:</span> <span>—</span></div>
+            <div><span class="font-bold text-slate-500">Tipo ing:</span> <span>CO - Compra</span></div>
+            <div><span class="font-bold text-slate-500">Docum:</span> <span>OC - Orden de Compra</span></div>
+            <div><span class="font-bold text-slate-500">Nº Docum:</span> <span id="ficha-val-n-doc">—</span></div>
+            <div><span class="font-bold text-slate-500">Seguro:</span> <span>Si</span></div>
+            <div><span class="font-bold text-slate-500">Serie:</span> <span id="ficha-val-serie">—</span></div>
+          </div>
+        </div>
+
+        <div class="border-t border-b border-slate-200 py-3 space-y-1 text-xs text-slate-600">
+          <div><span class="font-bold text-slate-500">Localización:</span> <span id="ficha-val-localizacion">—</span></div>
+          <div><span class="font-bold text-slate-500">Responsable:</span> <span id="ficha-val-responsable">—</span></div>
+          <div><span class="font-bold text-slate-500">Cuenta:</span> <span id="ficha-val-cuenta">—</span></div>
+          <div><span class="font-bold text-slate-500">C.Costo:</span> <span id="ficha-val-c-costo">—</span></div>
+        </div>
+
+        <div class="space-y-1 text-xs text-slate-600">
+          <div><span class="font-bold text-slate-500">Cod. Regulatorio:</span> <span>—</span></div>
+          <div><span class="font-bold text-slate-500">Cla. SUNASS:</span> <span>clasificacion</span></div>
+          <div><span class="font-bold text-slate-500">Tipo Serv. SUNASS:</span> <span>servicios</span></div>
+          <div><span class="font-bold text-slate-500">Mod. Adquisicion:</span> <span id="ficha-val-mod-adq">—</span></div>
+        </div>
+
+        <div class="space-y-2">
+          <div class="font-bold text-xs text-slate-500">Historial de Depreciación:</div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-center border-collapse text-[10px] text-slate-600 border border-slate-200">
+              <thead>
+                <tr class="bg-slate-100 font-bold border-b border-slate-200">
+                  <th class="p-1 border border-slate-200">Ene</th>
+                  <th class="p-1 border border-slate-200">Feb</th>
+                  <th class="p-1 border border-slate-200">Mar</th>
+                  <th class="p-1 border border-slate-200">Abr</th>
+                  <th class="p-1 border border-slate-200">May</th>
+                  <th class="p-1 border border-slate-200">Jun</th>
+                  <th class="p-1 border border-slate-200">Jul</th>
+                  <th class="p-1 border border-slate-200">Ago</th>
+                  <th class="p-1 border border-slate-200">Set</th>
+                  <th class="p-1 border border-slate-200">Oct</th>
+                  <th class="p-1 border border-slate-200">Nov</th>
+                  <th class="p-1 border border-slate-200">Dic</th>
+                  <th class="p-1 border border-slate-200 font-bold">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="p-1 border border-slate-200">0.00</td>
+                  <td class="p-1 border border-slate-200">0.00</td>
+                  <td class="p-1 border border-slate-200">0.00</td>
+                  <td class="p-1 border border-slate-200">0.00</td>
+                  <td class="p-1 border border-slate-200">0.00</td>
+                  <td class="p-1 border border-slate-200">0.00</td>
+                  <td class="p-1 border border-slate-200">0.00</td>
+                  <td class="p-1 border border-slate-200">0.00</td>
+                  <td class="p-1 border border-slate-200">0.00</td>
+                  <td class="p-1 border border-slate-200">0.00</td>
+                  <td class="p-1 border border-slate-200">0.00</td>
+                  <td class="p-1 border border-slate-200">0.00</td>
+                  <td class="p-1 border border-slate-200 font-bold">0.00</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="border-t border-slate-200 pt-3 text-xs text-slate-600">
+          <span class="font-bold text-slate-500">Detalle Activo:</span>
+          <p id="ficha-val-detalle-activo" class="mt-1 font-medium bg-slate-100/50 p-2.5 rounded-lg border border-slate-150">—</p>
+        </div>
+
+        <!-- Imágenes del Activo -->
+        <div id="ficha-images-wrapper" class="hidden space-y-2">
+          <div class="font-bold text-xs text-slate-500">Imágenes Registradas:</div>
+          <div id="ficha-images-container" class="grid grid-cols-3 gap-4">
+            <!-- Inyectadas dinámicamente -->
+          </div>
+        </div>
+      </div>
+      
+      <div id="ficha-empty-state" class="text-center py-12 text-slate-400">
+        <span class="text-3xl">📄</span>
+        <p class="text-sm font-semibold mt-2">Ingrese un código patrimonial para consultar la ficha.</p>
+      </div>
+    </div>
+
     <!-- Lista Vacía -->
     <div id="empty-state" class="hidden text-center py-16 text-slate-400">
       <span class="text-4xl">📦</span>
@@ -792,6 +952,9 @@
       <nav class="flex-1 py-4 overflow-y-auto px-3 space-y-1 bg-slate-50">
         <button data-tab="activos" class="mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left">
           💼 Activos Fijos
+        </button>
+        <button data-tab="ficha" class="mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left">
+          📄 Ficha de Activo
         </button>
         <button data-tab="obras" class="mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left">
           🚧 Obras en Curso
