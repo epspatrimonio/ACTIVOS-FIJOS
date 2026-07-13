@@ -35,7 +35,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
     posY += 4;
     doc.text(activo.localidad || "LA MERCED", marginX, posY);
     posY += 4;
-    doc.text("Versión: 2026.1.1-Sinergia Digital-AMD", marginX, posY);
+    doc.text("Versión: 2026.1.1-Juan Eder Systems", marginX, posY);
     
     const now = new Date();
     const dateStr = now.toLocaleDateString('es-PE');
@@ -71,6 +71,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
       return dateVal;
     };
     
+    // Fila 1
     doc.setFont("helvetica", "bold"); doc.text("Fec Ingreso:", marginX, posY);
     doc.setFont("helvetica", "normal"); doc.text(formatDateStr(activo.fecha_registro_contable) || '—', marginX + 22, posY);
     
@@ -80,6 +81,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
     doc.setFont("helvetica", "bold"); doc.text("Tipo ing:", 155, posY);
     doc.setFont("helvetica", "normal"); doc.text("CO - Compra", 155 + 20, posY);
     
+    // Fila 2
     posY += 5;
     doc.setFont("helvetica", "bold"); doc.text("Fec Alta:", marginX, posY);
     doc.setFont("helvetica", "normal"); doc.text(formatDateStr(activo.fecha_alta_factura) || '—', marginX + 22, posY);
@@ -90,6 +92,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
     doc.setFont("helvetica", "bold"); doc.text("Docum:", 155, posY);
     doc.setFont("helvetica", "normal"); doc.text("OC - Orden de Compra", 155 + 20, posY);
     
+    // Fila 3
     posY += 5;
     doc.setFont("helvetica", "bold"); doc.text("Fec Entrega:", marginX, posY);
     doc.setFont("helvetica", "normal"); doc.text(formatDateStr(activo.fecha_asignacion) || '—', marginX + 22, posY);
@@ -97,29 +100,30 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
     doc.setFont("helvetica", "bold"); doc.text("Tasación:", 105, posY);
     doc.setFont("helvetica", "normal"); doc.text("0.00", 105 + 22, posY);
     
-    doc.setFont("helvetica", "bold"); doc.text("Nº Docum:", 155, posY);
+    doc.setFont("helvetica", "bold"); doc.text("O/C:", 155, posY);
     doc.setFont("helvetica", "normal"); doc.text(activo.n_doc || '—', 155 + 20, posY);
     
+    // Fila 4
     posY += 5;
     doc.setFont("helvetica", "bold"); doc.text("Estado:", marginX, posY);
     doc.setFont("helvetica", "normal"); doc.text(activo.estado_activo || '—', marginX + 22, posY);
     
-    doc.setFont("helvetica", "bold"); doc.text("Residual:", 105, posY);
+    doc.setFont("helvetica", "bold"); doc.text("Neto:", 105, posY);
     doc.setFont("helvetica", "normal"); doc.text(`S/. ${Number(activo.valor_neto || 0).toFixed(2)}`, 105 + 22, posY);
     
     doc.setFont("helvetica", "bold"); doc.text("Seguro:", 155, posY);
     doc.setFont("helvetica", "normal"); doc.text("Si", 155 + 20, posY);
     
+    // Fila 5
     posY += 5;
     doc.setFont("helvetica", "bold"); doc.text("Proyecto:", marginX, posY);
     doc.setFont("helvetica", "normal"); doc.text("—", marginX + 22, posY);
     
-    doc.setFont("helvetica", "bold"); doc.text("Reposición:", 105, posY);
-    doc.setFont("helvetica", "normal"); doc.text("0.00", 105 + 22, posY);
+    doc.setFont("helvetica", "bold"); doc.text("Depreciación:", 105, posY);
+    const depAcum = (Number(activo.valor_en_libros || 0) - Number(activo.valor_neto || 0)).toFixed(2);
+    doc.setFont("helvetica", "normal"); doc.text(`S/. ${depAcum}`, 105 + 22, posY);
     
-    doc.setFont("helvetica", "bold"); doc.text("Serie:", 155, posY);
-    doc.setFont("helvetica", "normal"); doc.text(activo.numero_serie || '—', 155 + 20, posY);
-    
+    // Fila 6
     posY += 5;
     doc.setFont("helvetica", "bold"); doc.text("Principal:", marginX, posY);
     doc.setFont("helvetica", "normal"); doc.text("Si", marginX + 22, posY);
@@ -130,6 +134,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
     doc.setFont("helvetica", "bold"); doc.text("Vida util:", 155, posY);
     doc.setFont("helvetica", "normal"); doc.text(`${activo.vida_util_anios} Años`, 155 + 20, posY);
     
+    // Fila 7
     posY += 5;
     doc.setFont("helvetica", "bold"); doc.text("Dep Inic:", 105, posY);
     doc.setFont("helvetica", "normal"); doc.text("0.00", 105 + 22, posY);
@@ -137,7 +142,33 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
     doc.setFont("helvetica", "bold"); doc.text("Factor:", 155, posY);
     doc.setFont("helvetica", "normal"); doc.text("—", 155 + 20, posY);
 
-    posY += 3;
+    // Segmento Independiente: Detalle Físico
+    posY += 8;
+    doc.line(marginX, posY, 196, posY);
+    
+    posY += 6;
+    doc.setFont("helvetica", "bold");
+    doc.text("Detalle Físico del Activo / Especificaciones:", marginX, posY);
+    
+    posY += 5;
+    doc.setFont("helvetica", "bold"); doc.text("Marca:", marginX, posY);
+    doc.setFont("helvetica", "normal"); doc.text(activo.marca || '—', marginX + 15, posY);
+    
+    doc.setFont("helvetica", "bold"); doc.text("Modelo:", 70, posY);
+    doc.setFont("helvetica", "normal"); doc.text(activo.modelo || '—', 70 + 15, posY);
+    
+    doc.setFont("helvetica", "bold"); doc.text("Serie:", 135, posY);
+    doc.setFont("helvetica", "normal"); doc.text(activo.numero_serie || '—', 135 + 15, posY);
+    
+    posY += 5;
+    doc.setFont("helvetica", "bold"); doc.text("Especificaciones:", marginX, posY);
+    const specText = activo.caracteristicas_accesorios || '—';
+    const splitSpecs = doc.splitTextToSize(specText, 150);
+    doc.setFont("helvetica", "normal");
+    doc.text(splitSpecs, marginX + 30, posY);
+    
+    posY += (splitSpecs.length * 4);
+    
     doc.line(marginX, posY, 196, posY);
     
     posY += 6;
@@ -180,8 +211,52 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
     doc.setFont("helvetica", "bold");
     doc.text("Historial de Depreciación:", marginX, posY);
     
+    const getHistorialDepreciacion = (act, year) => {
+      const cost = Number(act.valor_en_libros) || 0;
+      const lifeYears = Number(act.vida_util_anios) || 0;
+      const startStr = act.fecha_registro_contable || act.fecha_alta_factura;
+      
+      const monthlyValues = Array(13).fill("0.00");
+      
+      if (cost > 0 && lifeYears > 0 && startStr) {
+        const startDate = new Date(startStr);
+        const startYear = startDate.getFullYear();
+        const startMonth = startDate.getMonth() + 1;
+        
+        const totalMonthsOfLife = lifeYears * 12;
+        const monthlyDepRate = cost / totalMonthsOfLife;
+        
+        const currentRealDate = new Date();
+        const currentRealYear = currentRealDate.getFullYear();
+        const currentRealMonth = currentRealDate.getMonth() + 1;
+        
+        let lastVal = 0;
+        for (let m = 1; m <= 12; m++) {
+          if (year > currentRealYear || (year === currentRealYear && m > currentRealMonth)) {
+            monthlyValues[m - 1] = "—";
+            continue;
+          }
+          
+          const elapsedMonths = (year - startYear) * 12 + (m - startMonth);
+          if (elapsedMonths < 0) {
+            monthlyValues[m - 1] = "0.00";
+          } else if (elapsedMonths >= totalMonthsOfLife) {
+            const val = cost;
+            monthlyValues[m - 1] = val.toFixed(2);
+            lastVal = val;
+          } else {
+            const val = monthlyDepRate * elapsedMonths;
+            monthlyValues[m - 1] = val.toFixed(2);
+            lastVal = val;
+          }
+        }
+        monthlyValues[12] = lastVal.toFixed(2);
+      }
+      return monthlyValues;
+    };
+
     const depHeaders = [["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Setiembre", "Octubre", "Noviembre", "Diciembre", "Total"]];
-    const depData = [["0.00", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00"]];
+    const depData = [getHistorialDepreciacion(activo, 2026)];
     
     doc.autoTable({
       startY: posY + 2,
