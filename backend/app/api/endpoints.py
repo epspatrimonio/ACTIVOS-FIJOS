@@ -3,7 +3,8 @@ import json
 import asyncio
 import subprocess
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+import shutil
+from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -442,6 +443,80 @@ async def update_activo(
         )
 
 
+@router.post("/activos/{cod_patrimonial}/upload", status_code=status.HTTP_200_OK)
+async def upload_activo_files(
+    cod_patrimonial: str,
+    pdf_file: Optional[UploadFile] = File(None),
+    imagen_1: Optional[UploadFile] = File(None),
+    imagen_2: Optional[UploadFile] = File(None),
+    imagen_3: Optional[UploadFile] = File(None),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Sube archivos asociados a un activo fijo (expediente PDF e imágenes).
+    """
+    db_activo = await db.get(Activo, cod_patrimonial)
+    if not db_activo:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"El activo con código patrimonial '{cod_patrimonial}' no existe."
+        )
+
+    current_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    uploads_dir = os.path.join(current_dir, "uploads")
+    os.makedirs(uploads_dir, exist_ok=True)
+
+    updates = {}
+
+    if pdf_file:
+        filename = f"{cod_patrimonial}_expediente.pdf"
+        file_path = os.path.join(uploads_dir, filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(pdf_file.file, buffer)
+        db_activo.pdf_expediente_path = f"/uploads/{filename}"
+        updates["pdf_expediente_path"] = db_activo.pdf_expediente_path
+
+    if imagen_1:
+        ext = os.path.splitext(imagen_1.filename)[1] or ".jpg"
+        filename = f"{cod_patrimonial}_img1{ext}"
+        file_path = os.path.join(uploads_dir, filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(imagen_1.file, buffer)
+        db_activo.imagen_1_path = f"/uploads/{filename}"
+        updates["imagen_1_path"] = db_activo.imagen_1_path
+
+    if imagen_2:
+        ext = os.path.splitext(imagen_2.filename)[1] or ".jpg"
+        filename = f"{cod_patrimonial}_img2{ext}"
+        file_path = os.path.join(uploads_dir, filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(imagen_2.file, buffer)
+        db_activo.imagen_2_path = f"/uploads/{filename}"
+        updates["imagen_2_path"] = db_activo.imagen_2_path
+
+    if imagen_3:
+        ext = os.path.splitext(imagen_3.filename)[1] or ".jpg"
+        filename = f"{cod_patrimonial}_img3{ext}"
+        file_path = os.path.join(uploads_dir, filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(imagen_3.file, buffer)
+        db_activo.imagen_3_path = f"/uploads/{filename}"
+        updates["imagen_3_path"] = db_activo.imagen_3_path
+
+    if updates:
+        try:
+            await db.commit()
+            await db.refresh(db_activo)
+        except Exception as e:
+            await db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Error al guardar los adjuntos: {str(e)}"
+            )
+
+    return {"status": "success", "updates": updates}
+
+
 @router.delete("/activos/{cod_patrimonial}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_activo(
     cod_patrimonial: str,
@@ -537,6 +612,17 @@ async def sincronizar_publico(db: AsyncSession = Depends(get_db)):
                 json.dump(serialized_inv, f, ensure_ascii=False, indent=2)
             with open(ter_export_path, "w", encoding="utf-8") as f:
                 json.dump(serialized_ter, f, ensure_ascii=False, indent=2)
+                
+            # Copiar archivos físicos subidos al dashboard público
+            uploads_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "uploads")
+            public_uploads_dir = os.path.join(dir_name, "uploads")
+            if os.path.exists(uploads_dir):
+                os.makedirs(public_uploads_dir, exist_ok=True)
+                for item in os.listdir(uploads_dir):
+                    s_path = os.path.join(uploads_dir, item)
+                    d_path = os.path.join(public_uploads_dir, item)
+                    if os.path.isfile(s_path):
+                        shutil.copy2(s_path, d_path)
         await asyncio.to_thread(save_files)
         
         # Sincronización automática con Git/GitHub

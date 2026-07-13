@@ -51,6 +51,11 @@ class Activo(Base):
     cuenta_contable: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     centro_costo: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     
+    pdf_expediente_path: Mapped[Optional[str]] = mapped_column(String(350), nullable=True)
+    imagen_1_path: Mapped[Optional[str]] = mapped_column(String(350), nullable=True)
+    imagen_2_path: Mapped[Optional[str]] = mapped_column(String(350), nullable=True)
+    imagen_3_path: Mapped[Optional[str]] = mapped_column(String(350), nullable=True)
+    
     # Campos de auditoria autogenerados
     created_at: Mapped[datetime] = mapped_column(server_default=FetchedValue())
     updated_at: Mapped[datetime] = mapped_column(server_default=FetchedValue())
@@ -134,6 +139,11 @@ class VwRegistroActivosDetalle(Base):
     centro_costo: Mapped[Optional[str]] = mapped_column(String(20))
     requerido_por: Mapped[Optional[str]] = mapped_column(String(260))
     fecha_alta: Mapped[Optional[date]] = mapped_column(Date)
+    
+    pdf_expediente_path: Mapped[Optional[str]] = mapped_column(String(350), nullable=True)
+    imagen_1_path: Mapped[Optional[str]] = mapped_column(String(350), nullable=True)
+    imagen_2_path: Mapped[Optional[str]] = mapped_column(String(350), nullable=True)
+    imagen_3_path: Mapped[Optional[str]] = mapped_column(String(350), nullable=True)
 
 
 

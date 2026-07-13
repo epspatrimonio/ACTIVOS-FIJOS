@@ -32,6 +32,10 @@ class ActivoBase(BaseModel):
     estado_activo: Literal["BUENO", "REGULAR", "MALO", "PARA BAJA", "BAJA"] = Field("BUENO")
     cuenta_contable: str = Field(..., max_length=20, description="Cuenta contable del activo")
     centro_costo: Optional[str] = Field(None, max_length=20, description="Centro de costo del activo")
+    pdf_expediente_path: Optional[str] = Field(None, max_length=350, description="Ruta al expediente de adquisición en formato PDF")
+    imagen_1_path: Optional[str] = Field(None, max_length=350, description="Ruta de la imagen 1 del activo")
+    imagen_2_path: Optional[str] = Field(None, max_length=350, description="Ruta de la imagen 2 del activo")
+    imagen_3_path: Optional[str] = Field(None, max_length=350, description="Ruta de la imagen 3 del activo")
 
 class ActivoCreate(ActivoBase):
     # Campos opcionales para la creación/actualización del documento de adquisición inline
@@ -151,6 +155,10 @@ class ActivoPublicoDTO(BaseModel):
     cuenta_contable: Optional[str] = None
     centro_costo: Optional[str] = None
     requerido_por: Optional[str] = None
+    pdf_expediente_path: Optional[str] = None
+    imagen_1_path: Optional[str] = None
+    imagen_2_path: Optional[str] = None
+    imagen_3_path: Optional[str] = None
 
     # Datos adicionales de vehículos
     placa: Optional[str] = None

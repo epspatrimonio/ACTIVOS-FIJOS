@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Package, Trash2, Edit3 } from 'lucide-react';
+import { Package, Trash2, Edit3, Download, FileText } from 'lucide-react';
 import { deleteActivo } from '../utils/api';
 import ExcelHeaderFilter from './ExcelHeaderFilter';
 
@@ -15,6 +15,248 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
     setColFilters({});
     setSortConfig({ key: null, direction: null });
   }, [activosCount]);
+
+
+
+  const generateFichaPDF = async (activo) => {
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+      alert('La librería jsPDF no está cargada.');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
+    
+    const marginX = 14;
+    let posY = 15;
+    
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.text("EPS SELVA CENTRAL S.A.", marginX, posY);
+    posY += 4;
+    doc.text(activo.localidad || "LA MERCED", marginX, posY);
+    posY += 4;
+    doc.text("Versión: 2026.1.1-Sinergia Digital-AMD", marginX, posY);
+    
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('es-PE');
+    const timeStr = now.toLocaleTimeString('es-PE');
+    doc.text(`Fecha: ${dateStr}`, 196, 15, { align: 'right' });
+    doc.text(`Hora: ${timeStr}`, 196, 19, { align: 'right' });
+    
+    posY += 10;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.text("FICHA DE REGISTRO DEL BIEN", 105, posY, { align: 'center' });
+    
+    posY += 3;
+    doc.setDrawColor(200, 200, 200);
+    doc.line(marginX, posY, 196, posY);
+    
+    posY += 6;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.text(`${activo.cod_patrimonial}   ${activo.denominacion}`, marginX, posY);
+    
+    posY += 2;
+    doc.line(marginX, posY, 196, posY);
+    
+    posY += 6;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    
+    const formatDateStr = (dateVal) => {
+      if (!dateVal) return '—';
+      const parts = dateVal.split('T')[0].split('-');
+      if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      return dateVal;
+    };
+    
+    doc.setFont("helvetica", "bold"); doc.text("Fec Ingreso:", marginX, posY);
+    doc.setFont("helvetica", "normal"); doc.text(formatDateStr(activo.fecha_registro_contable) || '—', marginX + 22, posY);
+    
+    doc.setFont("helvetica", "bold"); doc.text("Histórico:", 105, posY);
+    doc.setFont("helvetica", "normal"); doc.text(`S/. ${Number(activo.valor_en_libros || 0).toFixed(2)}`, 105 + 22, posY);
+    
+    doc.setFont("helvetica", "bold"); doc.text("Tipo ing:", 155, posY);
+    doc.setFont("helvetica", "normal"); doc.text("CO - Compra", 155 + 20, posY);
+    
+    posY += 5;
+    doc.setFont("helvetica", "bold"); doc.text("Fec Alta:", marginX, posY);
+    doc.setFont("helvetica", "normal"); doc.text(formatDateStr(activo.fecha_alta_factura) || '—', marginX + 22, posY);
+    
+    doc.setFont("helvetica", "bold"); doc.text("Libros:", 105, posY);
+    doc.setFont("helvetica", "normal"); doc.text(`S/. ${Number(activo.valor_en_libros || 0).toFixed(2)}`, 105 + 22, posY);
+    
+    doc.setFont("helvetica", "bold"); doc.text("Docum:", 155, posY);
+    doc.setFont("helvetica", "normal"); doc.text("OC - Orden de Compra", 155 + 20, posY);
+    
+    posY += 5;
+    doc.setFont("helvetica", "bold"); doc.text("Fec Entrega:", marginX, posY);
+    doc.setFont("helvetica", "normal"); doc.text(formatDateStr(activo.fecha_asignacion) || '—', marginX + 22, posY);
+    
+    doc.setFont("helvetica", "bold"); doc.text("Tasación:", 105, posY);
+    doc.setFont("helvetica", "normal"); doc.text("0.00", 105 + 22, posY);
+    
+    doc.setFont("helvetica", "bold"); doc.text("Nº Docum:", 155, posY);
+    doc.setFont("helvetica", "normal"); doc.text(activo.n_doc || '—', 155 + 20, posY);
+    
+    posY += 5;
+    doc.setFont("helvetica", "bold"); doc.text("Estado:", marginX, posY);
+    doc.setFont("helvetica", "normal"); doc.text(activo.estado_activo || '—', marginX + 22, posY);
+    
+    doc.setFont("helvetica", "bold"); doc.text("Residual:", 105, posY);
+    doc.setFont("helvetica", "normal"); doc.text(`S/. ${Number(activo.valor_neto || 0).toFixed(2)}`, 105 + 22, posY);
+    
+    doc.setFont("helvetica", "bold"); doc.text("Seguro:", 155, posY);
+    doc.setFont("helvetica", "normal"); doc.text("Si", 155 + 20, posY);
+    
+    posY += 5;
+    doc.setFont("helvetica", "bold"); doc.text("Proyecto:", marginX, posY);
+    doc.setFont("helvetica", "normal"); doc.text("—", marginX + 22, posY);
+    
+    doc.setFont("helvetica", "bold"); doc.text("Reposición:", 105, posY);
+    doc.setFont("helvetica", "normal"); doc.text("0.00", 105 + 22, posY);
+    
+    doc.setFont("helvetica", "bold"); doc.text("Serie:", 155, posY);
+    doc.setFont("helvetica", "normal"); doc.text(activo.numero_serie || '—', 155 + 20, posY);
+    
+    posY += 5;
+    doc.setFont("helvetica", "bold"); doc.text("Principal:", marginX, posY);
+    doc.setFont("helvetica", "normal"); doc.text("Si", marginX + 22, posY);
+    
+    doc.setFont("helvetica", "bold"); doc.text("Revaluado:", 105, posY);
+    doc.setFont("helvetica", "normal"); doc.text("0.00", 105 + 22, posY);
+    
+    doc.setFont("helvetica", "bold"); doc.text("Vida util:", 155, posY);
+    doc.setFont("helvetica", "normal"); doc.text(`${activo.vida_util_anios} Años`, 155 + 20, posY);
+    
+    posY += 5;
+    doc.setFont("helvetica", "bold"); doc.text("Dep Inic:", 105, posY);
+    doc.setFont("helvetica", "normal"); doc.text("0.00", 105 + 22, posY);
+    
+    doc.setFont("helvetica", "bold"); doc.text("Factor:", 155, posY);
+    doc.setFont("helvetica", "normal"); doc.text("—", 155 + 20, posY);
+
+    posY += 3;
+    doc.line(marginX, posY, 196, posY);
+    
+    posY += 6;
+    doc.setFont("helvetica", "bold"); doc.text("Localización:", marginX, posY);
+    doc.setFont("helvetica", "normal"); doc.text(activo.sucursal || '—', marginX + 22, posY);
+    
+    posY += 5;
+    doc.setFont("helvetica", "bold"); doc.text("Responsable:", marginX, posY);
+    doc.setFont("helvetica", "normal"); doc.text(activo.responsable || '—', marginX + 22, posY);
+    
+    posY += 5;
+    doc.setFont("helvetica", "bold"); doc.text("Cuenta:", marginX, posY);
+    doc.setFont("helvetica", "normal"); doc.text(activo.cuenta_contable || '—', marginX + 22, posY);
+    
+    posY += 5;
+    doc.setFont("helvetica", "bold"); doc.text("C.Costo:", marginX, posY);
+    doc.setFont("helvetica", "normal"); doc.text(activo.centro_costo || '—', marginX + 22, posY);
+    
+    posY += 3;
+    doc.line(marginX, posY, 196, posY);
+    
+    posY += 6;
+    doc.setFont("helvetica", "bold"); doc.text("Cod. Regulatorio:", marginX, posY);
+    doc.setFont("helvetica", "normal"); doc.text("—", marginX + 32, posY);
+    
+    doc.setFont("helvetica", "bold"); doc.text("Cla. SUNASS:", 105, posY);
+    doc.setFont("helvetica", "normal"); doc.text("clasificacion", 105 + 25, posY);
+    
+    posY += 5;
+    doc.setFont("helvetica", "bold"); doc.text("Tipo Serv. SUNASS:", marginX, posY);
+    doc.setFont("helvetica", "normal"); doc.text("servicios", marginX + 32, posY);
+    
+    doc.setFont("helvetica", "bold"); doc.text("Mod. Adquisicion:", 105, posY);
+    doc.setFont("helvetica", "normal"); doc.text(activo.documento_tipo || '—', 105 + 25, posY);
+    
+    posY += 3;
+    doc.line(marginX, posY, 196, posY);
+    
+    posY += 6;
+    doc.setFont("helvetica", "bold");
+    doc.text("Historial de Depreciación:", marginX, posY);
+    
+    const depHeaders = [["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Setiembre", "Octubre", "Noviembre", "Diciembre", "Total"]];
+    const depData = [["0.00", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00"]];
+    
+    doc.autoTable({
+      startY: posY + 2,
+      head: depHeaders,
+      body: depData,
+      theme: 'plain',
+      styles: { fontSize: 7.5, halign: 'center' },
+      headStyles: { fontStyle: 'bold', fillColor: [240, 240, 240] },
+      margin: { left: marginX, right: marginX }
+    });
+    
+    posY = doc.lastAutoTable.finalY + 6;
+    
+    doc.line(marginX, posY, 196, posY);
+    posY += 5;
+    doc.setFont("helvetica", "bold"); doc.text("Detalle Activo:", marginX, posY);
+    
+    const detParts = [];
+    if (activo.n_doc_compra) detParts.push(`O/C: ${activo.n_doc_compra}`);
+    if (activo.nota_pedido) detParts.push(`NOTA DE PEDIDO: ${activo.nota_pedido}`);
+    if (activo.certificacion_presupuestal) detParts.push(`CERTIFICACIÓN PRESUPUESTAL: ${activo.certificacion_presupuestal}`);
+    if (activo.numero_factura) detParts.push(`FACTURA: ${activo.numero_factura}`);
+    detParts.push(activo.denominacion);
+    
+    posY += 4;
+    doc.setFont("helvetica", "normal");
+    doc.text(detParts.join(" / "), marginX, posY, { maxWidth: 180 });
+    
+    const imagesToDraw = [];
+    if (activo.imagen_1_path) imagesToDraw.push(activo.imagen_1_path);
+    if (activo.imagen_2_path) imagesToDraw.push(activo.imagen_2_path);
+    if (activo.imagen_3_path) imagesToDraw.push(activo.imagen_3_path);
+    
+    if (imagesToDraw.length > 0) {
+      posY += 10;
+      doc.line(marginX, posY, 196, posY);
+      posY += 6;
+      doc.setFont("helvetica", "bold");
+      doc.text("Imágenes del Activo:", marginX, posY);
+      posY += 4;
+      
+      const loadImgAsBase64 = (url) => {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.crossOrigin = 'Anonymous';
+          img.src = url;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            resolve(canvas.toDataURL('image/jpeg'));
+          };
+          img.onerror = () => resolve(null);
+        });
+      };
+      
+      const imgWidth = 55;
+      const imgHeight = 40;
+      const spacing = 6;
+      
+      for (let i = 0; i < imagesToDraw.length; i++) {
+        const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api';
+        const uploadsBase = apiBase.replace('/api', '');
+        const fullUrl = `${uploadsBase}${imagesToDraw[i]}`;
+        const base64Data = await loadImgAsBase64(fullUrl);
+        if (base64Data) {
+          doc.addImage(base64Data, 'JPEG', marginX + i * (imgWidth + spacing), posY, imgWidth, imgHeight);
+        }
+      }
+    }
+    
+    doc.save(`Ficha_Activo_${activo.cod_patrimonial}.pdf`);
+  };
 
   const handleFilterChange = (columnKey, values) => {
     setColFilters(prev => ({
@@ -561,6 +803,28 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   {/* Gestión */}
                   <td className="px-5 py-4 whitespace-nowrap text-center text-xs">
                     <div className="flex items-center justify-center space-x-1.5">
+                      <button
+                        onClick={() => generateFichaPDF(activo)}
+                        title="Descargar Ficha del Activo"
+                        className="h-8 w-8 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/50 text-emerald-600 hover:text-emerald-700 rounded-lg transition-all duration-200 active:scale-95 inline-flex items-center justify-center shadow-sm"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                      </button>
+                      {activo.pdf_expediente_path && (
+                        <a
+                          href={(() => {
+                            const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api';
+                            const uploadsBase = apiBase.replace('/api', '');
+                            return `${uploadsBase}${activo.pdf_expediente_path}`;
+                          })()}
+                          target="_blank"
+                          rel="noreferrer"
+                          title="Ver Expediente de Adquisición"
+                          className="h-8 w-8 bg-amber-50 hover:bg-amber-100 border border-amber-200/50 text-amber-600 hover:text-amber-700 rounded-lg transition-all duration-200 active:scale-95 inline-flex items-center justify-center shadow-sm"
+                        >
+                          <FileText className="w-3.5 h-3.5" />
+                        </a>
+                      )}
                       <button
                         onClick={() => onEdit(activo)}
                         title="Editar Activo"

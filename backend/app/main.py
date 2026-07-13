@@ -39,6 +39,12 @@ public_dir = os.path.join(current_dir, "public_dashboard")
 if os.path.exists(public_dir):
     app.mount("/public", StaticFiles(directory=public_dir, html=True), name="public")
 
+# Servir archivos subidos (PDF e imágenes) de forma estática
+uploads_dir = os.path.join(current_dir, "uploads")
+if not os.path.exists(uploads_dir):
+    os.makedirs(uploads_dir)
+app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+
 # Servir el frontend compilado (producción) en la raíz '/' si existe
 frontend_dir = os.path.join(current_dir, "frontend", "dist")
 if os.path.exists(frontend_dir):

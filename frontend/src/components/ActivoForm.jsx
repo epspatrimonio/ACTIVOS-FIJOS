@@ -72,6 +72,10 @@ const INITIAL_FORM_STATE = {
   // Campos del Activo Fijo directamente
   cuenta_contable: '',
   centro_costo: '',
+  pdf_expediente_path: '',
+  imagen_1_path: '',
+  imagen_2_path: '',
+  imagen_3_path: '',
 };
 
 
@@ -139,6 +143,10 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
         estado_activo: editingActivo.estado_activo || 'REGISTRADO',
         cuenta_contable: editingActivo.cuenta_contable || '',
         centro_costo: editingActivo.centro_costo || '',
+        pdf_expediente_path: editingActivo.pdf_expediente_path || '',
+        imagen_1_path: editingActivo.imagen_1_path || '',
+        imagen_2_path: editingActivo.imagen_2_path || '',
+        imagen_3_path: editingActivo.imagen_3_path || '',
       };
     }
     return INITIAL_FORM_STATE;
@@ -147,6 +155,107 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const isEditMode = !!editingActivo;
+
+  const [selectedPdf, setSelectedPdf] = useState(null);
+  const [selectedImages, setSelectedImages] = useState([null, null, null]);
+
+  useEffect(() => {
+    setSelectedPdf(null);
+    setSelectedImages([null, null, null]);
+  }, [editingActivo]);
+
+  const compressImage = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 1200;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > MAX_WIDTH) {
+            height = Math.round((height * MAX_WIDTH) / width);
+            width = MAX_WIDTH;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+                  type: 'image/jpeg',
+                  lastModified: Date.now()
+                });
+                resolve(compressedFile);
+              } else {
+                resolve(file);
+              }
+            },
+            'image/jpeg',
+            0.8
+          );
+        };
+        img.onerror = () => resolve(file);
+      };
+      reader.onerror = () => resolve(file);
+    });
+  };
+
+  const handlePdfChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert("El archivo PDF no debe superar los 5MB.");
+        return;
+      }
+      setSelectedPdf(file);
+    }
+  };
+
+  const handleImageChange = async (e, index) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        alert("La imagen no debe superar los 10MB antes de la compresión.");
+        return;
+      }
+      const compressed = await compressImage(file);
+      setSelectedImages((prev) => {
+        const updated = [...prev];
+        updated[index] = compressed;
+        return updated;
+      });
+    }
+  };
+
+  const handleRemoveImage = (index) => {
+    setSelectedImages((prev) => {
+      const updated = [...prev];
+      updated[index] = null;
+      return updated;
+    });
+    const imgKey = `imagen_${index + 1}_path`;
+    setForm((prev) => ({
+      ...prev,
+      [imgKey]: ''
+    }));
+  };
+
+  const getUploadUrl = (path) => {
+    if (!path) return '';
+    const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api';
+    const uploadsBase = apiBase.replace('/api', '');
+    return `${uploadsBase}${path}`;
+  };
 
   // Listas de dimensiones y documentos
   const [sucursales, setSucursales] = useState([]);
@@ -321,6 +430,10 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
         estado_activo: editingActivo.estado_activo || 'REGISTRADO',
         cuenta_contable: editingActivo.cuenta_contable || '',
         centro_costo: editingActivo.centro_costo || '',
+        pdf_expediente_path: editingActivo.pdf_expediente_path || '',
+        imagen_1_path: editingActivo.imagen_1_path || '',
+        imagen_2_path: editingActivo.imagen_2_path || '',
+        imagen_3_path: editingActivo.imagen_3_path || '',
       });
       setError(null);
       setSuccess(false);
@@ -820,20 +933,40 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
 
       if (isEditMode) {
         await updateActivo(form.cod_patrimonial, payload);
-        if (selectedCategory && selectedCategory.toLowerCase().startsWith('vehiculo') && vehiculoDetalleData) {
-          await upsertVehiculoDetalle(form.cod_patrimonial, vehiculoDetalleData);
+      } else {
+        await createActivo(payload);
+      }
+
+      if (selectedCategory && selectedCategory.toLowerCase().startsWith('vehiculo') && vehiculoDetalleData) {
+        await upsertVehiculoDetalle(form.cod_patrimonial, vehiculoDetalleData);
+      }
+
+      // Subir archivos si existen
+      if (selectedPdf || selectedImages.some(img => img !== null)) {
+        const formData = new FormData();
+        if (selectedPdf) formData.append('pdf_file', selectedPdf);
+        if (selectedImages[0]) formData.append('imagen_1', selectedImages[0]);
+        if (selectedImages[1]) formData.append('imagen_2', selectedImages[1]);
+        if (selectedImages[2]) formData.append('imagen_3', selectedImages[2]);
+        
+        const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api';
+        const uploadResponse = await fetch(`${apiBase}/activos/${form.cod_patrimonial}/upload`, {
+          method: 'POST',
+          body: formData
+        });
+        if (!uploadResponse.ok) {
+          const errData = await uploadResponse.json().catch(() => ({}));
+          throw new Error(errData.detail || 'Error al subir los archivos adjuntos.');
         }
-        setSuccess(true);
-        reloadUltimasActas();
+      }
+
+      setSuccess(true);
+      reloadUltimasActas();
+
+      if (isEditMode) {
         if (onSuccess) onSuccess();
         if (onCancelEdit) onCancelEdit();
       } else {
-        await createActivo(payload);
-        if (selectedCategory && selectedCategory.toLowerCase().startsWith('vehiculo') && vehiculoDetalleData) {
-          await upsertVehiculoDetalle(form.cod_patrimonial, vehiculoDetalleData);
-        }
-        setSuccess(true);
-        reloadUltimasActas();
         const confirmAnother = window.confirm("¿Desea registrar otro activo fijo?");
         if (confirmAnother) {
           setForm((prev) => ({
@@ -845,12 +978,16 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
             cuenta_contable: prev.cuenta_contable,
             centro_costo: prev.centro_costo,
           }));
+          setSelectedPdf(null);
+          setSelectedImages([null, null, null]);
           if (onSuccess) onSuccess();
         } else {
           setForm(INITIAL_FORM_STATE);
           setSelectedCompraDetail(null);
           setSelectedIncDetail(null);
           setSelectedObraDetail(null);
+          setSelectedPdf(null);
+          setSelectedImages([null, null, null]);
           if (onClearPreSelectedDoc) onClearPreSelectedDoc();
           if (onSuccess) onSuccess();
           if (onNavigateTab) onNavigateTab('DOCUMENTOS');
@@ -1970,7 +2107,93 @@ export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEd
         </div>
       </div>
 
+      {/* SECCIÓN 6: Documento de Adquisición y Fotografías */}
+      <div className="glass-panel rounded-xl p-5 sm:p-6 relative focus-within:z-20">
+        <h3 className="text-base font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2">
+          6. Documento de Adquisición (PDF) y Fotografías del Activo (Max 3)
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* PDF Upload */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 mb-1">
+              Expediente de Compra / Adquisición (PDF)
+            </label>
+            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-xl hover:border-brand-500 transition-colors">
+              <div className="space-y-1 text-center">
+                <div className="flex text-sm text-slate-600 justify-center">
+                  <label className="relative cursor-pointer bg-white rounded-md font-semibold text-brand-600 hover:text-brand-500 focus-within:outline-none">
+                    <span>Subir archivo PDF</span>
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      className="sr-only"
+                      onChange={handlePdfChange}
+                    />
+                  </label>
+                </div>
+                <p className="text-xs text-slate-400">PDF hasta 5MB</p>
+                {selectedPdf && (
+                  <p className="text-xs font-semibold text-emerald-600 truncate max-w-[200px]" title={selectedPdf.name}>
+                    📎 {selectedPdf.name}
+                  </p>
+                )}
+                {!selectedPdf && form.pdf_expediente_path && (
+                  <p className="text-xs text-slate-500 truncate max-w-[200px]">
+                    Actualmente registrado: <a href={getUploadUrl(form.pdf_expediente_path)} target="_blank" rel="noreferrer" className="text-brand-600 hover:underline font-bold">Ver PDF</a>
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
 
+          {/* Images Upload */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 mb-2">
+              Fotografías del Activo (Máximo 3 imágenes, compresión automática)
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {[1, 2, 3].map((num) => {
+                const imgKey = `imagen_${num}_path`;
+                const localFile = selectedImages[num - 1];
+                const registeredUrl = form[imgKey];
+                return (
+                  <div key={num} className="relative group border border-slate-200 rounded-xl overflow-hidden aspect-square bg-slate-50 flex flex-col items-center justify-center cursor-pointer hover:border-brand-500 transition-colors">
+                    {localFile || registeredUrl ? (
+                      <>
+                        <img
+                          src={localFile ? URL.createObjectURL(localFile) : getUploadUrl(registeredUrl)}
+                          alt={`Imagen ${num}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveImage(num - 1);
+                          }}
+                          className="absolute top-1 right-1 p-1 bg-rose-500 text-white rounded-full hover:bg-rose-600 transition-colors"
+                        >
+                          &times;
+                        </button>
+                      </>
+                    ) : (
+                      <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer text-slate-400 hover:text-brand-500">
+                        <span className="text-[10px] font-semibold text-center">Subir Foto {num}</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="sr-only"
+                          onChange={(e) => handleImageChange(e, num - 1)}
+                        />
+                      </label>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Botones de Guardar / Cancelar */}
       <div className="flex justify-end items-center space-x-3 pt-4">
