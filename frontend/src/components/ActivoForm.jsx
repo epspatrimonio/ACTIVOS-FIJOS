@@ -103,7 +103,46 @@ const cleanMoney = (val) => {
 };
 
 export default function ActivoForm({ onSuccess, editingActivo = null, onCancelEdit = null, setIsDirty, preSelectedDoc, onClearPreSelectedDoc, onNavigateTab }) {
-  const [form, setForm] = useState(INITIAL_FORM_STATE);
+  const [form, setForm] = useState(() => {
+    if (editingActivo) {
+      const initialDocCompra = editingActivo.n_doc_compra || (editingActivo.documento_tipo === 'COMPRA' ? editingActivo.n_doc : '') || '';
+      const initialDocInc = editingActivo.n_doc_incorporacion || (editingActivo.documento_tipo === 'INCORPORACION' ? editingActivo.n_doc : '') || '';
+      const initialDocObra = editingActivo.n_doc_obra || (editingActivo.documento_tipo === 'OBRA' ? editingActivo.n_doc : '') || '';
+
+      return {
+        ...INITIAL_FORM_STATE,
+        cod_patrimonial: editingActivo.cod_patrimonial || '',
+        documento_tipo: editingActivo.documento_tipo || 'COMPRA',
+        n_doc_compra: initialDocCompra,
+        n_doc_incorporacion: initialDocInc,
+        n_doc_obra: initialDocObra,
+        cod_categoria: editingActivo.cod_categoria || '',
+        denominacion: editingActivo.denominacion || '',
+        color: editingActivo.color || '',
+        marca: editingActivo.marca || '',
+        modelo: editingActivo.modelo || '',
+        numero_serie: editingActivo.numero_serie || '',
+        caracteristicas_accesorios: editingActivo.caracteristicas_accesorios || '',
+        vida_util_anios: editingActivo.vida_util_anios || 0,
+        id_sucursal: editingActivo.id_sucursal || '',
+        unidad: editingActivo.unidad || '',
+        puesto_id: editingActivo.puesto_id || '',
+        cod_personal: editingActivo.cod_personal || '',
+        numero_factura: editingActivo.numero_factura || '',
+        fecha_alta_factura: editingActivo.fecha_alta_factura || '',
+        fecha_registro_contable: editingActivo.fecha_registro_contable || '',
+        fecha_asignacion: editingActivo.fecha_asignacion || '',
+        valor_en_libros: formatMonetaryValue(editingActivo.valor_en_libros),
+        igv: formatMonetaryValue(editingActivo.igv),
+        informe_conformidad: editingActivo.informe_conformidad || '',
+        n_acta: editingActivo.n_acta || '',
+        estado_activo: editingActivo.estado_activo || 'REGISTRADO',
+        cuenta_contable: editingActivo.cuenta_contable || '',
+        centro_costo: editingActivo.centro_costo || '',
+      };
+    }
+    return INITIAL_FORM_STATE;
+  });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);

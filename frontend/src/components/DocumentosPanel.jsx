@@ -1246,15 +1246,6 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
           {/* Barra de Filtros */}
           <div className="glass-panel rounded-xl p-5 relative z-30">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <SearchableSelect
-                label="Localidad"
-                name="filter_localidad"
-                value={tableFilters.id_localidad}
-                onChange={(e) => setTableFilters(prev => ({ ...prev, id_localidad: e.target.value }))}
-                options={localidadOpts}
-                placeholder="Todas las localidades"
-              />
-
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-1">N° Documento / Expediente</label>
                 <input
@@ -1265,6 +1256,15 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
                   className="block w-full px-3 py-2 text-sm bg-white border border-slate-300 hover:border-slate-400 rounded-lg focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-600 transition-all text-slate-700 font-medium placeholder-slate-400"
                 />
               </div>
+
+              <SearchableSelect
+                label="Localidad"
+                name="filter_localidad"
+                value={tableFilters.id_localidad}
+                onChange={(e) => setTableFilters(prev => ({ ...prev, id_localidad: e.target.value }))}
+                options={localidadOpts}
+                placeholder="Todas las localidades"
+              />
 
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-1">Fecha Desde</label>
