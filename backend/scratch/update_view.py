@@ -127,7 +127,11 @@ async def main():
                 COALESCE(cop.certificacion_presupuestal, inc.certificacion_presupuestal, lo.certificacion_presupuestal) AS certificacion_presupuestal,
                 a.centro_costo AS centro_costo,
                 COALESCE((SELECT personal FROM af.dim_personal WHERE cod_personal = cop.requerido_por), cop.requerido_por) AS requerido_por,
-                COALESCE(inc.fecha_alta, lo.fecha_alta, a.fecha_alta_factura) AS fecha_alta
+                COALESCE(inc.fecha_alta, lo.fecha_alta, a.fecha_alta_factura) AS fecha_alta,
+                a.pdf_expediente_path,
+                a.imagen_1_path,
+                a.imagen_2_path,
+                a.imagen_3_path
 
             FROM af.fct_registro_activos a
             JOIN af.dim_categoria c ON c.cod_categoria = a.cod_categoria

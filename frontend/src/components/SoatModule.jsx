@@ -563,7 +563,7 @@ export default function SoatModule() {
     doc.text("REPORTE DE VIGENCIA DE SEGUROS - SOAT", 14, 25);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
-    doc.text(`Fecha de Reporte: ${new Date().toLocaleDateString('es-PE')}`, 14, 31);
+    doc.text(`Fecha de Reporte: ${new Date().toLocaleDateString('es-PE')}`, 283, 31, { align: 'right' });
 
     const headers = [["Código", "Placa", "Vehículo / Denominación", "Póliza", "Aseguradora", "Vencimiento", "Días", "Estado"]];
     const tableRows = filtered.map(r => [
@@ -595,6 +595,16 @@ export default function SoatModule() {
         7: { cellWidth: 25 }
       }
     });
+
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(100, 116, 139);
+      doc.text(`Página ${i} de ${totalPages}`, 283, 12, { align: 'right' });
+    }
+
     doc.save(`Reporte_SOAT_${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
@@ -673,7 +683,7 @@ export default function SoatModule() {
           </button>
           <button
             onClick={handleExportPDF}
-            className="flex items-center justify-center gap-1.5 bg-rose-650 hover:bg-rose-700 text-white font-bold py-2 px-3.5 rounded-xl text-xs shadow-md shadow-rose-600/10 hover:shadow-lg active:scale-[0.98] transition-all cursor-pointer border-none h-10"
+            className="flex items-center justify-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 px-3.5 rounded-xl text-xs shadow-md shadow-rose-600/10 hover:shadow-lg active:scale-[0.98] transition-all cursor-pointer border-none h-10"
           >
             <FileText className="w-4 h-4" />
             <span>PDF</span>
