@@ -586,7 +586,7 @@ document.addEventListener('DOMContentLoaded', () => {
       stateOptions = ['BUENO', 'REGULAR', 'MALO', 'PARA BAJA', 'BAJA'];
     } else if (currentTab === 'soat') {
       dataset = getVehicles().filter(item => item.estado_activo !== 'PARA BAJA' && item.estado_activo !== 'BAJA');
-      stateOptions = ['BUENO', 'REGULAR', 'MALO'];
+      stateOptions = ['VIGENTE', 'POR_VENCER', 'VENCIDO'];
     } else if (currentTab === 'celulares') {
       dataset = celulares;
       // Obtener estados únicos de los celulares reales registrados
@@ -634,7 +634,13 @@ document.addEventListener('DOMContentLoaded', () => {
     stateOptions.forEach(est => {
       const option = document.createElement('option');
       option.value = est;
-      option.textContent = est;
+      let labelText = est;
+      if (currentTab === 'soat') {
+        if (est === 'VIGENTE') labelText = 'Vigente';
+        else if (est === 'POR_VENCER') labelText = 'Por Vencer';
+        else if (est === 'VENCIDO') labelText = 'Vencido';
+      }
+      option.textContent = labelText;
       if (est === previousEstado) {
         option.selected = true;
       }
@@ -939,7 +945,8 @@ document.addEventListener('DOMContentLoaded', () => {
       // Filtro de Estado
       const estadoMatch = !selectedEstado || 
         (currentTab === 'celulares' ? item.estado === selectedEstado : 
-         ((currentTab === 'inventario' || currentTab === 'terceros') ? item.tipo === selectedEstado : item.estado_activo === selectedEstado));
+         (currentTab === 'soat' ? item.soat_estado === selectedEstado :
+          ((currentTab === 'inventario' || currentTab === 'terceros') ? item.tipo === selectedEstado : item.estado_activo === selectedEstado)));
 
 
 
