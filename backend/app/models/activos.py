@@ -1,8 +1,8 @@
 from decimal import Decimal
 from datetime import date, datetime
-from typing import Optional
-from sqlalchemy import String, Integer, SmallInteger, BigInteger, Numeric, Date, Text, Boolean, FetchedValue
-from sqlalchemy.orm import Mapped, mapped_column
+from typing import Optional, List
+from sqlalchemy import String, Integer, SmallInteger, BigInteger, Numeric, Date, Text, Boolean, FetchedValue, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 
 
@@ -549,4 +549,55 @@ class VwBienesTercerosDetalle(Base):
     localidad: Mapped[Optional[str]] = mapped_column(String(120))
     created_at: Mapped[datetime] = mapped_column(server_default=FetchedValue())
     updated_at: Mapped[datetime] = mapped_column(server_default=FetchedValue())
+
+
+class SalidaBienes(Base):
+    """
+    Modelo ORM para la cabecera de la orden de salida de bienes.
+    Representa af.fct_salida_bienes.
+    """
+    __tablename__ = "fct_salida_bienes"
+    __table_args__ = {"schema": "af"}
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    n_orden: Mapped[str] = mapped_column(String(40), unique=True, nullable=False)
+    fecha_orden: Mapped[date] = mapped_column(Date, nullable=False)
+    tipo_salida: Mapped[str] = mapped_column(String(60), nullable=False)
+    motivo: Mapped[str] = mapped_column(Text, nullable=False)
+    responsable: Mapped[str] = mapped_column(String(260), nullable=False)
+    cargo: Mapped[str] = mapped_column(String(220), nullable=False)
+    ubicacion: Mapped[str] = mapped_column(String(220), nullable=False)
+    resp_tecnico: Mapped[Optional[str]] = mapped_column(String(260), nullable=True)
+    observaciones: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(server_default=FetchedValue())
+    updated_at: Mapped[datetime] = mapped_column(server_default=FetchedValue())
+
+    # Relación uno-a-muchos con el detalle
+    bienes: Mapped[List["SalidaBienesDetalle"]] = relationship("SalidaBienesDetalle", back_populates="salida", cascade="all, delete-orphan", lazy="selectin")
+
+
+class SalidaBienesDetalle(Base):
+    """
+    Modelo ORM para el detalle de la orden de salida de bienes.
+    Representa af.fct_salida_bienes_detalle.
+    """
+    __tablename__ = "fct_salida_bienes_detalle"
+    __table_args__ = {"schema": "af"}
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id_salida: Mapped[int] = mapped_column(Integer, ForeignKey("af.fct_salida_bienes.id", ondelete="CASCADE"), nullable=False)
+    cod_patrimonial: Mapped[Optional[str]] = mapped_column(String(30), ForeignKey("af.fct_registro_activos.cod_patrimonial", ondelete="SET NULL"), nullable=True)
+    denominacion: Mapped[str] = mapped_column(String(300), nullable=False)
+    color: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    marca: Mapped[Optional[str]] = mapped_column(String(160), nullable=True)
+    modelo: Mapped[Optional[str]] = mapped_column(String(180), nullable=True)
+    numero_serie: Mapped[Optional[str]] = mapped_column(String(180), nullable=True)
+    estado_activo: Mapped[str] = mapped_column(String(30), default="BUENO")
+    accesorios: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(server_default=FetchedValue())
+    updated_at: Mapped[datetime] = mapped_column(server_default=FetchedValue())
+
+    # Relación inversa con la cabecera
+    salida: Mapped["SalidaBienes"] = relationship("SalidaBienes", back_populates="bienes")
+
 

@@ -1,6 +1,6 @@
 from decimal import Decimal
 from datetime import date, datetime
-from typing import Optional, Literal
+from typing import Optional, Literal, List
 from pydantic import BaseModel, ConfigDict, Field
 
 class ActivoBase(BaseModel):
@@ -511,4 +511,56 @@ class BienTerceroResponse(BienTerceroBase):
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     model_config = ConfigDict(from_attributes=True)
+
+
+# ═══════════════════════════════════════════════════════════
+# SCHEMAS MÓDULO SALIDA DE BIENES
+# ═══════════════════════════════════════════════════════════
+
+class SalidaBienesDetalleBase(BaseModel):
+    cod_patrimonial: Optional[str] = Field(None, max_length=30)
+    denominacion: str = Field(..., max_length=300)
+    color: Optional[str] = Field(None, max_length=120)
+    marca: Optional[str] = Field(None, max_length=160)
+    modelo: Optional[str] = Field(None, max_length=180)
+    numero_serie: Optional[str] = Field(None, max_length=180)
+    estado_activo: str = Field("BUENO", max_length=30)
+    accesorios: Optional[str] = None
+
+
+class SalidaBienesDetalleCreate(SalidaBienesDetalleBase):
+    pass
+
+
+class SalidaBienesDetalleResponse(SalidaBienesDetalleBase):
+    id: int
+    id_salida: int
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    model_config = ConfigDict(from_attributes=True)
+
+
+class SalidaBienesBase(BaseModel):
+    fecha_orden: date
+    tipo_salida: str = Field(..., max_length=60)
+    motivo: str
+    responsable: str = Field(..., max_length=260)
+    cargo: str = Field(..., max_length=220)
+    ubicacion: str = Field(..., max_length=220)
+    resp_tecnico: Optional[str] = Field(None, max_length=260)
+    observaciones: Optional[str] = None
+
+
+class SalidaBienesCreate(SalidaBienesBase):
+    bienes: List[SalidaBienesDetalleCreate] = []
+
+
+class SalidaBienesResponse(SalidaBienesBase):
+    id: int
+    n_orden: str
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    bienes: List[SalidaBienesDetalleResponse] = []
+    model_config = ConfigDict(from_attributes=True)
+
 

@@ -19,6 +19,7 @@ from app.models.activos import (
     Soat, VwSoatVigencia,
     InventarioFisico, VwInventarioFisicoDetalle,
     BienTercero, VwBienesTercerosDetalle,
+    SalidaBienes, SalidaBienesDetalle,
 )
 from app.schemas.activos import (
     ActivoCreate, ActivoResponse, ActivoPublicoDTO,
@@ -32,6 +33,7 @@ from app.schemas.activos import (
     DocumentRename,
     InventarioFisicoCreate, InventarioFisicoResponse,
     BienTerceroCreate, BienTerceroResponse,
+    SalidaBienesCreate, SalidaBienesResponse,
 )
 
 router = APIRouter()
@@ -1904,4 +1906,93 @@ async def delete_bien_tercero(cod_patrimonial: str, db: AsyncSession = Depends(g
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=400, detail=f"Error al eliminar bien: {str(e)}")
+
+
+@router.post("/activos/salidas", response_model=SalidaBienesResponse, status_code=status.HTTP_201_CREATED, tags=["Salida de Bienes"])
+async def create_salida_bienes(salida_in: SalidaBienesCreate, db: AsyncSession = Depends(get_db)):
+    """
+    Registra una nueva orden de salida de bienes, autogenerando el número correlativo (n_orden).
+    """
+    try:
+        anio = salida_in.fecha_orden.year
+        
+        # 1. Obtener el correlativo máximo para el año actual
+        query = select(SalidaBienes.n_orden).where(
+            text("EXTRACT(YEAR FROM fecha_orden) = :anio")
+        ).params(anio=anio)
+        result = await db.execute(query)
+        ordenes = result.scalars().all()
+        
+        max_num = 0
+        for orden in ordenes:
+            # El formato es "XXX-YYYY"
+            parts = orden.split('-')
+            if len(parts) == 2 and parts[0].isdigit():
+                num = int(parts[0])
+                if num > max_num:
+                    max_num = num
+        
+        next_num = max_num + 1
+        n_orden_generado = f"{next_num:03d}-{anio}"
+        
+        # 2. Crear el objeto cabecera
+        db_salida = SalidaBienes(
+            n_orden=n_orden_generado,
+            fecha_orden=salida_in.fecha_orden,
+            tipo_salida=salida_in.tipo_salida,
+            motivo=salida_in.motivo,
+            responsable=salida_in.responsable,
+            cargo=salida_in.cargo,
+            ubicacion=salida_in.ubicacion,
+            resp_tecnico=salida_in.resp_tecnico,
+            observaciones=salida_in.observaciones
+        )
+        
+        db.add(db_salida)
+        await db.flush() # flush para obtener el id_salida autogenerado
+        
+        # 3. Crear los detalles vinculados
+        for bien in salida_in.bienes:
+            db_detalle = SalidaBienesDetalle(
+                id_salida=db_salida.id,
+                cod_patrimonial=bien.cod_patrimonial,
+                denominacion=bien.denominacion,
+                color=bien.color,
+                marca=bien.marca,
+                modelo=bien.modelo,
+                numero_serie=bien.numero_serie,
+                estado_activo=bien.estado_activo,
+                accesorios=bien.accesorios
+            )
+            db.add(db_detalle)
+            
+        await db.commit()
+        await db.refresh(db_salida)
+        return db_salida
+        
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Error al registrar la orden de salida: {str(e)}"
+        )
+
+
+@router.get("/activos/salidas", response_model=List[SalidaBienesResponse], tags=["Salida de Bienes"])
+async def list_salidas_bienes(db: AsyncSession = Depends(get_db)):
+    """
+    Retorna la lista de todas las órdenes de salida de bienes registradas con su detalle.
+    """
+    try:
+        # Se usa order_by en orden cronológico inverso
+        query = select(SalidaBienes).order_by(SalidaBienes.fecha_orden.desc(), SalidaBienes.id.desc())
+        result = await db.execute(query)
+        salidas = result.scalars().all()
+        return list(salidas)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error al obtener el historial de salidas: {str(e)}"
+        )
+
 
