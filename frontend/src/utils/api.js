@@ -523,3 +523,23 @@ export async function fetchGenerarCodigoTerceroControl(tipo) {
   return response.json(); // { codigo, siguiente }
 }
 
+export async function fetchSalidas() {
+  const response = await fetch(`${API_BASE_URL}/activos/salidas`);
+  if (!response.ok) throw new Error('Error al cargar el historial de salidas.');
+  return response.json();
+}
+
+export async function createSalida(payload) {
+  const response = await fetch(`${API_BASE_URL}/activos/salidas`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    await handleResponseError(response, 'Error al registrar la orden de salida.');
+  }
+  return response.json();
+}
+

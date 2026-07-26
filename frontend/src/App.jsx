@@ -17,6 +17,7 @@ import AdminDashboard from './components/AdminDashboard';
 import InventarioFisicoPanel from './components/InventarioFisicoPanel';
 import BienesTercerosPanel from './components/BienesTercerosPanel';
 import ReporteContable from './components/ReporteContable';
+import SalidaBienesPanel from './components/SalidaBienesPanel';
 import { fetchActivos, getDashboardUrl } from './utils/api';
 
 // Componente de Login alineado al diseño del prototipo
@@ -330,9 +331,9 @@ export default function App() {
     }
   };
 
-  // Cargar cada vez que cambian los filtros de base de datos o cuando se cambia a la pestaña de inventario, obras o contable
+  // Cargar cada vez que cambian los filtros de base de datos o cuando se cambia a la pestaña de inventario, obras, contable o salidas
   useEffect(() => {
-    if (isLoggedIn && (activeTab === 'INVENTARIO' || activeTab === 'OBRAS' || activeTab === 'CONTABLE')) {
+    if (isLoggedIn && (activeTab === 'INVENTARIO' || activeTab === 'OBRAS' || activeTab === 'CONTABLE' || activeTab === 'SALIDAS')) {
       loadActivos();
     }
   }, [filters.estado_activo, filters.id_sucursal, activeTab, isLoggedIn]);
@@ -464,6 +465,20 @@ export default function App() {
                   </span>
                   <span>Sincronizar</span>
                 </button>
+
+                <button
+                  onClick={() => handleTabChange('SALIDAS')}
+                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
+                    activeTab === 'SALIDAS'
+                      ? 'bg-white text-brand-600 shadow'
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'SALIDAS' ? 'bg-rose-50 text-rose-600' : 'bg-white/15 text-white/90'}`}>
+                    <LogOut className="rotate-180 w-3 h-3" />
+                  </span>
+                  <span>Salida de Bienes</span>
+                </button>
               </nav>
             </div>
 
@@ -591,7 +606,7 @@ export default function App() {
       </header>
 
       <main className={`flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-w-0 ${
-        ['INVENTARIO', 'OBRAS', 'CONTABLE', 'VEHICULOS', 'SOAT', 'CELULARES', 'INVENTARIO_FISICO', 'BIENES_TERCEROS'].includes(activeTab) ? 'overflow-hidden flex flex-col' : 'overflow-y-auto'
+        ['INVENTARIO', 'OBRAS', 'CONTABLE', 'VEHICULOS', 'SOAT', 'CELULARES', 'INVENTARIO_FISICO', 'BIENES_TERCEROS', 'SALIDAS'].includes(activeTab) ? 'overflow-hidden flex flex-col' : 'overflow-y-auto'
       }`}>
         {activeTab === 'INVENTARIO' && (
           <div className="flex-1 flex flex-col min-h-0 space-y-4 animate-fadeIn w-full max-w-full overflow-hidden">
@@ -765,6 +780,14 @@ export default function App() {
           <div className="space-y-4 animate-fadeIn pt-2 flex flex-col flex-1 min-h-0">
             <AdminDashboard />
           </div>
+        )}
+
+        {activeTab === 'SALIDAS' && (
+          <SalidaBienesPanel 
+            activos={activos} 
+            loadingActivos={loading} 
+            loadActivos={loadActivos} 
+          />
         )}
       </main>
 
