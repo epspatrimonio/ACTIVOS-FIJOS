@@ -1996,3 +1996,38 @@ async def list_salidas_bienes(db: AsyncSession = Depends(get_db)):
         )
 
 
+@router.put("/activos/salidas/{salida_id}", response_model=SalidaBienesResponse, tags=["Salida de Bienes"])
+async def update_salida_bienes(salida_id: int, payload: dict, db: AsyncSession = Depends(get_db)):
+    """
+    Actualiza los datos de cabecera de una orden de salida de bienes existente.
+    Solo modifica los campos de la cabecera (no el detalle de bienes).
+    """
+    try:
+        result = await db.execute(select(SalidaBienes).where(SalidaBienes.id == salida_id))
+        db_salida = result.scalar_one_or_none()
+        if not db_salida:
+            raise HTTPException(status_code=404, detail=f"Orden de salida con id {salida_id} no encontrada.")
+
+        campos_editables = ["fecha_orden", "tipo_salida", "motivo", "responsable", "cargo", "ubicacion", "resp_tecnico", "observaciones"]
+        for campo in campos_editables:
+            if campo in payload and payload[campo] is not None:
+                if campo == "fecha_orden":
+                    from datetime import date
+                    val = payload[campo]
+                    if isinstance(val, str):
+                        val = date.fromisoformat(val)
+                    setattr(db_salida, campo, val)
+                else:
+                    setattr(db_salida, campo, payload[campo])
+
+        await db.commit()
+        await db.refresh(db_salida)
+        return db_salida
+    except HTTPException:
+        raise
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error al actualizar la orden de salida: {str(e)}"
+        )

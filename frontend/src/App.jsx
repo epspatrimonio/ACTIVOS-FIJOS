@@ -783,11 +783,7 @@ export default function App() {
         )}
 
         {activeTab === 'SALIDAS' && (
-          <SalidaBienesPanel 
-            activos={activos} 
-            loadingActivos={loading} 
-            loadActivos={loadActivos} 
-          />
+          <SalidaBienesPanel />
         )}
       </main>
 
