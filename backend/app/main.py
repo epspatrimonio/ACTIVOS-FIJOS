@@ -33,6 +33,16 @@ async def health_check():
         "documentation": "/docs"
     }
 
+from fastapi.responses import RedirectResponse
+
+@app.get("/salidabienes", tags=["General"])
+async def redirect_salidabienes():
+    return RedirectResponse(url="/salidabienes/")
+
+@app.get("/public", tags=["General"])
+async def redirect_public():
+    return RedirectResponse(url="/public/")
+
 # Servir el dashboard público como archivos estáticos
 current_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 public_dir = os.path.join(current_dir, "public_dashboard")
