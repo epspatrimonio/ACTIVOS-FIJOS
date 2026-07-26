@@ -39,6 +39,11 @@ public_dir = os.path.join(current_dir, "public_dashboard")
 if os.path.exists(public_dir):
     app.mount("/public", StaticFiles(directory=public_dir, html=True), name="public")
 
+# Servir el aplicativo de salida de bienes como archivos estáticos
+salida_dir = os.path.join(current_dir, "salidabienes")
+if os.path.exists(salida_dir):
+    app.mount("/salidabienes", StaticFiles(directory=salida_dir, html=True), name="salidabienes")
+
 # Servir archivos subidos (PDF e imágenes) de forma estática
 uploads_dir = os.path.join(current_dir, "uploads")
 if not os.path.exists(uploads_dir):
