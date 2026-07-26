@@ -190,8 +190,8 @@
     "igv": "0.0000",
     "informe_conformidad": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "863.33",
-    "valor_neto": "1936.6700",
+    "depreciacion_acumulada": "886.67",
+    "valor_neto": "1913.3300",
     "estado_activo": "BUENO",
     "cuenta_contable": "3369151103",
     "centro_costo": "90260001",
@@ -245,8 +245,8 @@
     "igv": "199.9100",
     "informe_conformidad": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "684.87",
-    "valor_neto": "425.7300",
+    "depreciacion_acumulada": "703.38",
+    "valor_neto": "407.2200",
     "estado_activo": "BUENO",
     "cuenta_contable": "3369151102",
     "centro_costo": "90122201",
@@ -300,8 +300,8 @@
     "igv": "0.0000",
     "informe_conformidad": null,
     "n_acta_entrega": "018 - 2026",
-    "depreciacion_acumulada": "0.00",
-    "valor_neto": "1512.0000",
+    "depreciacion_acumulada": "12.60",
+    "valor_neto": "1499.4000",
     "estado_activo": "BUENO",
     "cuenta_contable": "3351111101",
     "centro_costo": "90133301",
@@ -491,7 +491,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-05-28",
-    "soat_dias_vigencia": 307,
+    "soat_dias_vigencia": 306,
     "soat_estado": "VIGENTE"
   },
   {
@@ -1811,7 +1811,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-11-24",
-    "soat_dias_vigencia": 122,
+    "soat_dias_vigencia": 121,
     "soat_estado": "VIGENTE"
   },
   {
@@ -1921,7 +1921,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-10-22",
-    "soat_dias_vigencia": 89,
+    "soat_dias_vigencia": 88,
     "soat_estado": "VIGENTE"
   },
   {
@@ -1976,7 +1976,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-05-29",
-    "soat_dias_vigencia": 308,
+    "soat_dias_vigencia": 307,
     "soat_estado": "VIGENTE"
   },
   {
@@ -2141,7 +2141,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-07-16",
-    "soat_dias_vigencia": -9,
+    "soat_dias_vigencia": -10,
     "soat_estado": "VENCIDO"
   },
   {
@@ -2196,7 +2196,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-02-18",
-    "soat_dias_vigencia": 208,
+    "soat_dias_vigencia": 207,
     "soat_estado": "VIGENTE"
   },
   {
@@ -2225,8 +2225,8 @@
     "igv": "199.9100",
     "informe_conformidad": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "684.87",
-    "valor_neto": "425.7300",
+    "depreciacion_acumulada": "703.38",
+    "valor_neto": "407.2200",
     "estado_activo": "BUENO",
     "cuenta_contable": "3369151102",
     "centro_costo": "90122201",
@@ -2280,8 +2280,8 @@
     "igv": "199.9080",
     "informe_conformidad": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "684.87",
-    "valor_neto": "425.7300",
+    "depreciacion_acumulada": "703.38",
+    "valor_neto": "407.2200",
     "estado_activo": "BUENO",
     "cuenta_contable": "3369151102",
     "centro_costo": "90255201",
@@ -2335,8 +2335,8 @@
     "igv": "199.9080",
     "informe_conformidad": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "684.87",
-    "valor_neto": "425.7300",
+    "depreciacion_acumulada": "703.38",
+    "valor_neto": "407.2200",
     "estado_activo": "BUENO",
     "cuenta_contable": "3369151102",
     "centro_costo": "90355201",
@@ -2471,7 +2471,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-06-04",
-    "soat_dias_vigencia": 314,
+    "soat_dias_vigencia": 313,
     "soat_estado": "VIGENTE"
   },
   {
@@ -2526,7 +2526,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-10-26",
-    "soat_dias_vigencia": 93,
+    "soat_dias_vigencia": 92,
     "soat_estado": "VIGENTE"
   },
   {
@@ -2581,7 +2581,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-11-04",
-    "soat_dias_vigencia": 102,
+    "soat_dias_vigencia": 101,
     "soat_estado": "VIGENTE"
   },
   {
@@ -2636,7 +2636,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-05-28",
-    "soat_dias_vigencia": 307,
+    "soat_dias_vigencia": 306,
     "soat_estado": "VIGENTE"
   },
   {
@@ -2691,7 +2691,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-05-28",
-    "soat_dias_vigencia": 307,
+    "soat_dias_vigencia": 306,
     "soat_estado": "VIGENTE"
   },
   {
@@ -2720,8 +2720,8 @@
     "igv": "199.9080",
     "informe_conformidad": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "684.87",
-    "valor_neto": "425.7300",
+    "depreciacion_acumulada": "703.38",
+    "valor_neto": "407.2200",
     "estado_activo": "BUENO",
     "cuenta_contable": "3369151102",
     "centro_costo": "90455201",
@@ -2775,8 +2775,8 @@
     "igv": "199.9100",
     "informe_conformidad": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "684.87",
-    "valor_neto": "425.7300",
+    "depreciacion_acumulada": "703.38",
+    "valor_neto": "407.2200",
     "estado_activo": "BUENO",
     "cuenta_contable": "3369151102",
     "centro_costo": "90555201",
@@ -2830,8 +2830,8 @@
     "igv": "199.9100",
     "informe_conformidad": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "684.87",
-    "valor_neto": "425.7300",
+    "depreciacion_acumulada": "703.38",
+    "valor_neto": "407.2200",
     "estado_activo": "BUENO",
     "cuenta_contable": "3369151102",
     "centro_costo": "90655201",
@@ -4396,7 +4396,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-05-29",
-    "soat_dias_vigencia": 308,
+    "soat_dias_vigencia": 307,
     "soat_estado": "VIGENTE"
   },
   {
@@ -4451,7 +4451,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-05-29",
-    "soat_dias_vigencia": 308,
+    "soat_dias_vigencia": 307,
     "soat_estado": "VIGENTE"
   },
   {
@@ -4506,7 +4506,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-05-29",
-    "soat_dias_vigencia": 308,
+    "soat_dias_vigencia": 307,
     "soat_estado": "VIGENTE"
   },
   {
@@ -4561,7 +4561,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-05-29",
-    "soat_dias_vigencia": 308,
+    "soat_dias_vigencia": 307,
     "soat_estado": "VIGENTE"
   },
   {
@@ -4616,7 +4616,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-03-04",
-    "soat_dias_vigencia": 222,
+    "soat_dias_vigencia": 221,
     "soat_estado": "VIGENTE"
   },
   {
@@ -4671,7 +4671,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-06-17",
-    "soat_dias_vigencia": 327,
+    "soat_dias_vigencia": 326,
     "soat_estado": "VIGENTE"
   },
   {
@@ -4726,7 +4726,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-07-16",
-    "soat_dias_vigencia": -9,
+    "soat_dias_vigencia": -10,
     "soat_estado": "VENCIDO"
   },
   {
@@ -4781,7 +4781,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-09-30",
-    "soat_dias_vigencia": 67,
+    "soat_dias_vigencia": 66,
     "soat_estado": "VIGENTE"
   },
   {
@@ -4836,7 +4836,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-09-30",
-    "soat_dias_vigencia": 67,
+    "soat_dias_vigencia": 66,
     "soat_estado": "VIGENTE"
   },
   {
@@ -4891,7 +4891,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-07-16",
-    "soat_dias_vigencia": -9,
+    "soat_dias_vigencia": -10,
     "soat_estado": "VENCIDO"
   },
   {
@@ -4946,7 +4946,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-07-16",
-    "soat_dias_vigencia": -9,
+    "soat_dias_vigencia": -10,
     "soat_estado": "VENCIDO"
   },
   {
@@ -5001,7 +5001,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2025-03-12",
-    "soat_dias_vigencia": -500,
+    "soat_dias_vigencia": -501,
     "soat_estado": "VENCIDO"
   },
   {
@@ -5056,7 +5056,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2025-03-12",
-    "soat_dias_vigencia": -500,
+    "soat_dias_vigencia": -501,
     "soat_estado": "VENCIDO"
   },
   {
@@ -5111,7 +5111,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2023-09-12",
-    "soat_dias_vigencia": -1047,
+    "soat_dias_vigencia": -1048,
     "soat_estado": "VENCIDO"
   },
   {
@@ -5166,7 +5166,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2022-08-27",
-    "soat_dias_vigencia": -1428,
+    "soat_dias_vigencia": -1429,
     "soat_estado": "VENCIDO"
   },
   {
@@ -5221,7 +5221,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-07-16",
-    "soat_dias_vigencia": -9,
+    "soat_dias_vigencia": -10,
     "soat_estado": "VENCIDO"
   },
   {
@@ -5276,7 +5276,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-09-05",
-    "soat_dias_vigencia": 42,
+    "soat_dias_vigencia": 41,
     "soat_estado": "VIGENTE"
   },
   {
@@ -5331,7 +5331,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-09-05",
-    "soat_dias_vigencia": 42,
+    "soat_dias_vigencia": 41,
     "soat_estado": "VIGENTE"
   },
   {
@@ -5381,12 +5381,12 @@
     "carroceria": "",
     "categoria_vehiculo": "L5",
     "vencimiento_rev_tec": "2026-08-25",
-    "dias_vigencia_rev_tec": 31,
-    "estado_rev_tec": "VIGENTE",
+    "dias_vigencia_rev_tec": 30,
+    "estado_rev_tec": "POR_VENCER",
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-06-25",
-    "soat_dias_vigencia": 335,
+    "soat_dias_vigencia": 334,
     "soat_estado": "VIGENTE"
   },
   {
@@ -5441,7 +5441,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-05-29",
-    "soat_dias_vigencia": 308,
+    "soat_dias_vigencia": 307,
     "soat_estado": "VIGENTE"
   },
   {
@@ -5491,12 +5491,12 @@
     "carroceria": "",
     "categoria_vehiculo": "N1",
     "vencimiento_rev_tec": "2027-02-16",
-    "dias_vigencia_rev_tec": 206,
+    "dias_vigencia_rev_tec": 205,
     "estado_rev_tec": "VIGENTE",
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-02-25",
-    "soat_dias_vigencia": 215,
+    "soat_dias_vigencia": 214,
     "soat_estado": "VIGENTE"
   },
   {
@@ -5551,7 +5551,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-09-05",
-    "soat_dias_vigencia": 42,
+    "soat_dias_vigencia": 41,
     "soat_estado": "VIGENTE"
   },
   {
@@ -5606,7 +5606,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-09-05",
-    "soat_dias_vigencia": 42,
+    "soat_dias_vigencia": 41,
     "soat_estado": "VIGENTE"
   },
   {
@@ -5661,7 +5661,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-09-05",
-    "soat_dias_vigencia": 42,
+    "soat_dias_vigencia": 41,
     "soat_estado": "VIGENTE"
   },
   {
@@ -5711,12 +5711,12 @@
     "carroceria": "",
     "categoria_vehiculo": "L5",
     "vencimiento_rev_tec": "2022-11-29",
-    "dias_vigencia_rev_tec": -1334,
+    "dias_vigencia_rev_tec": -1335,
     "estado_rev_tec": "VENCIDO",
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-06-22",
-    "soat_dias_vigencia": 332,
+    "soat_dias_vigencia": 331,
     "soat_estado": "VIGENTE"
   },
   {
@@ -5821,12 +5821,12 @@
     "carroceria": "",
     "categoria_vehiculo": "L3",
     "vencimiento_rev_tec": "2020-03-25",
-    "dias_vigencia_rev_tec": -2313,
+    "dias_vigencia_rev_tec": -2314,
     "estado_rev_tec": "VENCIDO",
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2024-11-22",
-    "soat_dias_vigencia": -610,
+    "soat_dias_vigencia": -611,
     "soat_estado": "VENCIDO"
   },
   {
@@ -5881,7 +5881,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2024-11-22",
-    "soat_dias_vigencia": -610,
+    "soat_dias_vigencia": -611,
     "soat_estado": "VENCIDO"
   },
   {
@@ -5931,12 +5931,12 @@
     "carroceria": "",
     "categoria_vehiculo": "L3",
     "vencimiento_rev_tec": "2023-02-08",
-    "dias_vigencia_rev_tec": -1263,
+    "dias_vigencia_rev_tec": -1264,
     "estado_rev_tec": "VENCIDO",
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-06-04",
-    "soat_dias_vigencia": 314,
+    "soat_dias_vigencia": 313,
     "soat_estado": "VIGENTE"
   },
   {
@@ -5991,7 +5991,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2024-12-01",
-    "soat_dias_vigencia": -601,
+    "soat_dias_vigencia": -602,
     "soat_estado": "VENCIDO"
   },
   {
@@ -6041,12 +6041,12 @@
     "carroceria": "",
     "categoria_vehiculo": "L5",
     "vencimiento_rev_tec": "2026-08-18",
-    "dias_vigencia_rev_tec": 24,
+    "dias_vigencia_rev_tec": 23,
     "estado_rev_tec": "POR_VENCER",
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-06-04",
-    "soat_dias_vigencia": 314,
+    "soat_dias_vigencia": 313,
     "soat_estado": "VIGENTE"
   },
   {
@@ -6096,12 +6096,12 @@
     "carroceria": "",
     "categoria_vehiculo": "L3",
     "vencimiento_rev_tec": "2026-08-18",
-    "dias_vigencia_rev_tec": 24,
+    "dias_vigencia_rev_tec": 23,
     "estado_rev_tec": "POR_VENCER",
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-06-04",
-    "soat_dias_vigencia": 314,
+    "soat_dias_vigencia": 313,
     "soat_estado": "VIGENTE"
   },
   {
@@ -6156,7 +6156,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2023-09-15",
-    "soat_dias_vigencia": -1044,
+    "soat_dias_vigencia": -1045,
     "soat_estado": "VENCIDO"
   },
   {
@@ -6211,7 +6211,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-11-24",
-    "soat_dias_vigencia": 122,
+    "soat_dias_vigencia": 121,
     "soat_estado": "VIGENTE"
   },
   {
@@ -11025,8 +11025,8 @@
     "igv": "0.0000",
     "informe_conformidad": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "160.00",
-    "valor_neto": "640.0000",
+    "depreciacion_acumulada": "166.67",
+    "valor_neto": "633.3300",
     "estado_activo": "BUENO",
     "cuenta_contable": "3351111101",
     "centro_costo": "90455201",
@@ -11080,8 +11080,8 @@
     "igv": "0.0000",
     "informe_conformidad": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "150.00",
-    "valor_neto": "600.0000",
+    "depreciacion_acumulada": "156.25",
+    "valor_neto": "593.7500",
     "estado_activo": "BUENO",
     "cuenta_contable": "3351111101",
     "centro_costo": "90455201",
@@ -11135,8 +11135,8 @@
     "igv": "0.0000",
     "informe_conformidad": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "160.00",
-    "valor_neto": "640.0000",
+    "depreciacion_acumulada": "166.67",
+    "valor_neto": "633.3300",
     "estado_activo": "BUENO",
     "cuenta_contable": "3351111101",
     "centro_costo": "90455201",
@@ -11190,8 +11190,8 @@
     "igv": "0.0000",
     "informe_conformidad": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "150.00",
-    "valor_neto": "600.0000",
+    "depreciacion_acumulada": "156.25",
+    "valor_neto": "593.7500",
     "estado_activo": "BUENO",
     "cuenta_contable": "3351111101",
     "centro_costo": "90455201",
@@ -11245,8 +11245,8 @@
     "igv": "0.0000",
     "informe_conformidad": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "160.00",
-    "valor_neto": "640.0000",
+    "depreciacion_acumulada": "166.67",
+    "valor_neto": "633.3300",
     "estado_activo": "BUENO",
     "cuenta_contable": "3351111101",
     "centro_costo": "90455201",
@@ -11300,8 +11300,8 @@
     "igv": "0.0000",
     "informe_conformidad": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "150.00",
-    "valor_neto": "600.0000",
+    "depreciacion_acumulada": "156.25",
+    "valor_neto": "593.7500",
     "estado_activo": "BUENO",
     "cuenta_contable": "3351111101",
     "centro_costo": "90455201",
@@ -11575,8 +11575,8 @@
     "igv": "0.0000",
     "informe_conformidad": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "2073.50",
-    "valor_neto": "9236.5000",
+    "depreciacion_acumulada": "2167.75",
+    "valor_neto": "9142.2500",
     "estado_activo": "BUENO",
     "cuenta_contable": "3369151103",
     "centro_costo": "90560001",
@@ -12180,8 +12180,8 @@
     "igv": "0.0000",
     "informe_conformidad": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "262.50",
-    "valor_neto": "337.5000",
+    "depreciacion_acumulada": "275.00",
+    "valor_neto": "325.0000",
     "estado_activo": "BUENO",
     "cuenta_contable": "3361181101",
     "centro_costo": "90655401",
@@ -12235,8 +12235,8 @@
     "igv": "0.0000",
     "informe_conformidad": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "1750.00",
-    "valor_neto": "2250.0000",
+    "depreciacion_acumulada": "1833.33",
+    "valor_neto": "2166.6700",
     "estado_activo": "BUENO",
     "cuenta_contable": "3361181101",
     "centro_costo": "90655401",
@@ -12730,8 +12730,8 @@
     "igv": "0.0000",
     "informe_conformidad": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "2526.00",
-    "valor_neto": "5894.0000",
+    "depreciacion_acumulada": "2666.33",
+    "valor_neto": "5753.6700",
     "estado_activo": "BUENO",
     "cuenta_contable": "3341151101",
     "centro_costo": "90260001",
@@ -12756,7 +12756,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-11-04",
-    "soat_dias_vigencia": 102,
+    "soat_dias_vigencia": 101,
     "soat_estado": "VIGENTE"
   },
   {
@@ -14131,7 +14131,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-11-04",
-    "soat_dias_vigencia": 102,
+    "soat_dias_vigencia": 101,
     "soat_estado": "VIGENTE"
   },
   {
@@ -14461,7 +14461,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-11-04",
-    "soat_dias_vigencia": 102,
+    "soat_dias_vigencia": 101,
     "soat_estado": "VIGENTE"
   },
   {
@@ -16111,7 +16111,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-10-22",
-    "soat_dias_vigencia": 89,
+    "soat_dias_vigencia": 88,
     "soat_estado": "VIGENTE"
   },
   {
@@ -17845,8 +17845,8 @@
     "igv": "0.0000",
     "informe_conformidad": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "510.25",
-    "valor_neto": "1938.9500",
+    "depreciacion_acumulada": "561.28",
+    "valor_neto": "1887.9200",
     "estado_activo": "BUENO",
     "cuenta_contable": "3361181101",
     "centro_costo": "90355201",
@@ -17900,8 +17900,8 @@
     "igv": "0.0000",
     "informe_conformidad": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "88.50",
-    "valor_neto": "336.3000",
+    "depreciacion_acumulada": "97.35",
+    "valor_neto": "327.4500",
     "estado_activo": "BUENO",
     "cuenta_contable": "3361181101",
     "centro_costo": "90355201",
@@ -19356,7 +19356,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-10-26",
-    "soat_dias_vigencia": 93,
+    "soat_dias_vigencia": 92,
     "soat_estado": "VIGENTE"
   },
   {
@@ -19961,7 +19961,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-10-26",
-    "soat_dias_vigencia": 93,
+    "soat_dias_vigencia": 92,
     "soat_estado": "VIGENTE"
   },
   {
@@ -22300,8 +22300,8 @@
     "igv": "0.0000",
     "informe_conformidad": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "87.02",
-    "valor_neto": "3393.9800",
+    "depreciacion_acumulada": "116.03",
+    "valor_neto": "3364.9700",
     "estado_activo": "BUENO",
     "cuenta_contable": "3331111103",
     "centro_costo": "90260001",
@@ -22656,7 +22656,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-01-16",
-    "soat_dias_vigencia": 175,
+    "soat_dias_vigencia": 174,
     "soat_estado": "VIGENTE"
   },
   {
@@ -22706,12 +22706,12 @@
     "carroceria": "",
     "categoria_vehiculo": "",
     "vencimiento_rev_tec": "2023-05-10",
-    "dias_vigencia_rev_tec": -1172,
+    "dias_vigencia_rev_tec": -1173,
     "estado_rev_tec": "VENCIDO",
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2024-09-20",
-    "soat_dias_vigencia": -673,
+    "soat_dias_vigencia": -674,
     "soat_estado": "VENCIDO"
   },
   {
