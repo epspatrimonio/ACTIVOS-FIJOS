@@ -240,7 +240,7 @@ export default function TransferenciasPanel() {
       console.warn('No se pudieron cargar imágenes para el PDF:', e);
     }
 
-    if (logoImg) doc.addImage(logoImg, 'PNG', marginX, posY, 45, 15);
+    if (logoImg) doc.addImage(logoImg, 'JPEG', marginX, posY - 4, 22, 22);
     if (selloImg) doc.addImage(selloImg, 'PNG', 150, posY, 45, 18);
 
     posY += 20;

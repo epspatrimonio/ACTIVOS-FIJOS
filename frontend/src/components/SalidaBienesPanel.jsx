@@ -30,7 +30,7 @@ const generarOrdenSalidaPDF = async (salidaData) => {
     loadImage('/Sello Post Firma - CP1.png'),
   ]);
 
-  if (logoImg) doc.addImage(logoImg, 'PNG', marginX, posY, 22, 11);
+  if (logoImg) doc.addImage(logoImg, 'JPEG', marginX, posY - 2, 20, 20);
   doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(30, 41, 59);
   doc.text('E.P.S. "SELVA CENTRAL" S.A.', marginX + 24, posY + 2.5);
   doc.setFont('helvetica', 'normal'); doc.setFontSize(5.5);
