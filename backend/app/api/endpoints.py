@@ -1857,8 +1857,9 @@ async def get_bienes_terceros(tipo: Optional[str] = None, db: AsyncSession = Dep
             await db.execute(text("ALTER TABLE af.fct_bienes_terceros ADD COLUMN IF NOT EXISTS fecha_salida DATE;"))
             await db.execute(text("UPDATE af.fct_bienes_terceros SET fecha_ingreso = created_at::date WHERE fecha_ingreso IS NULL AND created_at IS NOT NULL;"))
             await db.execute(text("UPDATE af.fct_bienes_terceros SET fecha_ingreso = CURRENT_DATE WHERE fecha_ingreso IS NULL;"))
+            await db.execute(text("DROP VIEW IF EXISTS af.vw_bienes_terceros_detalle CASCADE;"))
             await db.execute(text("""
-                CREATE OR REPLACE VIEW af.vw_bienes_terceros_detalle AS
+                CREATE VIEW af.vw_bienes_terceros_detalle AS
                 SELECT 
                     b.cod_patrimonial,
                     b.tipo,
@@ -1884,8 +1885,9 @@ async def get_bienes_terceros(tipo: Optional[str] = None, db: AsyncSession = Dep
                 LEFT JOIN af.dim_sucursal s ON b.id_sucursal = s.id_sucursal;
             """))
             await db.commit()
-        except Exception:
+        except Exception as e:
             await db.rollback()
+            print(f"Error updating view vw_bienes_terceros_detalle: {e}")
 
         query = select(VwBienesTercerosDetalle)
         if tipo:
