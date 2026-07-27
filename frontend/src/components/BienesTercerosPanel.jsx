@@ -1259,7 +1259,7 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
       {/* Modal de Edición */}
       {showModal && (
         <Modal
-          isOpen={showModal}
+          open={showModal}
           onClose={() => setShowModal(false)}
           title={`Editar Registro (${editForm.cod_patrimonial})`}
         >
