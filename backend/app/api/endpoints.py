@@ -1873,10 +1873,10 @@ async def get_bienes_terceros(tipo: Optional[str] = None, db: AsyncSession = Dep
                     b.propietario_manual,
                     COALESCE(b.fecha_ingreso, b.created_at::date, CURRENT_DATE) AS fecha_ingreso,
                     b.fecha_salida,
-                    COALESCE(p.nombre_completo, b.propietario_manual, 'Sin asignar') AS responsable,
+                    COALESCE(p.personal, b.propietario_manual, 'Sin asignar') AS responsable,
                     b.observaciones,
                     b.id_sucursal,
-                    s.nombre_sucursal AS sucursal,
+                    s.sucursal AS sucursal,
                     b.localidad,
                     b.created_at,
                     b.updated_at
