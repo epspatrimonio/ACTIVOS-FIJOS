@@ -217,8 +217,8 @@ export default function TransferenciasPanel() {
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    const marginX = 14;
-    let posY = 15;
+    const marginX = 15;
+    let posY = 10;
 
     // Cargar logos institucionales
     const loadImage = (url) => new Promise((resolve, reject) => {
@@ -240,39 +240,31 @@ export default function TransferenciasPanel() {
       console.warn('No se pudieron cargar imágenes para el PDF:', e);
     }
 
-    // 1. Encabezado de la Orden - Logo Mascota (18x21mm)
-    if (logoImg) doc.addImage(logoImg, 'JPEG', marginX, posY - 3, 18, 21);
+    // 1. Logo Mascota ajustado a la altura del texto (13x15mm)
+    if (logoImg) doc.addImage(logoImg, 'JPEG', marginX, posY, 13, 15);
 
-    // 2. Texto Institucional junto al logo
-    const textX = marginX + 21;
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(15, 23, 42);
-    doc.text('E.P.S. "SELVA CENTRAL" S.A.', textX, posY + 1);
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(0, 176, 240);
-    doc.text('ENTIDAD PRESTADORA DE SERVICIOS DE SANEAMIENTO', textX, posY + 5.5);
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(71, 85, 105);
-    doc.text('Chanchamayo - Oxapampa - Satipo  |  RUC: N° 20121876290', textX, posY + 9.5);
+    // 2. Texto Institucional alineado verticalmente con el logo (X = 30mm)
+    const textX = 30;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(15, 23, 42);
+    doc.text('E.P.S. "SELVA CENTRAL" S.A.', textX, posY + 3.5);
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(71, 85, 105);
+    doc.text('CHANCHAMAYO - OXAPAMPA - SATIPO', textX, posY + 7.5);
+
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(5.5); doc.setTextColor(71, 85, 105);
+    doc.text('Pasaje San Pedro N° 253-257 La Merced Chyo.', textX, posY + 11);
+    doc.text('RUC: N° 20121876290 Telefono 064-532363', textX, posY + 14.5);
 
     // Fecha en la esquina derecha superior
     doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(51, 65, 85);
     const fechaSimple = (transf.fecha_transferencia || '').split('-').reverse().join('/');
-    doc.text(`FECHA: ${fechaSimple}`, 195, posY + 1, { align: 'right' });
+    doc.text(`FECHA: ${fechaSimple}`, 195, posY + 3.5, { align: 'right' });
 
-    // Separador
-    doc.setLineWidth(0.4); doc.setDrawColor(226, 232, 240);
-    doc.line(15, posY + 17, 195, posY + 17);
+    posY = 32;
 
-    posY += 26;
-
-    // Encabezado Principal
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(15, 23, 42);
-    doc.text('ACTA DE TRANSFERENCIA Y CAMBIO DE RESPONSABLE', 105, posY, { align: 'center' });
-    doc.setFontSize(10); doc.setTextColor(71, 85, 105);
-    doc.text('BIENES MUEBLES PATRIMONIALES', 105, posY + 5.5, { align: 'center' });
-
-    posY += 12;
-    doc.setFontSize(9.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(0, 176, 240);
-    doc.text(`N° ACTA: ${transf.n_transferencia}`, 105, posY, { align: 'center' });
-    doc.setTextColor(30, 41, 59);
+    // Título Principal Centrado exactamente igual al modelo oficial
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(15, 23, 42);
+    doc.text(`ACTA N° ${transf.n_transferencia} – ASIGNACIÓN DE BIENES PATRIMONIALES`, 105, posY, { align: 'center' });
 
     posY += 8;
     doc.setFontSize(8.5);
