@@ -238,7 +238,7 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
     doc.text("ACTA DE REGISTRO E INGRESO DE BIENES DE TERCEROS", 105, posY, { align: 'center' });
 
     doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(0, 176, 240);
-    doc.text("SISTEMA DE CONTROL PATRIMONIAL Y DEPARTAMENTO DE LOGÍSTICA", 105, posY + 5, { align: 'center' });
+    doc.text("SISTEMA DE CONTROL PATRIMONIAL", 105, posY + 5, { align: 'center' });
 
     // Cuadro Informativo
     posY += 10;
@@ -271,10 +271,10 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
       head: [['CARACTERÍSTICA / ESPECIFICACIÓN', 'DETALLE REGISTRADO']],
       body: [
         ['Denominación del Bien', itemData.denominacion || '—'],
+        ['Color', itemData.color || '—'],
         ['Marca', itemData.marca || 'S/M (Sin Marca)'],
         ['Modelo', itemData.modelo || 'S/M (Sin Modelo)'],
         ['Número de Serie', itemData.numero_serie || 'S/S (Sin Serie)'],
-        ['Color', itemData.color || '—'],
         ['Especificaciones / Accesorios', itemData.caracteristicas_accesorios || '—'],
         ['Observaciones de Ingreso', itemData.observaciones || '—']
       ],
@@ -290,13 +290,13 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
 
     doc.text("----------------------------------------------------------------", 30, finalY);
     doc.setFont("helvetica", "bold");
-    doc.text("PROPIETARIO DEL BIEN / ENTREGUÉ CONFORME", 30, finalY + 4);
+    doc.text("PROPIETARIO DEL BIEN", 30, finalY + 4);
     doc.setFont("helvetica", "normal");
     doc.text(respNombre.toUpperCase(), 30, finalY + 8);
 
     doc.text("----------------------------------------------------------------", 125, finalY);
     doc.setFont("helvetica", "bold");
-    doc.text("CONTROL PATRIMONIAL / RECIBÍ CONFORME", 125, finalY + 4);
+    doc.text("CONTROL PATRIMONIAL", 125, finalY + 4);
     doc.setFont("helvetica", "normal");
     doc.text("E.P.S. SELVA CENTRAL S.A.", 125, finalY + 8);
 
@@ -841,6 +841,17 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Color</label>
+                  <input
+                    type="text"
+                    placeholder="Ej. Negro / Gris"
+                    value={regForm.color}
+                    onChange={(e) => setRegForm(prev => ({ ...prev, color: e.target.value }))}
+                    className="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl text-slate-800"
+                  />
+                </div>
+
+                <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">Marca</label>
                   <input
                     type="text"
@@ -870,17 +881,6 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
                     value={regForm.numero_serie}
                     onChange={(e) => setRegForm(prev => ({ ...prev, numero_serie: e.target.value }))}
                     className="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl font-mono text-slate-800"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Color</label>
-                  <input
-                    type="text"
-                    placeholder="Ej. Negro / Gris"
-                    value={regForm.color}
-                    onChange={(e) => setRegForm(prev => ({ ...prev, color: e.target.value }))}
-                    className="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl text-slate-800"
                   />
                 </div>
               </div>
@@ -1312,6 +1312,15 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Color</label>
+                <input
+                  type="text"
+                  value={editForm.color}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, color: e.target.value }))}
+                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl"
+                />
+              </div>
+              <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">Marca</label>
                 <input
                   type="text"
@@ -1320,6 +1329,9 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
                   className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl"
                 />
               </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">Modelo</label>
                 <input
@@ -1329,24 +1341,12 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
                   className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl"
                 />
               </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">Serie</label>
                 <input
                   type="text"
                   value={editForm.numero_serie}
                   onChange={(e) => setEditForm(prev => ({ ...prev, numero_serie: e.target.value }))}
-                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Color</label>
-                <input
-                  type="text"
-                  value={editForm.color}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, color: e.target.value }))}
                   className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl"
                 />
               </div>
