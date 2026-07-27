@@ -232,22 +232,55 @@ export default function App() {
     window.XLSX.writeFile(wb, `${title}_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
-  const handleExportActivosPDF = (data, title) => {
+  const handleExportActivosPDF = async (data, title) => {
     if (!window.jspdf || !window.jspdf.jsPDF) {
       alert('La librería jsPDF no está cargada.');
       return;
     }
+    const loadImage = (url) => new Promise((res) => { const img = new Image(); img.onload = () => res(img); img.onerror = () => res(null); img.src = url; });
+    const logoImg = await loadImage('/logo_eps2.png');
+
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'landscape', format: 'a4' });
     
+    if (logoImg) {
+      doc.addImage(logoImg, 'JPEG', 14, 5, 18, 21);
+    }
+
+    const textX = 35;
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text("EPS SELVA CENTRAL - CONTROL PATRIMONIAL", 14, 18);
-    doc.setFontSize(12);
-    doc.text(title.toUpperCase().replace(/_/g, ' '), 14, 25);
-    doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
-    doc.text(`Fecha de Reporte: ${new Date().toLocaleDateString('es-PE')}`, 14, 31);
+    doc.setTextColor(15, 23, 42);
+    doc.text('E.P.S. "SELVA CENTRAL" S.A.', textX, 10);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7);
+    doc.setTextColor(0, 176, 240);
+    doc.text('ENTIDAD PRESTADORA DE SERVICIOS DE SANEAMIENTO', textX, 14.5);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(6.5);
+    doc.setTextColor(71, 85, 105);
+    doc.text('Chanchamayo - Oxapampa - Satipo  |  RUC: N° 20121876290', textX, 18.5);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.setTextColor(15, 23, 42);
+    doc.text("CONTROL PATRIMONIAL", 148.5, 11, { align: 'center' });
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(0, 176, 240);
+    doc.text(title.toUpperCase().replace(/_/g, ' '), 148.5, 16.5, { align: 'center' });
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(100, 116, 139);
+    doc.text(`Fecha de Reporte: ${new Date().toLocaleDateString('es-PE')}`, 283, 10, { align: 'right' });
+
+    doc.setLineWidth(0.4);
+    doc.setDrawColor(226, 232, 240);
+    doc.line(14, 25, 283, 25);
 
     const headers = [["Código", "Documento", "Sucursal / Localidad", "Denominación del Activo", "Marca/Modelo/Serie", "Estado", "Valor Libros", "Valor Neto", "Responsable"]];
     const tableRows = data.map(item => [
@@ -263,7 +296,7 @@ export default function App() {
     ]);
 
     doc.autoTable({
-      startY: 36,
+      startY: 28,
       head: headers,
       body: tableRows,
       theme: 'striped',
