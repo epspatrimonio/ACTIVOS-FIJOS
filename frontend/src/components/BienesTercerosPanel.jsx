@@ -1042,16 +1042,16 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
 
               <button
                 onClick={handleExportExcel}
-                className="flex items-center justify-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-bold py-2 px-3.5 rounded-xl text-xs shadow-sm active:scale-95 transition-all cursor-pointer h-[2.25rem] shrink-0"
+                className="flex items-center justify-center gap-1.5 bg-[#00b074] hover:bg-[#009b66] text-white font-extrabold py-2 px-4 rounded-2xl text-xs shadow-sm active:scale-95 transition-all cursor-pointer border-none h-[2.25rem] shrink-0"
               >
-                <FileSpreadsheet className="w-4 h-4" />
+                <FileSpreadsheet className="w-4 h-4 text-white" />
                 <span>Excel</span>
               </button>
               <button
                 onClick={handleExportListPDF}
-                className="flex items-center justify-center gap-1.5 bg-brand-50 text-[#00509d] border border-brand-200 hover:bg-brand-100 font-bold py-2 px-3.5 rounded-xl text-xs shadow-sm active:scale-95 transition-all cursor-pointer h-[2.25rem] shrink-0"
+                className="flex items-center justify-center gap-1.5 bg-[#ff3b5c] hover:bg-[#e02e4d] text-white font-extrabold py-2 px-4 rounded-2xl text-xs shadow-sm active:scale-95 transition-all cursor-pointer border-none h-[2.25rem] shrink-0"
               >
-                <FileText className="w-4 h-4" />
+                <FileText className="w-4 h-4 text-white" />
                 <span>PDF Historial</span>
               </button>
             </div>

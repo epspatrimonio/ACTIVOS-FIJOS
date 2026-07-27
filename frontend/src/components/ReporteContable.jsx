@@ -372,16 +372,16 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
           <div className="flex gap-2 justify-end">
             <button
               onClick={handleExportExcel}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-bold py-2.5 px-4 rounded-xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#00b074] hover:bg-[#009b66] text-white font-extrabold py-2.5 px-4 rounded-2xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none"
             >
-              <FileSpreadsheet className="w-4 h-4" />
+              <FileSpreadsheet className="w-4 h-4 text-white" />
               <span>Excel</span>
             </button>
             <button
               onClick={handleExportPDF}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-brand-50 text-[#00509d] border border-brand-200 hover:bg-brand-100 font-bold py-2.5 px-4 rounded-xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#ff3b5c] hover:bg-[#e02e4d] text-white font-extrabold py-2.5 px-4 rounded-2xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none"
             >
-              <FileText className="w-4 h-4" />
+              <FileText className="w-4 h-4 text-white" />
               <span>PDF</span>
             </button>
           </div>

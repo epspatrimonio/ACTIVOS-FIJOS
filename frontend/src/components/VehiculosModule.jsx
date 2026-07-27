@@ -1049,22 +1049,25 @@ export default function VehiculosModule() {
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          <button onClick={loadData} className="p-2.5 rounded-2xl bg-white border border-slate-200 text-slate-500 hover:text-slate-700 transition-all shadow-sm cursor-pointer h-10 flex items-center justify-center" title="Actualizar">
+            <RefreshCw className="w-4 h-4" />
+          </button>
           <button
             onClick={handleExportExcel}
-            className="flex items-center justify-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-bold py-2 px-3.5 rounded-xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer h-10"
+            className="flex items-center justify-center gap-1.5 bg-[#00b074] hover:bg-[#009b66] text-white font-extrabold py-2 px-4 rounded-2xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none h-10"
           >
-            <FileSpreadsheet className="w-4 h-4" />
+            <FileSpreadsheet className="w-4 h-4 text-white" />
             <span>Excel</span>
           </button>
           <button
             onClick={handleExportPDF}
-            className="flex items-center justify-center gap-1.5 bg-brand-50 text-[#00509d] border border-brand-200 hover:bg-brand-100 font-bold py-2 px-3.5 rounded-xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer h-10"
+            className="flex items-center justify-center gap-1.5 bg-[#ff3b5c] hover:bg-[#e02e4d] text-white font-extrabold py-2 px-4 rounded-2xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none h-10"
           >
-            <FileText className="w-4 h-4" />
+            <FileText className="w-4 h-4 text-white" />
             <span>PDF</span>
           </button>
           <button onClick={() => { setEditItem(null); setShowForm(true); }}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#00509d] hover:bg-[#003f7e] text-white text-sm font-bold rounded-xl shadow-sm transition-all active:scale-[0.98] border-none cursor-pointer h-10">
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#00509d] hover:bg-[#003f7e] text-white text-sm font-bold rounded-2xl shadow-sm transition-all active:scale-[0.98] border-none cursor-pointer h-10">
             <Plus className="w-4 h-4" />
             Registrar Vehículo
           </button>
@@ -1088,7 +1091,7 @@ export default function VehiculosModule() {
               <CheckCircle2 className="w-5 h-5" />
             </div>
             <div>
-              <div className="text-xl font-extrabold text-slate-900">{conRevVigente}</div>
+              <div className="text-xl font-extrabold text-slate-900">{revVigentes}</div>
               <div className="text-xs text-slate-500 font-medium">Rev. Técnica Vigente</div>
             </div>
           </div>
@@ -1097,7 +1100,7 @@ export default function VehiculosModule() {
               <AlertTriangle className="w-5 h-5" />
             </div>
             <div>
-              <div className="text-xl font-extrabold text-slate-900">{conRevPorVencer}</div>
+              <div className="text-xl font-extrabold text-slate-900">{revPorVencer}</div>
               <div className="text-xs text-slate-500 font-medium">Por Vencer (≤30 días)</div>
             </div>
           </div>
@@ -1106,7 +1109,7 @@ export default function VehiculosModule() {
               <AlertCircle className="w-5 h-5" />
             </div>
             <div>
-              <div className="text-xl font-extrabold text-slate-900">{conRevVencida}</div>
+              <div className="text-xl font-extrabold text-slate-900">{revVencidas}</div>
               <div className="text-xs text-slate-500 font-medium">Rev. Vencida</div>
             </div>
           </div>
