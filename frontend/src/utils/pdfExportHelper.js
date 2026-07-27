@@ -33,7 +33,7 @@ export async function generateStandardPDF({
   const centerX = width / 2;
   const rightX = isLandscape ? 283 : 196;
 
-  // Garantizar un margen inferior de 42mm para que las filas de la tabla nunca se sobrepongan al pie de página / sello
+  // Garantizar espacio inferior de 42mm para no sobreponer la tabla al pie de página / sello
   doc.autoTable({
     startY: 28,
     margin: { top: 28, bottom: 42 },
@@ -51,7 +51,6 @@ export async function generateStandardPDF({
   const signatureLineY = isLandscape ? 192 : 274;
   const leftSigX = isLandscape ? 85 : 58;
   const rightSigX = isLandscape ? 205 : 150;
-  const stampX = isLandscape ? 179 : 124;
 
   for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i);
@@ -122,20 +121,22 @@ export async function generateStandardPDF({
     doc.setFontSize(8);
     doc.text("Firma y Sello (Huella Digital)", leftSigX, signatureLineY + 4, { align: 'center' });
 
-    // 3. Firma Derecha / Sello Post Firma CP1
+    // 3. Firma Derecha: Sello Post Firma CP1 (Exclusivamente la imagen si existe, sin sobreponer texto)
     if (selloImg) {
-      doc.addImage(selloImg, 'PNG', stampX, signatureLineY - 22, 52, 24);
+      const stampY = isLandscape ? 172 : 254;
+      doc.addImage(selloImg, 'PNG', rightSigX - 26, stampY, 52, 25);
+    } else {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(30, 41, 59);
+      doc.text("--------------------------------------------------", rightSigX, signatureLineY, { align: 'center' });
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(8);
+      doc.text("ING. JUAN E. BOHORQUEZ AGUILAR", rightSigX, signatureLineY + 4, { align: 'center' });
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7.5);
+      doc.text("Responsable de Control Patrimonial", rightSigX, signatureLineY + 7.5, { align: 'center' });
     }
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(30, 41, 59);
-    doc.text("--------------------------------------------------", rightSigX, signatureLineY, { align: 'center' });
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(8);
-    doc.text("ING. JUAN E. BOHORQUEZ AGUILAR", rightSigX, signatureLineY + 4, { align: 'center' });
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(7.5);
-    doc.text("Responsable de Control Patrimonial", rightSigX, signatureLineY + 7.5, { align: 'center' });
 
     // 4. Número de Página
     doc.setFont("helvetica", "normal");
