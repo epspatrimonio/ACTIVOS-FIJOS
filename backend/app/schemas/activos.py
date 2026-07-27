@@ -549,6 +549,8 @@ class SalidaBienesBase(BaseModel):
     ubicacion: str = Field(..., max_length=220)
     resp_tecnico: Optional[str] = Field(None, max_length=260)
     observaciones: Optional[str] = None
+    estado_devolucion: Optional[str] = Field("SALIDA", max_length=30)
+    obs_devolucion: Optional[str] = None
 
 
 class SalidaBienesCreate(SalidaBienesBase):

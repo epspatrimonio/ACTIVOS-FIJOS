@@ -569,6 +569,8 @@ class SalidaBienes(Base):
     ubicacion: Mapped[str] = mapped_column(String(220), nullable=False)
     resp_tecnico: Mapped[Optional[str]] = mapped_column(String(260), nullable=True)
     observaciones: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    estado_devolucion: Mapped[Optional[str]] = mapped_column(String(30), default="SALIDA", nullable=True)
+    obs_devolucion: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(server_default=FetchedValue())
     updated_at: Mapped[datetime] = mapped_column(server_default=FetchedValue())
 

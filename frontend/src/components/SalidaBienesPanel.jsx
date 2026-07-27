@@ -496,13 +496,14 @@ export default function SalidaBienesPanel() {
                   <th className="p-3 w-36">Tipo Salida</th>
                   <th className="p-3">Motivo</th>
                   <th className="p-3 w-20 text-center">Bienes</th>
+                  <th className="p-3 w-40 text-center">Devolución / Estado</th>
                   <th className="p-3 w-36 text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {loading && (
                   <tr>
-                    <td colSpan={7} className="p-10 text-center text-slate-400 font-medium">
+                    <td colSpan={8} className="p-10 text-center text-slate-400 font-medium">
                       <div className="flex justify-center items-center gap-2">
                         <RefreshCw className="w-4 h-4 animate-spin text-brand-500" />
                         <span>Cargando historial...</span>
@@ -511,10 +512,10 @@ export default function SalidaBienesPanel() {
                   </tr>
                 )}
                 {!loading && error && (
-                  <tr><td colSpan={7} className="p-10 text-center text-rose-600 font-semibold">{error}</td></tr>
+                  <tr><td colSpan={8} className="p-10 text-center text-rose-600 font-semibold">{error}</td></tr>
                 )}
                 {!loading && !error && historial.length === 0 && (
-                  <tr><td colSpan={7} className="p-12 text-center text-slate-400 font-medium">No hay registros de salidas en el sistema.</td></tr>
+                  <tr><td colSpan={8} className="p-12 text-center text-slate-400 font-medium">No hay registros de salidas en el sistema.</td></tr>
                 )}
                 {!loading && !error && historial.map((s) => (
                   <tr key={s.id} className="hover:bg-slate-50/70 transition-colors align-middle">
@@ -538,6 +539,68 @@ export default function SalidaBienesPanel() {
                       <span className="bg-slate-100 text-slate-800 font-bold px-2 py-0.5 rounded-lg text-[10px]">
                         {s.bienes ? s.bienes.length : 0}
                       </span>
+                    </td>
+                    <td className="p-3 text-center">
+                      <select
+                        value={s.estado_devolucion || 'SALIDA'}
+                        onChange={async (e) => {
+                          const newEstado = e.target.value;
+                          let newObs = s.obs_devolucion || '';
+                          if (newEstado === 'OBSERVADO') {
+                            const userObs = prompt('Ingrese la observación del retorno:', s.obs_devolucion || '');
+                            if (userObs !== null) newObs = userObs.trim();
+                          } else {
+                            newObs = '';
+                          }
+                          try {
+                            const res = await fetch(`/api/activos/salidas/${s.id}/devolucion`, {
+                              method: 'PATCH',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ estado_devolucion: newEstado, obs_devolucion: newObs })
+                            });
+                            if (res.ok) {
+                              setHistorial(prev => prev.map(item => item.id === s.id ? { ...item, estado_devolucion: newEstado, obs_devolucion: newObs } : item));
+                            }
+                          } catch (err) {
+                            console.error(err);
+                          }
+                        }}
+                        className={`px-2 py-1 rounded-md text-[10px] font-bold border transition-colors cursor-pointer focus:outline-none ${
+                          s.estado_devolucion === 'REGRESO' ? 'bg-emerald-50 text-emerald-700 border-emerald-300' :
+                          s.estado_devolucion === 'OBSERVADO' ? 'bg-amber-50 text-amber-700 border-amber-300' :
+                          'bg-blue-50 text-blue-700 border-blue-300'
+                        }`}
+                      >
+                        <option value="SALIDA">🔴 SALIDA</option>
+                        <option value="REGRESO">🟢 REGRESO</option>
+                        <option value="OBSERVADO">🟠 OBSERVADO</option>
+                      </select>
+                      {(s.estado_devolucion === 'OBSERVADO' || s.obs_devolucion) && (
+                        <div
+                          title={s.obs_devolucion ? `Observación: ${s.obs_devolucion}` : 'Clic para editar'}
+                          onClick={async () => {
+                            const userObs = prompt('Editar observación de retorno:', s.obs_devolucion || '');
+                            if (userObs !== null) {
+                              const newObs = userObs.trim();
+                              try {
+                                const res = await fetch(`/api/activos/salidas/${s.id}/devolucion`, {
+                                  method: 'PATCH',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ estado_devolucion: s.estado_devolucion || 'OBSERVADO', obs_devolucion: newObs })
+                                });
+                                if (res.ok) {
+                                  setHistorial(prev => prev.map(item => item.id === s.id ? { ...item, obs_devolucion: newObs } : item));
+                                }
+                              } catch (err) {
+                                console.error(err);
+                              }
+                            }
+                          }}
+                          className="text-[9px] text-amber-700 italic mt-1 max-w-[130px] truncate cursor-pointer font-medium hover:underline mx-auto"
+                        >
+                          {s.obs_devolucion ? `💬 ${s.obs_devolucion}` : '+ Agregar obs.'}
+                        </div>
+                      )}
                     </td>
                     <td className="p-3 text-center">
                       <div className="flex items-center justify-center gap-1.5">
