@@ -683,7 +683,7 @@ async def sincronizar_publico(db: AsyncSession = Depends(get_db)):
                 )
                 return {
                     "status": "success",
-                    "message": "Cambios subidos a GitHub correctamente.",
+                    "message": "Cambios subidos a GitHub correctamente. Sitio web: https://epspatrimonio.github.io/ACTIVOS-FIJOS/",
                     "detail": (push_res.stderr or push_res.stdout or "").strip()
                 }
             except subprocess.CalledProcessError as e:

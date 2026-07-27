@@ -43,6 +43,7 @@ export default function SyncPanel() {
           <li>Escribe un archivo estructurado y simplificado <code className="bg-slate-100 px-1 py-0.5 rounded">activos.json</code>.</li>
           <li>La ruta física de destino es: <code className="bg-slate-100 px-1 py-0.5 rounded">/public_dashboard/activos.json</code>.</li>
           <li>El Dashboard Público consume el JSON de manera estática sin interactuar con la base de datos directamente.</li>
+          <li>Enlace público oficial: <a href="https://epspatrimonio.github.io/ACTIVOS-FIJOS/" target="_blank" rel="noreferrer" className="text-brand-600 font-bold hover:underline">https://epspatrimonio.github.io/ACTIVOS-FIJOS/</a></li>
         </ul>
       </div>
 
@@ -70,14 +71,23 @@ export default function SyncPanel() {
               <p>📍 <strong>Ruta física:</strong> {result.export_path}</p>
               <p>📊 <strong>Registros exportados:</strong> {result.total_records}</p>
             </div>
-            <div className="mt-3 flex items-center space-x-4">
+            <div className="mt-3 flex flex-wrap items-center gap-3">
               <a
                 href={getDashboardUrl()}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center space-x-1 text-xs font-bold text-emerald-900 hover:underline"
+                className="inline-flex items-center space-x-1 text-xs font-bold text-emerald-900 hover:underline bg-emerald-100/60 px-2.5 py-1 rounded-lg border border-emerald-200"
               >
                 <span>Abrir Dashboard Público Local</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </a>
+              <a
+                href="https://epspatrimonio.github.io/ACTIVOS-FIJOS/"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center space-x-1 text-xs font-bold text-brand-700 hover:underline bg-brand-50 px-2.5 py-1 rounded-lg border border-brand-200"
+              >
+                <span>Abrir GitHub Pages (ACTIVOS-FIJOS)</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </a>
             </div>
