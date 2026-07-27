@@ -621,7 +621,7 @@ export default function App() {
       </header>
 
       <main className={`flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-w-0 ${
-        ['INVENTARIO', 'OBRAS', 'CONTABLE', 'VEHICULOS', 'SOAT', 'CELULARES', 'INVENTARIO_FISICO', 'BIENES_TERCEROS', 'SALIDAS', 'TRANSFERENCIAS'].includes(activeTab) ? 'overflow-hidden flex flex-col' : 'overflow-y-auto'
+        ['INVENTARIO', 'OBRAS', 'CONTABLE', 'VEHICULOS', 'SOAT', 'CELULARES', 'INVENTARIO_FISICO', 'BIENES_TERCEROS', 'TRANSFERENCIAS'].includes(activeTab) ? 'overflow-hidden flex flex-col' : 'overflow-y-auto'
       }`}>
         {activeTab === 'INVENTARIO' && (
           <div className="flex-1 flex flex-col min-h-0 space-y-4 animate-fadeIn w-full max-w-full overflow-hidden">

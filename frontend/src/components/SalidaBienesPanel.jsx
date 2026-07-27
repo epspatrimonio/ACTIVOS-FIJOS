@@ -395,7 +395,7 @@ export default function SalidaBienesPanel() {
         />
       )}
 
-      <div className="flex-1 flex flex-col min-h-0 space-y-4 animate-fadeIn w-full max-w-full overflow-hidden">
+      <div className="flex-1 flex flex-col space-y-4 animate-fadeIn w-full max-w-full">
 
         {/* Encabezado del módulo */}
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between shrink-0 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
@@ -466,11 +466,12 @@ export default function SalidaBienesPanel() {
 
         {/* Vista iframe del Módulo Completo */}
         {activeSubTab === 'MODULE' ? (
-          <div className="flex-1 bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-xs h-[calc(100vh-185px)] min-h-[750px] w-full">
+          <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-xs w-full min-h-[920px]">
             <iframe
               src="/salidabienes/"
               title="Módulo Salida de Bienes"
-              className="w-full h-full border-0"
+              className="w-full h-[920px] min-h-[920px] border-0"
+              style={{ overflowY: 'auto' }}
             />
           </div>
         ) : (
