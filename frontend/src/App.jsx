@@ -612,7 +612,7 @@ export default function App() {
                   <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'TRANSFERENCIAS' ? 'bg-emerald-50 text-emerald-600' : 'bg-white/15 text-white/90'}`}>
                     <ArrowLeftRight className="w-3 h-3" />
                   </span>
-                  <span>Transferencias</span>
+                  <span>Reasignación</span>
                 </button>
               </nav>
             </div>

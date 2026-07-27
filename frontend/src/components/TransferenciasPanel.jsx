@@ -42,6 +42,9 @@ export default function TransferenciasPanel() {
   const [editingTransf, setEditingTransf] = useState(null);
   const [editFormData, setEditFormData] = useState({});
 
+  // Sub-Pestaña Activa: REGISTRO | CONSULTAS
+  const [activeSubTab, setActiveSubTab] = useState('REGISTRO');
+
   useEffect(() => {
     loadData();
   }, []);
@@ -460,20 +463,48 @@ export default function TransferenciasPanel() {
             <ArrowLeftRight className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-[0.6875rem] font-bold text-brand-600 tracking-wider uppercase">Módulo de Reasignación</span>
-            <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">TRANSFERENCIA Y CAMBIO DE RESPONSABLE</h2>
-            <p className="text-xs text-slate-500 font-medium">Reasigna bienes patrimoniales y genera las actas oficiales en PDF.</p>
+            <span className="text-[0.6875rem] font-bold text-brand-600 tracking-wider uppercase">Módulo de Reasignación de Bienes</span>
+            <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">REASIGNACIÓN Y CAMBIO DE RESPONSABLE</h2>
+            <p className="text-xs text-slate-500 font-medium">Reasigna bienes patrimoniales a nuevos responsables y genera las actas oficiales en PDF.</p>
           </div>
         </div>
 
-        <button
-          onClick={loadData}
-          disabled={loading}
-          className="flex items-center space-x-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-all cursor-pointer border-none"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          <span>Actualizar</span>
-        </button>
+        <div className="flex items-center space-x-3">
+          {/* Sub-Pestañas de Navegación */}
+          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
+            <button
+              type="button"
+              onClick={() => setActiveSubTab('REGISTRO')}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all border-none cursor-pointer ${
+                activeSubTab === 'REGISTRO'
+                  ? 'bg-brand-500 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 bg-transparent'
+              }`}
+            >
+              Registro y Gestión
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveSubTab('CONSULTAS')}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all border-none cursor-pointer ${
+                activeSubTab === 'CONSULTAS'
+                  ? 'bg-brand-500 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 bg-transparent'
+              }`}
+            >
+              Tablas y Consultas
+            </button>
+          </div>
+
+          <button
+            onClick={loadData}
+            disabled={loading}
+            className="flex items-center space-x-2 px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-all cursor-pointer border-none"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            <span>Actualizar</span>
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -490,15 +521,16 @@ export default function TransferenciasPanel() {
         </div>
       )}
 
-      {/* Sección 1: Formulario Nueva Transferencia */}
-      <form onSubmit={handleRegistrarTransferencia} className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-6">
-        <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
-          <h3 className="text-base font-extrabold text-slate-900 flex items-center space-x-2">
-            <span className="w-2.5 h-2.5 bg-brand-500 rounded-full"></span>
-            <span>Nueva Transferencia de Bien</span>
-          </h3>
-          <span className="text-xs font-semibold text-slate-400">Paso 1: Seleccionar activo / Paso 2: Asignar nuevo responsable</span>
-        </div>
+      {/* Vista 1: Registro y Gestión */}
+      {activeSubTab === 'REGISTRO' && (
+        <form onSubmit={handleRegistrarTransferencia} className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-6">
+          <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+            <h3 className="text-base font-extrabold text-slate-900 flex items-center space-x-2">
+              <span className="w-2.5 h-2.5 bg-brand-500 rounded-full"></span>
+              <span>Nueva Reasignación de Bien</span>
+            </h3>
+            <span className="text-xs font-semibold text-slate-400">Paso 1: Seleccionar activo / Paso 2: Asignar nuevo responsable</span>
+          </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Columna Izquierda: Búsqueda y Datos del Activo */}
@@ -708,18 +740,20 @@ export default function TransferenciasPanel() {
             className="flex items-center space-x-2 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-700 hover:to-brand-800 text-white font-extrabold px-6 py-3 rounded-xl text-xs shadow-lg shadow-brand-600/20 active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer border-none"
           >
             <CheckCircle className="w-4 h-4" />
-            <span>{saving ? 'Guardando...' : 'Registrar Transferencia y Generar Acta (PDF)'}</span>
+            <span>{saving ? 'Guardando...' : 'Registrar Reasignación y Generar Acta (PDF)'}</span>
           </button>
         </div>
       </form>
+      )}
 
-      {/* Sección 2: Historial de Transferencias */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-          <div>
-            <h3 className="text-base font-extrabold text-slate-900">Historial de Transferencias Registradas</h3>
-            <p className="text-xs text-slate-500">Listado de cambios de responsable y actas generadas.</p>
-          </div>
+      {/* Vista 2: Tablas y Consultas (Historial) */}
+      {activeSubTab === 'CONSULTAS' && (
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+            <div>
+              <h3 className="text-base font-extrabold text-slate-900">Historial de Reasignaciones Registradas</h3>
+              <p className="text-xs text-slate-500">Listado de cambios de responsable y actas generadas.</p>
+            </div>
 
           <div className="flex flex-wrap items-center gap-2">
             <div className="relative">
@@ -799,6 +833,7 @@ export default function TransferenciasPanel() {
           </table>
         </div>
       </div>
+      )}
 
       {/* Modal Edición de Transferencia */}
       {editingTransf && (

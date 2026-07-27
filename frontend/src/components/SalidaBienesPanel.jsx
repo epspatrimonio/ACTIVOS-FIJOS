@@ -430,7 +430,7 @@ export default function SalidaBienesPanel() {
                   : 'text-slate-600 hover:text-slate-900 bg-transparent'
               }`}
             >
-              Módulo de Registro (PDF)
+              Registro y Gestión
             </button>
             <button
               onClick={() => setActiveSubTab('TABLE')}
@@ -440,7 +440,7 @@ export default function SalidaBienesPanel() {
                   : 'text-slate-600 hover:text-slate-900 bg-transparent'
               }`}
             >
-              Historial Tabular
+              Tablas y Consultas
             </button>
           </div>
 
