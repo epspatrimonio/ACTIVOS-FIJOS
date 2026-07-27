@@ -12,17 +12,24 @@ export default {
       },
       colors: {
         brand: {
-          50: '#f0f6fe',
-          100: '#d3e5fd',
-          200: '#a5cbfa',
-          300: '#6daaf3',
-          400: '#3b8eed',
-          500: '#0e6fdc', // Azul zafiro real
-          600: '#0d5bb0', // Azul medio
-          700: '#0e4984', // Azul oscuro elegante
-          800: '#0d396a', // Azul profundo
-          900: '#0b2a52', // Azul marino (tono de la imagen)
-          950: '#051934', // Azul marino oscuro (degradado de la imagen)
+          50: '#f0f4ff',
+          100: '#e0e9ff',
+          200: '#c7d7fe',
+          300: '#94b3fd',
+          400: '#5c83f9',
+          500: '#000080', // Navy Blue original solicitado (#000080)
+          600: '#000073',
+          700: '#000066',
+          800: '#000052',
+          900: '#00003d',
+          950: '#000029',
+        },
+        accent: {
+          50: '#f0fbff',
+          100: '#e0f7ff',
+          500: '#00B0F0', // Celeste institucional EPS Selva Central
+          600: '#009AD4',
+          700: '#007EB0'
         }
       }
     },

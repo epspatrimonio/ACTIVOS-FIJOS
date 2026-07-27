@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   ClipboardList, FolderOpen, PlusCircle, Smartphone, Car, ShieldCheck, 
   RefreshCw, LayoutDashboard, LogOut, Mail, Lock, AlertCircle,
-  ClipboardCheck, Users, Hammer, Coins, FileSpreadsheet, FileText, ArrowLeftRight
+  ClipboardCheck, Users, Hammer, Coins, FileSpreadsheet, FileText, ArrowLeftRight,
+  ChevronDown, Menu, X
 } from 'lucide-react';
 
 import Filters from './components/Filters';
@@ -118,6 +119,49 @@ function Login({ onLogin }) {
           </span>
         </div>
       </div>
+    </div>
+  );
+}
+
+// Componente para pestañas desplegables (Dropdowns) en la barra superior
+function NavDropdown({ label, icon: Icon, active, isOpen, onToggle, items }) {
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={onToggle}
+        className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
+          active || isOpen
+            ? 'bg-white text-[#000080] shadow-md shadow-black/10 font-extrabold ring-1 ring-white/30'
+            : 'text-white/90 hover:text-white hover:bg-white/15'
+        }`}
+      >
+        <Icon className="w-3.5 h-3.5" />
+        <span>{label}</span>
+        <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute left-0 mt-2 w-64 bg-white border border-slate-200/90 rounded-2xl shadow-xl z-50 p-1.5 animate-fadeIn">
+          {items.map((item, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => item.onClick()}
+              className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-all text-left ${
+                item.active
+                  ? 'bg-brand-50 text-[#000080] font-extrabold'
+                  : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              <span className={`flex items-center justify-center w-6 h-6 rounded-lg text-xs ${item.active ? 'bg-[#000080] text-white' : 'bg-slate-100 text-slate-600'}`}>
+                {item.icon}
+              </span>
+              <span className="flex-1">{item.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -356,6 +400,19 @@ export default function App() {
     setFilteredObras(obrasOnly);
   }, [filters.search, filters.cod_personal, filters.n_doc, activos]);
 
+  const [openDropdown, setOpenDropdown] = useState(null);
+  const navRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (navRef.current && !navRef.current.contains(event.target)) {
+        setOpenDropdown(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   if (!isLoggedIn) {
     return <Login onLogin={handleLogin} />;
   }
@@ -363,295 +420,187 @@ export default function App() {
   return (
     <div className="app-shell h-screen overflow-hidden flex flex-col">
       {/* Barra de Navegación Superior */}
-      <header className="app-topbar">
+      <header className="app-topbar shrink-0">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Fila 1: Logo + Título + Logout */}
-          <div className="flex items-center justify-between py-2.5">
-            <div className="flex items-center space-x-3">
+          {/* Fila Principal: Logo + Título + Menús Desplegables + Logout */}
+          <div className="flex items-center justify-between py-2.5 gap-4">
+            <div className="flex items-center space-x-3 shrink-0">
               <img 
                 src="/logo.jpg" 
                 alt="Logo EPS Selva Central" 
                 className="w-10 h-10 object-contain rounded-lg bg-white p-0.5 shadow-sm ring-1 ring-white/20" 
               />
               <div>
-                <h1 className="text-lg font-extrabold tracking-tight text-white leading-tight">Control Patrimonial</h1>
-                <p className="text-[0.6875rem] text-brand-100 font-bold tracking-wide uppercase">Gestión de activos fijos</p>
+                <span className="bg-white/20 text-white text-[0.6rem] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  EPS SELVA CENTRAL
+                </span>
+                <h1 className="text-base sm:text-lg font-bold tracking-tight text-white leading-tight mt-0.5">Control Patrimonial</h1>
               </div>
             </div>
 
-            {/* Botón Salir */}
-            <button
-              onClick={handleLogout}
-              title="Cerrar Sesión"
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-white/80 hover:text-white hover:bg-white/15 transition-all duration-200"
-            >
-              <LogOut className="w-5 h-5" />
-            </button>
+            {/* Menús Desplegables Organizados (Dropdown Menus) */}
+            <div ref={navRef} className="hidden lg:flex items-center gap-2 relative">
+              <NavDropdown
+                label="Operaciones y Registro"
+                icon={FolderOpen}
+                isOpen={openDropdown === 'OPERACIONES'}
+                onToggle={() => setOpenDropdown(openDropdown === 'OPERACIONES' ? null : 'OPERACIONES')}
+                active={['DOCUMENTOS', 'REGISTRO', 'SALIDAS_REGISTRO', 'TRANSFERENCIAS_REGISTRO', 'TERCEROS_REGISTRO'].includes(activeTab)}
+                items={[
+                  { label: 'Documentos', icon: <FolderOpen className="w-3.5 h-3.5" />, active: activeTab === 'DOCUMENTOS', onClick: () => { handleTabChange('DOCUMENTOS'); setOpenDropdown(null); } },
+                  { label: 'Registrar Activo', icon: <PlusCircle className="w-3.5 h-3.5" />, active: activeTab === 'REGISTRO', onClick: () => { handleTabChange('REGISTRO'); setOpenDropdown(null); } },
+                  { label: 'Salida de Bienes (Registro)', icon: <LogOut className="w-3.5 h-3.5 rotate-180" />, active: activeTab === 'SALIDAS_REGISTRO', onClick: () => { handleTabChange('SALIDAS_REGISTRO'); setOpenDropdown(null); } },
+                  { label: 'Reasignación (Registro)', icon: <ArrowLeftRight className="w-3.5 h-3.5" />, active: activeTab === 'TRANSFERENCIAS_REGISTRO', onClick: () => { handleTabChange('TRANSFERENCIAS_REGISTRO'); setOpenDropdown(null); } },
+                  { label: 'Bienes de Terceros (Registro)', icon: <Users className="w-3.5 h-3.5" />, active: activeTab === 'TERCEROS_REGISTRO', onClick: () => { handleTabChange('TERCEROS_REGISTRO'); setOpenDropdown(null); } },
+                ]}
+              />
+
+              <NavDropdown
+                label="Tablas y Consultas"
+                icon={ClipboardList}
+                isOpen={openDropdown === 'CONSULTAS'}
+                onToggle={() => setOpenDropdown(openDropdown === 'CONSULTAS' ? null : 'CONSULTAS')}
+                active={['INVENTARIO', 'OBRAS', 'VEHICULOS', 'SOAT', 'CELULARES', 'INVENTARIO_FISICO', 'TERCEROS_TABLA', 'SALIDAS_TABLA', 'TRANSFERENCIAS_TABLA'].includes(activeTab)}
+                items={[
+                  { label: 'Activos Fijos', icon: <ClipboardList className="w-3.5 h-3.5" />, active: activeTab === 'INVENTARIO', onClick: () => { handleTabChange('INVENTARIO'); setOpenDropdown(null); } },
+                  { label: 'Obras en Curso', icon: <Hammer className="w-3.5 h-3.5" />, active: activeTab === 'OBRAS', onClick: () => { handleTabChange('OBRAS'); setOpenDropdown(null); } },
+                  { label: 'Flota de Vehículos', icon: <Car className="w-3.5 h-3.5" />, active: activeTab === 'VEHICULOS', onClick: () => { handleTabChange('VEHICULOS'); setOpenDropdown(null); } },
+                  { label: 'SOAT y Rev. Técnica', icon: <ShieldCheck className="w-3.5 h-3.5" />, active: activeTab === 'SOAT', onClick: () => { handleTabChange('SOAT'); setOpenDropdown(null); } },
+                  { label: 'Equipos Celulares', icon: <Smartphone className="w-3.5 h-3.5" />, active: activeTab === 'CELULARES', onClick: () => { handleTabChange('CELULARES'); setOpenDropdown(null); } },
+                  { label: 'Inventario Físico', icon: <ClipboardCheck className="w-3.5 h-3.5" />, active: activeTab === 'INVENTARIO_FISICO', onClick: () => { handleTabChange('INVENTARIO_FISICO'); setOpenDropdown(null); } },
+                  { label: 'Bienes de Terceros (Tabla)', icon: <Users className="w-3.5 h-3.5" />, active: activeTab === 'TERCEROS_TABLA', onClick: () => { handleTabChange('TERCEROS_TABLA'); setOpenDropdown(null); } },
+                  { label: 'Salida de Bienes (Historial)', icon: <LogOut className="w-3.5 h-3.5 rotate-180" />, active: activeTab === 'SALIDAS_TABLA', onClick: () => { handleTabChange('SALIDAS_TABLA'); setOpenDropdown(null); } },
+                  { label: 'Reasignaciones (Historial)', icon: <ArrowLeftRight className="w-3.5 h-3.5" />, active: activeTab === 'TRANSFERENCIAS_TABLA', onClick: () => { handleTabChange('TRANSFERENCIAS_TABLA'); setOpenDropdown(null); } },
+                ]}
+              />
+
+              <NavDropdown
+                label="Reportes y Procesos"
+                icon={Coins}
+                isOpen={openDropdown === 'REPORTES'}
+                onToggle={() => setOpenDropdown(openDropdown === 'REPORTES' ? null : 'REPORTES')}
+                active={['CONTABLE', 'DASHBOARD'].includes(activeTab)}
+                items={[
+                  { label: 'Reporte Contable Agrupado', icon: <Coins className="w-3.5 h-3.5" />, active: activeTab === 'CONTABLE', onClick: () => { handleTabChange('CONTABLE'); setOpenDropdown(null); } },
+                  { label: 'Dashboard Administrativo', icon: <LayoutDashboard className="w-3.5 h-3.5" />, active: activeTab === 'DASHBOARD', onClick: () => { handleTabChange('DASHBOARD'); setOpenDropdown(null); } },
+                ]}
+              />
+
+              <NavDropdown
+                label="Configuración"
+                icon={RefreshCw}
+                isOpen={openDropdown === 'CONFIG'}
+                onToggle={() => setOpenDropdown(openDropdown === 'CONFIG' ? null : 'CONFIG')}
+                active={['SINCRONIZAR', 'ADMIN'].includes(activeTab)}
+                items={[
+                  { label: 'Sincronizar Dashboard Público', icon: <RefreshCw className="w-3.5 h-3.5" />, active: activeTab === 'SINCRONIZAR', onClick: () => { handleTabChange('SINCRONIZAR'); setOpenDropdown(null); } },
+                  ...(isAdmin ? [{ label: 'Administración del Sistema', icon: <Lock className="w-3.5 h-3.5" />, active: activeTab === 'ADMIN', onClick: () => { handleTabChange('ADMIN'); setOpenDropdown(null); } }] : [])
+                ]}
+              />
+            </div>
+
+            <div className="flex items-center space-x-2 shrink-0">
+              <button
+                onClick={handleLogout}
+                title="Cerrar Sesión"
+                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-white/90 hover:text-white hover:bg-white/15 transition-all duration-200 text-xs font-bold border border-white/10 cursor-pointer"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">Cerrar Sesión</span>
+              </button>
+            </div>
           </div>
 
-          {/* Fila 2: Navegación de pestañas en 3 niveles */}
-          <div className="pb-3 -mt-0.5 space-y-2.5">
-            {/* Nivel 1: Registro y Gestión */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5">
-              <span className="text-[0.6875rem] font-bold text-white/60 uppercase tracking-wider min-w-[135px] select-none py-1">
-                Registro y Gestión:
-              </span>
-              <nav className="flex flex-1 gap-1 overflow-x-auto rounded-xl border border-white/10 bg-white/10 p-1">
-                <button
-                  onClick={() => handleTabChange('DOCUMENTOS')}
-                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
-                    activeTab === 'DOCUMENTOS'
-                      ? 'bg-white text-brand-600 shadow'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'DOCUMENTOS' ? 'bg-amber-50 text-amber-600' : 'bg-white/15 text-white/90'}`}>
-                    <FolderOpen className="w-3 h-3" />
-                  </span>
-                  <span>Documentos</span>
-                </button>
-
-                <button
-                  onClick={() => handleTabChange('REGISTRO')}
-                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
-                    activeTab === 'REGISTRO'
-                      ? 'bg-white text-brand-600 shadow'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'REGISTRO' ? 'bg-emerald-50 text-emerald-600' : 'bg-white/15 text-white/90'}`}>
-                    <PlusCircle className="w-3 h-3" />
-                  </span>
-                  <span>Registrar</span>
-                </button>
-
-                <button
-                  onClick={() => handleTabChange('SALIDAS_REGISTRO')}
-                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
-                    ['SALIDAS', 'SALIDAS_REGISTRO'].includes(activeTab)
-                      ? 'bg-white text-brand-600 shadow'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${['SALIDAS', 'SALIDAS_REGISTRO'].includes(activeTab) ? 'bg-rose-50 text-rose-600' : 'bg-white/15 text-white/90'}`}>
-                    <LogOut className="rotate-180 w-3 h-3" />
-                  </span>
-                  <span>Salida de Bienes</span>
-                </button>
-
-                <button
-                  onClick={() => handleTabChange('TRANSFERENCIAS_REGISTRO')}
-                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
-                    ['TRANSFERENCIAS', 'TRANSFERENCIAS_REGISTRO'].includes(activeTab)
-                      ? 'bg-white text-brand-600 shadow'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${['TRANSFERENCIAS', 'TRANSFERENCIAS_REGISTRO'].includes(activeTab) ? 'bg-emerald-50 text-emerald-600' : 'bg-white/15 text-white/90'}`}>
-                    <ArrowLeftRight className="w-3 h-3" />
-                  </span>
-                  <span>Reasignación</span>
-                </button>
-
-                <button
-                  onClick={() => handleTabChange('TERCEROS_REGISTRO')}
-                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
-                    activeTab === 'TERCEROS_REGISTRO'
-                      ? 'bg-white text-brand-600 shadow'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'TERCEROS_REGISTRO' ? 'bg-purple-50 text-purple-600' : 'bg-white/15 text-white/90'}`}>
-                    <Users className="w-3 h-3" />
-                  </span>
-                  <span>Terceros</span>
-                </button>
-              </nav>
-            </div>
-
-            {/* Nivel 2: Tablas y Consultas */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5">
-              <span className="text-[0.6875rem] font-bold text-white/60 uppercase tracking-wider min-w-[135px] select-none py-1">
-                Tablas y Consultas:
-              </span>
-              <nav className="flex flex-1 gap-1 overflow-x-auto rounded-xl border border-white/10 bg-white/10 p-1">
-                <button
-                  onClick={() => handleTabChange('INVENTARIO')}
-                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
-                    activeTab === 'INVENTARIO'
-                      ? 'bg-white text-brand-600 shadow'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'INVENTARIO' ? 'bg-brand-50 text-brand-600' : 'bg-white/15 text-white/90'}`}>
-                    <ClipboardList className="w-3 h-3" />
-                  </span>
-                  <span>Inventario</span>
-                </button>
-
-                <button
-                  onClick={() => handleTabChange('OBRAS')}
-                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
-                    activeTab === 'OBRAS'
-                      ? 'bg-white text-brand-600 shadow'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'OBRAS' ? 'bg-orange-50 text-orange-600' : 'bg-white/15 text-white/90'}`}>
-                    <Hammer className="w-3 h-3" />
-                  </span>
-                  <span>Obras en Curso</span>
-                </button>
-
-                <button
-                  onClick={() => handleTabChange('VEHICULOS')}
-                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
-                    activeTab === 'VEHICULOS'
-                      ? 'bg-white text-brand-600 shadow'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'VEHICULOS' ? 'bg-blue-50 text-blue-600' : 'bg-white/15 text-white/90'}`}>
-                    <Car className="w-3 h-3" />
-                  </span>
-                  <span>Vehículos</span>
-                </button>
-
-                <button
-                  onClick={() => handleTabChange('SOAT')}
-                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
-                    activeTab === 'SOAT'
-                      ? 'bg-white text-brand-600 shadow'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'SOAT' ? 'bg-rose-50 text-rose-600' : 'bg-white/15 text-white/90'}`}>
-                    <ShieldCheck className="w-3 h-3" />
-                  </span>
-                  <span>SOAT</span>
-                </button>
-
-                <button
-                  onClick={() => handleTabChange('CELULARES')}
-                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
-                    activeTab === 'CELULARES'
-                      ? 'bg-white text-brand-600 shadow'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'CELULARES' ? 'bg-cyan-50 text-cyan-600' : 'bg-white/15 text-white/90'}`}>
-                    <Smartphone className="w-3 h-3" />
-                  </span>
-                  <span>Celulares</span>
-                </button>
-
-                <button
-                  onClick={() => handleTabChange('INVENTARIO_FISICO')}
-                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
-                    activeTab === 'INVENTARIO_FISICO'
-                      ? 'bg-white text-brand-600 shadow'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'INVENTARIO_FISICO' ? 'bg-amber-50 text-amber-600' : 'bg-white/15 text-white/90'}`}>
-                    <ClipboardCheck className="w-3 h-3" />
-                  </span>
-                  <span>Inv. Físico</span>
-                </button>
-
-                <button
-                  onClick={() => handleTabChange('TERCEROS_TABLA')}
-                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
-                    ['BIENES_TERCEROS', 'TERCEROS_TABLA'].includes(activeTab)
-                      ? 'bg-white text-brand-600 shadow'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${['BIENES_TERCEROS', 'TERCEROS_TABLA'].includes(activeTab) ? 'bg-purple-50 text-purple-600' : 'bg-white/15 text-white/90'}`}>
-                    <Users className="w-3 h-3" />
-                  </span>
-                  <span>Terceros</span>
-                </button>
-
-                <button
-                  onClick={() => handleTabChange('SALIDAS_TABLA')}
-                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
-                    activeTab === 'SALIDAS_TABLA'
-                      ? 'bg-white text-brand-600 shadow'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'SALIDAS_TABLA' ? 'bg-rose-50 text-rose-600' : 'bg-white/15 text-white/90'}`}>
-                    <LogOut className="rotate-180 w-3 h-3" />
-                  </span>
-                  <span>Salida de Bienes</span>
-                </button>
-
-                <button
-                  onClick={() => handleTabChange('TRANSFERENCIAS_TABLA')}
-                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
-                    activeTab === 'TRANSFERENCIAS_TABLA'
-                      ? 'bg-white text-brand-600 shadow'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'TRANSFERENCIAS_TABLA' ? 'bg-emerald-50 text-emerald-600' : 'bg-white/15 text-white/90'}`}>
-                    <ArrowLeftRight className="w-3 h-3" />
-                  </span>
-                  <span>Reasignación</span>
-                </button>
-              </nav>
-            </div>
-
-            {/* Nivel 3: Reportes y Procesos */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5">
-              <span className="text-[0.6875rem] font-bold text-white/60 uppercase tracking-wider min-w-[135px] select-none py-1">
-                Reportes y Procesos:
-              </span>
-              <nav className="flex flex-1 gap-1 overflow-x-auto rounded-xl border border-white/10 bg-white/10 p-1">
-                <button
-                  onClick={() => handleTabChange('CONTABLE')}
-                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
-                    activeTab === 'CONTABLE'
-                      ? 'bg-white text-brand-600 shadow'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'CONTABLE' ? 'bg-yellow-50 text-yellow-600' : 'bg-white/15 text-white/90'}`}>
-                    <Coins className="w-3 h-3" />
-                  </span>
-                  <span>Rep. Contable</span>
-                </button>
-
-                <button
-                  onClick={() => handleTabChange('DASHBOARD')}
-                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
-                    activeTab === 'DASHBOARD'
-                      ? 'bg-white text-brand-600 shadow'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'DASHBOARD' ? 'bg-indigo-50 text-indigo-600' : 'bg-white/15 text-white/90'}`}>
-                    <LayoutDashboard className="w-3 h-3" />
-                  </span>
-                  <span>Dashboard</span>
-                </button>
-
-                <button
-                  onClick={() => handleTabChange('SINCRONIZAR')}
-                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
-                    activeTab === 'SINCRONIZAR'
-                      ? 'bg-white text-brand-600 shadow'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'SINCRONIZAR' ? 'bg-slate-100 text-slate-600' : 'bg-white/15 text-white/90'}`}>
-                    <RefreshCw className="w-3 h-3" />
-                  </span>
-                  <span>Sincronizar</span>
-                </button>
-              </nav>
-            </div>
+          {/* Selector de Pestañas Rápido Estilo public_dashboard (Single row pill switcher) */}
+          <div className="py-2 overflow-x-auto border-t border-white/10 flex items-center gap-1.5 no-scrollbar">
+            <button
+              onClick={() => handleTabChange('INVENTARIO')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'INVENTARIO' ? 'bg-white text-[#000080] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              💼 Activos Fijos
+            </button>
+            <button
+              onClick={() => handleTabChange('OBRAS')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'OBRAS' ? 'bg-white text-[#000080] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              🚧 Obras en Curso
+            </button>
+            <button
+              onClick={() => handleTabChange('VEHICULOS')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'VEHICULOS' ? 'bg-white text-[#000080] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              🚗 Vehículos
+            </button>
+            <button
+              onClick={() => handleTabChange('SOAT')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'SOAT' ? 'bg-white text-[#000080] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              🛡️ SOAT
+            </button>
+            <button
+              onClick={() => handleTabChange('CELULARES')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'CELULARES' ? 'bg-white text-[#000080] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              📱 Celulares
+            </button>
+            <button
+              onClick={() => handleTabChange('INVENTARIO_FISICO')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'INVENTARIO_FISICO' ? 'bg-white text-[#000080] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              🔍 Inv. Físico
+            </button>
+            <button
+              onClick={() => handleTabChange('TERCEROS_TABLA')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
+                ['BIENES_TERCEROS', 'TERCEROS_TABLA', 'TERCEROS_REGISTRO'].includes(activeTab) ? 'bg-white text-[#000080] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              🤝 Bienes de Terceros
+            </button>
+            <button
+              onClick={() => handleTabChange('DOCUMENTOS')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'DOCUMENTOS' ? 'bg-white text-[#000080] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              📄 Documentos
+            </button>
+            <button
+              onClick={() => handleTabChange('REGISTRO')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'REGISTRO' ? 'bg-white text-[#000080] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              ➕ Registrar Activo
+            </button>
+            <button
+              onClick={() => handleTabChange('CONTABLE')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'CONTABLE' ? 'bg-white text-[#000080] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              📊 Rep. Contable
+            </button>
+            <button
+              onClick={() => handleTabChange('SINCRONIZAR')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'SINCRONIZAR' ? 'bg-white text-[#000080] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              ☁️ Sincronizar
+            </button>
           </div>
         </div>
       </header>
