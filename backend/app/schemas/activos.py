@@ -496,6 +496,9 @@ class BienTerceroBase(BaseModel):
     color: Optional[str] = Field(None, max_length=120)
     caracteristicas_accesorios: Optional[str] = None
     cod_personal: Optional[str] = Field(None, max_length=20)
+    propietario_manual: Optional[str] = Field(None, max_length=260)
+    fecha_ingreso: Optional[date] = None
+    fecha_salida: Optional[date] = None
     observaciones: Optional[str] = None
     id_sucursal: Optional[int] = None
     localidad: Optional[str] = None

@@ -499,6 +499,20 @@ export default function App() {
                   </span>
                   <span>Reasignación</span>
                 </button>
+
+                <button
+                  onClick={() => handleTabChange('TERCEROS_REGISTRO')}
+                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
+                    activeTab === 'TERCEROS_REGISTRO'
+                      ? 'bg-white text-brand-600 shadow'
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'TERCEROS_REGISTRO' ? 'bg-purple-50 text-purple-600' : 'bg-white/15 text-white/90'}`}>
+                    <Users className="w-3 h-3" />
+                  </span>
+                  <span>Terceros</span>
+                </button>
               </nav>
             </div>
 
@@ -593,14 +607,14 @@ export default function App() {
                 </button>
 
                 <button
-                  onClick={() => handleTabChange('BIENES_TERCEROS')}
+                  onClick={() => handleTabChange('TERCEROS_TABLA')}
                   className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
-                    activeTab === 'BIENES_TERCEROS'
+                    ['BIENES_TERCEROS', 'TERCEROS_TABLA'].includes(activeTab)
                       ? 'bg-white text-brand-600 shadow'
                       : 'text-white/80 hover:text-white hover:bg-white/10'
                   }`}
                 >
-                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'BIENES_TERCEROS' ? 'bg-purple-50 text-purple-600' : 'bg-white/15 text-white/90'}`}>
+                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${['BIENES_TERCEROS', 'TERCEROS_TABLA'].includes(activeTab) ? 'bg-purple-50 text-purple-600' : 'bg-white/15 text-white/90'}`}>
                     <Users className="w-3 h-3" />
                   </span>
                   <span>Terceros</span>
@@ -690,7 +704,7 @@ export default function App() {
       </header>
 
       <main className={`flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-w-0 ${
-        ['INVENTARIO', 'OBRAS', 'CONTABLE', 'VEHICULOS', 'SOAT', 'CELULARES', 'INVENTARIO_FISICO', 'BIENES_TERCEROS', 'TRANSFERENCIAS', 'TRANSFERENCIAS_REGISTRO', 'TRANSFERENCIAS_TABLA', 'SALIDAS', 'SALIDAS_REGISTRO', 'SALIDAS_TABLA'].includes(activeTab) ? 'overflow-hidden flex flex-col' : 'overflow-y-auto'
+        ['INVENTARIO', 'OBRAS', 'CONTABLE', 'VEHICULOS', 'SOAT', 'CELULARES', 'INVENTARIO_FISICO', 'BIENES_TERCEROS', 'TERCEROS_REGISTRO', 'TERCEROS_TABLA', 'TRANSFERENCIAS', 'TRANSFERENCIAS_REGISTRO', 'TRANSFERENCIAS_TABLA', 'SALIDAS', 'SALIDAS_REGISTRO', 'SALIDAS_TABLA'].includes(activeTab) ? 'overflow-hidden flex flex-col' : 'overflow-y-auto'
       }`}>
         {activeTab === 'INVENTARIO' && (
           <div className="flex-1 flex flex-col min-h-0 space-y-4 animate-fadeIn w-full max-w-full overflow-hidden">
@@ -854,9 +868,15 @@ export default function App() {
           </div>
         )}
 
-        {activeTab === 'BIENES_TERCEROS' && (
+        {(activeTab === 'BIENES_TERCEROS' || activeTab === 'TERCEROS_TABLA') && (
           <div className="space-y-4 animate-fadeIn pt-2 flex flex-col flex-1 min-h-0">
-            <BienesTercerosPanel />
+            <BienesTercerosPanel initialSubTab="CONSULTAS" />
+          </div>
+        )}
+
+        {activeTab === 'TERCEROS_REGISTRO' && (
+          <div className="space-y-4 animate-fadeIn pt-2 flex flex-col flex-1 min-h-0">
+            <BienesTercerosPanel initialSubTab="REGISTRO" />
           </div>
         )}
 

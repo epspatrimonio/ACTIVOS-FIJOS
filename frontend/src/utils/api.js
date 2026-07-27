@@ -523,6 +523,16 @@ export async function fetchGenerarCodigoTerceroControl(tipo) {
   return response.json(); // { codigo, siguiente }
 }
 
+export async function updateFechaSalidaTercero(cod_patrimonial, fecha_salida) {
+  const response = await fetch(`${API_BASE_URL}/bienes-terceros/${encodeURIComponent(cod_patrimonial)}/fecha-salida`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fecha_salida }),
+  });
+  if (!response.ok) await handleResponseError(response, 'Error al actualizar fecha de salida.');
+  return response.json();
+}
+
 export async function fetchSalidas() {
   const response = await fetch(`${API_BASE_URL}/activos/salidas`);
   if (!response.ok) throw new Error('Error al cargar el historial de salidas.');

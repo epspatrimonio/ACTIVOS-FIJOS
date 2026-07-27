@@ -1851,11 +1851,45 @@ async def generar_codigo_tercero_control(tipo: str, db: AsyncSession = Depends(g
 async def get_bienes_terceros(tipo: Optional[str] = None, db: AsyncSession = Depends(get_db)):
     """Lista todos los bienes de terceros o activos no fijos controlados."""
     try:
+        try:
+            await db.execute(text("ALTER TABLE af.fct_bienes_terceros ADD COLUMN IF NOT EXISTS propietario_manual VARCHAR(260);"))
+            await db.execute(text("ALTER TABLE af.fct_bienes_terceros ADD COLUMN IF NOT EXISTS fecha_ingreso DATE;"))
+            await db.execute(text("ALTER TABLE af.fct_bienes_terceros ADD COLUMN IF NOT EXISTS fecha_salida DATE;"))
+            await db.commit()
+        except Exception:
+            await db.rollback()
+
         query = select(VwBienesTercerosDetalle)
         if tipo:
             query = query.where(VwBienesTercerosDetalle.tipo == tipo)
         result = await db.execute(query)
-        return result.scalars().all()
+        items = result.scalars().all()
+        res_list = []
+        for item in items:
+            resp = item.responsable or item.propietario_manual or 'Sin Asignar'
+            item_dict = {
+                'cod_patrimonial': item.cod_patrimonial,
+                'tipo': item.tipo,
+                'denominacion': item.denominacion,
+                'marca': item.marca,
+                'modelo': item.modelo,
+                'numero_serie': item.numero_serie,
+                'color': item.color,
+                'caracteristicas_accesorios': item.caracteristicas_accesorios,
+                'cod_personal': item.cod_personal,
+                'propietario_manual': item.propietario_manual,
+                'fecha_ingreso': item.fecha_ingreso,
+                'fecha_salida': item.fecha_salida,
+                'observaciones': item.observaciones,
+                'id_sucursal': item.id_sucursal,
+                'localidad': item.localidad,
+                'responsable': resp,
+                'sucursal': item.sucursal,
+                'created_at': item.created_at,
+                'updated_at': item.updated_at
+            }
+            res_list.append(item_dict)
+        return res_list
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -1898,6 +1932,47 @@ async def update_bien_tercero(cod_patrimonial: str, bien_in: BienTerceroCreate, 
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=400, detail=f"Error al actualizar bien: {str(e)}")
+
+
+@router.patch("/bienes-terceros/{cod_patrimonial}/fecha-salida", response_model=BienTerceroResponse, tags=["Bienes de Terceros"])
+async def update_fecha_salida_tercero(cod_patrimonial: str, payload: dict, db: AsyncSession = Depends(get_db)):
+    """Actualiza la fecha de salida de un bien de terceros."""
+    db_bien = await db.get(BienTercero, cod_patrimonial)
+    if not db_bien:
+        raise HTTPException(status_code=404, detail="Registro no encontrado.")
+    
+    val = payload.get("fecha_salida")
+    db_bien.fecha_salida = val if val else None
+    try:
+        await db.commit()
+        await db.refresh(db_bien)
+        res = await db.execute(select(VwBienesTercerosDetalle).where(VwBienesTercerosDetalle.cod_patrimonial == cod_patrimonial))
+        item = res.scalar_one()
+        resp = item.responsable or item.propietario_manual or 'Sin Asignar'
+        return {
+            'cod_patrimonial': item.cod_patrimonial,
+            'tipo': item.tipo,
+            'denominacion': item.denominacion,
+            'marca': item.marca,
+            'modelo': item.modelo,
+            'numero_serie': item.numero_serie,
+            'color': item.color,
+            'caracteristicas_accesorios': item.caracteristicas_accesorios,
+            'cod_personal': item.cod_personal,
+            'propietario_manual': item.propietario_manual,
+            'fecha_ingreso': item.fecha_ingreso,
+            'fecha_salida': item.fecha_salida,
+            'observaciones': item.observaciones,
+            'id_sucursal': item.id_sucursal,
+            'localidad': item.localidad,
+            'responsable': resp,
+            'sucursal': item.sucursal,
+            'created_at': item.created_at,
+            'updated_at': item.updated_at
+        }
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.delete("/bienes-terceros/{cod_patrimonial}", status_code=status.HTTP_204_NO_CONTENT, tags=["Bienes de Terceros"])
