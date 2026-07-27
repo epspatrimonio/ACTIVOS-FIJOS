@@ -2788,7 +2788,7 @@ document.addEventListener('DOMContentLoaded', () => {
         styles: { fontSize: 7.5, cellPadding: 2.5, valign: 'middle' },
         headStyles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold' },
         columnStyles: columnStyles,
-        margin: { top: 30, bottom: 36 } // Asegura espacio superior e inferior en todas las páginas
+        margin: { top: 30, bottom: 42 } // Asegura espacio libre de 42mm para no sobreponer la tabla al pie de página / firmas
       });
 
       // Dibujar Encabezado y Pie de página en cada hoja
@@ -2805,7 +2805,10 @@ document.addEventListener('DOMContentLoaded', () => {
       else if (currentTab === 'terceros') subtitle = "Bienes de Terceros (Terceros / Control)";
       else if (currentTab === 'contable') subtitle = "Reporte Contable Agrupado";
 
-      const signatureBlockY = 198;
+      const signatureLineY = 192;
+      const leftSigX = 85;
+      const rightSigX = 205;
+      const stampX = 179;
 
       for (let i = 1; i <= totalPages; i++) {
         doc.setPage(i);
@@ -2861,30 +2864,42 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.line(14, 25, 283, 25);
 
         // --- PIE DE PÁGINA ---
-        // 4. Mensaje de advertencia de firmas en la parte izquierda
+        // 1. Advertencia en esquina inferior izquierda
         doc.setFont("helvetica", "bold");
         doc.setFontSize(7.5);
-        doc.setTextColor(225, 29, 72); // Color rojo/rosa formal (rose-600)
-        doc.text("Nota: El documento sin firmas carece de valor.", 14, signatureBlockY + 4);
+        doc.setTextColor(225, 29, 72); // rose-600
+        doc.text("Nota: El documento sin firmas carece de valor.", 14, 202);
 
-        // 5. Firma y Sello Punteados (Posición Centrada)
+        // 2. Firma Izquierda: Firma y Sello (Huella Digital)
         doc.setFont("helvetica", "normal");
         doc.setFontSize(8);
         doc.setTextColor(30, 41, 59);
-        doc.text("--------------------------------------------------", 148.5, signatureBlockY, { align: 'center' });
-        doc.setFont("helvetica", "bold");
-        doc.text("CONTROL PATRIMONIAL", 148.5, signatureBlockY + 4, { align: 'center' });
+        doc.text("--------------------------------------------------", leftSigX, signatureLineY, { align: 'center' });
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.text("Firma y Sello (Huella Digital)", leftSigX, signatureLineY + 4, { align: 'center' });
 
-        // 6. Sello Post Firma CP1 (Parte Inferior Derecha)
+        // 3. Firma Derecha / Sello Post Firma CP1 (Imagen del sello sin duplicar texto encima)
         if (selloImg) {
-          doc.addImage(selloImg, 'PNG', 200, signatureBlockY - 22, 52, 24);
+          doc.addImage(selloImg, 'PNG', rightSigX - 26, 172, 52, 25);
+        } else {
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(8);
+          doc.setTextColor(30, 41, 59);
+          doc.text("--------------------------------------------------", rightSigX, signatureLineY, { align: 'center' });
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(8);
+          doc.text("ING. JUAN E. BOHORQUEZ AGUILAR", rightSigX, signatureLineY + 4, { align: 'center' });
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(7.5);
+          doc.text("Responsable de Control Patrimonial", rightSigX, signatureLineY + 7.5, { align: 'center' });
         }
 
-        // 7. Número de Página (Página X de Y)
+        // 4. Número de Página (Página X de Y)
         doc.setFont("helvetica", "normal");
         doc.setFontSize(7.5);
         doc.setTextColor(148, 163, 184);
-        doc.text(`Página ${i} de ${totalPages}`, 283, signatureBlockY + 4, { align: 'right' });
+        doc.text(`Página ${i} de ${totalPages}`, 283, signatureLineY + 4, { align: 'right' });
       }
 
       // Guardar PDF
