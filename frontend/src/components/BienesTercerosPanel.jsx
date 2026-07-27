@@ -284,21 +284,23 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
       columnStyles: { 0: { cellWidth: 55, fontStyle: 'bold', fillColor: [241, 245, 249] }, 1: { cellWidth: 127 } }
     });
 
-    // Bloque de Firmas Punteadas
+    // Bloque de Firmas Punteadas Centradas
     const finalY = (doc.lastAutoTable.finalY || posY + 70) + 32;
     doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(30, 41, 59);
 
-    doc.text("----------------------------------------------------------------", 30, finalY);
+    // Firma Izquierda (Propietario del Bien) - Centrado en X = 55
+    doc.text("--------------------------------------------------", 55, finalY, { align: 'center' });
     doc.setFont("helvetica", "bold");
-    doc.text("PROPIETARIO DEL BIEN", 30, finalY + 4);
+    doc.text("PROPIETARIO DEL BIEN", 55, finalY + 5, { align: 'center' });
     doc.setFont("helvetica", "normal");
-    doc.text(respNombre.toUpperCase(), 30, finalY + 8);
+    doc.text(respNombre.toUpperCase(), 55, finalY + 9.5, { align: 'center' });
 
-    doc.text("----------------------------------------------------------------", 125, finalY);
+    // Firma Derecha (Control Patrimonial) - Centrado en X = 155
+    doc.text("--------------------------------------------------", 155, finalY, { align: 'center' });
     doc.setFont("helvetica", "bold");
-    doc.text("CONTROL PATRIMONIAL", 125, finalY + 4);
+    doc.text("CONTROL PATRIMONIAL", 155, finalY + 5, { align: 'center' });
     doc.setFont("helvetica", "normal");
-    doc.text("E.P.S. SELVA CENTRAL S.A.", 125, finalY + 8);
+    doc.text("E.P.S. SELVA CENTRAL S.A.", 155, finalY + 9.5, { align: 'center' });
 
     doc.setFont("helvetica", "italic"); doc.setFontSize(7); doc.setTextColor(225, 29, 72);
     doc.text("Nota: El presente documento valida el ingreso del bien a las instalaciones de EPS Selva Central S.A.", 14, finalY + 22);
@@ -568,24 +570,42 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
+    if (!editForm.cod_patrimonial || !editForm.denominacion) {
+      setModalError('El código patrimonial y la denominación son obligatorios.');
+      return;
+    }
+
+    const codPersonalClean = editForm.ownerType === 'PERSONAL' ? extractString(editForm.cod_personal) : null;
+    const propietarioManualClean = editForm.ownerType === 'MANUAL' ? extractString(editForm.propietario_manual) : null;
+
+    if (editForm.ownerType === 'PERSONAL' && !codPersonalClean) {
+      setModalError('Debe seleccionar el nombre de un personal de la empresa de la lista.');
+      return;
+    }
+    if (editForm.ownerType === 'MANUAL' && !propietarioManualClean) {
+      setModalError('Debe escribir el nombre del propietario externo.');
+      return;
+    }
+
     setModalLoading(true);
     setModalError(null);
+
     const payload = {
-      cod_patrimonial: editForm.cod_patrimonial,
+      cod_patrimonial: extractString(editForm.cod_patrimonial),
       tipo: editForm.tipo,
-      denominacion: editForm.denominacion,
-      marca: editForm.marca,
-      modelo: editForm.modelo,
-      numero_serie: editForm.numero_serie,
-      color: editForm.color,
-      caracteristicas_accesorios: editForm.caracteristicas_accesorios,
-      cod_personal: editForm.ownerType === 'PERSONAL' ? editForm.cod_personal : null,
-      propietario_manual: editForm.ownerType === 'MANUAL' ? editForm.propietario_manual : null,
+      denominacion: extractString(editForm.denominacion),
+      marca: extractString(editForm.marca),
+      modelo: extractString(editForm.modelo),
+      numero_serie: extractString(editForm.numero_serie),
+      color: extractString(editForm.color),
+      caracteristicas_accesorios: extractString(editForm.caracteristicas_accesorios),
+      cod_personal: codPersonalClean,
+      propietario_manual: propietarioManualClean,
       id_sucursal: editForm.id_sucursal ? Number(editForm.id_sucursal) : null,
       localidad: editForm.localidad,
       fecha_ingreso: editForm.fecha_ingreso || null,
       fecha_salida: editForm.fecha_salida || null,
-      observaciones: editForm.observaciones
+      observaciones: extractString(editForm.observaciones)
     };
 
     try {
@@ -594,7 +614,7 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
       setShowModal(false);
-      loadData();
+      await loadData();
     } catch (err) {
       setModalError(err.message || 'Error al actualizar registro.');
     } finally {
