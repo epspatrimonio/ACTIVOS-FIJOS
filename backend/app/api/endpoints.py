@@ -720,9 +720,9 @@ async def sincronizar_publico(db: AsyncSession = Depends(get_db)):
 
 @router.get("/listas/sucursales", response_model=List[SucursalDTO], tags=["Listas"])
 async def get_lista_sucursales(db: AsyncSession = Depends(get_db)):
-    """Retorna las sucursales activas desde vw_lista_sucursal, excluyendo agregadores como SELVA CENTRAL."""
+    """Retorna las sucursales activas desde vw_lista_sucursal ordenadas por id_sucursal."""
     try:
-        result = await db.execute(select(VwListaSucursal))
+        result = await db.execute(select(VwListaSucursal).order_by(VwListaSucursal.value))
         sucursales = result.scalars().all()
         EXCLUDE = {"SELVA CENTRAL", "EPS SELVA CENTRAL", "SELVA CENTRAL S.A.", "RETIRADAS", "SIN ASIGNAR"}
         return [

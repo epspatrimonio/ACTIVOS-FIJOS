@@ -66,10 +66,20 @@ export default function TransferenciasPanel() {
 
       if (sucData && Array.isArray(sucData)) {
         const EXCLUDED_SUCURSALES = new Set(['SELVA CENTRAL', 'EPS SELVA CENTRAL', 'SELVA CENTRAL S.A.', 'RETIRADAS', 'SIN ASIGNAR']);
-        const sucs = sucData
-          .map(s => (s.label || s.sucursal || '').toUpperCase().trim())
-          .filter(s => s && !EXCLUDED_SUCURSALES.has(s));
-        setSucursalesList(Array.from(new Set(sucs)));
+        const DIM_SUCURSAL_ORDER = ['SEDE CENTRAL', 'LA MERCED', 'SATIPO', 'OXAPAMPA', 'PICHANAKI', 'PERENÉ', 'VILLA RICA'];
+        const sucs = Array.from(new Set(
+          sucData
+            .map(s => (s.label || s.sucursal || '').toUpperCase().trim())
+            .filter(s => s && !EXCLUDED_SUCURSALES.has(s))
+        )).sort((a, b) => {
+          const idxA = DIM_SUCURSAL_ORDER.indexOf(a);
+          const idxB = DIM_SUCURSAL_ORDER.indexOf(b);
+          const posA = idxA !== -1 ? idxA : 999;
+          const posB = idxB !== -1 ? idxB : 999;
+          if (posA !== posB) return posA - posB;
+          return a.localeCompare(b);
+        });
+        setSucursalesList(sucs);
       }
 
       if (puestosData && Array.isArray(puestosData)) {
