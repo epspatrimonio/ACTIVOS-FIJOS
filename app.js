@@ -3397,7 +3397,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- ENCABEZADO REPETITIVO ---
         // 1. Logo superior izquierdo
         if (logoImg) {
-          doc.addImage(logoImg, 'PNG', 14, 6, 22, 11);
+          doc.addImage(logoImg, 'JPEG', 14, 4, 20, 20);
         }
 
         // 2. Información de Entidad
