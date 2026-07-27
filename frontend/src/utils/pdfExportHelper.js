@@ -32,11 +32,11 @@ export async function generateStandardPDF({
   const width = isLandscape ? 297 : 210;
   const centerX = width / 2;
   const rightX = isLandscape ? 283 : 196;
-  const signatureBlockY = isLandscape ? 194 : 278;
 
+  // Garantizar un margen inferior de 42mm para que las filas de la tabla nunca se sobrepongan al pie de página / sello
   doc.autoTable({
     startY: 28,
-    margin: { top: 28, bottom: 22 },
+    margin: { top: 28, bottom: 42 },
     head: headers,
     body: data,
     theme: 'grid',
@@ -47,6 +47,11 @@ export async function generateStandardPDF({
 
   const totalPages = doc.internal.getNumberOfPages();
   const today = new Date().toLocaleDateString('es-PE');
+
+  const signatureLineY = isLandscape ? 192 : 274;
+  const leftSigX = isLandscape ? 85 : 58;
+  const rightSigX = isLandscape ? 205 : 150;
+  const stampX = isLandscape ? 179 : 124;
 
   for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i);
@@ -102,27 +107,41 @@ export async function generateStandardPDF({
     doc.line(14, 25, rightX, 25);
 
     // --- PIE DE PÁGINA REPETITIVO EN TODAS LAS PÁGINAS ---
+    // 1. Advertencia en esquina inferior izquierda
     doc.setFont("helvetica", "bold");
     doc.setFontSize(7.5);
     doc.setTextColor(225, 29, 72); // rose-600
-    doc.text("Nota: El documento sin firmas carece de valor.", 14, signatureBlockY + 4);
+    doc.text("Nota: El documento sin firmas carece de valor.", 14, isLandscape ? 202 : 289);
 
+    // 2. Firma Izquierda: Firma y Sello (Huella Digital)
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
     doc.setTextColor(30, 41, 59);
-    doc.text("--------------------------------------------------", centerX, signatureBlockY, { align: 'center' });
-    doc.setFont("helvetica", "bold");
-    doc.text("CONTROL PATRIMONIAL", centerX, signatureBlockY + 4, { align: 'center' });
+    doc.text("--------------------------------------------------", leftSigX, signatureLineY, { align: 'center' });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.text("Firma y Sello (Huella Digital)", leftSigX, signatureLineY + 4, { align: 'center' });
 
+    // 3. Firma Derecha / Sello Post Firma CP1
     if (selloImg) {
-      const selloX = isLandscape ? 200 : 130;
-      doc.addImage(selloImg, 'PNG', selloX, signatureBlockY - 22, 52, 24);
+      doc.addImage(selloImg, 'PNG', stampX, signatureLineY - 22, 52, 24);
     }
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(30, 41, 59);
+    doc.text("--------------------------------------------------", rightSigX, signatureLineY, { align: 'center' });
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.text("ING. JUAN E. BOHORQUEZ AGUILAR", rightSigX, signatureLineY + 4, { align: 'center' });
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.5);
+    doc.text("Responsable de Control Patrimonial", rightSigX, signatureLineY + 7.5, { align: 'center' });
 
+    // 4. Número de Página
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.5);
     doc.setTextColor(148, 163, 184);
-    doc.text(`Página ${i} de ${totalPages}`, rightX, signatureBlockY + 4, { align: 'right' });
+    doc.text(`Página ${i} de ${totalPages}`, rightX, signatureLineY + 4, { align: 'right' });
   }
 
   doc.save(filename);
