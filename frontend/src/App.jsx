@@ -403,11 +403,11 @@ export default function App() {
             </button>
           </div>
 
-          {/* Fila 2: Navegación de pestañas en 2 niveles */}
+          {/* Fila 2: Navegación de pestañas en 3 niveles */}
           <div className="pb-3 -mt-0.5 space-y-2.5">
             {/* Nivel 1: Registro y Gestión */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-1.5">
-              <span className="text-[0.6875rem] font-bold text-white/60 uppercase tracking-wider min-w-[125px] select-none py-1">
+              <span className="text-[0.6875rem] font-bold text-white/60 uppercase tracking-wider min-w-[135px] select-none py-1">
                 Registro y Gestión:
               </span>
               <nav className="flex flex-1 gap-1 overflow-x-auto rounded-xl border border-white/10 bg-white/10 p-1">
@@ -440,34 +440,6 @@ export default function App() {
                 </button>
 
                 <button
-                  onClick={() => handleTabChange('DASHBOARD')}
-                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
-                    activeTab === 'DASHBOARD'
-                      ? 'bg-white text-brand-600 shadow'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'DASHBOARD' ? 'bg-indigo-50 text-indigo-600' : 'bg-white/15 text-white/90'}`}>
-                    <LayoutDashboard className="w-3 h-3" />
-                  </span>
-                  <span>Dashboard</span>
-                </button>
-
-                <button
-                  onClick={() => handleTabChange('SINCRONIZAR')}
-                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
-                    activeTab === 'SINCRONIZAR'
-                      ? 'bg-white text-brand-600 shadow'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'SINCRONIZAR' ? 'bg-slate-100 text-slate-600' : 'bg-white/15 text-white/90'}`}>
-                    <RefreshCw className="w-3 h-3" />
-                  </span>
-                  <span>Sincronizar</span>
-                </button>
-
-                <button
                   onClick={() => handleTabChange('SALIDAS')}
                   className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
                     activeTab === 'SALIDAS'
@@ -480,12 +452,26 @@ export default function App() {
                   </span>
                   <span>Salida de Bienes</span>
                 </button>
+
+                <button
+                  onClick={() => handleTabChange('TRANSFERENCIAS')}
+                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
+                    activeTab === 'TRANSFERENCIAS'
+                      ? 'bg-white text-brand-600 shadow'
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'TRANSFERENCIAS' ? 'bg-emerald-50 text-emerald-600' : 'bg-white/15 text-white/90'}`}>
+                    <ArrowLeftRight className="w-3 h-3" />
+                  </span>
+                  <span>Reasignación</span>
+                </button>
               </nav>
             </div>
 
             {/* Nivel 2: Tablas y Consultas */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-1.5">
-              <span className="text-[0.6875rem] font-bold text-white/60 uppercase tracking-wider min-w-[125px] select-none py-1">
+              <span className="text-[0.6875rem] font-bold text-white/60 uppercase tracking-wider min-w-[135px] select-none py-1">
                 Tablas y Consultas:
               </span>
               <nav className="flex flex-1 gap-1 overflow-x-auto rounded-xl border border-white/10 bg-white/10 p-1">
@@ -515,20 +501,6 @@ export default function App() {
                     <Hammer className="w-3 h-3" />
                   </span>
                   <span>Obras en Curso</span>
-                </button>
-
-                <button
-                  onClick={() => handleTabChange('CONTABLE')}
-                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
-                    activeTab === 'CONTABLE'
-                      ? 'bg-white text-brand-600 shadow'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'CONTABLE' ? 'bg-yellow-50 text-yellow-600' : 'bg-white/15 text-white/90'}`}>
-                    <Coins className="w-3 h-3" />
-                  </span>
-                  <span>Rep. Contable</span>
                 </button>
 
                 <button
@@ -600,19 +572,55 @@ export default function App() {
                   </span>
                   <span>Terceros</span>
                 </button>
+              </nav>
+            </div>
 
+            {/* Nivel 3: Reportes y Procesos */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5">
+              <span className="text-[0.6875rem] font-bold text-white/60 uppercase tracking-wider min-w-[135px] select-none py-1">
+                Reportes y Procesos:
+              </span>
+              <nav className="flex flex-1 gap-1 overflow-x-auto rounded-xl border border-white/10 bg-white/10 p-1">
                 <button
-                  onClick={() => handleTabChange('TRANSFERENCIAS')}
+                  onClick={() => handleTabChange('CONTABLE')}
                   className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
-                    activeTab === 'TRANSFERENCIAS'
+                    activeTab === 'CONTABLE'
                       ? 'bg-white text-brand-600 shadow'
                       : 'text-white/80 hover:text-white hover:bg-white/10'
                   }`}
                 >
-                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'TRANSFERENCIAS' ? 'bg-emerald-50 text-emerald-600' : 'bg-white/15 text-white/90'}`}>
-                    <ArrowLeftRight className="w-3 h-3" />
+                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'CONTABLE' ? 'bg-yellow-50 text-yellow-600' : 'bg-white/15 text-white/90'}`}>
+                    <Coins className="w-3 h-3" />
                   </span>
-                  <span>Reasignación</span>
+                  <span>Rep. Contable</span>
+                </button>
+
+                <button
+                  onClick={() => handleTabChange('DASHBOARD')}
+                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
+                    activeTab === 'DASHBOARD'
+                      ? 'bg-white text-brand-600 shadow'
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'DASHBOARD' ? 'bg-indigo-50 text-indigo-600' : 'bg-white/15 text-white/90'}`}>
+                    <LayoutDashboard className="w-3 h-3" />
+                  </span>
+                  <span>Dashboard</span>
+                </button>
+
+                <button
+                  onClick={() => handleTabChange('SINCRONIZAR')}
+                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
+                    activeTab === 'SINCRONIZAR'
+                      ? 'bg-white text-brand-600 shadow'
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'SINCRONIZAR' ? 'bg-slate-100 text-slate-600' : 'bg-white/15 text-white/90'}`}>
+                    <RefreshCw className="w-3 h-3" />
+                  </span>
+                  <span>Sincronizar</span>
                 </button>
               </nav>
             </div>
