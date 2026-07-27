@@ -440,28 +440,28 @@ export default function App() {
                 </button>
 
                 <button
-                  onClick={() => handleTabChange('SALIDAS')}
+                  onClick={() => handleTabChange('SALIDAS_REGISTRO')}
                   className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
-                    activeTab === 'SALIDAS'
+                    ['SALIDAS', 'SALIDAS_REGISTRO'].includes(activeTab)
                       ? 'bg-white text-brand-600 shadow'
                       : 'text-white/80 hover:text-white hover:bg-white/10'
                   }`}
                 >
-                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'SALIDAS' ? 'bg-rose-50 text-rose-600' : 'bg-white/15 text-white/90'}`}>
+                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${['SALIDAS', 'SALIDAS_REGISTRO'].includes(activeTab) ? 'bg-rose-50 text-rose-600' : 'bg-white/15 text-white/90'}`}>
                     <LogOut className="rotate-180 w-3 h-3" />
                   </span>
                   <span>Salida de Bienes</span>
                 </button>
 
                 <button
-                  onClick={() => handleTabChange('TRANSFERENCIAS')}
+                  onClick={() => handleTabChange('TRANSFERENCIAS_REGISTRO')}
                   className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
-                    activeTab === 'TRANSFERENCIAS'
+                    ['TRANSFERENCIAS', 'TRANSFERENCIAS_REGISTRO'].includes(activeTab)
                       ? 'bg-white text-brand-600 shadow'
                       : 'text-white/80 hover:text-white hover:bg-white/10'
                   }`}
                 >
-                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'TRANSFERENCIAS' ? 'bg-emerald-50 text-emerald-600' : 'bg-white/15 text-white/90'}`}>
+                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${['TRANSFERENCIAS', 'TRANSFERENCIAS_REGISTRO'].includes(activeTab) ? 'bg-emerald-50 text-emerald-600' : 'bg-white/15 text-white/90'}`}>
                     <ArrowLeftRight className="w-3 h-3" />
                   </span>
                   <span>Reasignación</span>
@@ -572,6 +572,34 @@ export default function App() {
                   </span>
                   <span>Terceros</span>
                 </button>
+
+                <button
+                  onClick={() => handleTabChange('SALIDAS_TABLA')}
+                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
+                    activeTab === 'SALIDAS_TABLA'
+                      ? 'bg-white text-brand-600 shadow'
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'SALIDAS_TABLA' ? 'bg-rose-50 text-rose-600' : 'bg-white/15 text-white/90'}`}>
+                    <LogOut className="rotate-180 w-3 h-3" />
+                  </span>
+                  <span>Salida de Bienes</span>
+                </button>
+
+                <button
+                  onClick={() => handleTabChange('TRANSFERENCIAS_TABLA')}
+                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
+                    activeTab === 'TRANSFERENCIAS_TABLA'
+                      ? 'bg-white text-brand-600 shadow'
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'TRANSFERENCIAS_TABLA' ? 'bg-emerald-50 text-emerald-600' : 'bg-white/15 text-white/90'}`}>
+                    <ArrowLeftRight className="w-3 h-3" />
+                  </span>
+                  <span>Reasignación</span>
+                </button>
               </nav>
             </div>
 
@@ -629,7 +657,7 @@ export default function App() {
       </header>
 
       <main className={`flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-w-0 ${
-        ['INVENTARIO', 'OBRAS', 'CONTABLE', 'VEHICULOS', 'SOAT', 'CELULARES', 'INVENTARIO_FISICO', 'BIENES_TERCEROS', 'TRANSFERENCIAS'].includes(activeTab) ? 'overflow-hidden flex flex-col' : 'overflow-y-auto'
+        ['INVENTARIO', 'OBRAS', 'CONTABLE', 'VEHICULOS', 'SOAT', 'CELULARES', 'INVENTARIO_FISICO', 'BIENES_TERCEROS', 'TRANSFERENCIAS', 'TRANSFERENCIAS_REGISTRO', 'TRANSFERENCIAS_TABLA', 'SALIDAS', 'SALIDAS_REGISTRO', 'SALIDAS_TABLA'].includes(activeTab) ? 'overflow-hidden flex flex-col' : 'overflow-y-auto'
       }`}>
         {activeTab === 'INVENTARIO' && (
           <div className="flex-1 flex flex-col min-h-0 space-y-4 animate-fadeIn w-full max-w-full overflow-hidden">
@@ -805,12 +833,18 @@ export default function App() {
           </div>
         )}
 
-        {activeTab === 'SALIDAS' && (
-          <SalidaBienesPanel />
+        {(activeTab === 'SALIDAS' || activeTab === 'SALIDAS_REGISTRO') && (
+          <SalidaBienesPanel initialSubTab="MODULE" />
+        )}
+        {activeTab === 'SALIDAS_TABLA' && (
+          <SalidaBienesPanel initialSubTab="TABLE" />
         )}
 
-        {activeTab === 'TRANSFERENCIAS' && (
-          <TransferenciasPanel />
+        {(activeTab === 'TRANSFERENCIAS' || activeTab === 'TRANSFERENCIAS_REGISTRO') && (
+          <TransferenciasPanel initialSubTab="REGISTRO" />
+        )}
+        {activeTab === 'TRANSFERENCIAS_TABLA' && (
+          <TransferenciasPanel initialSubTab="CONSULTAS" />
         )}
       </main>
 

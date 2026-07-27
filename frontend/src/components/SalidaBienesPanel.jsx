@@ -308,8 +308,12 @@ function EditModal({ salida, onClose, onSave }) {
 // ──────────────────────────────────────────────────────────────────────────────
 // COMPONENTE PRINCIPAL – Solo Historial
 // ──────────────────────────────────────────────────────────────────────────────
-export default function SalidaBienesPanel() {
-  const [activeSubTab, setActiveSubTab] = useState('MODULE'); // 'MODULE' | 'TABLE'
+export default function SalidaBienesPanel({ initialSubTab = 'MODULE' }) {
+  const [activeSubTab, setActiveSubTab] = useState(initialSubTab); // 'MODULE' | 'TABLE'
+
+  useEffect(() => {
+    if (initialSubTab) setActiveSubTab(initialSubTab);
+  }, [initialSubTab]);
   const [historial, setHistorial] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

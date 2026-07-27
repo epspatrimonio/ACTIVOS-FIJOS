@@ -8,7 +8,7 @@ import {
   fetchActivos, fetchPersonal, fetchSucursales, fetchPuestos
 } from '../utils/api';
 
-export default function TransferenciasPanel() {
+export default function TransferenciasPanel({ initialSubTab = 'REGISTRO' }) {
   const [transferencias, setTransferencias] = useState([]);
   const [activos, setActivos] = useState([]);
   const [personalList, setPersonalList] = useState([]);
@@ -43,7 +43,11 @@ export default function TransferenciasPanel() {
   const [editFormData, setEditFormData] = useState({});
 
   // Sub-Pestaña Activa: REGISTRO | CONSULTAS
-  const [activeSubTab, setActiveSubTab] = useState('REGISTRO');
+  const [activeSubTab, setActiveSubTab] = useState(initialSubTab);
+
+  useEffect(() => {
+    if (initialSubTab) setActiveSubTab(initialSubTab);
+  }, [initialSubTab]);
 
   useEffect(() => {
     loadData();
