@@ -1049,25 +1049,22 @@ export default function VehiculosModule() {
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <button onClick={loadData} className="p-2 rounded-lg text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-colors border border-slate-200 cursor-pointer bg-white h-10" title="Actualizar">
-            <RefreshCw className="w-4 h-4" />
-          </button>
           <button
             onClick={handleExportExcel}
-            className="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-3.5 rounded-xl text-xs shadow-md shadow-emerald-600/10 hover:shadow-lg active:scale-[0.98] transition-all cursor-pointer border-none h-10"
+            className="flex items-center justify-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-bold py-2 px-3.5 rounded-xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer h-10"
           >
             <FileSpreadsheet className="w-4 h-4" />
             <span>Excel</span>
           </button>
           <button
             onClick={handleExportPDF}
-            className="flex items-center justify-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 px-3.5 rounded-xl text-xs shadow-md shadow-rose-600/10 hover:shadow-lg active:scale-[0.98] transition-all cursor-pointer border-none h-10"
+            className="flex items-center justify-center gap-1.5 bg-brand-50 text-[#00509d] border border-brand-200 hover:bg-brand-100 font-bold py-2 px-3.5 rounded-xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer h-10"
           >
             <FileText className="w-4 h-4" />
             <span>PDF</span>
           </button>
           <button onClick={() => { setEditItem(null); setShowForm(true); }}
-            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-brand-600 to-[#00B0F0] text-white text-sm font-bold rounded-xl shadow-lg shadow-brand-500/25 hover:from-brand-700 hover:to-[#009FD6] transition-all active:scale-[0.98] border-none cursor-pointer h-10">
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#00509d] hover:bg-[#003f7e] text-white text-sm font-bold rounded-xl shadow-sm transition-all active:scale-[0.98] border-none cursor-pointer h-10">
             <Plus className="w-4 h-4" />
             Registrar Vehículo
           </button>
@@ -1078,45 +1075,57 @@ export default function VehiculosModule() {
       {total > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div className="flex items-center gap-3 px-4 py-3 bg-white rounded-xl border border-slate-200 shadow-sm">
-            <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600"><Car className="w-4.5 h-4.5" /></div>
+            <div className="p-2 bg-brand-50 text-brand-600 rounded-lg shrink-0">
+              <Car className="w-5 h-5" />
+            </div>
             <div>
-              <p className="text-2xl font-extrabold text-slate-900 leading-none">{total}</p>
-              <p className="text-[11px] text-slate-500 font-semibold mt-0.5">Vehículos en Flota</p>
+              <div className="text-xl font-extrabold text-slate-900">{total}</div>
+              <div className="text-xs text-slate-500 font-medium">Total Vehículos</div>
             </div>
           </div>
-          <div className="flex items-center gap-3 px-4 py-3 bg-emerald-50 border border-emerald-100 rounded-xl shadow-sm">
-            <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-emerald-600"><CheckCircle2 className="w-4.5 h-4.5" /></div>
+          <div className="flex items-center gap-3 px-4 py-3 bg-white rounded-xl border border-slate-200 shadow-sm">
+            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg shrink-0">
+              <CheckCircle2 className="w-5 h-5" />
+            </div>
             <div>
-              <p className="text-2xl font-extrabold text-emerald-800 leading-none">{revVigentes}</p>
-              <p className="text-[11px] text-emerald-600 font-semibold mt-0.5">Rev. Técnica Vigentes</p>
+              <div className="text-xl font-extrabold text-slate-900">{conRevVigente}</div>
+              <div className="text-xs text-slate-500 font-medium">Rev. Técnica Vigente</div>
             </div>
           </div>
-          <div className="flex items-center gap-3 px-4 py-3 bg-amber-50 border border-amber-100 rounded-xl shadow-sm">
-            <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-amber-600"><AlertTriangle className="w-4.5 h-4.5" /></div>
+          <div className="flex items-center gap-3 px-4 py-3 bg-white rounded-xl border border-slate-200 shadow-sm">
+            <div className="p-2 bg-amber-50 text-amber-600 rounded-lg shrink-0">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
             <div>
-              <p className="text-2xl font-extrabold text-amber-800 leading-none">{revPorVencer}</p>
-              <p className="text-[11px] text-amber-600 font-semibold mt-0.5">Rev. Técnica Por Vencer</p>
+              <div className="text-xl font-extrabold text-slate-900">{conRevPorVencer}</div>
+              <div className="text-xs text-slate-500 font-medium">Por Vencer (≤30 días)</div>
             </div>
           </div>
-          <div className="flex items-center gap-3 px-4 py-3 bg-rose-50 border border-rose-100 rounded-xl shadow-sm">
-            <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-rose-600"><AlertCircle className="w-4.5 h-4.5" /></div>
+          <div className="flex items-center gap-3 px-4 py-3 bg-white rounded-xl border border-slate-200 shadow-sm">
+            <div className="p-2 bg-rose-50 text-rose-600 rounded-lg shrink-0">
+              <AlertCircle className="w-5 h-5" />
+            </div>
             <div>
-              <p className="text-2xl font-extrabold text-rose-800 leading-none">{revVencidas}</p>
-              <p className="text-[11px] text-rose-600 font-semibold mt-0.5">Rev. Técnica Vencidas</p>
+              <div className="text-xl font-extrabold text-slate-900">{conRevVencida}</div>
+              <div className="text-xs text-slate-500 font-medium">Rev. Vencida</div>
             </div>
           </div>
         </div>
       )}
 
-      {/* FILTROS */}
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="relative flex-1 min-w-[240px]">
+      {/* FILTROS Y BUSQUEDA */}
+      <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
+        <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input type="text" placeholder="Buscar por placa, denominación, responsable, marca..."
-            value={busqueda} onChange={e => setBusqueda(e.target.value)}
-            className="block w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all font-semibold" style={{ minHeight: '2.5rem' }} />
+          <input
+            type="text"
+            placeholder="Buscar por placa, código, denominación, marca, modelo, responsable..."
+            value={busqueda}
+            onChange={e => setBusqueda(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all placeholder:text-slate-400"
+            style={{ minHeight: '2.5rem' }}
+          />
         </div>
-
 
 
         <div className="relative">
@@ -1165,7 +1174,7 @@ export default function VehiculosModule() {
             </p>
             {!busqueda && !filtroSucursal && !filtroEstadoRev && (
               <button onClick={() => { setEditItem(null); setShowForm(true); }}
-                className="flex items-center gap-2 px-5 py-2.5 bg-brand-600 text-white text-sm font-bold rounded-xl transition-all cursor-pointer border-none mx-auto">
+                className="flex items-center gap-2 px-5 py-2.5 bg-[#00509d] text-white text-sm font-bold rounded-xl transition-all cursor-pointer border-none mx-auto">
                 <Plus className="w-4 h-4" /> Registrar Vehículo
               </button>
             )}
@@ -1173,7 +1182,7 @@ export default function VehiculosModule() {
         ) : (
           <div className="overflow-auto flex-1">
             <table className="min-w-[1750px] w-full text-sm">
-              <thead className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+              <thead className="bg-[#00509d] text-white sticky top-0 z-10 font-bold">
                 <tr>
                   <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                     <ExcelHeaderFilter

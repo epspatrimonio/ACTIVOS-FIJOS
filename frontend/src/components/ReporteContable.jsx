@@ -372,14 +372,14 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
           <div className="flex gap-2 justify-end">
             <button
               onClick={handleExportExcel}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs shadow-md shadow-emerald-600/10 hover:shadow-lg hover:shadow-emerald-600/25 active:scale-[0.98] transition-all cursor-pointer"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-bold py-2.5 px-4 rounded-xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer"
             >
               <FileSpreadsheet className="w-4 h-4" />
               <span>Excel</span>
             </button>
             <button
               onClick={handleExportPDF}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs shadow-md shadow-rose-600/10 hover:shadow-lg hover:shadow-rose-600/25 active:scale-[0.98] transition-all cursor-pointer"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-brand-50 text-[#00509d] border border-brand-200 hover:bg-brand-100 font-bold py-2.5 px-4 rounded-xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer"
             >
               <FileText className="w-4 h-4" />
               <span>PDF</span>
@@ -394,9 +394,9 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
         <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm flex items-center justify-between">
           <div>
             <span className="text-[0.6875rem] font-extrabold text-slate-400 uppercase tracking-wider">Costo Histórico (Clase 33)</span>
-            <p className="text-2xl font-extrabold text-brand-600 tracking-tight mt-1">{formatMoney(totalCosto)}</p>
+            <p className="text-2xl font-extrabold text-slate-900 tracking-tight mt-1">{formatMoney(totalCosto)}</p>
           </div>
-          <div className="p-3 bg-brand-50 rounded-xl text-brand-600">
+          <div className="p-3 bg-brand-50 rounded-xl text-[#00509d]">
             <Calculator className="w-6 h-6" />
           </div>
         </div>
@@ -404,17 +404,17 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
         <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm flex items-center justify-between">
           <div>
             <span className="text-[0.6875rem] font-extrabold text-slate-400 uppercase tracking-wider">Depreciación Acumulada (Clase 68)</span>
-            <p className="text-2xl font-extrabold text-rose-600 tracking-tight mt-1">{formatMoney(totalDepreciacion)}</p>
+            <p className="text-2xl font-extrabold text-slate-900 tracking-tight mt-1">{formatMoney(totalDepreciacion)}</p>
           </div>
-          <div className="p-3 bg-rose-50 rounded-xl text-rose-600">
-            <Calculator className="w-6 h-6 animate-pulse" />
+          <div className="p-3 bg-slate-100 rounded-xl text-slate-600">
+            <Calculator className="w-6 h-6" />
           </div>
         </div>
 
         <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm flex items-center justify-between">
           <div>
             <span className="text-[0.6875rem] font-extrabold text-slate-400 uppercase tracking-wider">Valor Residual Neto Contable</span>
-            <p className="text-2xl font-extrabold text-emerald-600 tracking-tight mt-1">{formatMoney(valorNeto)}</p>
+            <p className="text-2xl font-extrabold text-emerald-700 tracking-tight mt-1">{formatMoney(valorNeto)}</p>
           </div>
           <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600">
             <ShieldCheck className="w-6 h-6" />
@@ -433,12 +433,12 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
         <div className="glass-panel rounded-xl border border-slate-200 overflow-hidden w-full max-w-full h-full flex flex-col">
           <div className="overflow-x-auto overflow-y-auto w-full flex-1 min-h-0">
             <table className="min-w-[800px] w-full divide-y divide-slate-200 border-collapse">
-              <thead className="sticky top-0 bg-slate-100 z-10 shadow-[0_1px_0_0_rgba(226,232,240,1)]">
+              <thead className="sticky top-0 bg-[#00509d] text-white z-10 shadow-sm">
                 <tr>
-                  <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide w-24">Código PCGE</th>
-                  <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Descripción de la Cuenta Contable</th>
-                  <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide w-48">Tipo de Elemento</th>
-                  <th scope="col" className="px-5 py-3 text-right text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide w-36">Saldo Total</th>
+                  <th scope="col" className="px-5 py-3 text-left text-[0.72rem] font-bold text-white uppercase tracking-wider w-28">Código PCGE</th>
+                  <th scope="col" className="px-5 py-3 text-left text-[0.72rem] font-bold text-white uppercase tracking-wider">Descripción de la Cuenta Contable</th>
+                  <th scope="col" className="px-5 py-3 text-left text-[0.72rem] font-bold text-white uppercase tracking-wider w-48">Tipo de Elemento</th>
+                  <th scope="col" className="px-5 py-3 text-right text-[0.72rem] font-bold text-white uppercase tracking-wider w-40">Saldo Total</th>
                 </tr>
               </thead>
               

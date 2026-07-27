@@ -622,14 +622,14 @@ export default function App() {
                 </div>
                 <button
                   onClick={() => handleExportActivosExcel(filteredActivos, 'Inventario')}
-                  className="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 px-3 rounded-xl text-[11px] shadow-md shadow-emerald-600/10 hover:shadow-lg active:scale-[0.98] transition-all cursor-pointer border-none h-8"
+                  className="flex items-center justify-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-bold py-1.5 px-3 rounded-xl text-[11px] shadow-sm active:scale-[0.98] transition-all cursor-pointer h-8"
                 >
                   <FileSpreadsheet className="w-3.5 h-3.5" />
                   <span>Excel</span>
                 </button>
                 <button
                   onClick={() => handleExportActivosPDF(filteredActivos, 'Inventario')}
-                  className="flex items-center justify-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold py-1.5 px-3 rounded-xl text-[11px] shadow-md shadow-rose-600/10 hover:shadow-lg active:scale-[0.98] transition-all cursor-pointer border-none h-8"
+                  className="flex items-center justify-center gap-1.5 bg-brand-50 text-[#00509d] border border-brand-200 hover:bg-brand-100 font-bold py-1.5 px-3 rounded-xl text-[11px] shadow-sm active:scale-[0.98] transition-all cursor-pointer h-8"
                 >
                   <FileText className="w-3.5 h-3.5" />
                   <span>PDF</span>
@@ -668,14 +668,14 @@ export default function App() {
                 </div>
                 <button
                   onClick={() => handleExportActivosExcel(filteredObras, 'Obras_En_Curso')}
-                  className="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 px-3 rounded-xl text-[11px] shadow-md shadow-emerald-600/10 hover:shadow-lg active:scale-[0.98] transition-all cursor-pointer border-none h-8"
+                  className="flex items-center justify-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-bold py-1.5 px-3 rounded-xl text-[11px] shadow-sm active:scale-[0.98] transition-all cursor-pointer h-8"
                 >
                   <FileSpreadsheet className="w-3.5 h-3.5" />
                   <span>Excel</span>
                 </button>
                 <button
                   onClick={() => handleExportActivosPDF(filteredObras, 'Obras_En_Curso')}
-                  className="flex items-center justify-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold py-1.5 px-3 rounded-xl text-[11px] shadow-md shadow-rose-600/10 hover:shadow-lg active:scale-[0.98] transition-all cursor-pointer border-none h-8"
+                  className="flex items-center justify-center gap-1.5 bg-brand-50 text-[#00509d] border border-brand-200 hover:bg-brand-100 font-bold py-1.5 px-3 rounded-xl text-[11px] shadow-sm active:scale-[0.98] transition-all cursor-pointer h-8"
                 >
                   <FileText className="w-3.5 h-3.5" />
                   <span>PDF</span>

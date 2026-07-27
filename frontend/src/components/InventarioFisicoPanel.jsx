@@ -514,21 +514,21 @@ export default function InventarioFisicoPanel() {
           
           <button
             onClick={handleExportExcel}
-            className="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-3.5 rounded-xl text-xs shadow-md shadow-emerald-600/10 hover:shadow-lg active:scale-[0.98] transition-all cursor-pointer border-none h-[2.25rem] shrink-0"
+            className="flex items-center justify-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-bold py-2 px-3.5 rounded-xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer h-[2.25rem] shrink-0"
           >
             <FileSpreadsheet className="w-4 h-4" />
             <span>Excel</span>
           </button>
           <button
             onClick={handleExportPDF}
-            className="flex items-center justify-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 px-3.5 rounded-xl text-xs shadow-md shadow-rose-600/10 hover:shadow-lg active:scale-[0.98] transition-all cursor-pointer border-none h-[2.25rem] shrink-0"
+            className="flex items-center justify-center gap-1.5 bg-brand-50 text-[#00509d] border border-brand-200 hover:bg-brand-100 font-bold py-2 px-3.5 rounded-xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer h-[2.25rem] shrink-0"
           >
             <FileText className="w-4 h-4" />
             <span>PDF</span>
           </button>
           <button
             onClick={handleOpenCreate}
-            className="flex items-center space-x-1.5 bg-gradient-to-r from-brand-600 to-[#00B0F0] hover:from-brand-700 hover:to-[#00A0E0] text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md transition-all active:scale-95 shrink-0"
+            className="flex items-center space-x-1.5 bg-[#00509d] hover:bg-[#003f7e] text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm transition-all active:scale-95 shrink-0 border-none cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Agregar</span>
@@ -550,12 +550,12 @@ export default function InventarioFisicoPanel() {
         </div>
       )}
 
-      {/* Tabla de Resultados */}
+      {/* Tabla de Registros de Inventario Físico */}
       <div className="flex-1 min-h-0 bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col">
         <div className="flex-1 overflow-auto">
           {loading ? (
-            <div className="h-full flex items-center justify-center text-slate-400 text-sm py-12">
-              Cargando registros...
+            <div className="h-full flex items-center justify-center text-slate-400 text-sm py-16">
+              <span>Cargando inventario físico...</span>
             </div>
           ) : filteredAndSortedItems.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-slate-400 text-sm py-16 space-y-2">
@@ -564,8 +564,8 @@ export default function InventarioFisicoPanel() {
             </div>
           ) : (
             <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50/75 border-b border-slate-200/80 sticky top-0 z-10 text-[0.6875rem] font-bold text-slate-500 uppercase tracking-wider">
+              <thead className="bg-[#00509d] text-white sticky top-0 z-10 font-bold">
+                <tr className="border-b border-white/10 text-[0.72rem] font-bold text-white uppercase tracking-wider">
                   <th className="px-5 py-3">
                     <ExcelHeaderFilter
                       title="Código"

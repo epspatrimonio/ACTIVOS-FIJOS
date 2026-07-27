@@ -639,7 +639,7 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
             onClick={() => setActiveSubTab('REGISTRO')}
             className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
               activeSubTab === 'REGISTRO'
-                ? 'bg-purple-600 text-white shadow-md'
+                ? 'bg-[#00509d] text-white shadow-md'
                 : 'text-slate-700 hover:text-slate-900 hover:bg-slate-300/60'
             }`}
           >
@@ -650,7 +650,7 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
             onClick={() => setActiveSubTab('CONSULTAS')}
             className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
               activeSubTab === 'CONSULTAS'
-                ? 'bg-purple-600 text-white shadow-md'
+                ? 'bg-[#00509d] text-white shadow-md'
                 : 'text-slate-700 hover:text-slate-900 hover:bg-slate-300/60'
             }`}
           >
@@ -1042,14 +1042,14 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
 
               <button
                 onClick={handleExportExcel}
-                className="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-3.5 rounded-xl text-xs shadow-md active:scale-95 transition-all cursor-pointer border-none h-[2.25rem] shrink-0"
+                className="flex items-center justify-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-bold py-2 px-3.5 rounded-xl text-xs shadow-sm active:scale-95 transition-all cursor-pointer h-[2.25rem] shrink-0"
               >
                 <FileSpreadsheet className="w-4 h-4" />
                 <span>Excel</span>
               </button>
               <button
                 onClick={handleExportListPDF}
-                className="flex items-center justify-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 px-3.5 rounded-xl text-xs shadow-md active:scale-95 transition-all cursor-pointer border-none h-[2.25rem] shrink-0"
+                className="flex items-center justify-center gap-1.5 bg-brand-50 text-[#00509d] border border-brand-200 hover:bg-brand-100 font-bold py-2 px-3.5 rounded-xl text-xs shadow-sm active:scale-95 transition-all cursor-pointer h-[2.25rem] shrink-0"
               >
                 <FileText className="w-4 h-4" />
                 <span>PDF Historial</span>
@@ -1071,66 +1071,66 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
                 </div>
               ) : (
                 <table className="w-full text-left border-collapse text-xs">
-                  <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10 font-bold text-slate-700">
+                  <thead className="bg-[#00509d] text-white sticky top-0 z-10 font-bold">
                     <tr>
-                      <th className="p-3 w-28">
+                      <th className="p-3 w-28 text-left text-[0.72rem] font-bold text-white uppercase tracking-wider">
                         <div className="flex items-center justify-between">
                           <span>Código</span>
                           <ExcelHeaderFilter columnKey="cod_patrimonial" items={filteredItems} getColValue={getColValue} onFilterChange={handleFilterChange} onSortChange={handleSortChange} currentSort={sortConfig} />
                         </div>
                       </th>
-                      <th className="p-3 w-24">
+                      <th className="p-3 w-24 text-left text-[0.72rem] font-bold text-white uppercase tracking-wider">
                         <div className="flex items-center justify-between">
                           <span>Tipo</span>
                           <ExcelHeaderFilter columnKey="tipo" items={filteredItems} getColValue={getColValue} onFilterChange={handleFilterChange} onSortChange={handleSortChange} currentSort={sortConfig} />
                         </div>
                       </th>
-                      <th className="p-3">
+                      <th className="p-3 text-left text-[0.72rem] font-bold text-white uppercase tracking-wider">
                         <div className="flex items-center justify-between">
                           <span>Denominación del Bien</span>
                           <ExcelHeaderFilter columnKey="denominacion" items={filteredItems} getColValue={getColValue} onFilterChange={handleFilterChange} onSortChange={handleSortChange} currentSort={sortConfig} />
                         </div>
                       </th>
-                      <th className="p-3">
+                      <th className="p-3 text-left text-[0.72rem] font-bold text-white uppercase tracking-wider">
                         <div className="flex items-center justify-between">
                           <span>Propietario del Bien</span>
                           <ExcelHeaderFilter columnKey="responsable" items={filteredItems} getColValue={getColValue} onFilterChange={handleFilterChange} onSortChange={handleSortChange} currentSort={sortConfig} />
                         </div>
                       </th>
-                      <th className="p-3">
+                      <th className="p-3 text-left text-[0.72rem] font-bold text-white uppercase tracking-wider">
                         <div className="flex items-center justify-between">
                           <span>Características</span>
                           <ExcelHeaderFilter columnKey="caracteristicas" items={filteredItems} getColValue={getColValue} onFilterChange={handleFilterChange} onSortChange={handleSortChange} currentSort={sortConfig} />
                         </div>
                       </th>
-                      <th className="p-3 w-32">
+                      <th className="p-3 w-32 text-left text-[0.72rem] font-bold text-white uppercase tracking-wider">
                         <div className="flex items-center justify-between">
                           <span>Ubicación</span>
                           <ExcelHeaderFilter columnKey="ubicacion" items={filteredItems} getColValue={getColValue} onFilterChange={handleFilterChange} onSortChange={handleSortChange} currentSort={sortConfig} />
                         </div>
                       </th>
-                      <th className="p-3 w-28">
+                      <th className="p-3 w-28 text-left text-[0.72rem] font-bold text-white uppercase tracking-wider">
                         <div className="flex items-center justify-between">
                           <span>Fecha Ingreso</span>
                           <ExcelHeaderFilter columnKey="fecha_ingreso" items={filteredItems} getColValue={getColValue} onFilterChange={handleFilterChange} onSortChange={handleSortChange} currentSort={sortConfig} />
                         </div>
                       </th>
-                      <th className="p-3 w-36">
+                      <th className="p-3 w-36 text-left text-[0.72rem] font-bold text-white uppercase tracking-wider">
                         <div className="flex items-center justify-between">
                           <span>Fecha Salida</span>
                           <ExcelHeaderFilter columnKey="fecha_salida" items={filteredItems} getColValue={getColValue} onFilterChange={handleFilterChange} onSortChange={handleSortChange} currentSort={sortConfig} />
                         </div>
                       </th>
-                      <th className="p-3 w-24 text-right">Acciones</th>
+                      <th className="p-3 w-24 text-right text-[0.72rem] font-bold text-white uppercase tracking-wider">Acciones</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {filteredAndSortedItems.map((item) => (
                       <tr key={item.cod_patrimonial} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="p-3 font-mono font-bold text-purple-700">{item.cod_patrimonial}</td>
+                        <td className="p-3 font-mono font-bold text-slate-800">{item.cod_patrimonial}</td>
                         <td className="p-3">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[0.6875rem] font-bold ${
-                            item.tipo === 'TERCERO' ? 'bg-purple-100 text-purple-800' : 'bg-indigo-100 text-indigo-800'
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[0.6875rem] font-bold ${
+                            item.tipo === 'TERCERO' ? 'bg-brand-50 text-[#00509d] border border-brand-200/80' : 'bg-slate-100 text-slate-700 border border-slate-200'
                           }`}>
                             {item.tipo === 'TERCERO' ? 'Tercero' : 'Control'}
                           </span>
@@ -1145,7 +1145,7 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
                               Personal Externo
                             </span>
                           ) : (
-                            <span className="text-[0.625rem] text-purple-700 font-bold bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200 inline-block mt-0.5">
+                            <span className="text-[0.625rem] text-[#00509d] font-bold bg-brand-50 px-1.5 py-0.5 rounded border border-brand-200 inline-block mt-0.5">
                               Personal EPS
                             </span>
                           )}
@@ -1215,7 +1215,7 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
                             <button
                               onClick={() => generarActaPDF(item)}
                               title="Descargar Acta PDF"
-                              className="p-1.5 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                              className="p-1.5 text-[#00509d] hover:bg-brand-50 rounded-lg transition-colors"
                             >
                               <FileText className="w-4 h-4" />
                             </button>
