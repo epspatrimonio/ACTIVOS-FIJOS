@@ -65,7 +65,10 @@ export default function TransferenciasPanel() {
       }
 
       if (sucData && Array.isArray(sucData)) {
-        const sucs = sucData.map(s => (s.label || s.sucursal || '').toUpperCase()).filter(Boolean);
+        const EXCLUDED_SUCURSALES = new Set(['SELVA CENTRAL', 'EPS SELVA CENTRAL', 'SELVA CENTRAL S.A.', 'RETIRADAS', 'SIN ASIGNAR']);
+        const sucs = sucData
+          .map(s => (s.label || s.sucursal || '').toUpperCase().trim())
+          .filter(s => s && !EXCLUDED_SUCURSALES.has(s));
         setSucursalesList(Array.from(new Set(sucs)));
       }
 
