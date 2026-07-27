@@ -494,7 +494,7 @@ export default function App() {
                 active={['SINCRONIZAR', 'ADMIN'].includes(activeTab)}
                 items={[
                   { label: 'Sincronizar Dashboard Público', icon: <RefreshCw className="w-3.5 h-3.5" />, active: activeTab === 'SINCRONIZAR', onClick: () => { handleTabChange('SINCRONIZAR'); setOpenDropdown(null); } },
-                  ...(isAdmin ? [{ label: 'Administración del Sistema', icon: <Lock className="w-3.5 h-3.5" />, active: activeTab === 'ADMIN', onClick: () => { handleTabChange('ADMIN'); setOpenDropdown(null); } }] : [])
+                  { label: 'Administración del Sistema', icon: <Lock className="w-3.5 h-3.5" />, active: activeTab === 'ADMIN', onClick: () => { handleTabChange('ADMIN'); setOpenDropdown(null); } }
                 ]}
               />
             </div>
