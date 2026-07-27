@@ -1,4 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // ── Detectar URL base de la API ──────────────────────────────────────────
+  // En producción (GitHub Pages) apunta al backend local en la red
+  // En local (localhost) usa ruta relativa al mismo servidor FastAPI
+  const isGitHubPages = window.location.hostname.includes('github.io');
+  const API_BASE = isGitHubPages
+    ? 'http://127.0.0.1:8000/api'
+    : '/api';
+
   let activos = [];
   let bienesSeleccionados = [];
   let responsablesList = []; // Lista única de responsables para autocompletado
@@ -40,36 +48,86 @@ document.addEventListener('DOMContentLoaded', () => {
   const hoy = new Date().toISOString().split('T')[0];
   formFecha.value = hoy;
 
+  const btnAddManualRow = document.getElementById('btn-add-manual-row');
+  if (btnAddManualRow) {
+    btnAddManualRow.addEventListener('click', () => {
+      bienesSeleccionados.push({
+        cod_patrimonial: '',
+        denominacion: '',
+        color: 'NEGRO',
+        marca: 'S/M',
+        modelo: 'S/M',
+        numero_serie: 'S/S',
+        estado_activo: 'BUENO',
+        accesorios: '',
+        isManual: true,
+        seleccionado: true
+      });
+      renderSelectedBienesTable();
+    });
+  }
+
+  const chkSelectAll = document.getElementById('chk-select-all');
+  if (chkSelectAll) {
+    chkSelectAll.addEventListener('change', (e) => {
+      const isChecked = e.target.checked;
+      bienesSeleccionados.forEach(b => {
+        b.seleccionado = isChecked;
+      });
+      renderSelectedBienesTable();
+    });
+  }
+
   // Función global de cambio de modo (llamada desde onclick en HTML)
   window.setModo = function(modo) {
     modoActual = modo;
     const btnSistema = document.getElementById('modo-sistema-btn');
     const btnManual = document.getElementById('modo-manual-btn');
-    const sectionFiltroResp = document.getElementById('section-filtro-responsable');
+    const sectionSearchActivo = document.getElementById('section-search-activo');
+    const thSelectAll = document.getElementById('th-select-all');
 
     if (modo === 'SISTEMA') {
       btnSistema.className = 'flex items-center gap-2 px-4 py-2 rounded-lg border-2 text-xs font-bold transition-all border-brand-500 bg-brand-50 text-brand-700 cursor-pointer';
       btnManual.className = 'flex items-center gap-2 px-4 py-2 rounded-lg border-2 text-xs font-bold transition-all border-slate-200 text-slate-500 hover:border-slate-300 cursor-pointer';
-      if (sectionFiltroResp) sectionFiltroResp.classList.remove('hidden');
+      if (sectionSearchActivo) sectionSearchActivo.classList.remove('hidden');
+      if (btnAddManualRow) btnAddManualRow.classList.add('hidden');
+      if (thSelectAll) thSelectAll.classList.remove('hidden');
+      bienesSeleccionados = [];
     } else {
       btnManual.className = 'flex items-center gap-2 px-4 py-2 rounded-lg border-2 text-xs font-bold transition-all border-brand-500 bg-brand-50 text-brand-700 cursor-pointer';
       btnSistema.className = 'flex items-center gap-2 px-4 py-2 rounded-lg border-2 text-xs font-bold transition-all border-slate-200 text-slate-500 hover:border-slate-300 cursor-pointer';
-      if (sectionFiltroResp) sectionFiltroResp.classList.add('hidden');
-      // En modo manual limpiar los bienes cargados del sistema
-      bienesSeleccionados = [];
-      renderBienesTable();
+      if (sectionSearchActivo) sectionSearchActivo.classList.add('hidden');
+      if (btnAddManualRow) {
+        btnAddManualRow.classList.remove('hidden');
+        btnAddManualRow.innerHTML = `<svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg> + Agregar Activo`;
+      }
+      if (thSelectAll) thSelectAll.classList.add('hidden');
+      
+      // En modo manual iniciar con Activo 1 listo para rellenar
+      bienesSeleccionados = [{
+        cod_patrimonial: '',
+        denominacion: '',
+        color: 'NEGRO',
+        marca: 'S/M',
+        modelo: 'S/M',
+        numero_serie: 'S/S',
+        estado_activo: 'BUENO',
+        accesorios: '',
+        isManual: true,
+        seleccionado: true
+      }];
     }
     // Limpiar datos del responsable
     if (formResponsable) formResponsable.value = '';
     if (formCargo) formCargo.value = '';
     if (formUbicacion) formUbicacion.value = '';
-    if (searchResponsable) searchResponsable.value = '';
+    renderSelectedBienesTable();
   };
 
   // Actualizar el código de salida mostrado al obtener el siguiente número
   async function fetchNextCodigoSalida() {
     try {
-      const resp = await fetch('/api/activos/salidas');
+      const resp = await fetch(`${API_BASE}/activos/salidas`);
       if (resp.ok) {
         const salidas = await resp.json();
         const year = new Date().getFullYear();
@@ -89,8 +147,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Cargar activos desde el servidor FastAPI
   async function loadActivosData() {
     const paths = [
-      '/api/activos',
-      'https://localhost:8000/api/activos'
+      `${API_BASE}/activos`,
+      'http://127.0.0.1:8000/api/activos'
     ];
     for (const path of paths) {
       try {
@@ -106,32 +164,80 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Procesar datos al cargar para obtener responsables únicos
+  let cargosList = [];
+  let sucursalesList = ['SEDE CENTRAL', 'LA MERCED', 'SATIPO', 'OXAPAMPA', 'PICHANAKI', 'PERENÉ', 'VILLA RICA'];
+
+  // Procesar datos al cargar para obtener responsables, cargos y sucursales únicas
   function processActivosData() {
     responsablesDataMap = {};
     const respSet = new Set();
+    const cargoSet = new Set();
+    const sucSet = new Set(sucursalesList);
 
     activos.forEach(item => {
       const resp = item.responsable ? item.responsable.trim().toUpperCase() : '';
+      const cargo = item.puesto || item.subcategoria || item.unidad || '';
+      const ubi = item.localidad || item.sucursal || '';
+
+      if (cargo && cargo.trim() !== '') cargoSet.add(cargo.trim().toUpperCase());
+      if (ubi && ubi.trim() !== '') sucSet.add(ubi.trim().toUpperCase());
+
       if (resp) {
         respSet.add(resp);
         if (!responsablesDataMap[resp]) {
           responsablesDataMap[resp] = {
-            cargo: item.puesto || item.unidad || '—',
-            ubicacion: item.localidad || item.sucursal || '—'
+            cargo: cargo || '—',
+            ubicacion: ubi || '—'
           };
         } else {
-          if (item.puesto && responsablesDataMap[resp].cargo === '—') {
-            responsablesDataMap[resp].cargo = item.puesto;
+          if (cargo && responsablesDataMap[resp].cargo === '—') {
+            responsablesDataMap[resp].cargo = cargo;
           }
-          if (item.localidad && responsablesDataMap[resp].ubicacion === '—') {
-            responsablesDataMap[resp].ubicacion = item.localidad;
+          if (ubi && responsablesDataMap[resp].ubicacion === '—') {
+            responsablesDataMap[resp].ubicacion = ubi;
           }
         }
       }
     });
 
     responsablesList = Array.from(respSet).sort();
+    cargosList = Array.from(cargoSet).sort();
+    sucursalesList = Array.from(sucSet).sort();
+
+    populateSucursalesDropdown();
+  }
+
+  function populateSucursalesDropdown() {
+    const selectSucursal = document.getElementById('form-ubicacion');
+    if (!selectSucursal) return;
+    const currentVal = selectSucursal.value;
+    selectSucursal.innerHTML = '<option value="">-- Seleccionar Sucursal --</option>';
+    sucursalesList.forEach(suc => {
+      const opt = document.createElement('option');
+      opt.value = suc;
+      opt.textContent = suc;
+      selectSucursal.appendChild(opt);
+    });
+    if (currentVal) selectSucursal.value = currentVal;
+  }
+
+  function setSucursalValue(sucStr) {
+    const selectSucursal = document.getElementById('form-ubicacion');
+    if (!selectSucursal || !sucStr) return;
+    const target = sucStr.toUpperCase();
+    let match = sucursalesList.find(s => s === target);
+    if (!match) {
+      match = sucursalesList.find(s => target.includes(s) || s.includes(target));
+    }
+    if (match) {
+      selectSucursal.value = match;
+    } else if (target && target !== '—') {
+      const opt = document.createElement('option');
+      opt.value = target;
+      opt.textContent = target;
+      selectSucursal.appendChild(opt);
+      selectSucursal.value = target;
+    }
   }
 
   // Alternar entre pestañas de navegación
@@ -164,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </tr>
     `;
     try {
-      const response = await fetch('/api/activos/salidas');
+      const response = await fetch(`${API_BASE}/activos/salidas`);
       if (response.ok) {
         historialSalidas = await response.json();
         renderHistorialTable();
@@ -288,46 +394,139 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Autocompletado de Responsables
-  searchResponsable.addEventListener('input', (e) => {
-    const query = e.target.value.trim().toUpperCase();
-    if (!query) {
-      responsableSuggestions.classList.add('hidden');
-      return;
-    }
+  const respTecnicoSuggestions = document.getElementById('resp-tecnico-suggestions');
+  const cargoSuggestions = document.getElementById('cargo-suggestions');
 
-    const matches = responsablesList.filter(name => name.includes(query)).slice(0, 10);
-    if (matches.length === 0) {
-      responsableSuggestions.classList.add('hidden');
-      return;
-    }
-
-    responsableSuggestions.innerHTML = '';
-    matches.forEach(name => {
-      const div = document.createElement('div');
-      div.className = 'p-2.5 hover:bg-slate-50 cursor-pointer text-xs transition-colors border-b border-slate-100 last:border-b-0 font-medium text-slate-700';
-      div.textContent = name;
-      div.addEventListener('click', () => {
-        formResponsable.value = name;
-        const info = responsablesDataMap[name];
-        if (info) {
-          formCargo.value = info.cargo;
-          formUbicacion.value = info.ubicacion;
-        }
-        searchResponsable.value = '';
+  // Autocompletado directo en Nombre Responsable
+  if (formResponsable && responsableSuggestions) {
+    formResponsable.addEventListener('input', (e) => {
+      const query = e.target.value.trim().toUpperCase();
+      if (!query) {
         responsableSuggestions.classList.add('hidden');
+        return;
+      }
+
+      const matches = responsablesList.filter(name => name.includes(query)).slice(0, 10);
+      if (matches.length === 0) {
+        responsableSuggestions.classList.add('hidden');
+        return;
+      }
+
+      responsableSuggestions.innerHTML = '';
+      matches.forEach(name => {
+        const div = document.createElement('div');
+        div.className = 'p-2.5 hover:bg-slate-50 cursor-pointer text-xs transition-colors border-b border-slate-100 last:border-b-0 font-medium text-slate-700 flex justify-between items-center';
+        const info = responsablesDataMap[name];
+        const detailStr = info ? `${info.cargo} (${info.ubicacion})` : '';
+        div.innerHTML = `
+          <span class="font-semibold text-slate-900">${name}</span>
+          <span class="text-[0.7rem] text-slate-400 font-normal truncate max-w-[180px] ml-2">${detailStr}</span>
+        `;
+        div.addEventListener('click', () => {
+          formResponsable.value = name;
+          if (info) {
+            formCargo.value = info.cargo !== '—' ? info.cargo : '';
+            setSucursalValue(info.ubicacion);
+          }
+          responsableSuggestions.classList.add('hidden');
+
+          if (modoActual === 'SISTEMA') {
+            // En Modo Sistema, cargar automáticamente los bienes del responsable
+            const bienesDelResponsable = activos.filter(item => {
+              const resp = item.responsable ? item.responsable.trim().toUpperCase() : '';
+              return resp === name;
+            });
+
+            bienesSeleccionados = bienesDelResponsable.map(item => ({
+              cod_patrimonial: item.cod_patrimonial || '',
+              denominacion: item.denominacion || '',
+              color: item.color || 'NEGRO',
+              marca: item.marca || 'S/M',
+              modelo: item.modelo || 'S/M',
+              numero_serie: item.numero_serie || 'S/S',
+              estado_activo: item.estado_activo || 'BUENO',
+              accesorios: '',
+              seleccionado: true
+            }));
+            renderSelectedBienesTable();
+          }
+        });
+        responsableSuggestions.appendChild(div);
       });
-      responsableSuggestions.appendChild(div);
+      responsableSuggestions.classList.remove('hidden');
     });
-    responsableSuggestions.classList.remove('hidden');
-  });
+  }
+
+  // Autocompletado en Cargo / Unidad Orgánica
+  if (formCargo && cargoSuggestions) {
+    formCargo.addEventListener('input', (e) => {
+      const query = e.target.value.trim().toUpperCase();
+      if (!query) {
+        cargoSuggestions.classList.add('hidden');
+        return;
+      }
+      const matches = cargosList.filter(c => c.includes(query)).slice(0, 10);
+      if (matches.length === 0) {
+        cargoSuggestions.classList.add('hidden');
+        return;
+      }
+      cargoSuggestions.innerHTML = '';
+      matches.forEach(cargo => {
+        const div = document.createElement('div');
+        div.className = 'p-2 hover:bg-slate-50 cursor-pointer text-xs transition-colors border-b border-slate-100 last:border-b-0 font-medium text-slate-700';
+        div.textContent = cargo;
+        div.addEventListener('click', () => {
+          formCargo.value = cargo;
+          cargoSuggestions.classList.add('hidden');
+        });
+        cargoSuggestions.appendChild(div);
+      });
+      cargoSuggestions.classList.remove('hidden');
+    });
+  }
+
+  // Autocompletado para Responsable Cargo Salida (Área Técnica)
+  if (formRespTecnico && respTecnicoSuggestions) {
+    formRespTecnico.addEventListener('input', (e) => {
+      const query = e.target.value.trim().toUpperCase();
+      if (!query) {
+        respTecnicoSuggestions.classList.add('hidden');
+        return;
+      }
+
+      const matches = responsablesList.filter(name => name.includes(query)).slice(0, 10);
+      if (matches.length === 0) {
+        respTecnicoSuggestions.classList.add('hidden');
+        return;
+      }
+
+      respTecnicoSuggestions.innerHTML = '';
+      matches.forEach(name => {
+        const div = document.createElement('div');
+        div.className = 'p-2.5 hover:bg-slate-50 cursor-pointer text-xs transition-colors border-b border-slate-100 last:border-b-0 font-medium text-slate-700';
+        div.textContent = name;
+        div.addEventListener('click', () => {
+          formRespTecnico.value = name;
+          respTecnicoSuggestions.classList.add('hidden');
+        });
+        respTecnicoSuggestions.appendChild(div);
+      });
+      respTecnicoSuggestions.classList.remove('hidden');
+    });
+  }
 
   // Cerrar sugerencias al hacer click fuera
   document.addEventListener('click', (e) => {
-    if (e.target !== searchResponsable) {
+    if (e.target !== formResponsable && responsableSuggestions) {
       responsableSuggestions.classList.add('hidden');
     }
-    if (e.target !== searchActivo) {
+    if (e.target !== formCargo && cargoSuggestions) {
+      cargoSuggestions.classList.add('hidden');
+    }
+    if (e.target !== formRespTecnico && respTecnicoSuggestions) {
+      respTecnicoSuggestions.classList.add('hidden');
+    }
+    if (e.target !== searchActivo && activoSuggestions) {
       activoSuggestions.classList.add('hidden');
     }
   });
@@ -409,81 +608,130 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Renderizar la tabla de bienes seleccionados
   function renderSelectedBienesTable() {
+    const totalCount = bienesSeleccionados.length;
+    const selectedCount = bienesSeleccionados.filter(b => b.seleccionado !== false).length;
+
+    if (modoActual === 'SISTEMA') {
+      selectedCountBadge.textContent = `${selectedCount} de ${totalCount} Bienes Seleccionados`;
+    } else {
+      selectedCountBadge.textContent = `${totalCount} Bienes Registrados`;
+    }
+
     if (bienesSeleccionados.length === 0) {
+      const colSpan = modoActual === 'SISTEMA' ? 8 : 7;
       bienesTbody.innerHTML = `
         <tr id="empty-bienes-row">
-          <td colspan="7" class="p-8 text-center text-slate-400 font-medium">
+          <td colspan="${colSpan}" class="p-8 text-center text-slate-400 font-medium">
             <svg class="w-12 h-12 text-slate-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
             </svg>
-            No se han agregado bienes a la orden. Búscalos arriba para agregarlos.
+            No se han agregado bienes a la orden. ${modoActual === 'SISTEMA' ? 'Seleccione un responsable arriba o busque un bien.' : 'Haga clic en "+ Agregar Activo" arriba.'}
           </td>
         </tr>
       `;
-      selectedCountBadge.textContent = '0 Bienes Seleccionados';
       return;
     }
 
     bienesTbody.innerHTML = '';
-    selectedCountBadge.textContent = `${bienesSeleccionados.length} Bienes Seleccionados`;
 
     bienesSeleccionados.forEach((bien, index) => {
       const row = document.createElement('tr');
-      row.className = 'hover:bg-slate-50 transition-colors align-middle';
+      const isUnselected = modoActual === 'SISTEMA' && bien.seleccionado === false;
+      row.className = `hover:bg-slate-50 transition-colors align-middle ${isUnselected ? 'opacity-40 bg-slate-50' : ''}`;
 
-      // Nro
+      // Checkbox (solo en Modo SISTEMA)
+      if (modoActual === 'SISTEMA') {
+        const cellChk = document.createElement('td');
+        cellChk.className = 'p-3 text-center';
+        const chk = document.createElement('input');
+        chk.type = 'checkbox';
+        chk.checked = bien.seleccionado !== false;
+        chk.className = 'w-4 h-4 text-brand-500 rounded border-slate-300 cursor-pointer';
+        chk.addEventListener('change', (e) => {
+          bienesSeleccionados[index].seleccionado = e.target.checked;
+          renderSelectedBienesTable();
+        });
+        cellChk.appendChild(chk);
+        row.appendChild(cellChk);
+      }
+
+      // N° / Activo X
       const cellNro = document.createElement('td');
-      cellNro.className = 'p-3 text-center font-bold text-slate-500';
-      cellNro.textContent = index + 1;
+      cellNro.className = 'p-3 text-center font-bold text-slate-700 whitespace-nowrap text-xs';
+      if (modoActual === 'MANUAL') {
+        cellNro.innerHTML = `<span class="bg-brand-50 text-brand-700 px-2 py-1 rounded font-extrabold text-[0.7rem] border border-brand-200">Activo ${index + 1}</span>`;
+      } else {
+        cellNro.textContent = index + 1;
+      }
       row.appendChild(cellNro);
 
       // Cod. Patrimonial
       const cellCod = document.createElement('td');
       cellCod.className = 'p-3 font-semibold text-slate-900 font-mono';
-      cellCod.textContent = bien.cod_patrimonial || '—';
+      if (modoActual === 'MANUAL' || bien.isManual) {
+        const inputCod = document.createElement('input');
+        inputCod.type = 'text';
+        inputCod.value = bien.cod_patrimonial || '';
+        inputCod.placeholder = 'Manual (Opcional)';
+        inputCod.className = 'border border-slate-200 rounded px-1.5 py-1 text-[0.75rem] focus:outline-none focus:border-brand-500 w-full font-mono bg-white';
+        inputCod.addEventListener('input', (e) => {
+          bienesSeleccionados[index].cod_patrimonial = e.target.value;
+        });
+        cellCod.appendChild(inputCod);
+      } else {
+        cellCod.textContent = bien.cod_patrimonial || '—';
+      }
       row.appendChild(cellCod);
 
       // Denominación
       const cellDenom = document.createElement('td');
       cellDenom.className = 'p-3 font-medium text-slate-800';
-      cellDenom.textContent = bien.denominacion;
+      if (modoActual === 'MANUAL' || bien.isManual) {
+        const inputDenom = document.createElement('input');
+        inputDenom.type = 'text';
+        inputDenom.value = bien.denominacion || '';
+        inputDenom.placeholder = 'Ej: LAPTOP / IMPRESORA... *';
+        inputDenom.className = 'border border-slate-200 rounded px-1.5 py-1 text-[0.75rem] focus:outline-none focus:border-brand-500 w-full font-semibold bg-white';
+        inputDenom.addEventListener('input', (e) => {
+          bienesSeleccionados[index].denominacion = e.target.value;
+        });
+        cellDenom.appendChild(inputDenom);
+      } else {
+        cellDenom.textContent = bien.denominacion;
+      }
       row.appendChild(cellDenom);
 
       // Características (Color, Marca, Modelo, Serie)
       const cellCaract = document.createElement('td');
       cellCaract.className = 'p-3';
-      
       const gridDiv = document.createElement('div');
       gridDiv.className = 'grid grid-cols-2 gap-1.5';
-      
       gridDiv.innerHTML = `
         <div class="flex flex-col">
           <span class="text-[0.6rem] font-bold text-slate-400 uppercase tracking-wide">Color</span>
-          <input type="text" value="${bien.color}" class="border border-slate-200 rounded px-1.5 py-0.5 text-[0.7rem] focus:outline-none focus:border-brand-500 w-full" data-field="color" data-index="${index}">
+          <input type="text" value="${bien.color || 'NEGRO'}" class="border border-slate-200 rounded px-1.5 py-0.5 text-[0.7rem] focus:outline-none focus:border-brand-500 w-full bg-white" data-field="color" data-index="${index}">
         </div>
         <div class="flex flex-col">
           <span class="text-[0.6rem] font-bold text-slate-400 uppercase tracking-wide">Marca</span>
-          <input type="text" value="${bien.marca}" class="border border-slate-200 rounded px-1.5 py-0.5 text-[0.7rem] focus:outline-none focus:border-brand-500 w-full" data-field="marca" data-index="${index}">
+          <input type="text" value="${bien.marca || 'S/M'}" class="border border-slate-200 rounded px-1.5 py-0.5 text-[0.7rem] focus:outline-none focus:border-brand-500 w-full bg-white" data-field="marca" data-index="${index}">
         </div>
         <div class="flex flex-col">
           <span class="text-[0.6rem] font-bold text-slate-400 uppercase tracking-wide">Modelo</span>
-          <input type="text" value="${bien.modelo}" class="border border-slate-200 rounded px-1.5 py-0.5 text-[0.7rem] focus:outline-none focus:border-brand-500 w-full" data-field="modelo" data-index="${index}">
+          <input type="text" value="${bien.modelo || 'S/M'}" class="border border-slate-200 rounded px-1.5 py-0.5 text-[0.7rem] focus:outline-none focus:border-brand-500 w-full bg-white" data-field="modelo" data-index="${index}">
         </div>
         <div class="flex flex-col">
           <span class="text-[0.6rem] font-bold text-slate-400 uppercase tracking-wide">Serie</span>
-          <input type="text" value="${bien.numero_serie}" class="border border-slate-200 rounded px-1.5 py-0.5 text-[0.7rem] focus:outline-none focus:border-brand-500 w-full" data-field="numero_serie" data-index="${index}">
+          <input type="text" value="${bien.numero_serie || 'S/S'}" class="border border-slate-200 rounded px-1.5 py-0.5 text-[0.7rem] focus:outline-none focus:border-brand-500 w-full bg-white" data-field="numero_serie" data-index="${index}">
         </div>
       `;
-
       cellCaract.appendChild(gridDiv);
       row.appendChild(cellCaract);
 
       // Estado
       const cellEstado = document.createElement('td');
-      cellEstado.className = 'p-3';
-      
+      cellEstado.className = 'p-3 text-center';
       const selectEstado = document.createElement('select');
-      selectEstado.className = 'border border-slate-200 rounded px-1.5 py-1 text-[0.7rem] focus:outline-none focus:border-brand-500 w-full';
+      selectEstado.className = 'border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 bg-white shadow-sm focus:outline-none focus:border-brand-500 cursor-pointer min-w-[95px]';
       selectEstado.innerHTML = `
         <option value="BUENO" ${bien.estado_activo === 'BUENO' ? 'selected' : ''}>BUENO</option>
         <option value="REGULAR" ${bien.estado_activo === 'REGULAR' ? 'selected' : ''}>REGULAR</option>
@@ -499,12 +747,11 @@ document.addEventListener('DOMContentLoaded', () => {
       // Accesorios
       const cellAccesorios = document.createElement('td');
       cellAccesorios.className = 'p-3';
-      
       const inputAccesorios = document.createElement('input');
       inputAccesorios.type = 'text';
-      inputAccesorios.value = bien.accesorios;
+      inputAccesorios.value = bien.accesorios || '';
       inputAccesorios.placeholder = 'Cargador, mouse, etc...';
-      inputAccesorios.className = 'border border-slate-200 rounded px-2 py-1 text-[0.7rem] focus:outline-none focus:border-brand-500 w-full';
+      inputAccesorios.className = 'border border-slate-200 rounded px-2 py-1 text-[0.7rem] focus:outline-none focus:border-brand-500 w-full bg-white';
       inputAccesorios.addEventListener('input', (e) => {
         bienesSeleccionados[index].accesorios = e.target.value;
       });
@@ -514,7 +761,6 @@ document.addEventListener('DOMContentLoaded', () => {
       // Acciones
       const cellAccion = document.createElement('td');
       cellAccion.className = 'p-3 text-center';
-      
       const btnDelete = document.createElement('button');
       btnDelete.type = 'button';
       btnDelete.className = 'p-1.5 hover:bg-red-50 text-red-500 rounded transition-colors cursor-pointer';
@@ -533,7 +779,7 @@ document.addEventListener('DOMContentLoaded', () => {
       bienesTbody.appendChild(row);
     });
 
-    // Registrar inputs
+    // Registrar inputs de características
     const caractInputs = bienesTbody.querySelectorAll('input[data-field]');
     caractInputs.forEach(input => {
       input.addEventListener('input', (e) => {
@@ -585,9 +831,19 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    if (bienesSeleccionados.length === 0) {
-      alert('Por favor agregue al menos un bien patrimonial a la orden de salida.');
+    const bienesAEnviar = bienesSeleccionados.filter(b => b.seleccionado !== false);
+
+    if (bienesAEnviar.length === 0) {
+      alert('Por favor seleccione al menos un bien patrimonial activo para la orden de salida.');
       return;
+    }
+
+    for (let i = 0; i < bienesAEnviar.length; i++) {
+      const b = bienesAEnviar[i];
+      if (!b.denominacion || !b.denominacion.trim()) {
+        alert(`Por favor ingrese la denominación o descripción para el bien N° ${i + 1}.`);
+        return;
+      }
     }
 
     const originalText = btnGenerar.innerHTML;
@@ -607,7 +863,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ubicacion: formUbicacion.value.trim(),
         resp_tecnico: formRespTecnico.value.trim() || null,
         observaciones: formObservaciones.value.trim() || null,
-        bienes: bienesSeleccionados.map(b => ({
+        bienes: bienesAEnviar.map(b => ({
           cod_patrimonial: b.cod_patrimonial || null,
           denominacion: b.denominacion,
           color: b.color || null,
@@ -620,7 +876,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       // 2. Realizar petición POST al backend
-      const response = await fetch('/api/activos/salidas', {
+      const response = await fetch(`${API_BASE}/activos/salidas`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
