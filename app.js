@@ -2810,35 +2810,55 @@ document.addEventListener('DOMContentLoaded', () => {
       for (let i = 1; i <= totalPages; i++) {
         doc.setPage(i);
 
-        // --- ENCABEZADO ---
-        // 1. Agregar Imagen de Logo (Superior Izquierda)
+        // --- ENCABEZADO REPETITIVO ---
+        // 1. Logo Mascota Institucional (Superior Izquierda, dimensión simétrica 18x21mm)
         if (logoImg) {
-          doc.addImage(logoImg, 'PNG', 14, 8, 48, 14);
+          doc.addImage(logoImg, 'JPEG', 14, 5, 18, 21);
         }
 
-        // 2. Fecha (Superior Derecha)
+        // 2. Datos de Entidad a la derecha del Logo
+        const textX = 35;
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(8);
-        doc.setTextColor(100, 116, 139);
-        doc.text(`Fecha de Reporte: ${today}`, 283, 12, { align: 'right' });
+        doc.setFontSize(9);
+        doc.setTextColor(15, 23, 42);
+        doc.text('E.P.S. "SELVA CENTRAL" S.A.', textX, 10);
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(7);
+        doc.setTextColor(0, 176, 240);
+        doc.text('ENTIDAD PRESTADORA DE SERVICIOS DE SANEAMIENTO', textX, 14.5);
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(6.5);
+        doc.setTextColor(71, 85, 105);
+        doc.text('Chanchamayo - Oxapampa - Satipo  |  RUC: N° 20121876290', textX, 18.5);
 
         // 3. Título Centrado
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(16);
-        doc.setTextColor(0, 110, 180); // Azul formal
-        doc.text("CONTROL PATRIMONIAL", 148.5, 14, { align: 'center' });
+        doc.setFontSize(14);
+        doc.setTextColor(15, 23, 42);
+        doc.text("CONTROL PATRIMONIAL", 148.5, 11, { align: 'center' });
 
-        // Subtítulo Centrado
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(11);
-        doc.setTextColor(71, 85, 105);
-        doc.text(subtitle, 148.5, 20, { align: 'center' });
+        doc.setFontSize(10);
+        doc.setTextColor(0, 176, 240);
+        doc.text(subtitle.toUpperCase(), 148.5, 16.5, { align: 'center' });
 
-        // Sucursal / Filtro Centrado
-        doc.setFont("helvetica", "italic");
-        doc.setFontSize(9);
-        doc.setTextColor(148, 163, 184);
-        doc.text(`Filtro: ${selectedSucursal}`, 148.5, 25, { align: 'center' });
+        // 4. Fecha de Reporte y Filtro (Superior Derecha)
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8);
+        doc.setTextColor(100, 116, 139);
+        doc.text(`Fecha de Reporte: ${today}`, 283, 10, { align: 'right' });
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8);
+        doc.setTextColor(0, 176, 240);
+        doc.text(`Filtro: ${selectedSucursal}`, 283, 15, { align: 'right' });
+
+        // 5. Línea separadora institucional
+        doc.setLineWidth(0.4);
+        doc.setDrawColor(226, 232, 240);
+        doc.line(14, 25, 283, 25);
 
         // --- PIE DE PÁGINA ---
         // 4. Mensaje de advertencia de firmas en la parte izquierda
@@ -3395,21 +3415,27 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.setPage(i);
 
         // --- ENCABEZADO REPETITIVO ---
-        // 1. Logo superior izquierdo
+        // 1. Logo Mascota (18x21mm)
         if (logoImg) {
-          doc.addImage(logoImg, 'JPEG', 14, 4, 20, 20);
+          doc.addImage(logoImg, 'JPEG', 14, 4, 18, 21);
         }
 
-        // 2. Información de Entidad
+        // 2. Información de Entidad al lado del Logo
+        const textX = 35;
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(6.5);
-        doc.setTextColor(30, 41, 59);
-        doc.text('E.P.S. "SELVA CENTRAL" S.A.', 38, 9);
+        doc.setFontSize(9);
+        doc.setTextColor(15, 23, 42);
+        doc.text('E.P.S. "SELVA CENTRAL" S.A.', textX, 9);
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(7);
+        doc.setTextColor(0, 176, 240);
+        doc.text('ENTIDAD PRESTADORA DE SERVICIOS DE SANEAMIENTO', textX, 13.5);
+
         doc.setFont("helvetica", "normal");
-        doc.setFontSize(5.5);
-        doc.text('CHANCHAMAYO - OXAPAMPA - SATIPO', 38, 11.5);
-        doc.text('Pasaje San Pedro N° 253-257 La Merced Chyo.', 38, 14);
-        doc.text('RUC: N° 20121876290 Telefono 064-532363', 38, 16.5);
+        doc.setFontSize(6.5);
+        doc.setTextColor(71, 85, 105);
+        doc.text('Chanchamayo - Oxapampa - Satipo  |  RUC: N° 20121876290', textX, 17.5);
 
         // 3. Título Centrado (Ubicado en el centro, debajo del logo/datos de la izquierda - Y=25, tamaño 16)
         doc.setFont("helvetica", "bold");
