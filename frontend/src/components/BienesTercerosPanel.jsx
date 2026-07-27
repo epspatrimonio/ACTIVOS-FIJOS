@@ -168,7 +168,7 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
       case 'denominacion': return item.denominacion || '';
       case 'caracteristicas': return `M:${item.marca || ''} Mod:${item.modelo || ''} S:${item.numero_serie || ''} C:${item.color || ''}`;
       case 'responsable': return item.responsable || item.propietario_manual || 'Sin asignar';
-      case 'fecha_ingreso': return item.fecha_ingreso || '';
+      case 'fecha_ingreso': return item.fecha_ingreso || (item.created_at ? String(item.created_at).split('T')[0] : '');
       case 'fecha_salida': return item.fecha_salida || '';
       case 'observaciones': return item.observaciones || '';
       default: return '';
@@ -1175,7 +1175,10 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
                           {item.localidad && <div className="text-[0.6875rem] text-slate-400">({item.localidad})</div>}
                         </td>
                         <td className="p-3 text-slate-700 font-semibold">
-                          {item.fecha_ingreso ? item.fecha_ingreso.split('-').reverse().join('/') : '—'}
+                          {(() => {
+                            const val = item.fecha_ingreso || (item.created_at ? String(item.created_at).split('T')[0] : null);
+                            return val ? val.split('-').reverse().join('/') : '—';
+                          })()}
                         </td>
                         {/* Celda Interactivia de Fecha de Salida */}
                         <td className="p-3">

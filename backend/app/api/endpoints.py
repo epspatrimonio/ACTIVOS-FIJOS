@@ -1855,6 +1855,34 @@ async def get_bienes_terceros(tipo: Optional[str] = None, db: AsyncSession = Dep
             await db.execute(text("ALTER TABLE af.fct_bienes_terceros ADD COLUMN IF NOT EXISTS propietario_manual VARCHAR(260);"))
             await db.execute(text("ALTER TABLE af.fct_bienes_terceros ADD COLUMN IF NOT EXISTS fecha_ingreso DATE;"))
             await db.execute(text("ALTER TABLE af.fct_bienes_terceros ADD COLUMN IF NOT EXISTS fecha_salida DATE;"))
+            await db.execute(text("UPDATE af.fct_bienes_terceros SET fecha_ingreso = created_at::date WHERE fecha_ingreso IS NULL AND created_at IS NOT NULL;"))
+            await db.execute(text("UPDATE af.fct_bienes_terceros SET fecha_ingreso = CURRENT_DATE WHERE fecha_ingreso IS NULL;"))
+            await db.execute(text("""
+                CREATE OR REPLACE VIEW af.vw_bienes_terceros_detalle AS
+                SELECT 
+                    b.cod_patrimonial,
+                    b.tipo,
+                    b.denominacion,
+                    b.marca,
+                    b.modelo,
+                    b.numero_serie,
+                    b.color,
+                    b.caracteristicas_accesorios,
+                    b.cod_personal,
+                    b.propietario_manual,
+                    COALESCE(b.fecha_ingreso, b.created_at::date, CURRENT_DATE) AS fecha_ingreso,
+                    b.fecha_salida,
+                    COALESCE(p.nombre_completo, b.propietario_manual, 'Sin asignar') AS responsable,
+                    b.observaciones,
+                    b.id_sucursal,
+                    s.nombre_sucursal AS sucursal,
+                    b.localidad,
+                    b.created_at,
+                    b.updated_at
+                FROM af.fct_bienes_terceros b
+                LEFT JOIN af.dim_personal p ON b.cod_personal = p.cod_personal
+                LEFT JOIN af.dim_sucursal s ON b.id_sucursal = s.id_sucursal;
+            """))
             await db.commit()
         except Exception:
             await db.rollback()
