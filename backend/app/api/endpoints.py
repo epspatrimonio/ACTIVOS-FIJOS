@@ -1894,6 +1894,55 @@ async def get_bienes_terceros(tipo: Optional[str] = None, db: AsyncSession = Dep
         raise HTTPException(status_code=500, detail=str(e))
 
 
+def _format_bien_tercero_response(item, db_bien=None):
+    if item:
+        resp = item.responsable or item.propietario_manual or 'Sin Asignar'
+        return {
+            'cod_patrimonial': item.cod_patrimonial,
+            'tipo': item.tipo,
+            'denominacion': item.denominacion,
+            'marca': item.marca,
+            'modelo': item.modelo,
+            'numero_serie': item.numero_serie,
+            'color': item.color,
+            'caracteristicas_accesorios': item.caracteristicas_accesorios,
+            'cod_personal': item.cod_personal,
+            'propietario_manual': item.propietario_manual,
+            'fecha_ingreso': item.fecha_ingreso,
+            'fecha_salida': item.fecha_salida,
+            'observaciones': item.observaciones,
+            'id_sucursal': item.id_sucursal,
+            'localidad': item.localidad,
+            'responsable': resp,
+            'sucursal': getattr(item, 'sucursal', None),
+            'created_at': item.created_at,
+            'updated_at': item.updated_at
+        }
+    if db_bien:
+        return {
+            'cod_patrimonial': db_bien.cod_patrimonial,
+            'tipo': db_bien.tipo,
+            'denominacion': db_bien.denominacion,
+            'marca': db_bien.marca,
+            'modelo': db_bien.modelo,
+            'numero_serie': db_bien.numero_serie,
+            'color': db_bien.color,
+            'caracteristicas_accesorios': db_bien.caracteristicas_accesorios,
+            'cod_personal': db_bien.cod_personal,
+            'propietario_manual': db_bien.propietario_manual,
+            'fecha_ingreso': db_bien.fecha_ingreso,
+            'fecha_salida': db_bien.fecha_salida,
+            'observaciones': db_bien.observaciones,
+            'id_sucursal': db_bien.id_sucursal,
+            'localidad': db_bien.localidad,
+            'responsable': db_bien.propietario_manual or 'Sin Asignar',
+            'sucursal': None,
+            'created_at': db_bien.created_at,
+            'updated_at': db_bien.updated_at
+        }
+    return {}
+
+
 @router.post("/bienes-terceros", response_model=BienTerceroResponse, status_code=status.HTTP_201_CREATED, tags=["Bienes de Terceros"])
 async def create_bien_tercero(bien_in: BienTerceroCreate, db: AsyncSession = Depends(get_db)):
     """Registra un nuevo bien de terceros o activo no fijo controlado."""
@@ -1907,7 +1956,8 @@ async def create_bien_tercero(bien_in: BienTerceroCreate, db: AsyncSession = Dep
         await db.commit()
         await db.refresh(db_bien)
         res = await db.execute(select(VwBienesTercerosDetalle).where(VwBienesTercerosDetalle.cod_patrimonial == db_bien.cod_patrimonial))
-        return res.scalar_one()
+        item = res.scalar_one_or_none()
+        return _format_bien_tercero_response(item, db_bien)
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=400, detail=f"Error al registrar bien: {str(e)}")
@@ -1928,7 +1978,8 @@ async def update_bien_tercero(cod_patrimonial: str, bien_in: BienTerceroCreate, 
         await db.commit()
         await db.refresh(db_bien)
         res = await db.execute(select(VwBienesTercerosDetalle).where(VwBienesTercerosDetalle.cod_patrimonial == cod_patrimonial))
-        return res.scalar_one()
+        item = res.scalar_one_or_none()
+        return _format_bien_tercero_response(item, db_bien)
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=400, detail=f"Error al actualizar bien: {str(e)}")
@@ -1947,32 +1998,11 @@ async def update_fecha_salida_tercero(cod_patrimonial: str, payload: dict, db: A
         await db.commit()
         await db.refresh(db_bien)
         res = await db.execute(select(VwBienesTercerosDetalle).where(VwBienesTercerosDetalle.cod_patrimonial == cod_patrimonial))
-        item = res.scalar_one()
-        resp = item.responsable or item.propietario_manual or 'Sin Asignar'
-        return {
-            'cod_patrimonial': item.cod_patrimonial,
-            'tipo': item.tipo,
-            'denominacion': item.denominacion,
-            'marca': item.marca,
-            'modelo': item.modelo,
-            'numero_serie': item.numero_serie,
-            'color': item.color,
-            'caracteristicas_accesorios': item.caracteristicas_accesorios,
-            'cod_personal': item.cod_personal,
-            'propietario_manual': item.propietario_manual,
-            'fecha_ingreso': item.fecha_ingreso,
-            'fecha_salida': item.fecha_salida,
-            'observaciones': item.observaciones,
-            'id_sucursal': item.id_sucursal,
-            'localidad': item.localidad,
-            'responsable': resp,
-            'sucursal': item.sucursal,
-            'created_at': item.created_at,
-            'updated_at': item.updated_at
-        }
+        item = res.scalar_one_or_none()
+        return _format_bien_tercero_response(item, db_bien)
     except Exception as e:
         await db.rollback()
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=f"Error al actualizar fecha de salida: {str(e)}")
 
 
 @router.delete("/bienes-terceros/{cod_patrimonial}", status_code=status.HTTP_204_NO_CONTENT, tags=["Bienes de Terceros"])
