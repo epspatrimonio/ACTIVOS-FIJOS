@@ -2867,16 +2867,17 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.setTextColor(225, 29, 72); // Color rojo/rosa formal (rose-600)
         doc.text("Nota: El documento sin firmas carece de valor.", 14, signatureBlockY + 4);
 
-        // 5. Firma y Sello Punteados (Posición Centrada-Izquierda)
+        // 5. Firma y Sello Punteados (Posición Centrada)
         doc.setFont("helvetica", "normal");
-        doc.setFontSize(8.5);
+        doc.setFontSize(8);
         doc.setTextColor(30, 41, 59);
-        doc.text("----------------------------------------------------------------", 110, signatureBlockY);
-        doc.text("Firma y Sello (Huella Digital)", 122, signatureBlockY + 4);
+        doc.text("--------------------------------------------------", 148.5, signatureBlockY, { align: 'center' });
+        doc.setFont("helvetica", "bold");
+        doc.text("CONTROL PATRIMONIAL", 148.5, signatureBlockY + 4, { align: 'center' });
 
-        // 6. Sello Post Firma CP1 (Parte Inferior Derecha, posición fija - desplazado a X=190)
+        // 6. Sello Post Firma CP1 (Parte Inferior Derecha)
         if (selloImg) {
-          doc.addImage(selloImg, 'PNG', 190, signatureBlockY - 22, 56, 26);
+          doc.addImage(selloImg, 'PNG', 200, signatureBlockY - 22, 52, 24);
         }
 
         // 7. Número de Página (Página X de Y)
@@ -3502,24 +3503,24 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.setFontSize(7.5);
         
         // Usuario
-        doc.text("RECIBÍ CONFORME", 50, yLine + 4, { align: 'center' });
         doc.setFont("helvetica", "bold");
-        doc.text("USUARIO RESPONSABLE", 50, yLine + 8, { align: 'center' });
-
-        // Control Patrimonial (Texto "ING. JUAN EDER... RESPONSABLE..." eliminado porque ya viene en el sello)
-        doc.setFont("helvetica", "normal");
         doc.setFontSize(7.5);
-        doc.text("ENTREGUÉ CONFORME", 130, yLine + 4, { align: 'center' });
+        doc.text("USUARIO RESPONSABLE", 50, yLine + 4, { align: 'center' });
+
+        // Control Patrimonial
         doc.setFont("helvetica", "bold");
-        doc.text("CONTROL PATRIMONIAL", 130, yLine + 8, { align: 'center' });
+        doc.setFontSize(7.5);
+        doc.text("CONTROL PATRIMONIAL", 130, yLine + 4, { align: 'center' });
 
         // GAF
-        doc.text("Vº Bº", 202.5, yLine + 4, { align: 'center' });
-        doc.text("GAF", 202.5, yLine + 8, { align: 'center' });
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(7.5);
+        doc.text("Vº Bº GAF", 202.5, yLine + 4, { align: 'center' });
 
         // Logística
-        doc.text("Vº Bº", 257.5, yLine + 4, { align: 'center' });
-        doc.text("LOGISTICA", 257.5, yLine + 8, { align: 'center' });
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(7.5);
+        doc.text("Vº Bº LOGÍSTICA", 257.5, yLine + 4, { align: 'center' });
 
         // Sello Post Firma CP1 (Ubicado casi al ras de ENTREGUÉ CONFORME)
         if (selloImg) {
