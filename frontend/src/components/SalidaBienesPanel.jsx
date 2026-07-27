@@ -466,11 +466,11 @@ export default function SalidaBienesPanel() {
 
         {/* Vista iframe del Módulo Completo */}
         {activeSubTab === 'MODULE' ? (
-          <div className="flex-1 bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-xs min-h-[700px]">
+          <div className="flex-1 bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-xs h-[calc(100vh-185px)] min-h-[750px] w-full">
             <iframe
               src="/salidabienes/"
               title="Módulo Salida de Bienes"
-              className="w-full h-full min-h-[700px] border-0"
+              className="w-full h-full border-0"
             />
           </div>
         ) : (
