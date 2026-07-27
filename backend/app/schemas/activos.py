@@ -490,13 +490,13 @@ class BienTerceroBase(BaseModel):
     cod_patrimonial: str = Field(..., max_length=30)
     tipo: Literal["TERCERO", "CONTROL"]
     denominacion: str = Field(..., max_length=300)
-    marca: Optional[str] = Field(None, max_length=160)
-    modelo: Optional[str] = Field(None, max_length=180)
-    numero_serie: Optional[str] = Field(None, max_length=180)
-    color: Optional[str] = Field(None, max_length=120)
+    marca: Optional[str] = None
+    modelo: Optional[str] = None
+    numero_serie: Optional[str] = None
+    color: Optional[str] = None
     caracteristicas_accesorios: Optional[str] = None
-    cod_personal: Optional[str] = Field(None, max_length=20)
-    propietario_manual: Optional[str] = Field(None, max_length=260)
+    cod_personal: Optional[str] = None
+    propietario_manual: Optional[str] = None
     fecha_ingreso: Optional[date] = None
     fecha_salida: Optional[date] = None
     observaciones: Optional[str] = None

@@ -33,6 +33,23 @@ const INITIAL_FORM_STATE = {
   fecha_salida: ''
 };
 
+const extractString = (val) => {
+  if (val === null || val === undefined) return null;
+  if (typeof val === 'object' && val.target?.value !== undefined) {
+    const res = String(val.target.value).trim();
+    return res || null;
+  }
+  if (typeof val === 'object' && val.value !== undefined) {
+    const res = String(val.value).trim();
+    return res || null;
+  }
+  if (typeof val === 'string') {
+    const res = val.trim();
+    return res || null;
+  }
+  return String(val).trim() || null;
+};
+
 export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
   const [activeSubTab, setActiveSubTab] = useState(initialSubTab); // 'REGISTRO' | 'CONSULTAS'
   const [items, setItems] = useState([]);
@@ -65,6 +82,7 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
   const [editForm, setEditForm] = useState(INITIAL_FORM_STATE);
   const [modalLoading, setModalLoading] = useState(false);
   const [modalError, setModalError] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   // Edición rápida de fecha de salida por ítem
   const [editingFechaSalida, setEditingFechaSalida] = useState({}); // { [cod]: dateString }
@@ -295,25 +313,38 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
       setRegError('El código patrimonial y la denominación son obligatorios.');
       return;
     }
+
+    const codPersonalClean = regForm.ownerType === 'PERSONAL' ? extractString(regForm.cod_personal) : null;
+    const propietarioManualClean = regForm.ownerType === 'MANUAL' ? extractString(regForm.propietario_manual) : null;
+
+    if (regForm.ownerType === 'PERSONAL' && !codPersonalClean) {
+      setRegError('Debe seleccionar el nombre de un personal de la empresa de la lista.');
+      return;
+    }
+    if (regForm.ownerType === 'MANUAL' && !propietarioManualClean) {
+      setRegError('Debe escribir el nombre del propietario externo.');
+      return;
+    }
+
     setRegLoading(true);
     setRegError(null);
 
     const payload = {
-      cod_patrimonial: regForm.cod_patrimonial,
+      cod_patrimonial: extractString(regForm.cod_patrimonial),
       tipo: regForm.tipo,
-      denominacion: regForm.denominacion,
-      marca: regForm.marca,
-      modelo: regForm.modelo,
-      numero_serie: regForm.numero_serie,
-      color: regForm.color,
-      caracteristicas_accesorios: regForm.caracteristicas_accesorios,
-      cod_personal: regForm.ownerType === 'PERSONAL' ? regForm.cod_personal : null,
-      propietario_manual: regForm.ownerType === 'MANUAL' ? regForm.propietario_manual : null,
+      denominacion: extractString(regForm.denominacion),
+      marca: extractString(regForm.marca),
+      modelo: extractString(regForm.modelo),
+      numero_serie: extractString(regForm.numero_serie),
+      color: extractString(regForm.color),
+      caracteristicas_accesorios: extractString(regForm.caracteristicas_accesorios),
+      cod_personal: codPersonalClean,
+      propietario_manual: propietarioManualClean,
       id_sucursal: regForm.id_sucursal ? Number(regForm.id_sucursal) : null,
       localidad: regForm.localidad,
       fecha_ingreso: regForm.fecha_ingreso || null,
       fecha_salida: regForm.fecha_salida || null,
-      observaciones: regForm.observaciones
+      observaciones: extractString(regForm.observaciones)
     };
 
     try {
@@ -323,11 +354,12 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
       setTimeout(() => setSuccess(false), 4000);
 
       // Generar Acta PDF automáticamente
+      const personalObj = personal.find(p => String(p.value) === String(codPersonalClean));
       await generarActaPDF({
         ...payload,
         responsable: regForm.ownerType === 'PERSONAL' 
-          ? (personal.find(p => p.value === regForm.cod_personal)?.label || regForm.cod_personal)
-          : regForm.propietario_manual,
+          ? (personalObj?.label || codPersonalClean)
+          : propietarioManualClean,
         sucursal: sucursales.find(s => String(s.value) === String(regForm.id_sucursal))?.label
       });
 
@@ -760,8 +792,11 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
                   </label>
                   <SearchableSelect
                     options={personalOptions}
-                    value={regForm.cod_personal}
-                    onChange={(val) => setRegForm(prev => ({ ...prev, cod_personal: val }))}
+                    value={typeof regForm.cod_personal === 'object' ? (regForm.cod_personal?.target?.value || '') : (regForm.cod_personal || '')}
+                    onChange={(val) => {
+                      const clean = extractString(val);
+                      setRegForm(prev => ({ ...prev, cod_personal: clean || '' }));
+                    }}
                     placeholder="Buscar personal por nombre..."
                     className="text-xs"
                   />
@@ -1256,8 +1291,11 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
               {editForm.ownerType === 'PERSONAL' ? (
                 <SearchableSelect
                   options={personalOptions}
-                  value={editForm.cod_personal}
-                  onChange={(val) => setEditForm(prev => ({ ...prev, cod_personal: val }))}
+                  value={typeof editForm.cod_personal === 'object' ? (editForm.cod_personal?.target?.value || '') : (editForm.cod_personal || '')}
+                  onChange={(val) => {
+                    const clean = extractString(val);
+                    setEditForm(prev => ({ ...prev, cod_personal: clean || '' }));
+                  }}
                   placeholder="Buscar personal por nombre..."
                   className="text-xs"
                 />
