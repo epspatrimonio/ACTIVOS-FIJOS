@@ -298,6 +298,7 @@ function EditModal({ salida, onClose, onSave }) {
 // COMPONENTE PRINCIPAL – Solo Historial
 // ──────────────────────────────────────────────────────────────────────────────
 export default function SalidaBienesPanel() {
+  const [activeSubTab, setActiveSubTab] = useState('MODULE'); // 'MODULE' | 'TABLE'
   const [historial, setHistorial] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -397,56 +398,82 @@ export default function SalidaBienesPanel() {
       <div className="flex-1 flex flex-col min-h-0 space-y-4 animate-fadeIn w-full max-w-full overflow-hidden">
 
         {/* Encabezado del módulo */}
-        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between shrink-0">
+        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between shrink-0 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
           <div>
             <p className="text-[11px] font-bold text-brand-500 uppercase tracking-widest">Control Patrimonial</p>
-            <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight leading-tight">
-              HISTORIAL DE SALIDA DE BIENES
+            <h2 className="text-xl font-extrabold text-slate-900 tracking-tight leading-tight">
+              ORDEN DE SALIDA DE BIENES
             </h2>
-            <p className="text-sm text-slate-500 mt-0.5">
-              Las nuevas salidas se registran en&nbsp;
-              <a
-                href="https://epspatrimonio.github.io/SALIDA-BIENES/"
-                target="_blank"
-                rel="noreferrer"
-                className="text-brand-600 font-semibold hover:underline"
-              >
-                epspatrimonio.github.io/SALIDA-BIENES/
-              </a>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Genera nuevas órdenes de salida y consulta el historial registrado.
             </p>
           </div>
 
-          {/* Herramientas */}
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
-            <div className="flex items-center gap-1.5 bg-slate-100 border border-slate-200 rounded-xl px-3 py-1.5">
-              <Layers className="w-3.5 h-3.5 text-slate-500" />
-              <span className="text-xs font-bold text-slate-700">
-                {historial.length}&nbsp;<span className="font-normal text-slate-500">órdenes</span>
-              </span>
-            </div>
+          {/* Sub-Pestañas de Selector */}
+          <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-xl">
             <button
-              type="button" onClick={handleExcelExport}
-              className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 px-3.5 rounded-xl text-xs shadow-sm transition-all cursor-pointer border-none"
+              onClick={() => setActiveSubTab('MODULE')}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all border-none cursor-pointer ${
+                activeSubTab === 'MODULE'
+                  ? 'bg-brand-500 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 bg-transparent'
+              }`}
             >
-              <FileSpreadsheet className="w-3.5 h-3.5" /> Exportar Excel
+              Módulo de Registro (PDF)
             </button>
             <button
-              type="button" onClick={handlePDFExport}
-              className="flex items-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold py-1.5 px-3.5 rounded-xl text-xs shadow-sm transition-all cursor-pointer border-none"
+              onClick={() => setActiveSubTab('TABLE')}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all border-none cursor-pointer ${
+                activeSubTab === 'TABLE'
+                  ? 'bg-brand-500 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 bg-transparent'
+              }`}
             >
-              <FileText className="w-3.5 h-3.5" /> Exportar PDF
-            </button>
-            <button
-              type="button" onClick={cargarHistorial} title="Actualizar historial"
-              className="p-2 bg-white hover:bg-slate-100 text-slate-600 rounded-xl shadow-sm border border-slate-200 cursor-pointer transition-all"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-brand-500' : ''}`} />
+              Historial Tabular
             </button>
           </div>
+
+          {/* Herramientas (Solo en Vista Tabular) */}
+          {activeSubTab === 'TABLE' && (
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <div className="flex items-center gap-1.5 bg-slate-100 border border-slate-200 rounded-xl px-3 py-1.5">
+                <Layers className="w-3.5 h-3.5 text-slate-500" />
+                <span className="text-xs font-bold text-slate-700">
+                  {historial.length}&nbsp;<span className="font-normal text-slate-500">órdenes</span>
+                </span>
+              </div>
+              <button
+                type="button" onClick={handleExcelExport}
+                className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 px-3.5 rounded-xl text-xs shadow-sm transition-all cursor-pointer border-none"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5" /> Exportar Excel
+              </button>
+              <button
+                type="button" onClick={handlePDFExport}
+                className="flex items-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold py-1.5 px-3.5 rounded-xl text-xs shadow-sm transition-all cursor-pointer border-none"
+              >
+                <FileText className="w-3.5 h-3.5" /> Exportar PDF
+              </button>
+              <button
+                type="button" onClick={cargarHistorial} title="Actualizar historial"
+                className="p-2 bg-white hover:bg-slate-100 text-slate-600 rounded-xl shadow-sm border border-slate-200 cursor-pointer transition-all"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-brand-500' : ''}`} />
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Tabla */}
-        <div className="flex-1 bg-white rounded-2xl shadow-sm border border-slate-200/80 flex flex-col min-h-0 overflow-hidden">
+        {/* Vista iframe del Módulo Completo */}
+        {activeSubTab === 'MODULE' ? (
+          <div className="flex-1 bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-xs min-h-[700px]">
+            <iframe
+              src="/salidabienes/"
+              title="Módulo Salida de Bienes"
+              className="w-full h-full min-h-[700px] border-0"
+            />
+          </div>
+        ) : (
           <div className="flex-1 overflow-auto min-h-0">
             <table className="w-full text-left text-xs border-collapse">
               <thead className="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider text-[10px] sticky top-0 z-10 border-b border-slate-200">
@@ -525,7 +552,7 @@ export default function SalidaBienesPanel() {
               </tbody>
             </table>
           </div>
-        </div>
+        )}
 
       </div>
     </>
