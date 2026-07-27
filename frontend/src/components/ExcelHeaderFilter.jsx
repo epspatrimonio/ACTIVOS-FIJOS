@@ -238,7 +238,7 @@ export default function ExcelHeaderFilter({
           <button
             type="button"
             onClick={handleApply}
-            className="px-3.5 py-1.5 text-[11px] font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm active:scale-95 transition-all"
+            className="px-3.5 py-1.5 text-[11px] font-bold bg-[#00509d] hover:bg-[#003f7e] text-white rounded-lg shadow-sm active:scale-95 transition-all"
           >
             ACEPTAR
           </button>
@@ -249,17 +249,18 @@ export default function ExcelHeaderFilter({
   ) : null;
 
   return (
-    <div className={`relative inline-flex items-center gap-1 group/header select-none ${className}`}>
-      <span className="font-extrabold">{title}</span>
+    <div className={`relative inline-flex items-center gap-1.5 group/header select-none ${className}`}>
+      <span className="font-bold text-white text-[0.75rem] uppercase tracking-wider">{title}</span>
       <button
         ref={btnRef}
         type="button"
         onClick={() => isOpen ? setIsOpen(false) : openPopover()}
-        className={`p-0.5 rounded hover:bg-slate-200 transition-colors ${
+        className={`p-1 rounded-md transition-all cursor-pointer ${
           isFilteredActive || isSortedActive
-            ? 'text-blue-600 bg-blue-50'
-            : 'text-slate-400 opacity-60 group-hover/header:opacity-100'
+            ? 'text-amber-300 bg-white/20 ring-1 ring-amber-300/40'
+            : 'text-white/70 hover:text-white hover:bg-white/15'
         }`}
+        title={`Filtrar ${title}`}
       >
         <Filter className="w-3.5 h-3.5" />
       </button>

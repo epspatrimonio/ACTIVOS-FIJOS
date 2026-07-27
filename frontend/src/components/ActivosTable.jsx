@@ -460,9 +460,9 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
       {/* Contenedor de scroll con altura máxima para hacer efectiva la cabecera sticky */}
       <div className="overflow-x-auto overflow-y-auto w-full flex-1 min-h-0">
         <table className={`${tableMinWidth} w-full divide-y divide-slate-200 border-collapse`}>
-          <thead className="sticky top-0 bg-slate-100 z-20 shadow-[0_1px_0_0_rgba(226,232,240,1)]">
+          <thead className="sticky top-0 bg-[#00509d] text-white z-20 shadow-md">
             <tr>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
                 <ExcelHeaderFilter
                   title="Cód. Patrimonial"
                   columnKey="cod_patrimonial"
@@ -474,7 +474,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   getValue={(item) => getColValue(item, 'cod_patrimonial')}
                 />
               </th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
                 <ExcelHeaderFilter
                   title="Documento N Doc"
                   columnKey="n_doc"
@@ -487,7 +487,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                 />
               </th>
               {activeTab === 'INVENTARIO' && (
-                <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+                <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
                   <ExcelHeaderFilter
                     title="Cuenta / C. Costo"
                     columnKey="cuenta_contable"
@@ -502,7 +502,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
               )}
 
               {activeTab === 'OBRAS' && (
-                <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+                <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
                   <ExcelHeaderFilter
                     title="Cuenta Contable"
                     columnKey="cuenta_contable"
@@ -518,7 +518,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
 
               {activeTab !== 'INVENTARIO' && activeTab !== 'OBRAS' && (
                 <>
-                  <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+                  <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
                     <ExcelHeaderFilter
                       title="Cuenta Contable"
                       columnKey="cuenta_contable"
@@ -530,7 +530,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                       getValue={(item) => getColValue(item, 'cuenta_contable')}
                     />
                   </th>
-                  <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+                  <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
                     <ExcelHeaderFilter
                       title="Centro de Costo"
                       columnKey="centro_costo"
@@ -544,7 +544,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   </th>
                 </>
               )}
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
                 <ExcelHeaderFilter
                   title="Fecha de Ingreso"
                   columnKey="fecha_ingreso"
@@ -556,7 +556,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   getValue={(item) => formatDate(getColValue(item, 'fecha_ingreso'))}
                 />
               </th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
                 <ExcelHeaderFilter
                   title="Ubicación (Sucursal / Localidad)"
                   columnKey="ubicacion"
@@ -568,7 +568,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   getValue={(item) => getColValue(item, 'ubicacion')}
                 />
               </th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
                 <ExcelHeaderFilter
                   title="Denominación del Activo"
                   columnKey="denominacion"
@@ -580,7 +580,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   getValue={(item) => getColValue(item, 'denominacion')}
                 />
               </th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
                 <ExcelHeaderFilter
                   title="Características"
                   columnKey="marca"
@@ -592,7 +592,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   getValue={(item) => getColValue(item, 'marca')}
                 />
               </th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
                 <ExcelHeaderFilter
                   title="Especificaciones"
                   columnKey="placa"
@@ -604,7 +604,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   getValue={(item) => getColValue(item, 'placa')}
                 />
               </th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
                 <ExcelHeaderFilter
                   title="Estado"
                   columnKey="estado"
@@ -616,7 +616,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   getValue={(item) => getColValue(item, 'estado')}
                 />
               </th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
                 <ExcelHeaderFilter
                   title="Valor Libros"
                   columnKey="valor_en_libros"
@@ -628,7 +628,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   getValue={(item) => String(getColValue(item, 'valor_en_libros'))}
                 />
               </th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
                 <ExcelHeaderFilter
                   title="Valor Neto"
                   columnKey="valor_neto"
@@ -640,7 +640,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   getValue={(item) => String(getColValue(item, 'valor_neto'))}
                 />
               </th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">
+              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
                 <ExcelHeaderFilter
                   title="Responsable"
                   columnKey="responsable"
@@ -662,7 +662,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   getValue={(item) => getColValue(item, 'puesto')}
                 />
               </th>
-              <th scope="col" className="px-5 py-3 text-center text-[0.6875rem] font-extrabold text-slate-600 uppercase tracking-wide">Gestión</th>
+              <th scope="col" className="px-5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Gestión</th>
             </tr>
           </thead>
           

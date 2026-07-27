@@ -51,7 +51,7 @@
   }
 
   .app-topbar {
-    @apply sticky top-0 z-40 border-b border-white/10 bg-gradient-to-r from-[#000080] via-[#001f5c] to-[#003366] text-white shadow-md shadow-[#000080]/30;
+    @apply sticky top-0 z-40 border-b border-white/10 bg-gradient-to-r from-[#00509d] via-[#003f7e] to-[#00254c] text-white shadow-md shadow-[#00509d]/30;
   }
 
   .module-heading {

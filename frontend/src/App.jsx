@@ -132,7 +132,7 @@ function NavDropdown({ label, icon: Icon, active, isOpen, onToggle, items }) {
         onClick={onToggle}
         className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
           active || isOpen
-            ? 'bg-white text-[#000080] shadow-md shadow-black/10 font-extrabold ring-1 ring-white/30'
+            ? 'bg-white text-[#00509d] shadow-md shadow-black/10 font-extrabold ring-1 ring-white/30'
             : 'text-white/90 hover:text-white hover:bg-white/15'
         }`}
       >
@@ -150,7 +150,7 @@ function NavDropdown({ label, icon: Icon, active, isOpen, onToggle, items }) {
               onClick={() => item.onClick()}
               className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-all text-left ${
                 item.active
-                  ? 'bg-brand-50 text-[#000080] font-extrabold'
+                  ? 'bg-brand-50 text-[#00509d] font-extrabold'
                   : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
               }`}
             >
@@ -516,7 +516,7 @@ export default function App() {
             <button
               onClick={() => handleTabChange('INVENTARIO')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeTab === 'INVENTARIO' ? 'bg-white text-[#000080] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
+                activeTab === 'INVENTARIO' ? 'bg-white text-[#00509d] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
               }`}
             >
               💼 Activos Fijos
@@ -524,7 +524,7 @@ export default function App() {
             <button
               onClick={() => handleTabChange('OBRAS')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeTab === 'OBRAS' ? 'bg-white text-[#000080] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
+                activeTab === 'OBRAS' ? 'bg-white text-[#00509d] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
               }`}
             >
               🚧 Obras en Curso
@@ -532,7 +532,7 @@ export default function App() {
             <button
               onClick={() => handleTabChange('VEHICULOS')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeTab === 'VEHICULOS' ? 'bg-white text-[#000080] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
+                activeTab === 'VEHICULOS' ? 'bg-white text-[#00509d] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
               }`}
             >
               🚗 Vehículos
@@ -540,7 +540,7 @@ export default function App() {
             <button
               onClick={() => handleTabChange('SOAT')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeTab === 'SOAT' ? 'bg-white text-[#000080] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
+                activeTab === 'SOAT' ? 'bg-white text-[#00509d] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
               }`}
             >
               🛡️ SOAT
@@ -548,7 +548,7 @@ export default function App() {
             <button
               onClick={() => handleTabChange('CELULARES')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeTab === 'CELULARES' ? 'bg-white text-[#000080] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
+                activeTab === 'CELULARES' ? 'bg-white text-[#00509d] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
               }`}
             >
               📱 Celulares
@@ -556,7 +556,7 @@ export default function App() {
             <button
               onClick={() => handleTabChange('INVENTARIO_FISICO')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeTab === 'INVENTARIO_FISICO' ? 'bg-white text-[#000080] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
+                activeTab === 'INVENTARIO_FISICO' ? 'bg-white text-[#00509d] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
               }`}
             >
               🔍 Inv. Físico
@@ -564,7 +564,7 @@ export default function App() {
             <button
               onClick={() => handleTabChange('TERCEROS_TABLA')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
-                ['BIENES_TERCEROS', 'TERCEROS_TABLA', 'TERCEROS_REGISTRO'].includes(activeTab) ? 'bg-white text-[#000080] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
+                ['BIENES_TERCEROS', 'TERCEROS_TABLA', 'TERCEROS_REGISTRO'].includes(activeTab) ? 'bg-white text-[#00509d] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
               }`}
             >
               🤝 Bienes de Terceros
@@ -572,7 +572,7 @@ export default function App() {
             <button
               onClick={() => handleTabChange('DOCUMENTOS')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeTab === 'DOCUMENTOS' ? 'bg-white text-[#000080] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
+                activeTab === 'DOCUMENTOS' ? 'bg-white text-[#00509d] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
               }`}
             >
               📄 Documentos
@@ -580,7 +580,7 @@ export default function App() {
             <button
               onClick={() => handleTabChange('REGISTRO')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeTab === 'REGISTRO' ? 'bg-white text-[#000080] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
+                activeTab === 'REGISTRO' ? 'bg-white text-[#00509d] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
               }`}
             >
               ➕ Registrar Activo
@@ -588,7 +588,7 @@ export default function App() {
             <button
               onClick={() => handleTabChange('CONTABLE')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeTab === 'CONTABLE' ? 'bg-white text-[#000080] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
+                activeTab === 'CONTABLE' ? 'bg-white text-[#00509d] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
               }`}
             >
               📊 Rep. Contable
@@ -596,7 +596,7 @@ export default function App() {
             <button
               onClick={() => handleTabChange('SINCRONIZAR')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeTab === 'SINCRONIZAR' ? 'bg-white text-[#000080] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
+                activeTab === 'SINCRONIZAR' ? 'bg-white text-[#00509d] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
               }`}
             >
               ☁️ Sincronizar
