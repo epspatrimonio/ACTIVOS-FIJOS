@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   ClipboardList, FolderOpen, PlusCircle, Smartphone, Car, ShieldCheck, 
   RefreshCw, LayoutDashboard, LogOut, Mail, Lock, AlertCircle,
-  ClipboardCheck, Users, Hammer, Coins, FileSpreadsheet, FileText
+  ClipboardCheck, Users, Hammer, Coins, FileSpreadsheet, FileText, ArrowLeftRight
 } from 'lucide-react';
 
 import Filters from './components/Filters';
@@ -18,6 +18,7 @@ import InventarioFisicoPanel from './components/InventarioFisicoPanel';
 import BienesTercerosPanel from './components/BienesTercerosPanel';
 import ReporteContable from './components/ReporteContable';
 import SalidaBienesPanel from './components/SalidaBienesPanel';
+import TransferenciasPanel from './components/TransferenciasPanel';
 import { fetchActivos, getDashboardUrl } from './utils/api';
 
 // Componente de Login alineado al diseño del prototipo
@@ -599,6 +600,20 @@ export default function App() {
                   </span>
                   <span>Terceros</span>
                 </button>
+
+                <button
+                  onClick={() => handleTabChange('TRANSFERENCIAS')}
+                  className={`flex items-center space-x-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-[0.75rem] font-semibold transition-all duration-200 ${
+                    activeTab === 'TRANSFERENCIAS'
+                      ? 'bg-white text-brand-600 shadow'
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md ${activeTab === 'TRANSFERENCIAS' ? 'bg-emerald-50 text-emerald-600' : 'bg-white/15 text-white/90'}`}>
+                    <ArrowLeftRight className="w-3 h-3" />
+                  </span>
+                  <span>Transferencias</span>
+                </button>
               </nav>
             </div>
           </div>
@@ -606,7 +621,7 @@ export default function App() {
       </header>
 
       <main className={`flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-w-0 ${
-        ['INVENTARIO', 'OBRAS', 'CONTABLE', 'VEHICULOS', 'SOAT', 'CELULARES', 'INVENTARIO_FISICO', 'BIENES_TERCEROS', 'SALIDAS'].includes(activeTab) ? 'overflow-hidden flex flex-col' : 'overflow-y-auto'
+        ['INVENTARIO', 'OBRAS', 'CONTABLE', 'VEHICULOS', 'SOAT', 'CELULARES', 'INVENTARIO_FISICO', 'BIENES_TERCEROS', 'SALIDAS', 'TRANSFERENCIAS'].includes(activeTab) ? 'overflow-hidden flex flex-col' : 'overflow-y-auto'
       }`}>
         {activeTab === 'INVENTARIO' && (
           <div className="flex-1 flex flex-col min-h-0 space-y-4 animate-fadeIn w-full max-w-full overflow-hidden">
@@ -784,6 +799,10 @@ export default function App() {
 
         {activeTab === 'SALIDAS' && (
           <SalidaBienesPanel />
+        )}
+
+        {activeTab === 'TRANSFERENCIAS' && (
+          <TransferenciasPanel />
         )}
       </main>
 

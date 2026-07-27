@@ -564,3 +564,37 @@ class SalidaBienesResponse(SalidaBienesBase):
     model_config = ConfigDict(from_attributes=True)
 
 
+# ═══════════════════════════════════════════════════════════
+# SCHEMAS MÓDULO TRANSFERENCIA DE BIENES
+# ═══════════════════════════════════════════════════════════
+
+class TransferenciaBienesBase(BaseModel):
+    fecha_transferencia: date
+    cod_patrimonial: str = Field(..., max_length=30)
+    denominacion: str = Field(..., max_length=300)
+    
+    resp_origen: Optional[str] = Field(None, max_length=260)
+    cargo_origen: Optional[str] = Field(None, max_length=220)
+    sucursal_origen: Optional[str] = Field(None, max_length=160)
+    
+    resp_destino: str = Field(..., max_length=260)
+    cargo_destino: Optional[str] = Field(None, max_length=220)
+    sucursal_destino: Optional[str] = Field(None, max_length=160)
+    
+    motivo: str
+    observaciones: Optional[str] = None
+
+
+class TransferenciaBienesCreate(TransferenciaBienesBase):
+    pass
+
+
+class TransferenciaBienesResponse(TransferenciaBienesBase):
+    id: int
+    n_transferencia: str
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    model_config = ConfigDict(from_attributes=True)
+
+
+

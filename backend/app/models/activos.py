@@ -601,3 +601,32 @@ class SalidaBienesDetalle(Base):
     salida: Mapped["SalidaBienes"] = relationship("SalidaBienes", back_populates="bienes")
 
 
+class TransferenciaBienes(Base):
+    """
+    Modelo ORM para el registro de transferencias / cambio de responsable de bienes.
+    Representa af.fct_transferencia_bienes.
+    """
+    __tablename__ = "fct_transferencia_bienes"
+    __table_args__ = {"schema": "af"}
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    n_transferencia: Mapped[str] = mapped_column(String(40), nullable=False)
+    fecha_transferencia: Mapped[date] = mapped_column(Date, nullable=False)
+    cod_patrimonial: Mapped[str] = mapped_column(String(30), nullable=False)
+    denominacion: Mapped[str] = mapped_column(String(300), nullable=False)
+    
+    resp_origen: Mapped[Optional[str]] = mapped_column(String(260), nullable=True)
+    cargo_origen: Mapped[Optional[str]] = mapped_column(String(220), nullable=True)
+    sucursal_origen: Mapped[Optional[str]] = mapped_column(String(160), nullable=True)
+    
+    resp_destino: Mapped[str] = mapped_column(String(260), nullable=False)
+    cargo_destino: Mapped[Optional[str]] = mapped_column(String(220), nullable=True)
+    sucursal_destino: Mapped[Optional[str]] = mapped_column(String(160), nullable=True)
+    
+    motivo: Mapped[str] = mapped_column(Text, nullable=False)
+    observaciones: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(server_default=FetchedValue())
+    updated_at: Mapped[datetime] = mapped_column(server_default=FetchedValue())
+
+
+

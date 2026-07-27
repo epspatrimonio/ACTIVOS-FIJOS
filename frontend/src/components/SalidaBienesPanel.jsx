@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   FileSpreadsheet, FileText, Download, RefreshCw, Pencil, X, Check, Layers
 } from 'lucide-react';
-import { fetchSalidas } from '../utils/api';
+import { fetchSalidas, fetchPersonal, fetchSucursales } from '../utils/api';
 
 // ──────────────────────────────────────────────────────────────────────────────
 // UTILIDAD: Cargar imágenes
@@ -180,7 +180,18 @@ function EditModal({ salida, onClose, onSave }) {
     resp_tecnico: salida.resp_tecnico || '',
     observaciones: salida.observaciones || '',
   });
+  const [sucursales, setSucursales] = useState([]);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    fetchSucursales()
+      .then(data => {
+        if (Array.isArray(data)) {
+          setSucursales(data.map(s => s.label || s.sucursal).filter(Boolean));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleSave = async () => {
     if (!form.responsable.trim() || !form.motivo.trim()) {
@@ -250,7 +261,12 @@ function EditModal({ salida, onClose, onSave }) {
             </div>
             <div>
               <label className={labelCls}>Ubicación / Dependencia</label>
-              <input type="text" value={form.ubicacion} onChange={e => setForm(f => ({ ...f, ubicacion: e.target.value }))} className={inputCls} />
+              <select value={form.ubicacion} onChange={e => setForm(f => ({ ...f, ubicacion: e.target.value }))} className={inputCls}>
+                <option value="">-- Seleccionar --</option>
+                {sucursales.map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
             </div>
           </div>
           <div>

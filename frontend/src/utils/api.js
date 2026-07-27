@@ -543,3 +543,40 @@ export async function createSalida(payload) {
   return response.json();
 }
 
+// ── Transferencia de Bienes (Cambio de Responsable) ─────────────────────────
+
+export async function fetchTransferencias() {
+  const response = await fetch(`${API_BASE_URL}/activos/transferencias`);
+  if (!response.ok) throw new Error('Error al cargar el historial de transferencias.');
+  return response.json();
+}
+
+export async function createTransferencia(payload) {
+  const response = await fetch(`${API_BASE_URL}/activos/transferencias`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    await handleResponseError(response, 'Error al registrar la transferencia.');
+  }
+  return response.json();
+}
+
+export async function updateTransferencia(id, payload) {
+  const response = await fetch(`${API_BASE_URL}/activos/transferencias/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    await handleResponseError(response, 'Error al actualizar la transferencia.');
+  }
+  return response.json();
+}
+
+

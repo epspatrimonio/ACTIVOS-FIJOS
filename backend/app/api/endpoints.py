@@ -20,6 +20,7 @@ from app.models.activos import (
     InventarioFisico, VwInventarioFisicoDetalle,
     BienTercero, VwBienesTercerosDetalle,
     SalidaBienes, SalidaBienesDetalle,
+    TransferenciaBienes,
 )
 from app.schemas.activos import (
     ActivoCreate, ActivoResponse, ActivoPublicoDTO,
@@ -34,6 +35,7 @@ from app.schemas.activos import (
     InventarioFisicoCreate, InventarioFisicoResponse,
     BienTerceroCreate, BienTerceroResponse,
     SalidaBienesCreate, SalidaBienesResponse,
+    TransferenciaBienesCreate, TransferenciaBienesResponse,
 )
 
 router = APIRouter()
@@ -2030,4 +2032,135 @@ async def update_salida_bienes(salida_id: int, payload: dict, db: AsyncSession =
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error al actualizar la orden de salida: {str(e)}"
+        )
+
+
+# ═══════════════════════════════════════════════════════════
+# ENDPOINTS MÓDULO TRANSFERENCIA DE BIENES (CAMBIO DE RESPONSABLE)
+# ═══════════════════════════════════════════════════════════
+
+@router.post("/activos/transferencias", response_model=TransferenciaBienesResponse, status_code=status.HTTP_201_CREATED, tags=["Transferencia de Bienes"])
+async def create_transferencia_bienes(
+    payload: TransferenciaBienesCreate,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Registra una transferencia / cambio de responsable de un bien patrimonial.
+    - Genera el código correlativo de transferencia (TR-NN-YYYY)
+    - Crea el registro histórico en af.fct_transferencia_bienes
+    - Modifica el responsable, puesto y sucursal del bien en af.fct_registro_activos
+    """
+    try:
+        from datetime import date
+        year = payload.fecha_transferencia.year
+        start_date = date(year, 1, 1)
+        end_date = date(year, 12, 31)
+        query_count = select(TransferenciaBienes).where(
+            TransferenciaBienes.fecha_transferencia >= start_date,
+            TransferenciaBienes.fecha_transferencia <= end_date
+        )
+        res_count = await db.execute(query_count)
+        count_year = len(res_count.scalars().all())
+        next_num = count_year + 1
+        n_transf = f"TR-{str(next_num).zfill(2)}-{year}"
+
+        db_transf = TransferenciaBienes(
+            n_transferencia=n_transf,
+            fecha_transferencia=payload.fecha_transferencia,
+            cod_patrimonial=payload.cod_patrimonial,
+            denominacion=payload.denominacion,
+            resp_origen=payload.resp_origen,
+            cargo_origen=payload.cargo_origen,
+            sucursal_origen=payload.sucursal_origen,
+            resp_destino=payload.resp_destino,
+            cargo_destino=payload.cargo_destino,
+            sucursal_destino=payload.sucursal_destino,
+            motivo=payload.motivo,
+            observaciones=payload.observaciones
+        )
+        db.add(db_transf)
+
+        # Actualizar el activo en af.fct_registro_activos
+        res_act = await db.execute(select(Activo).where(Activo.cod_patrimonial == payload.cod_patrimonial))
+        activo = res_act.scalar_one_or_none()
+        if activo:
+            if payload.resp_destino:
+                res_p = await db.execute(select(VwListaPersonal).where(VwListaPersonal.nombres_completos == payload.resp_destino))
+                p_obj = res_p.scalar_one_or_none()
+                if p_obj and p_obj.cod_personal:
+                    activo.cod_personal = p_obj.cod_personal
+
+            if payload.cargo_destino:
+                activo.unidad = payload.cargo_destino
+
+            if payload.sucursal_destino:
+                res_suc = await db.execute(select(VwListaSucursal).where(VwListaSucursal.sucursal == payload.sucursal_destino))
+                suc_obj = res_suc.scalar_one_or_none()
+                if suc_obj and suc_obj.id_sucursal:
+                    activo.id_sucursal = suc_obj.id_sucursal
+
+            activo.fecha_asignacion = payload.fecha_transferencia
+
+        await db.commit()
+        await db.refresh(db_transf)
+        return db_transf
+
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Error al registrar la transferencia de bien: {str(e)}"
+        )
+
+
+@router.get("/activos/transferencias", response_model=List[TransferenciaBienesResponse], tags=["Transferencia de Bienes"])
+async def list_transferencias_bienes(db: AsyncSession = Depends(get_db)):
+    """
+    Retorna la lista de todas las transferencias de bienes registradas.
+    """
+    try:
+        query = select(TransferenciaBienes).order_by(TransferenciaBienes.fecha_transferencia.desc(), TransferenciaBienes.id.desc())
+        result = await db.execute(query)
+        transferencias = result.scalars().all()
+        return list(transferencias)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error al obtener el historial de transferencias: {str(e)}"
+        )
+
+
+@router.put("/activos/transferencias/{transf_id}", response_model=TransferenciaBienesResponse, tags=["Transferencia de Bienes"])
+async def update_transferencia_bienes(transf_id: int, payload: dict, db: AsyncSession = Depends(get_db)):
+    """
+    Actualiza los datos de un registro de transferencia existente.
+    """
+    try:
+        result = await db.execute(select(TransferenciaBienes).where(TransferenciaBienes.id == transf_id))
+        db_transf = result.scalar_one_or_none()
+        if not db_transf:
+            raise HTTPException(status_code=404, detail=f"Transferencia con id {transf_id} no encontrada.")
+
+        campos_editables = ["fecha_transferencia", "resp_destino", "cargo_destino", "sucursal_destino", "motivo", "observaciones"]
+        for campo in campos_editables:
+            if campo in payload and payload[campo] is not None:
+                if campo == "fecha_transferencia":
+                    from datetime import date
+                    val = payload[campo]
+                    if isinstance(val, str):
+                        val = date.fromisoformat(val)
+                    setattr(db_transf, campo, val)
+                else:
+                    setattr(db_transf, campo, payload[campo])
+
+        await db.commit()
+        await db.refresh(db_transf)
+        return db_transf
+    except HTTPException:
+        raise
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error al actualizar la transferencia: {str(e)}"
         )
