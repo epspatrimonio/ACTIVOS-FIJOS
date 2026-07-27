@@ -240,41 +240,41 @@ export default function TransferenciasPanel() {
       console.warn('No se pudieron cargar imágenes para el PDF:', e);
     }
 
-    // 1. Logo Mascota ligeramente reducido y alineado (11.5 x 13.5 mm)
-    if (logoImg) doc.addImage(logoImg, 'JPEG', marginX, posY, 11.5, 13.5);
+    // 1. Logo Mascota simétrico y centrado verticalmente con la información (13 x 15 mm)
+    if (logoImg) doc.addImage(logoImg, 'JPEG', marginX, posY - 1, 13, 15);
 
-    // 2. Texto Institucional alineado verticalmente con el logo (X = 28mm)
-    const textX = 28;
+    // 2. Texto Institucional alineado simétricamente (X = 30mm)
+    const textX = 30;
     doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(15, 23, 42);
-    doc.text('E.P.S. "SELVA CENTRAL" S.A.', textX, posY + 3);
+    doc.text('E.P.S. "SELVA CENTRAL" S.A.', textX, posY + 2.5);
 
     doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(71, 85, 105);
-    doc.text('CHANCHAMAYO - OXAPAMPA - SATIPO', textX, posY + 6.5);
+    doc.text('CHANCHAMAYO - OXAPAMPA - SATIPO', textX, posY + 6);
 
     doc.setFont('helvetica', 'normal'); doc.setFontSize(5.5); doc.setTextColor(71, 85, 105);
     doc.text('Pasaje San Pedro N° 253-257 La Merced Chyo.', textX, posY + 9.5);
-    doc.text('RUC: N° 20121876290 Telefono 064-532363', textX, posY + 12.5);
+    doc.text('RUC: N° 20121876290 Telefono 064-532363', textX, posY + 13);
 
-    // Indicador de Página / Fecha en la esquina derecha superior
+    // Indicador de Página y Fecha a la derecha
     doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(148, 163, 184);
-    doc.text('Página 1 de 1', 195, posY + 3, { align: 'right' });
+    doc.text('Página 1 de 1', 195, posY + 2.5, { align: 'right' });
 
     doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(51, 65, 85);
     const fechaSimple = (transf.fecha_transferencia || '').split('-').reverse().join('/');
-    doc.text(`FECHA: ${fechaSimple}`, 195, posY + 8, { align: 'right' });
+    doc.text(`FECHA: ${fechaSimple}`, 195, posY + 7, { align: 'right' });
 
-    // 3. Título Principal Centrado y desplazado hacia abajo para dar espacio (Y = 36mm)
-    posY = 36;
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(15, 23, 42);
+    // 3. Título Principal Centrado
+    posY = 33;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11.5); doc.setTextColor(15, 23, 42);
     doc.text(`ACTA N° ${transf.n_transferencia} – ASIGNACIÓN DE BIENES PATRIMONIALES`, 105, posY, { align: 'center' });
 
-    // Subtítulo de Autorización desplazado
-    posY += 7;
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(71, 85, 105);
+    // Subtítulo de Autorización
+    posY += 6.5;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(6); doc.setTextColor(71, 85, 105);
     doc.text('AUTORIZADO POR LA GERENCIA DE ADMINISTRACIÓN Y FINANZAS, JEFATURA DE PLANIFICACIÓN Y DESARROLLO EMPRESARIAL, JEFATURA DE CONTROL PATRIMONIAL.', 105, posY, { align: 'center' });
 
-    // 4. Texto Introductorio desahogado
-    posY += 9;
+    // 4. Texto Introductorio
+    posY += 8.5;
     doc.setFontSize(8.5);
     doc.setFont('helvetica', 'normal'); doc.setTextColor(30, 41, 59);
     const fechaFormatted = new Date(transf.fecha_transferencia + 'T00:00:00').toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' });
