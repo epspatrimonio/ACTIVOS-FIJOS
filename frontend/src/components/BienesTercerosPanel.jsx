@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Users, Plus, Search, Trash2, Edit3, X, AlertCircle, CheckCircle2, ChevronDown,
-  FileSpreadsheet, FileText, PlusCircle, ClipboardList, Calendar, Check, ShieldAlert,
-  Building2, UserCheck, UserX, Tag, Layers
+  FileSpreadsheet, FileText, PlusCircle, ClipboardList, Calendar, Check,
+  UserCheck, Tag
 } from 'lucide-react';
 import SearchableSelect from './SearchableSelect';
 import Modal from './Modal';
@@ -23,7 +23,7 @@ const INITIAL_FORM_STATE = {
   numero_serie: '',
   color: '',
   caracteristicas_accesorios: '',
-  ownerType: 'PERSONAL', // PERSONAL | MANUAL
+  ownerType: 'PERSONAL', // PERSONAL (Personal EPS) | MANUAL (Personal Externo)
   cod_personal: '',
   propietario_manual: '',
   observaciones: '',
@@ -157,11 +157,11 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
     }
   };
 
-  // Opciones de personal responsable
+  // Opciones de personal responsable: Solo el nombre completo, sin código
   const personalOptions = useMemo(() => {
     return personal.map(p => ({
       value: p.value,
-      label: `${p.value} - ${p.label}`
+      label: p.label
     }));
   }, [personal]);
 
@@ -234,7 +234,7 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
     const fechaSalidaVal = itemData.fecha_salida ? itemData.fecha_salida.split('-').reverse().join('/') : 'POSTERIOR / PENDIENTE';
 
     doc.setFontSize(8.5);
-    doc.setFont("helvetica", "bold"); doc.setTextColor(30, 41, 59); doc.text("PROPIETARIO / RESPONSABLE:", marginX + 4, posY + 7);
+    doc.setFont("helvetica", "bold"); doc.setTextColor(30, 41, 59); doc.text("PROPIETARIO DEL BIEN:", marginX + 4, posY + 7);
     doc.setFont("helvetica", "normal"); doc.text(respNombre.toUpperCase(), marginX + 56, posY + 7);
 
     doc.setFont("helvetica", "bold"); doc.text("SUCURSAL / DEPENDENCIA:", marginX + 4, posY + 13);
@@ -243,8 +243,8 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
     doc.setFont("helvetica", "bold"); doc.text("FECHA ESTIMADA DE SALIDA:", marginX + 4, posY + 19);
     doc.setFont("helvetica", "normal"); doc.text(fechaSalidaVal, marginX + 56, posY + 19);
 
-    doc.setFont("helvetica", "bold"); doc.text("TIPO DE INGRESO:", marginX + 4, posY + 25);
-    doc.setFont("helvetica", "normal"); doc.text(itemData.tipo === 'TERCERO' ? 'BIEN DE TERCERO (PERSONA EXTERNA / TEMPORAL)' : 'CONTROL INTERNO', marginX + 56, posY + 25);
+    doc.setFont("helvetica", "bold"); doc.text("TIPO DE PROPIETARIO:", marginX + 4, posY + 25);
+    doc.setFont("helvetica", "normal"); doc.text(itemData.cod_personal ? 'PERSONAL EPS SELVA CENTRAL' : 'PERSONAL EXTERNO (ESCRITURA MANUAL)', marginX + 56, posY + 25);
 
     // Tabla de Especificaciones del Bien
     posY += 36;
@@ -272,7 +272,7 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
 
     doc.text("----------------------------------------------------------------", 30, finalY);
     doc.setFont("helvetica", "bold");
-    doc.text("PROPIETARIO / ENTREGUÉ CONFORME", 30, finalY + 4);
+    doc.text("PROPIETARIO DEL BIEN / ENTREGUÉ CONFORME", 30, finalY + 4);
     doc.setFont("helvetica", "normal");
     doc.text(respNombre.toUpperCase(), 30, finalY + 8);
 
@@ -392,7 +392,7 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
       "Especificaciones": item.caracteristicas_accesorios || '—',
       "Sucursal": item.sucursal || '—',
       "Localidad": item.localidad || '—',
-      "Propietario / Responsable": item.responsable || item.propietario_manual || '—',
+      "Propietario del Bien": item.responsable || item.propietario_manual || '—',
       "Fecha Ingreso": parseTimestampToJSDate(item.fecha_ingreso),
       "Fecha Salida": parseTimestampToJSDate(item.fecha_salida),
       "Observaciones": item.observaciones || '—'
@@ -428,7 +428,7 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
 
     doc.setLineWidth(0.4); doc.setDrawColor(226, 232, 240); doc.line(14, 25, 283, 25);
 
-    const headers = [["Código", "Tipo", "Denominación", "Marca/Modelo/Serie/Color", "Ubicación", "Propietario / Responsable", "F. Ingreso", "F. Salida"]];
+    const headers = [["Código", "Tipo", "Denominación", "Marca/Modelo/Serie/Color", "Ubicación", "Propietario del Bien", "F. Ingreso", "F. Salida"]];
     const tableRows = filteredAndSortedItems.map(item => [
       item.cod_patrimonial,
       item.tipo === 'TERCERO' ? 'Tercero' : 'Control',
@@ -591,7 +591,7 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
             <span>BIENES DE TERCEROS</span>
           </h2>
           <p className="text-sm text-slate-500">
-            Registro, asignación de propietarios (personal / externos), fechas de ingreso/salida y emisión de actas PDF.
+            Registro de propietarios (Personal EPS / Externo), fechas de ingreso/salida y emisión de actas PDF.
           </p>
         </div>
 
@@ -648,7 +648,7 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
                 <span>Formulario de Ingreso y Registro de Bienes de Terceros</span>
               </h3>
               <p className="text-xs text-slate-500 mt-1">
-                Complete las características del bien y seleccione si el propietario pertenece a la planilla o es una persona externa/temporal.
+                Complete los datos del bien y seleccione si pertenece a Personal EPS o a un Personal Externo.
               </p>
             </div>
 
@@ -666,16 +666,29 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
                   Tipo de Registro
                 </label>
                 <select
-                  value={regForm.tipo}
+                  value={regForm.ownerType === 'PERSONAL' ? 'PERSONAL_EPS' : 'PERSONAL_EXTERNO'}
                   onChange={(e) => {
-                    const newTipo = e.target.value;
-                    setRegForm(prev => ({ ...prev, tipo: newTipo }));
-                    generarCodigoParaRegistro(newTipo);
+                    const sel = e.target.value;
+                    if (sel === 'PERSONAL_EPS') {
+                      setRegForm(prev => ({
+                        ...prev,
+                        tipo: 'TERCERO',
+                        ownerType: 'PERSONAL',
+                        propietario_manual: ''
+                      }));
+                    } else {
+                      setRegForm(prev => ({
+                        ...prev,
+                        tipo: 'TERCERO',
+                        ownerType: 'MANUAL',
+                        cod_personal: ''
+                      }));
+                    }
                   }}
-                  className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                  className="w-full px-3 py-2 text-xs bg-purple-50/80 border border-purple-200 rounded-xl font-extrabold text-purple-900 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 cursor-pointer"
                 >
-                  <option value="TERCERO">Bien de Tercero (Persona Externa/Empresa)</option>
-                  <option value="CONTROL">Control Interno (Activo Menor)</option>
+                  <option value="PERSONAL_EPS">Persona EPS (Personal de la Empresa)</option>
+                  <option value="PERSONAL_EXTERNO">Personal Externo (Escritura Manual)</option>
                 </select>
               </div>
 
@@ -727,62 +740,40 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
               </div>
             </div>
 
-            {/* SECCIÓN PROPIETARIO / RESPONSABLE (2 OPCIONES: PERSONAL ENTIDAD VS REGISTRO MANUAL) */}
+            {/* SECCIÓN PROPIETARIO DEL BIEN */}
             <div className="bg-purple-50/60 border border-purple-100 rounded-2xl p-4 space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-purple-100/80 pb-2">
-                <label className="text-xs font-bold text-purple-900 uppercase tracking-wider flex items-center gap-1.5">
+                <label className="text-xs font-extrabold text-purple-900 uppercase tracking-wider flex items-center gap-1.5">
                   <UserCheck className="w-4 h-4 text-purple-600" />
-                  <span>Propietario / Responsable del Bien</span>
+                  <span>PROPIETARIO DEL BIEN</span>
                 </label>
 
-                {/* Switch / Radio entre Personal y Manual */}
-                <div className="flex bg-white p-1 rounded-xl border border-purple-200 text-xs font-bold shadow-sm">
-                  <button
-                    type="button"
-                    onClick={() => setRegForm(prev => ({ ...prev, ownerType: 'PERSONAL', propietario_manual: '' }))}
-                    className={`px-3 py-1 rounded-lg transition-all ${
-                      regForm.ownerType === 'PERSONAL'
-                        ? 'bg-purple-600 text-white'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    Personal de la Entidad
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setRegForm(prev => ({ ...prev, ownerType: 'MANUAL', cod_personal: '' }))}
-                    className={`px-3 py-1 rounded-lg transition-all ${
-                      regForm.ownerType === 'MANUAL'
-                        ? 'bg-purple-600 text-white'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    Registro Manual (Externo / Temporal)
-                  </button>
-                </div>
+                <span className="text-[0.6875rem] font-extrabold text-purple-700 bg-white px-2.5 py-1 rounded-lg border border-purple-200">
+                  {regForm.ownerType === 'PERSONAL' ? 'Personal EPS (Lista Automática)' : 'Personal Externo (Escritura Manual)'}
+                </span>
               </div>
 
               {regForm.ownerType === 'PERSONAL' ? (
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Seleccione Trabajador / Responsable (Personal de Planilla)
+                    Seleccione Nombre del Personal de la Empresa
                   </label>
                   <SearchableSelect
                     options={personalOptions}
                     value={regForm.cod_personal}
                     onChange={(val) => setRegForm(prev => ({ ...prev, cod_personal: val }))}
-                    placeholder="Buscar trabajador por nombre o código..."
+                    placeholder="Buscar personal por nombre..."
                     className="text-xs"
                   />
                 </div>
               ) : (
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Nombre Completo del Propietario (Persona Externa / Visitante / Contratista)
+                    Nombre del Propietario Externo (Escritura Manual)
                   </label>
                   <input
                     type="text"
-                    placeholder="Ej. Juan Carlos Pérez Rojas - DNI 45129088 / Empresa Constructora XYZ"
+                    placeholder="Escriba el nombre completo del propietario externo o visitante..."
                     value={regForm.propietario_manual}
                     onChange={(e) => setRegForm(prev => ({ ...prev, propietario_manual: e.target.value }))}
                     className="w-full px-3 py-2 text-xs bg-white border border-purple-200 rounded-xl font-medium text-slate-800 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
@@ -1061,7 +1052,7 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
                       </th>
                       <th className="p-3">
                         <div className="flex items-center justify-between">
-                          <span>Propietario / Responsable</span>
+                          <span>Propietario del Bien</span>
                           <ExcelHeaderFilter columnKey="responsable" items={filteredItems} getColValue={getColValue} onFilterChange={handleFilterChange} onSortChange={handleSortChange} currentSort={sortConfig} />
                         </div>
                       </th>
@@ -1108,9 +1099,13 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
                           <div className="font-semibold text-slate-800">
                             {item.responsable || item.propietario_manual || 'Sin asignar'}
                           </div>
-                          {item.propietario_manual && (
+                          {item.propietario_manual ? (
                             <span className="text-[0.625rem] text-amber-700 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 inline-block mt-0.5">
-                              Persona Externa / Manual
+                              Personal Externo
+                            </span>
+                          ) : (
+                            <span className="text-[0.625rem] text-purple-700 font-bold bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200 inline-block mt-0.5">
+                              Personal EPS
                             </span>
                           )}
                         </td>
@@ -1235,7 +1230,7 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
             {/* Propietario en Edición */}
             <div className="bg-slate-50 p-3 rounded-xl space-y-2 border border-slate-200">
               <div className="flex items-center justify-between text-xs font-bold text-slate-700">
-                <span>Propietario / Responsable</span>
+                <span>PROPIETARIO DEL BIEN</span>
                 <div className="flex gap-2 text-[0.6875rem]">
                   <label className="flex items-center gap-1 cursor-pointer">
                     <input
@@ -1244,7 +1239,7 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
                       checked={editForm.ownerType === 'PERSONAL'}
                       onChange={() => setEditForm(prev => ({ ...prev, ownerType: 'PERSONAL', propietario_manual: '' }))}
                     />
-                    <span>Personal</span>
+                    <span>Personal EPS</span>
                   </label>
                   <label className="flex items-center gap-1 cursor-pointer">
                     <input
@@ -1253,7 +1248,7 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
                       checked={editForm.ownerType === 'MANUAL'}
                       onChange={() => setEditForm(prev => ({ ...prev, ownerType: 'MANUAL', cod_personal: '' }))}
                     />
-                    <span>Manual (Externo)</span>
+                    <span>Personal Externo</span>
                   </label>
                 </div>
               </div>
@@ -1263,7 +1258,7 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
                   options={personalOptions}
                   value={editForm.cod_personal}
                   onChange={(val) => setEditForm(prev => ({ ...prev, cod_personal: val }))}
-                  placeholder="Buscar trabajador..."
+                  placeholder="Buscar personal por nombre..."
                   className="text-xs"
                 />
               ) : (
@@ -1271,7 +1266,7 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
                   type="text"
                   value={editForm.propietario_manual}
                   onChange={(e) => setEditForm(prev => ({ ...prev, propietario_manual: e.target.value }))}
-                  placeholder="Nombre de la persona externa..."
+                  placeholder="Nombre del propietario externo..."
                   className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white"
                 />
               )}
