@@ -10,6 +10,7 @@ import Modal from './Modal';
 import SearchableSelect from './SearchableSelect';
 import ExcelHeaderFilter from './ExcelHeaderFilter';
 import { fetchSoat, createSoat, updateSoat, deleteSoat, fetchSoatPorVehiculo, fetchActivos, fetchSucursales, fetchLocalidades, fetchVehiculos } from '../utils/api';
+import { generateStandardPDF } from '../utils/pdfExportHelper';
 
 // ─── Config estados SOAT ──────────────────────────────────────────────────────
 const ESTADOS = {
@@ -549,22 +550,7 @@ export default function SoatModule() {
     window.XLSX.writeFile(wb, `Reporte_SOAT_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
-  const handleExportPDF = () => {
-    if (!window.jspdf || !window.jspdf.jsPDF) {
-      alert('La librería jsPDF no está cargada.');
-      return;
-    }
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'landscape', format: 'a4' });
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text("EPS SELVA CENTRAL - CONTROL PATRIMONIAL", 14, 18);
-    doc.setFontSize(12);
-    doc.text("REPORTE DE VIGENCIA DE SEGUROS - SOAT", 14, 25);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.text(`Fecha de Reporte: ${new Date().toLocaleDateString('es-PE')}`, 283, 31, { align: 'right' });
-
+  const handleExportPDF = async () => {
     const headers = [["Código", "Placa", "Vehículo / Denominación", "Póliza", "Aseguradora", "Vencimiento", "Días", "Estado"]];
     const tableRows = filtered.map(r => [
       r.cod_patrimonial,
@@ -577,35 +563,26 @@ export default function SoatModule() {
       r.estado_soat
     ]);
 
-    doc.autoTable({
-      startY: 36,
-      head: headers,
-      body: tableRows,
-      theme: 'striped',
-      headStyles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold' },
-      styles: { fontSize: 8 },
-      columnStyles: {
-        0: { cellWidth: 25 },
-        1: { cellWidth: 20 },
-        2: { cellWidth: 95 },
-        3: { cellWidth: 25 },
-        4: { cellWidth: 35 },
-        5: { cellWidth: 25 },
-        6: { cellWidth: 15, halign: 'center' },
-        7: { cellWidth: 25 }
-      }
+    const columnStyles = {
+      0: { cellWidth: 25 },
+      1: { cellWidth: 20 },
+      2: { cellWidth: 95 },
+      3: { cellWidth: 25 },
+      4: { cellWidth: 35 },
+      5: { cellWidth: 25 },
+      6: { cellWidth: 15, halign: 'center' },
+      7: { cellWidth: 25 }
+    };
+
+    await generateStandardPDF({
+      title: "CONTROL PATRIMONIAL",
+      subtitle: "REPORTE DE VIGENCIA DE SEGUROS - SOAT",
+      headers: headers,
+      data: tableRows,
+      columnStyles: columnStyles,
+      filename: `Reporte_SOAT_${new Date().toISOString().split('T')[0]}.pdf`,
+      orientation: "landscape"
     });
-
-    const totalPages = doc.internal.getNumberOfPages();
-    for (let i = 1; i <= totalPages; i++) {
-      doc.setPage(i);
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(8);
-      doc.setTextColor(100, 116, 139);
-      doc.text(`Página ${i} de ${totalPages}`, 283, 12, { align: 'right' });
-    }
-
-    doc.save(`Reporte_SOAT_${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   const filtered = registros.filter(r => {

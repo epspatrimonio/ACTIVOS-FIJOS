@@ -9,6 +9,7 @@ import {
 import Modal from './Modal';
 import SearchableSelect from './SearchableSelect';
 import ExcelHeaderFilter from './ExcelHeaderFilter';
+import { generateStandardPDF } from '../utils/pdfExportHelper';
 import {
   fetchCelulares, createCelular, updateCelular, deleteCelular,
   fetchSucursales, fetchPuestos, fetchPersonal, fetchGenerarCodigoCelular,
@@ -580,22 +581,7 @@ export default function CelularesModule() {
     window.XLSX.writeFile(wb, `Reporte_Celulares_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
-  const handleExportPDF = () => {
-    if (!window.jspdf || !window.jspdf.jsPDF) {
-      alert('La librería jsPDF no está cargada.');
-      return;
-    }
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'landscape', format: 'a4' });
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text("EPS SELVA CENTRAL - CONTROL PATRIMONIAL", 14, 18);
-    doc.setFontSize(12);
-    doc.text("REPORTE DE CONTROL DE EQUIPOS MÓVILES - CELULARES", 14, 25);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.text(`Fecha de Reporte: ${new Date().toLocaleDateString('es-PE')}`, 14, 31);
-
+  const handleExportPDF = async () => {
     const headers = [["Cód. Control", "Línea / IMEI", "Equipo / Marca", "Sucursal", "Responsable / Puesto", "Ingreso", "Vigencia Control", "Estado"]];
     const tableRows = filtered.map(c => [
       c.cod_control,
@@ -608,25 +594,26 @@ export default function CelularesModule() {
       c.estado
     ]);
 
-    doc.autoTable({
-      startY: 36,
-      head: headers,
-      body: tableRows,
-      theme: 'striped',
-      headStyles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold' },
-      styles: { fontSize: 8 },
-      columnStyles: {
-        0: { cellWidth: 20 },
-        1: { cellWidth: 45 },
-        2: { cellWidth: 40 },
-        3: { cellWidth: 35 },
-        4: { cellWidth: 60 },
-        5: { cellWidth: 20 },
-        6: { cellWidth: 35 },
-        7: { cellWidth: 20 }
-      }
+    const columnStyles = {
+      0: { cellWidth: 20 },
+      1: { cellWidth: 45 },
+      2: { cellWidth: 40 },
+      3: { cellWidth: 35 },
+      4: { cellWidth: 60 },
+      5: { cellWidth: 20 },
+      6: { cellWidth: 30 },
+      7: { cellWidth: 20 }
+    };
+
+    await generateStandardPDF({
+      title: "CONTROL PATRIMONIAL",
+      subtitle: "CONTROL DE EQUIPOS MÓVILES - CELULARES",
+      headers: headers,
+      data: tableRows,
+      columnStyles: columnStyles,
+      filename: `Reporte_Celulares_${new Date().toISOString().split('T')[0]}.pdf`,
+      orientation: "landscape"
     });
-    doc.save(`Reporte_Celulares_${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   const filtered = celulares.filter(c => {

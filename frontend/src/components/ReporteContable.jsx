@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FileSpreadsheet, FileText, Calendar, Filter, Layers, Calculator, ShieldCheck } from 'lucide-react';
 import { fetchCuentasContables } from '../utils/api';
+import { generateStandardPDF } from '../utils/pdfExportHelper';
 
 export default function ReporteContable({ assets = [], loading: assetsLoading = false, error: assetsError = null }) {
   const [digitMode, setDigitMode] = useState(10); // 3 | 10
@@ -235,27 +236,8 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
   };
 
   // EXPORTAR A PDF
-  const handleExportPDF = () => {
-    if (!window.jspdf || !window.jspdf.jsPDF) {
-      alert('La librería jsPDF no está cargada.');
-      return;
-    }
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
-
-    // Título principal
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text("EPS SELVA CENTRAL - CONTROL PATRIMONIAL", 14, 18);
-    
-    doc.setFontSize(12);
-    doc.text(`REPORTE CONTABLE AGRUPADO POR CUENTAS (${digitMode} DÍGITOS)`, 14, 25);
-    
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.text(`Filtros Aplicados - Año: ${selectedYear} | Mes: ${selectedMonth === 'Todos' ? 'Todos' : months.find(m => m.value === selectedMonth)?.label}`, 14, 31);
-    doc.text(`Fecha de Reporte: ${new Date().toLocaleDateString('es-PE')}`, 14, 36);
-
+  const handleExportPDF = async () => {
+    const monthName = selectedMonth === 'Todos' ? 'Todos' : months.find(m => m.value === selectedMonth)?.label;
     const headers = [["Código", "Descripción de la Cuenta Contable", "Tipo de Elemento", "Saldo (S/.)"]];
     const data = ledgerData.map(item => [
       item.codigo,
@@ -270,23 +252,22 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
     data.push(["68", "TOTAL DEPRECIACIÓN ACUMULADA", "DETERIORO", formatMoney(totalDepreciacion)]);
     data.push(["NETO", "VALOR RESIDUAL NETO CONTABLE", "RESIDUAL", formatMoney(valorNeto)]);
 
-    doc.autoTable({
-      startY: 42,
-      head: headers,
-      body: data,
-      theme: 'striped',
-      headStyles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold' },
-      footStyles: { fillColor: [241, 245, 249], textColor: [15, 23, 42], fontStyle: 'bold' },
-      styles: { fontSize: 8.5 },
-      columnStyles: {
-        0: { cellWidth: 25 },
-        1: { cellWidth: 90 },
-        2: { cellWidth: 45 },
-        3: { cellWidth: 30, halign: 'right' }
-      }
-    });
+    const columnStyles = {
+      0: { cellWidth: 25 },
+      1: { cellWidth: 90 },
+      2: { cellWidth: 45 },
+      3: { cellWidth: 30, halign: 'right' }
+    };
 
-    doc.save(`Reporte_Contable_${digitMode}D_${selectedYear}.pdf`);
+    await generateStandardPDF({
+      title: "CONTROL PATRIMONIAL",
+      subtitle: `REPORTE CONTABLE AGRUPADO (${digitMode} DÍGITOS) - AÑO: ${selectedYear} | MES: ${monthName}`,
+      headers: headers,
+      data: data,
+      columnStyles: columnStyles,
+      filename: `Reporte_Contable_${digitMode}D_${selectedYear}.pdf`,
+      orientation: "portrait"
+    });
   };
 
   return (

@@ -20,6 +20,7 @@ import ReporteContable from './components/ReporteContable';
 import SalidaBienesPanel from './components/SalidaBienesPanel';
 import TransferenciasPanel from './components/TransferenciasPanel';
 import { fetchActivos, getDashboardUrl } from './utils/api';
+import { generateStandardPDF } from './utils/pdfExportHelper';
 
 // Componente de Login alineado al diseño del prototipo
 function Login({ onLogin }) {
@@ -233,55 +234,6 @@ export default function App() {
   };
 
   const handleExportActivosPDF = async (data, title) => {
-    if (!window.jspdf || !window.jspdf.jsPDF) {
-      alert('La librería jsPDF no está cargada.');
-      return;
-    }
-    const loadImage = (url) => new Promise((res) => { const img = new Image(); img.onload = () => res(img); img.onerror = () => res(null); img.src = url; });
-    const logoImg = await loadImage('/logo_eps2.png');
-
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'landscape', format: 'a4' });
-    
-    if (logoImg) {
-      doc.addImage(logoImg, 'JPEG', 14, 5, 18, 21);
-    }
-
-    const textX = 35;
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(9);
-    doc.setTextColor(15, 23, 42);
-    doc.text('E.P.S. "SELVA CENTRAL" S.A.', textX, 10);
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(7);
-    doc.setTextColor(0, 176, 240);
-    doc.text('ENTIDAD PRESTADORA DE SERVICIOS DE SANEAMIENTO', textX, 14.5);
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(6.5);
-    doc.setTextColor(71, 85, 105);
-    doc.text('Chanchamayo - Oxapampa - Satipo  |  RUC: N° 20121876290', textX, 18.5);
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.setTextColor(15, 23, 42);
-    doc.text("CONTROL PATRIMONIAL", 148.5, 11, { align: 'center' });
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.setTextColor(0, 176, 240);
-    doc.text(title.toUpperCase().replace(/_/g, ' '), 148.5, 16.5, { align: 'center' });
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(8);
-    doc.setTextColor(100, 116, 139);
-    doc.text(`Fecha de Reporte: ${new Date().toLocaleDateString('es-PE')}`, 283, 10, { align: 'right' });
-
-    doc.setLineWidth(0.4);
-    doc.setDrawColor(226, 232, 240);
-    doc.line(14, 25, 283, 25);
-
     const headers = [["Código", "Documento", "Sucursal / Localidad", "Denominación del Activo", "Marca/Modelo/Serie", "Estado", "Valor Libros", "Valor Neto", "Responsable"]];
     const tableRows = data.map(item => [
       item.cod_patrimonial,
@@ -295,26 +247,27 @@ export default function App() {
       item.responsable || 'Sin asignar'
     ]);
 
-    doc.autoTable({
-      startY: 28,
-      head: headers,
-      body: tableRows,
-      theme: 'striped',
-      headStyles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold' },
-      styles: { fontSize: 8 },
-      columnStyles: {
-        0: { cellWidth: 25 },
-        1: { cellWidth: 25 },
-        2: { cellWidth: 35 },
-        3: { cellWidth: 55 },
-        4: { cellWidth: 45 },
-        5: { cellWidth: 20 },
-        6: { cellWidth: 22, halign: 'right' },
-        7: { cellWidth: 22, halign: 'right' },
-        8: { cellWidth: 35 }
-      }
+    const columnStyles = {
+      0: { cellWidth: 22 },
+      1: { cellWidth: 22 },
+      2: { cellWidth: 32 },
+      3: { cellWidth: 55 },
+      4: { cellWidth: 45 },
+      5: { cellWidth: 18 },
+      6: { cellWidth: 24, halign: 'right' },
+      7: { cellWidth: 24, halign: 'right' },
+      8: { cellWidth: 35 }
+    };
+
+    await generateStandardPDF({
+      title: "CONTROL PATRIMONIAL",
+      subtitle: title,
+      headers: headers,
+      data: tableRows,
+      columnStyles: columnStyles,
+      filename: `${title}_${new Date().toISOString().split('T')[0]}.pdf`,
+      orientation: "landscape"
     });
-    doc.save(`${title}_${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   const handleEdit = (activo) => {

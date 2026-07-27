@@ -7,6 +7,7 @@ import {
 import SearchableSelect from './SearchableSelect';
 import Modal from './Modal';
 import ExcelHeaderFilter from './ExcelHeaderFilter';
+import { generateStandardPDF } from '../utils/pdfExportHelper';
 import { 
   fetchBienesTerceros, saveBienTercero, deleteBienTercero, fetchGenerarCodigoTerceroControl,
   fetchPersonal, fetchSucursales, fetchLocalidades, updateFechaSalidaTercero
@@ -445,23 +446,7 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
   };
 
   // Exportar PDF de la lista tabular completa
-  const handleExportListPDF = () => {
-    if (!window.jspdf || !window.jspdf.jsPDF) {
-      alert('La librería jsPDF no está cargada.');
-      return;
-    }
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'landscape', format: 'a4' });
-
-    doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.setTextColor(15, 23, 42);
-    doc.text("EPS SELVA CENTRAL S.A. - CONTROL PATRIMONIAL", 14, 15);
-    doc.setFontSize(11); doc.setTextColor(0, 176, 240);
-    doc.text("REPORTE GENERAL DE BIENES DE TERCEROS Y CONTROL INTERNO", 14, 21);
-    doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(100, 116, 139);
-    doc.text(`Fecha de Reporte: ${new Date().toLocaleDateString('es-PE')}`, 283, 15, { align: 'right' });
-
-    doc.setLineWidth(0.4); doc.setDrawColor(226, 232, 240); doc.line(14, 25, 283, 25);
-
+  const handleExportListPDF = async () => {
     const headers = [["Código", "Tipo", "Denominación", "Marca/Modelo/Serie/Color", "Ubicación", "Propietario del Bien", "F. Ingreso", "F. Salida"]];
     const tableRows = filteredAndSortedItems.map(item => [
       item.cod_patrimonial,
@@ -474,25 +459,26 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
       item.fecha_salida ? item.fecha_salida.split('-').reverse().join('/') : 'Pendiente'
     ]);
 
-    doc.autoTable({
-      startY: 28,
-      head: headers,
-      body: tableRows,
-      theme: 'grid',
-      headStyles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold' },
-      styles: { fontSize: 7.5, cellPadding: 2.5, valign: 'middle' },
-      columnStyles: {
-        0: { cellWidth: 25 },
-        1: { cellWidth: 20 },
-        2: { cellWidth: 55 },
-        3: { cellWidth: 50 },
-        4: { cellWidth: 35 },
-        5: { cellWidth: 45 },
-        6: { cellWidth: 22 },
-        7: { cellWidth: 22 }
-      }
+    const columnStyles = {
+      0: { cellWidth: 25 },
+      1: { cellWidth: 20 },
+      2: { cellWidth: 55 },
+      3: { cellWidth: 50 },
+      4: { cellWidth: 35 },
+      5: { cellWidth: 45 },
+      6: { cellWidth: 20 },
+      7: { cellWidth: 20 }
+    };
+
+    await generateStandardPDF({
+      title: "CONTROL PATRIMONIAL",
+      subtitle: "BIENES DE TERCEROS Y CONTROL INTERNO",
+      headers: headers,
+      data: tableRows,
+      columnStyles: columnStyles,
+      filename: `Historial_Bienes_Terceros_${new Date().toISOString().split('T')[0]}.pdf`,
+      orientation: "landscape"
     });
-    doc.save(`Historial_Bienes_Terceros_${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   // Filtrado local de items en la tabla

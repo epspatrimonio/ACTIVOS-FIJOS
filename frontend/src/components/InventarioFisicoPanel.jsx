@@ -6,6 +6,7 @@ import {
 import SearchableSelect from './SearchableSelect';
 import Modal from './Modal';
 import ExcelHeaderFilter from './ExcelHeaderFilter';
+import { generateStandardPDF } from '../utils/pdfExportHelper';
 import { 
   fetchInventarioFisico, saveInventarioFisico, deleteInventarioFisico, fetchGenerarCodigoSobrante,
   fetchActivos, fetchSubcategorias, fetchSucursales, fetchLocalidades
@@ -170,22 +171,7 @@ export default function InventarioFisicoPanel() {
     window.XLSX.writeFile(wb, `Reporte_Inventario_Fisico_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
-  const handleExportPDF = () => {
-    if (!window.jspdf || !window.jspdf.jsPDF) {
-      alert('La librería jsPDF no está cargada.');
-      return;
-    }
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'landscape', format: 'a4' });
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text("EPS SELVA CENTRAL - CONTROL PATRIMONIAL", 14, 18);
-    doc.setFontSize(12);
-    doc.text("REPORTE DE INVENTARIO FÍSICO (FALTANTES Y SOBRANTES)", 14, 25);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.text(`Fecha de Reporte: ${new Date().toLocaleDateString('es-PE')}`, 14, 31);
-
+  const handleExportPDF = async () => {
     const headers = [["Código", "Tipo", "Denominación", "Marca/Modelo/Serie", "Sucursal / Localidad", "Fecha Reg.", "Observaciones"]];
     const tableRows = filteredItems.map(item => [
       item.cod_patrimonial,
@@ -197,24 +183,25 @@ export default function InventarioFisicoPanel() {
       item.observaciones || '—'
     ]);
 
-    doc.autoTable({
-      startY: 36,
-      head: headers,
-      body: tableRows,
-      theme: 'striped',
-      headStyles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold' },
-      styles: { fontSize: 8 },
-      columnStyles: {
-        0: { cellWidth: 25 },
-        1: { cellWidth: 20 },
-        2: { cellWidth: 70 },
-        3: { cellWidth: 45 },
-        4: { cellWidth: 45 },
-        5: { cellWidth: 20 },
-        6: { cellWidth: 55 }
-      }
+    const columnStyles = {
+      0: { cellWidth: 25 },
+      1: { cellWidth: 20 },
+      2: { cellWidth: 70 },
+      3: { cellWidth: 45 },
+      4: { cellWidth: 45 },
+      5: { cellWidth: 20 },
+      6: { cellWidth: 44 }
+    };
+
+    await generateStandardPDF({
+      title: "CONTROL PATRIMONIAL",
+      subtitle: "INVENTARIO FÍSICO (FALTANTES / SOBRANTES)",
+      headers: headers,
+      data: tableRows,
+      columnStyles: columnStyles,
+      filename: `Reporte_Inventario_Fisico_${new Date().toISOString().split('T')[0]}.pdf`,
+      orientation: "landscape"
     });
-    doc.save(`Reporte_Inventario_Fisico_${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   // Filtrado de items local
