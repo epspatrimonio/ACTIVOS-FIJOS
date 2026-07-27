@@ -23,34 +23,45 @@ const generarOrdenSalidaPDF = async (salidaData) => {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const marginX = 15;
-  let posY = 15;
+  let posY = 12;
 
   const [logoImg, selloImg] = await Promise.all([
     loadImage('/logo_eps2.png'),
     loadImage('/Sello Post Firma - CP1.png'),
   ]);
 
-  if (logoImg) doc.addImage(logoImg, 'JPEG', marginX, posY - 2, 20, 20);
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(30, 41, 59);
-  doc.text('E.P.S. "SELVA CENTRAL" S.A.', marginX + 24, posY + 2.5);
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(5.5);
-  doc.text('CHANCHAMAYO - OXAPAMPA - SATIPO', marginX + 24, posY + 5);
-  doc.text('RUC: N° 20121876290', marginX + 24, posY + 7.5);
+  // 1. Logo Mascota (18x21mm)
+  if (logoImg) doc.addImage(logoImg, 'JPEG', marginX, posY, 18, 21);
 
+  // 2. Datos de Entidad
+  const textX = marginX + 21;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(15, 23, 42);
+  doc.text('E.P.S. "SELVA CENTRAL" S.A.', textX, posY + 5);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(0, 176, 240);
+  doc.text('ENTIDAD PRESTADORA DE SERVICIOS DE SANEAMIENTO', textX, posY + 9.5);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(71, 85, 105);
+  doc.text('Chanchamayo - Oxapampa - Satipo  |  RUC: N° 20121876290', textX, posY + 13.5);
+
+  // 3. Fecha y N° Orden (Derecha)
   const dateParts = (salidaData.fecha_orden || '').split('-');
   const fechaFmt = dateParts.length === 3 ? `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}` : salidaData.fecha_orden;
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(8);
-  doc.text(`FECHA: ${fechaFmt}`, 195, posY + 4, { align: 'right' });
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(51, 65, 85);
+  doc.text(`FECHA: ${fechaFmt}`, 195, posY + 5, { align: 'right' });
   if (salidaData.n_orden) {
-    doc.setFontSize(7);
-    doc.text(`N° ORDEN: ${salidaData.n_orden}`, 195, posY + 9, { align: 'right' });
+    doc.setFontSize(8.5); doc.setTextColor(0, 176, 240);
+    doc.text(`N° ORDEN: ${salidaData.n_orden}`, 195, posY + 10, { align: 'right' });
   }
 
-  posY += 20;
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(14);
+  // 4. Línea separadora
+  doc.setLineWidth(0.4); doc.setDrawColor(226, 232, 240);
+  doc.line(15, posY + 22, 195, posY + 22);
+
+  // 5. Título Principal
+  posY += 32;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(15, 23, 42);
   doc.text('ORDEN DE SALIDA DE BIENES', 105, posY, { align: 'center' });
   const tw = doc.getTextWidth('ORDEN DE SALIDA DE BIENES');
-  doc.setLineWidth(0.5); doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(0.6); doc.setDrawColor(0, 176, 240);
   doc.line(105 - tw / 2, posY + 1.5, 105 + tw / 2, posY + 1.5);
 
   posY += 10;

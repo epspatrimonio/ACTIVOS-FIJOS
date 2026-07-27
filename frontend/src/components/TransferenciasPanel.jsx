@@ -240,21 +240,37 @@ export default function TransferenciasPanel() {
       console.warn('No se pudieron cargar imágenes para el PDF:', e);
     }
 
-    if (logoImg) doc.addImage(logoImg, 'JPEG', marginX, posY - 4, 22, 22);
-    if (selloImg) doc.addImage(selloImg, 'PNG', 150, posY, 45, 18);
+    // 1. Encabezado de la Orden - Logo Mascota (18x21mm)
+    if (logoImg) doc.addImage(logoImg, 'JPEG', marginX, posY - 3, 18, 21);
 
-    posY += 20;
+    // 2. Texto Institucional junto al logo
+    const textX = marginX + 21;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(15, 23, 42);
+    doc.text('E.P.S. "SELVA CENTRAL" S.A.', textX, posY + 1);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(0, 176, 240);
+    doc.text('ENTIDAD PRESTADORA DE SERVICIOS DE SANEAMIENTO', textX, posY + 5.5);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(71, 85, 105);
+    doc.text('Chanchamayo - Oxapampa - Satipo  |  RUC: N° 20121876290', textX, posY + 9.5);
+
+    // Fecha en la esquina derecha superior
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(51, 65, 85);
+    const fechaSimple = (transf.fecha_transferencia || '').split('-').reverse().join('/');
+    doc.text(`FECHA: ${fechaSimple}`, 195, posY + 1, { align: 'right' });
+
+    // Separador
+    doc.setLineWidth(0.4); doc.setDrawColor(226, 232, 240);
+    doc.line(15, posY + 17, 195, posY + 17);
+
+    posY += 26;
 
     // Encabezado Principal
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(15, 23, 42);
     doc.text('ACTA DE TRANSFERENCIA Y CAMBIO DE RESPONSABLE', 105, posY, { align: 'center' });
-    doc.setFontSize(11);
-    doc.text('BIENES MUEBLES PATRIMONIALES', 105, posY + 6, { align: 'center' });
+    doc.setFontSize(10); doc.setTextColor(71, 85, 105);
+    doc.text('BIENES MUEBLES PATRIMONIALES', 105, posY + 5.5, { align: 'center' });
 
-    posY += 13;
-    doc.setFontSize(10);
-    doc.setTextColor(0, 176, 240);
+    posY += 12;
+    doc.setFontSize(9.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(0, 176, 240);
     doc.text(`N° ACTA: ${transf.n_transferencia}`, 105, posY, { align: 'center' });
     doc.setTextColor(30, 41, 59);
 
