@@ -1168,7 +1168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <td class="px-5 py-4 text-[0.8125rem] min-w-[220px] text-slate-500 leading-relaxed">
           ${item.placa ? `
             <div class="mb-1">
-              <span class="font-mono font-bold text-slate-700 bg-slate-950 text-white px-2 py-0.5 rounded text-[10px] tracking-wider shadow-sm mr-1.5">
+              <span class="font-mono font-bold text-[#00509d] bg-[#e8f0fe] border border-[#00509d]/25 px-2 py-0.5 rounded-md text-[10px] tracking-wider shadow-sm mr-1.5">
                 ${item.placa}
               </span>
               ${item.categoria_vehiculo ? `<span class="bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded text-[10px] ring-1 ring-amber-200">Cat: ${item.categoria_vehiculo}</span>` : ''}
@@ -1263,7 +1263,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       <div class="mt-4 border-t border-slate-100 pt-3 text-[0.8125rem] leading-relaxed text-slate-600">
         ${item.placa ? `
-          <div><span class="font-semibold text-slate-700 bg-slate-900 text-white px-2 py-0.5 rounded text-[10px] font-mono mr-1.5">${item.placa}</span></div>
+          <div><span class="font-semibold text-[#00509d] bg-[#e8f0fe] border border-[#00509d]/25 px-2 py-0.5 rounded-md text-[10px] font-mono mr-1.5 tracking-wider shadow-sm">${item.placa}</span></div>
           <div class="mt-1"><span class="font-semibold text-slate-400">Motor:</span> ${item.nro_motor || '—'}</div>
           <div class="mt-1"><span class="font-semibold text-slate-400">Chasis:</span> ${item.nro_chasis || '—'}</div>
         ` : `
@@ -1318,7 +1318,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <td class="px-3.5 py-4 text-[0.8125rem] min-w-[220px] text-slate-500 leading-relaxed">
           ${item.placa ? `
             <div class="mb-1">
-              <span class="font-mono font-bold text-slate-700 bg-slate-950 text-white px-2 py-0.5 rounded text-[10px] tracking-wider shadow-sm mr-1.5">
+              <span class="font-mono font-bold text-[#00509d] bg-[#e8f0fe] border border-[#00509d]/25 px-2 py-0.5 rounded-md text-[10px] tracking-wider shadow-sm mr-1.5">
                 ${item.placa}
               </span>
               ${item.categoria_vehiculo ? `<span class="bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded text-[10px] ring-1 ring-amber-200">Cat: ${item.categoria_vehiculo}</span>` : ''}
@@ -1410,7 +1410,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       <div class="mt-4 border-t border-slate-100 pt-3 text-[0.8125rem] leading-relaxed text-slate-600">
         ${item.placa ? `
-          <div><span class="font-semibold text-slate-700 bg-slate-900 text-white px-2 py-0.5 rounded text-[10px] font-mono mr-1.5">${item.placa}</span></div>
+          <div><span class="font-semibold text-[#00509d] bg-[#e8f0fe] border border-[#00509d]/25 px-2 py-0.5 rounded-md text-[10px] font-mono mr-1.5 tracking-wider shadow-sm">${item.placa}</span></div>
           <div class="mt-1"><span class="font-semibold text-slate-400">Motor:</span> ${item.nro_motor || '—'}</div>
           <div class="mt-1"><span class="font-semibold text-slate-400">Chasis:</span> ${item.nro_chasis || '—'}</div>
         ` : `
