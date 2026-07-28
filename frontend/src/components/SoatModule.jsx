@@ -648,25 +648,25 @@ export default function SoatModule() {
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <button onClick={load} className="p-2 rounded-lg text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-colors h-10" title="Actualizar">
+          <button onClick={load} className="p-2.5 rounded-2xl bg-white border border-slate-200 text-slate-500 hover:text-slate-700 transition-all shadow-sm cursor-pointer h-10 flex items-center justify-center" title="Actualizar">
             <RefreshCw className="w-4 h-4" />
           </button>
           <button
             onClick={handleExportExcel}
-            className="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-3.5 rounded-xl text-xs shadow-md shadow-emerald-600/10 hover:shadow-lg active:scale-[0.98] transition-all cursor-pointer border-none h-10"
+            className="flex items-center justify-center gap-1.5 bg-[#00b074] hover:bg-[#009b66] text-white font-extrabold py-2 px-4 rounded-2xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none h-10"
           >
-            <FileSpreadsheet className="w-4 h-4" />
+            <FileSpreadsheet className="w-4 h-4 text-white" />
             <span>Excel</span>
           </button>
           <button
             onClick={handleExportPDF}
-            className="flex items-center justify-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 px-3.5 rounded-xl text-xs shadow-md shadow-rose-600/10 hover:shadow-lg active:scale-[0.98] transition-all cursor-pointer border-none h-10"
+            className="flex items-center justify-center gap-1.5 bg-[#ff3b5c] hover:bg-[#e02e4d] text-white font-extrabold py-2 px-4 rounded-2xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none h-10"
           >
-            <FileText className="w-4 h-4" />
+            <FileText className="w-4 h-4 text-white" />
             <span>PDF</span>
           </button>
           <button onClick={() => { setEditItem(null); setShowForm(true); }}
-            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-brand-600 to-[#00B0F0] text-white text-sm font-bold rounded-xl shadow-lg shadow-brand-500/25 hover:from-brand-700 hover:to-[#009FD6] transition-all active:scale-[0.98] cursor-pointer h-10 border-none">
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#00509d] hover:bg-[#003f7e] text-white text-xs font-bold rounded-2xl shadow-sm transition-all active:scale-[0.98] cursor-pointer h-10 border-none">
             <Plus className="w-4 h-4" />
             Registrar SOAT
           </button>
@@ -759,7 +759,7 @@ export default function SoatModule() {
         ) : (
           <div className="overflow-auto flex-1">
             <table className="w-full text-sm">
-              <thead className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+              <thead className="bg-[#00509d] text-white sticky top-0 z-10 font-bold">
                 <tr>
                   <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                     <ExcelHeaderFilter

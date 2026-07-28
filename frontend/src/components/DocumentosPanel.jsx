@@ -1298,7 +1298,7 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
                 <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                   <div className="overflow-x-auto min-h-[380px]">
                     <table className="min-w-full divide-y divide-slate-100 text-left text-xs">
-                      <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider">
+                      <thead className="bg-[#00509d] text-white font-bold uppercase tracking-wider sticky top-0 z-10 shadow-sm">
                         <tr>
                           <th className="px-6 py-3.5">
                             <ExcelHeaderFilter
@@ -1424,7 +1424,7 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
                 <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                   <div className="overflow-x-auto min-h-[380px]">
                     <table className="min-w-full divide-y divide-slate-100 text-left text-xs">
-                      <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider">
+                      <thead className="bg-[#00509d] text-white font-bold uppercase tracking-wider sticky top-0 z-10 shadow-sm">
                         <tr>
                           <th className="px-6 py-3.5">
                             <ExcelHeaderFilter
@@ -1563,7 +1563,7 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
                 <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                   <div className="overflow-x-auto min-h-[380px]">
                     <table className="min-w-full divide-y divide-slate-100 text-left text-xs">
-                      <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider">
+                      <thead className="bg-[#00509d] text-white font-bold uppercase tracking-wider sticky top-0 z-10 shadow-sm">
                         <tr>
                           <th className="px-6 py-3.5">
                             <ExcelHeaderFilter

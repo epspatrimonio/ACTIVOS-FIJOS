@@ -681,26 +681,26 @@ export default function CelularesModule() {
           <p style={{ margin:0, fontSize:'0.875rem', color:'#64748b' }}>Control, asignación y vida útil de equipos móviles</p>
         </div>
         <div style={{ display:'flex', gap:8, alignItems:'center' }}>
-          <button onClick={load} style={{ padding:8, border:'1px solid #e2e8f0', borderRadius:10, background:'#fff', cursor:'pointer', color:'#64748b', height:38 }} title="Actualizar">
-            <RefreshCw style={{ width:16, height:16 }} />
+          <button onClick={load} className="p-2.5 rounded-2xl bg-white border border-slate-200 text-slate-500 hover:text-slate-700 transition-all shadow-sm cursor-pointer h-10 flex items-center justify-center" title="Actualizar">
+            <RefreshCw className="w-4 h-4" />
           </button>
           <button
             onClick={handleExportExcel}
-            style={{ display:'flex', alignItems:'center', gap:6, padding:'9px 16px', background:'#10b981', color:'#fff', border:'none', borderRadius:12, fontWeight:700, fontSize:'0.875rem', cursor:'pointer', height:38 }}
+            className="flex items-center justify-center gap-1.5 bg-[#00b074] hover:bg-[#009b66] text-white font-extrabold py-2 px-4 rounded-2xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none h-10"
           >
-            <FileSpreadsheet style={{ width:16, height:16 }} />
+            <FileSpreadsheet className="w-4 h-4 text-white" />
             <span>Excel</span>
           </button>
           <button
             onClick={handleExportPDF}
-            style={{ display:'flex', alignItems:'center', gap:6, padding:'9px 16px', background:'#f43f5e', color:'#fff', border:'none', borderRadius:12, fontWeight:700, fontSize:'0.875rem', cursor:'pointer', height:38 }}
+            className="flex items-center justify-center gap-1.5 bg-[#ff3b5c] hover:bg-[#e02e4d] text-white font-extrabold py-2 px-4 rounded-2xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none h-10"
           >
-            <FileText style={{ width:16, height:16 }} />
+            <FileText className="w-4 h-4 text-white" />
             <span>PDF</span>
           </button>
           <button onClick={openNew}
-            style={{ display:'flex', alignItems:'center', gap:8, padding:'9px 18px', background:'linear-gradient(135deg,#0e6fdc,#00B0F0)', color:'#fff', border:'none', borderRadius:12, fontWeight:700, fontSize:'0.875rem', cursor:'pointer', boxShadow:'0 2px 12px rgba(14,111,220,.3)', height:38 }}>
-            <Plus style={{ width:16, height:16 }} /> Registrar Celular
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#00509d] hover:bg-[#003f7e] text-white text-xs font-bold rounded-2xl shadow-sm transition-all active:scale-[0.98] border-none cursor-pointer h-10">
+            <Plus className="w-4 h-4" /> Registrar Celular
           </button>
         </div>
       </div>
@@ -830,8 +830,8 @@ export default function CelularesModule() {
         ) : (
           <div style={{ overflow: 'auto', flex: 1 }}>
             <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'0.8125rem' }}>
-              <thead>
-                <tr style={{ background:'linear-gradient(to right,#f8fafc,#f1f5f9)', borderBottom:'1px solid #e2e8f0' }}>
+              <thead className="sticky top-0 bg-[#00509d] text-white z-10 shadow-sm font-bold">
+                <tr className="border-b border-white/10 text-[0.72rem] font-bold text-white uppercase tracking-wider">
                   <th style={{ padding:'10px 8px', textAlign:'left' }}>
                     <ExcelHeaderFilter
                       title="Cód. Control"
