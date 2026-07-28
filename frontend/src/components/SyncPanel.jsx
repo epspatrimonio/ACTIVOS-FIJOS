@@ -105,7 +105,7 @@ export default function SyncPanel() {
                 </p>
                 <p>{result.git_sync.message}</p>
                 {result.git_sync.detail && (
-                  <pre className="mt-2 bg-[#051934] text-brand-100 p-3 rounded-xl border border-brand-900/50 font-mono text-[10px] overflow-x-auto max-h-32 shadow-inner">
+                  <pre className="mt-2 bg-[#051934] text-brand-100 p-3 rounded-xl border border-brand-900/50 font-mono text-[10px] overflow-hidden whitespace-pre-wrap break-all max-h-28 shadow-inner leading-relaxed">
                     {result.git_sync.detail}
                   </pre>
                 )}

@@ -761,7 +761,7 @@ export default function SoatModule() {
             <table className="w-full text-sm">
               <thead className="bg-[#00509d] text-white sticky top-0 z-10 font-bold">
                 <tr>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">
                     <ExcelHeaderFilter
                       title="Cód. Patrimonial"
                       columnKey="cod_patrimonial"
@@ -773,7 +773,7 @@ export default function SoatModule() {
                       getValue={(item) => getColValue(item, 'cod_patrimonial')}
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">
                     <ExcelHeaderFilter
                       title="Placa"
                       columnKey="placa"
@@ -785,7 +785,7 @@ export default function SoatModule() {
                       getValue={(item) => getColValue(item, 'placa')}
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">
                     <ExcelHeaderFilter
                       title="Tipo de Vehículo"
                       columnKey="tipo_vehiculo"
@@ -797,7 +797,7 @@ export default function SoatModule() {
                       getValue={(item) => getColValue(item, 'tipo_vehiculo')}
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">
                     <ExcelHeaderFilter
                       title="Sucursal"
                       columnKey="sucursal"
@@ -809,7 +809,7 @@ export default function SoatModule() {
                       getValue={(item) => getColValue(item, 'sucursal')}
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">
                     <ExcelHeaderFilter
                       title="Vigencia SOAT"
                       columnKey="vencimiento_soat"
@@ -821,7 +821,7 @@ export default function SoatModule() {
                       getValue={(item) => formatDate(getColValue(item, 'vencimiento_soat'))}
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">
                     <ExcelHeaderFilter
                       title="Rev. Técnica"
                       columnKey="vencimiento_rev_tec"
@@ -833,7 +833,7 @@ export default function SoatModule() {
                       getValue={(item) => formatDate(getColValue(item, 'vencimiento_rev_tec'))}
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap"></th>
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -912,9 +912,9 @@ export default function SoatModule() {
                         })()}
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-1">
                           <button onClick={() => { setEditItem(r); setShowForm(true); }} title="Renovar / Editar"
-                            className="p-1.5 rounded-lg hover:bg-brand-50 text-slate-400 hover:text-brand-600 transition-colors border-none bg-transparent cursor-pointer">
+                            className="p-1.5 rounded-lg hover:bg-brand-50 text-slate-500 hover:text-brand-600 transition-colors border-none bg-transparent cursor-pointer">
                             <Pencil className="w-3.5 h-3.5" />
                           </button>
                           <button onClick={() => setDeleteItem(r)} title="Eliminar"

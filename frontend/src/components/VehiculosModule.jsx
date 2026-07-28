@@ -1187,7 +1187,7 @@ export default function VehiculosModule() {
             <table className="min-w-[1750px] w-full text-sm">
               <thead className="bg-[#00509d] text-white sticky top-0 z-10 font-bold">
                 <tr>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">
                     <ExcelHeaderFilter
                       title="Placa"
                       columnKey="placa"
@@ -1199,7 +1199,7 @@ export default function VehiculosModule() {
                       getValue={(item) => getColValue(item, 'placa')}
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">
                     <ExcelHeaderFilter
                       title="Cód. Patrimonial"
                       columnKey="cod_patrimonial"
@@ -1211,7 +1211,7 @@ export default function VehiculosModule() {
                       getValue={(item) => getColValue(item, 'cod_patrimonial')}
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">
                     <ExcelHeaderFilter
                       title="Tipo / Subcat"
                       columnKey="tipo_vehiculo"
@@ -1223,7 +1223,7 @@ export default function VehiculosModule() {
                       getValue={(item) => getColValue(item, 'tipo_vehiculo')}
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">
                     <ExcelHeaderFilter
                       title="Ubicación"
                       columnKey="sucursal"
@@ -1235,7 +1235,7 @@ export default function VehiculosModule() {
                       getValue={(item) => getColValue(item, 'sucursal')}
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">
                     <ExcelHeaderFilter
                       title="Denominación / Marca / Modelo"
                       columnKey="denominacion"
@@ -1247,10 +1247,10 @@ export default function VehiculosModule() {
                       getValue={(item) => getColValue(item, 'denominacion')}
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">
                     Especificaciones Técnicas
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">
                     <ExcelHeaderFilter
                       title="Estado"
                       columnKey="estado_activo"
@@ -1262,13 +1262,13 @@ export default function VehiculosModule() {
                       getValue={(item) => getColValue(item, 'estado_activo')}
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">
                     SOAT
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">
                     Rev. Técnica
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">
                     <ExcelHeaderFilter
                       title="Responsable"
                       columnKey="responsable"
@@ -1280,7 +1280,7 @@ export default function VehiculosModule() {
                       getValue={(item) => getColValue(item, 'responsable')}
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">Gestión</th>
+                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">Gestión</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -1363,13 +1363,13 @@ export default function VehiculosModule() {
 
                     {/* Gestión */}
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-1">
                         <button onClick={() => { setEditItem(v); setShowForm(true); }} title="Editar Vehículo"
-                          className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors border-none cursor-pointer bg-none">
+                          className="p-1.5 rounded-lg hover:bg-white/20 text-slate-500 hover:text-[#00509d] transition-colors border-none cursor-pointer bg-transparent">
                           <Pencil className="w-3.5 h-3.5" />
                         </button>
                         <button onClick={() => setDeleteItem(v)} title="Eliminar"
-                          className="p-1.5 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors border-none cursor-pointer bg-none">
+                          className="p-1.5 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors border-none cursor-pointer bg-transparent">
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>

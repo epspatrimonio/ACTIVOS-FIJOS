@@ -940,7 +940,7 @@ export default function CelularesModule() {
                       getValue={(item) => getColValue(item, 'estado')}
                     />
                   </th>
-                  <th style={{ padding:'10px 8px', textAlign:'left' }}></th>
+                  <th style={{ padding:'10px 8px', textAlign:'left' }}>Acciones</th>
                 </tr>
               </thead>
               <tbody>

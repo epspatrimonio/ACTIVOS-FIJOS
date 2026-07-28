@@ -815,7 +815,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                             <p className="flex items-center gap-1.5 flex-wrap leading-none mb-1">
                               <span className="font-semibold text-slate-400">Placa:</span>
                               {activo.placa ? (
-                                <span className="font-mono font-bold text-slate-700 bg-slate-900 text-white px-1.5 py-0.5 rounded text-[10px] tracking-wider whitespace-nowrap">
+                                <span className="font-mono font-bold text-white bg-[#00509d] px-2 py-0.5 rounded-md text-[10px] tracking-wider whitespace-nowrap shadow-sm">
                                   {activo.placa}
                                 </span>
                               ) : (
