@@ -594,7 +594,7 @@ class SalidaBienesDetalle(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     id_salida: Mapped[int] = mapped_column(Integer, ForeignKey("af.fct_salida_bienes.id", ondelete="CASCADE"), nullable=False)
-    cod_patrimonial: Mapped[Optional[str]] = mapped_column(String(30), ForeignKey("af.fct_registro_activos.cod_patrimonial", ondelete="SET NULL"), nullable=True)
+    cod_patrimonial: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
     denominacion: Mapped[str] = mapped_column(String(300), nullable=False)
     color: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
     marca: Mapped[Optional[str]] = mapped_column(String(160), nullable=True)

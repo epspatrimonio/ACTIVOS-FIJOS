@@ -1021,6 +1021,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
           errMsg = errorData.detail || 'Fallo en la comunicación con el servidor.';
         }
+        if (typeof errMsg === 'string' && (errMsg.includes('INSERT INTO') || errMsg.includes('parameters:'))) {
+          errMsg = errMsg.split('\n')[0];
+        }
         throw new Error(errMsg);
       }
 
@@ -1042,7 +1045,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     } catch (err) {
       console.error('Error al registrar/generar la orden:', err);
-      alert(`Hubo un error al registrar la orden de salida: ${err.message || err}`);
+      let msg = err.message || err || 'Error desconocido';
+      if (typeof msg === 'string' && (msg.includes('INSERT INTO') || msg.includes('parameters:'))) {
+        msg = msg.split('\n')[0];
+      }
+      alert(`Hubo un error al registrar la orden de salida:\n${msg}`);
     } finally {
       btnGenerar.innerHTML = originalText;
       btnGenerar.disabled = false;

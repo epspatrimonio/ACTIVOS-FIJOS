@@ -2056,6 +2056,13 @@ async def create_salida_bienes(salida_in: SalidaBienesCreate, db: AsyncSession =
     Registra una nueva orden de salida de bienes, autogenerando el número correlativo (n_orden).
     """
     try:
+        # Asegurar eliminación de restricción FK en cod_patrimonial para permitir códigos libres
+        try:
+            await db.execute(text("ALTER TABLE af.fct_salida_bienes_detalle DROP CONSTRAINT IF EXISTS fct_salida_bienes_detalle_cod_patrimonial_fkey;"))
+            await db.commit()
+        except Exception:
+            await db.rollback()
+
         anio = salida_in.fecha_orden.year
         
         # 1. Obtener el correlativo máximo para el año actual
@@ -2114,9 +2121,12 @@ async def create_salida_bienes(salida_in: SalidaBienesCreate, db: AsyncSession =
         
     except Exception as e:
         await db.rollback()
+        err_msg = str(e)
+        if "INSERT INTO" in err_msg or "STATEMENT:" in err_msg or "sqlalche" in err_msg:
+            err_msg = err_msg.split("\n")[0]
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Error al registrar la orden de salida: {str(e)}"
+            detail=f"Error al registrar la orden de salida: {err_msg}"
         )
 
 
