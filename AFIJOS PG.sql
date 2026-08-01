@@ -578,4 +578,38 @@ LEFT JOIN (
         fecha_vencimiento
     FROM af.fct_soat
     ORDER BY cod_patrimonial, fecha_vencimiento DESC
-) s_latest ON s_latest.cod_patrimonial = a.cod_patrimonial
+) s_latest ON s_latest.cod_patrimonial = a.cod_patrimonial;
+
+-- =========================================================
+-- INDICES DE RENDIMIENTO Y OPTIMIZACION DE CONSULTAS
+-- =========================================================
+CREATE INDEX IF NOT EXISTS idx_activos_categoria ON af.fct_registro_activos(cod_categoria);
+CREATE INDEX IF NOT EXISTS idx_activos_sucursal ON af.fct_registro_activos(id_sucursal);
+CREATE INDEX IF NOT EXISTS idx_activos_cuenta ON af.fct_registro_activos(cuenta_contable);
+CREATE INDEX IF NOT EXISTS idx_activos_centro ON af.fct_registro_activos(centro_costo);
+CREATE INDEX IF NOT EXISTS idx_activos_personal ON af.fct_registro_activos(cod_personal);
+CREATE INDEX IF NOT EXISTS idx_activos_doc_compra ON af.fct_registro_activos(n_doc_compra);
+CREATE INDEX IF NOT EXISTS idx_activos_doc_inc ON af.fct_registro_activos(n_doc_incorporacion);
+CREATE INDEX IF NOT EXISTS idx_activos_doc_obra ON af.fct_registro_activos(n_doc_obra);
+CREATE INDEX IF NOT EXISTS idx_activos_estado ON af.fct_registro_activos(estado_activo);
+
+CREATE INDEX IF NOT EXISTS idx_vehiculo_patrimonial ON af.fct_vehiculo_detalle(cod_patrimonial);
+CREATE INDEX IF NOT EXISTS idx_soat_patrimonial_venc ON af.fct_soat(cod_patrimonial, fecha_vencimiento DESC);
+
+-- =========================================================
+-- TABLA Y ESTRUCTURA DE AUDITORIA E HISTORIAL DE CAMBIOS
+-- =========================================================
+CREATE TABLE IF NOT EXISTS af.audit_logs (
+    id BIGSERIAL PRIMARY KEY,
+    usuario VARCHAR(100) DEFAULT 'SISTEMA',
+    accion VARCHAR(30) NOT NULL,
+    entidad VARCHAR(80) NOT NULL,
+    entidad_id VARCHAR(100) NOT NULL,
+    detalle TEXT,
+    ip_address VARCHAR(45),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_audit_logs_entidad ON af.audit_logs(entidad, entidad_id);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_created ON af.audit_logs(created_at DESC);
+

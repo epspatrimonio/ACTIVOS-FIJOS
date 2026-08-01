@@ -9,19 +9,22 @@ import {
 import Filters from './components/Filters';
 import ActivosTable from './components/ActivosTable';
 import ActivoForm from './components/ActivoForm';
-import SyncPanel from './components/SyncPanel';
-import DocumentosPanel from './components/DocumentosPanel';
-import CelularesModule from './components/CelularesModule';
-import SoatModule from './components/SoatModule';
-import VehiculosModule from './components/VehiculosModule';
-import AdminDashboard from './components/AdminDashboard';
-import InventarioFisicoPanel from './components/InventarioFisicoPanel';
-import BienesTercerosPanel from './components/BienesTercerosPanel';
-import ReporteContable from './components/ReporteContable';
-import SalidaBienesPanel from './components/SalidaBienesPanel';
-import TransferenciasPanel from './components/TransferenciasPanel';
 import { fetchActivos, getDashboardUrl } from './utils/api';
 import { generateStandardPDF } from './utils/pdfExportHelper';
+
+// Carga diferida (Lazy Loading) de módulos pesados para optimizar el bundle inicial
+const SyncPanel = React.lazy(() => import('./components/SyncPanel'));
+const DocumentosPanel = React.lazy(() => import('./components/DocumentosPanel'));
+const CelularesModule = React.lazy(() => import('./components/CelularesModule'));
+const SoatModule = React.lazy(() => import('./components/SoatModule'));
+const VehiculosModule = React.lazy(() => import('./components/VehiculosModule'));
+const AdminDashboard = React.lazy(() => import('./components/AdminDashboard'));
+const InventarioFisicoPanel = React.lazy(() => import('./components/InventarioFisicoPanel'));
+const BienesTercerosPanel = React.lazy(() => import('./components/BienesTercerosPanel'));
+const ReporteContable = React.lazy(() => import('./components/ReporteContable'));
+const SalidaBienesPanel = React.lazy(() => import('./components/SalidaBienesPanel'));
+const TransferenciasPanel = React.lazy(() => import('./components/TransferenciasPanel'));
+
 
 // Componente de Login alineado al diseño del prototipo
 function Login({ onLogin }) {
@@ -608,7 +611,13 @@ export default function App() {
       <main className={`flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-w-0 ${
         ['INVENTARIO', 'OBRAS', 'CONTABLE', 'VEHICULOS', 'SOAT', 'CELULARES', 'INVENTARIO_FISICO', 'BIENES_TERCEROS', 'TERCEROS_REGISTRO', 'TERCEROS_TABLA', 'TRANSFERENCIAS', 'TRANSFERENCIAS_REGISTRO', 'TRANSFERENCIAS_TABLA', 'SALIDAS', 'SALIDAS_REGISTRO', 'SALIDAS_TABLA', 'DASHBOARD', 'ADMIN'].includes(activeTab) ? 'overflow-hidden flex flex-col' : 'overflow-y-auto'
       }`}>
-        {activeTab === 'INVENTARIO' && (
+        <React.Suspense fallback={
+          <div className="flex items-center justify-center p-12 text-slate-500 font-semibold space-x-2 animate-pulse">
+            <RefreshCw className="w-5 h-5 animate-spin text-brand-600" />
+            <span>Cargando módulo...</span>
+          </div>
+        }>
+          {activeTab === 'INVENTARIO' && (
           <div className="flex-1 flex flex-col min-h-0 space-y-4 animate-fadeIn w-full max-w-full overflow-hidden">
             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between shrink-0 mb-2">
               <div className="module-heading">
@@ -801,6 +810,7 @@ export default function App() {
         {activeTab === 'TRANSFERENCIAS_TABLA' && (
           <TransferenciasPanel initialSubTab="CONSULTAS" />
         )}
+        </React.Suspense>
       </main>
 
       {/* Pie de Página */}

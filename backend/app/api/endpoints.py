@@ -72,11 +72,13 @@ async def get_activos(
     id_sucursal: Optional[int] = None,
     cuenta_contable: Optional[str] = None,
     centro_costo: Optional[str] = None,
+    page: Optional[int] = None,
+    page_size: Optional[int] = None,
     db: AsyncSession = Depends(get_db)
 ):
     """
     Obtiene la lista de activos fijos con filtros opcionales por estado de activo, sucursal,
-    cuenta contable y centro de costo, cargando detalles unidos de dimensiones.
+    cuenta contable y centro de costo, con soporte opcional para paginación.
     """
     try:
         query = select(VwRegistroActivosDetalle)
@@ -89,6 +91,10 @@ async def get_activos(
         if centro_costo:
             query = query.where(VwRegistroActivosDetalle.centro_costo == centro_costo)
             
+        if page is not None and page_size is not None and page > 0 and page_size > 0:
+            offset_val = (page - 1) * page_size
+            query = query.offset(offset_val).limit(page_size)
+
         result = await db.execute(query)
         activos = result.scalars().all()
         return activos
@@ -447,6 +453,29 @@ async def update_activo(
         )
 
 
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
+ALLOWED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
+ALLOWED_PDF_EXTENSIONS = {".pdf"}
+
+async def validate_upload_file(file: UploadFile, allowed_extensions: set, max_size: int = MAX_FILE_SIZE):
+    if not file or not file.filename:
+        return
+    ext = os.path.splitext(file.filename)[1].lower()
+    if ext not in allowed_extensions:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Formato de archivo '{ext}' no permitido. Permitidos: {', '.join(allowed_extensions)}"
+        )
+    # Leer el tamaño del contenido
+    file.file.seek(0, os.SEEK_END)
+    file_size = file.file.tell()
+    file.file.seek(0)
+    if file_size > max_size:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"El archivo '{file.filename}' excede el límite máximo de {max_size // (1024 * 1024)}MB."
+        )
+
 @router.post("/activos/{cod_patrimonial}/upload", status_code=status.HTTP_200_OK)
 async def upload_activo_files(
     cod_patrimonial: str,
@@ -473,6 +502,7 @@ async def upload_activo_files(
     updates = {}
 
     if pdf_file:
+        await validate_upload_file(pdf_file, ALLOWED_PDF_EXTENSIONS)
         filename = f"{cod_patrimonial}_expediente.pdf"
         file_path = os.path.join(uploads_dir, filename)
         with open(file_path, "wb") as buffer:
@@ -481,7 +511,8 @@ async def upload_activo_files(
         updates["pdf_expediente_path"] = db_activo.pdf_expediente_path
 
     if imagen_1:
-        ext = os.path.splitext(imagen_1.filename)[1] or ".jpg"
+        await validate_upload_file(imagen_1, ALLOWED_IMAGE_EXTENSIONS)
+        ext = os.path.splitext(imagen_1.filename)[1].lower() or ".jpg"
         filename = f"{cod_patrimonial}_img1{ext}"
         file_path = os.path.join(uploads_dir, filename)
         with open(file_path, "wb") as buffer:
@@ -490,7 +521,8 @@ async def upload_activo_files(
         updates["imagen_1_path"] = db_activo.imagen_1_path
 
     if imagen_2:
-        ext = os.path.splitext(imagen_2.filename)[1] or ".jpg"
+        await validate_upload_file(imagen_2, ALLOWED_IMAGE_EXTENSIONS)
+        ext = os.path.splitext(imagen_2.filename)[1].lower() or ".jpg"
         filename = f"{cod_patrimonial}_img2{ext}"
         file_path = os.path.join(uploads_dir, filename)
         with open(file_path, "wb") as buffer:
@@ -499,7 +531,8 @@ async def upload_activo_files(
         updates["imagen_2_path"] = db_activo.imagen_2_path
 
     if imagen_3:
-        ext = os.path.splitext(imagen_3.filename)[1] or ".jpg"
+        await validate_upload_file(imagen_3, ALLOWED_IMAGE_EXTENSIONS)
+        ext = os.path.splitext(imagen_3.filename)[1].lower() or ".jpg"
         filename = f"{cod_patrimonial}_img3{ext}"
         file_path = os.path.join(uploads_dir, filename)
         with open(file_path, "wb") as buffer:
@@ -518,8 +551,27 @@ async def upload_activo_files(
                 detail=f"Error al guardar los adjuntos: {str(e)}"
             )
 
+
     return {"status": "success", "updates": updates}
 
+
+async def registrar_auditoria(db: AsyncSession, accion: str, entidad: str, entidad_id: str, detalle: Optional[str] = None):
+    """
+    Registra una entrada en la tabla af.audit_logs para auditoría y trazabilidad.
+    """
+    try:
+        sql = text("""
+            INSERT INTO af.audit_logs (usuario, accion, entidad, entidad_id, detalle)
+            VALUES ('SISTEMA', :accion, :entidad, :entidad_id, :detalle)
+        """)
+        await db.execute(sql, {
+            "accion": accion,
+            "entidad": entidad,
+            "entidad_id": str(entidad_id),
+            "detalle": detalle
+        })
+    except Exception as e:
+        pass
 
 @router.delete("/activos/{cod_patrimonial}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_activo(
@@ -536,7 +588,9 @@ async def delete_activo(
             detail=f"El activo con código patrimonial '{cod_patrimonial}' no existe."
         )
     try:
+        denominacion = db_activo.denominacion
         await db.delete(db_activo)
+        await registrar_auditoria(db, "ELIMINAR", "ACTIVO", cod_patrimonial, f"Eliminado: {denominacion}")
         await db.commit()
         return None
     except Exception as e:
