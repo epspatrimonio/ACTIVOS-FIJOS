@@ -941,25 +941,44 @@ export default function VehiculosModule() {
   };
 
   const handleExportPDF = async () => {
-    const headers = [["Código", "Placa", "Denominación del Vehículo", "Tipo", "Sucursal", "Responsable", "Estado"]];
-    const tableRows = filtered.map(v => [
-      v.cod_patrimonial,
+    const headers = [
+      [
+        "Placa",
+        "Cód. Patrimonial",
+        "Ubicación",
+        "Denominación",
+        "Especificaciones Técnicas",
+        "Estado",
+        "SOAT",
+        "Revisión Técnica",
+        "Responsable"
+      ]
+    ];
+    const sortedFiltered = [...filtered].sort((a, b) =>
+      (a.denominacion || '').localeCompare(b.denominacion || '', 'es', { sensitivity: 'base' })
+    );
+    const tableRows = sortedFiltered.map(v => [
       v.placa || 'S/P',
-      `${v.denominacion}\nM: ${v.marca || 'S/M'} · Mod: ${v.modelo || 'S/M'}\nMotor: ${v.nro_motor || 'S/M'} · Chasis: ${v.nro_chasis || 'S/C'}`,
-      v.tipo_vehiculo || '—',
-      v.sucursal || '—',
-      v.responsable || 'Sin asignar',
-      v.estado_activo
+      v.cod_patrimonial || '—',
+      `${v.sucursal || '—'}${v.localidad ? `\n(${v.localidad})` : ''}`,
+      `${v.denominacion || ''}${v.anio_fabricacion || v.vehiculo_anio ? `\nAño: ${v.anio_fabricacion || v.vehiculo_anio}` : ''}`,
+      `Color: ${v.color || '—'}\nMarca: ${v.marca || '—'}\nModelo: ${v.modelo || '—'}\nMotor: ${v.nro_motor || '—'}\nChasis: ${v.nro_chasis || '—'}\nCombustible: ${v.combustible || '—'}`,
+      v.estado_activo || '—',
+      v.soat_estado ? `${v.soat_estado}\nVence: ${v.soat_vencimiento ? formatDate(v.soat_vencimiento) : '—'}` : 'No Registrado',
+      v.vencimiento_rev_tec ? `${v.estado_rev_tec || 'VIGENTE'}\nVence: ${formatDate(v.vencimiento_rev_tec)}` : 'No registrado',
+      v.responsable || 'Sin asignar'
     ]);
 
     const columnStyles = {
-      0: { cellWidth: 25 },
-      1: { cellWidth: 20 },
-      2: { cellWidth: 90 },
-      3: { cellWidth: 25 },
-      4: { cellWidth: 35 },
-      5: { cellWidth: 45 },
-      6: { cellWidth: 25 }
+      0: { cellWidth: 20 },
+      1: { cellWidth: 26 },
+      2: { cellWidth: 28 },
+      3: { cellWidth: 46 },
+      4: { cellWidth: 54 },
+      5: { cellWidth: 18 },
+      6: { cellWidth: 25 },
+      7: { cellWidth: 25 },
+      8: { cellWidth: 27 }
     };
 
     await generateStandardPDF({
