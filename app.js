@@ -96,6 +96,20 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         salidas = [];
       }
+
+      // Combinar salidas registradas localmente en el navegador
+      try {
+        const localSaved = JSON.parse(localStorage.getItem('salidas_custom_history') || '[]');
+        if (Array.isArray(localSaved) && localSaved.length > 0) {
+          const existingOrders = new Set(salidas.map(s => s.n_orden));
+          localSaved.forEach(item => {
+            if (item && item.n_orden && !existingOrders.has(item.n_orden)) {
+              salidas.unshift(item);
+              existingOrders.add(item.n_orden);
+            }
+          });
+        }
+      } catch (e) {}
       
       // Cargar tipografía en paralelo
       loadAgencyFont();
@@ -1041,14 +1055,14 @@ document.addEventListener('DOMContentLoaded', () => {
       baseData = inventario;
     } else if (currentTab === 'terceros') {
       baseData = terceros;
-    } else if (currentTab === 'salida-tabla') {
+    } else if (currentTab === 'salida-tabla' || currentTab === 'salidas') {
       baseData = salidas;
     } else if (currentTab === 'contable') {
       baseData = assets;
     }
 
     const filtered = baseData.filter(item => {
-      if (currentTab === 'salida-tabla') {
+      if (currentTab === 'salida-tabla' || currentTab === 'salidas') {
         const query = searchInput.value.toLowerCase().trim();
         const searchMatch = !query || 
           (item.n_orden || '').toLowerCase().includes(query) ||
@@ -1058,14 +1072,14 @@ document.addEventListener('DOMContentLoaded', () => {
           
         let yearMatch = true;
         const selectedGlobalYear = document.getElementById('filter-global-year')?.value;
-        if (selectedGlobalYear) {
+        if (selectedGlobalYear && item.fecha_orden) {
           const y = new Date(item.fecha_orden).getFullYear();
           yearMatch = (y === Number(selectedGlobalYear));
         }
 
         let monthMatch = true;
         const selectedGlobalMonth = document.getElementById('filter-global-month')?.value;
-        if (selectedGlobalMonth) {
+        if (selectedGlobalMonth && item.fecha_orden) {
           const m = new Date(item.fecha_orden).getMonth() + 1;
           monthMatch = (m === Number(selectedGlobalMonth));
         }
@@ -1277,7 +1291,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
       mobileContainer.classList.add('hidden');
-      renderSalidasRows(salidas);
+      renderSalidasRows(data);
       return;
     }
 
@@ -1981,7 +1995,25 @@ document.addEventListener('DOMContentLoaded', () => {
         // Generar y descargar PDF client-side
         await generarOrdenSalidaPDF_Public(payload);
 
-        // Si existe backend conectado, registrar en DB
+        // Registrar en memoria y localStorage para persistencia en la consulta estática de forma inmediata
+        const addAndSaveSalida = (newSalida) => {
+          if (!salidas.some(s => s.n_orden === newSalida.n_orden)) {
+            salidas.unshift(newSalida);
+          }
+          try {
+            const localSaved = JSON.parse(localStorage.getItem('salidas_custom_history') || '[]');
+            if (!localSaved.some(s => s.n_orden === newSalida.n_orden)) {
+              localSaved.unshift(newSalida);
+              localStorage.setItem('salidas_custom_history', JSON.stringify(localSaved));
+            }
+          } catch (e) {}
+          applyFilters();
+        };
+
+        // Guardar inmediatamente
+        addAndSaveSalida(payload);
+
+        // Si existe backend conectado, registrar en DB en segundo plano
         try {
           fetch('/api/activos/salidas', {
             method: 'POST',
@@ -1989,9 +2021,13 @@ document.addEventListener('DOMContentLoaded', () => {
             body: JSON.stringify(payload)
           }).then(res => {
             if (res.ok) {
-              return res.json().then(data => {
-                salidas.unshift(data);
-                applyFilters();
+              return res.json().then(serverData => {
+                if (serverData && serverData.n_orden) {
+                  const idx = salidas.findIndex(s => s.n_orden === payload.n_orden || s.n_orden === serverData.n_orden);
+                  if (idx !== -1) salidas[idx] = serverData;
+                  else addAndSaveSalida(serverData);
+                  applyFilters();
+                }
               });
             }
           }).catch(() => {});
@@ -2000,12 +2036,23 @@ document.addEventListener('DOMContentLoaded', () => {
         alert(`Orden de Salida ${n_orden} generada y descargada con éxito.`);
 
         // Limpiar formulario
-        document.getElementById('salida-motivo').value = '';
-        document.getElementById('salida-responsable').value = '';
-        document.getElementById('salida-cargo').value = '';
-        document.getElementById('salida-observaciones').value = '';
+        if (document.getElementById('salida-motivo')) document.getElementById('salida-motivo').value = '';
+        if (document.getElementById('salida-responsable')) document.getElementById('salida-responsable').value = '';
+        if (document.getElementById('salida-cargo')) document.getElementById('salida-cargo').value = '';
+        if (document.getElementById('salida-observaciones')) document.getElementById('salida-observaciones').value = '';
         salidaBienesSeleccionados = [];
         renderSalidaBienesFormTable();
+
+        // Actualizar N° Orden correlativo para el siguiente registro
+        if (codigoBadge) {
+          const nextCount = (salidas ? salidas.length : 0) + 1;
+          codigoBadge.textContent = `OS-${new Date().getFullYear()}-${String(nextCount).padStart(3, '0')}`;
+        }
+
+        // Cambiar automáticamente a la subpestaña "Tablas y Consultas" para mostrar el nuevo registro inmediatamente
+        if (btnSubtabHistory) {
+          btnSubtabHistory.click();
+        }
       });
     }
   }
