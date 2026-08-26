@@ -1,61 +1,1258 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="h-full bg-slate-50 text-slate-900 overflow-hidden">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="refresh" content="0; url=public_dashboard/">
-  <title>Control Patrimonial - EPS Selva Central</title>
+  <title>Control Patrimonial - Consulta Pública de Activos</title>
+  <link rel="icon" type="image/jpeg" href="logo.jpg">
+  
+  <!-- Tailwind CSS CDN para Cero Compilación (Ideal para GitHub Pages) -->
+  <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    window.location.replace("public_dashboard/");
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Roboto', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0fbff',
+              100: '#e0f7ff',
+              200: '#b8eeff',
+              300: '#7ae0ff',
+              400: '#33cfff',
+              500: '#00B0F0', // Celeste original
+              600: '#009ad4',
+              700: '#007eb0',
+              800: '#00628a',
+              900: '#004763',
+              950: '#002533',
+            }
+          }
+        }
+      }
+    }
   </script>
+
+  <!-- Google Fonts: Inter + Roboto -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+  <!-- Librerías de Exportación (Excel y PDF) y Gráficos (Chart.js) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
+    :root {
+      color-scheme: light;
+      font-size: 16px;
+    }
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f8fafc;
-      color: #334155;
-      display: flex;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      letter-spacing: -0.010em;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Roboto', sans-serif;
+      letter-spacing: -0.02em;
+    }
+    .card-hover {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .card-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px -5px rgba(148, 163, 184, 0.15);
+    }
+    .smooth-scroll {
+      -webkit-overflow-scrolling: touch;
+    }
+    .hidden {
+      display: none !important;
+    }
+    /* Forzar visibilidad de filtros en desktop (md+), ya que .hidden con
+       !important sobreescribe md:flex de Tailwind */
+    @media (min-width: 768px) {
+      #filters-content {
+        display: flex !important;
+      }
+    }
+    .control-field {
+      min-height: 2.875rem;
+    }
+    #assets-mobile-container {
+      display: none;
+    }
+    #assets-table-container:not(.hidden) {
+      display: flex !important;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
     }
-    .loader-container {
-      text-align: center;
-      padding: 2rem;
-      background: white;
-      border-radius: 1rem;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    @media (max-width: 767px) {
+      html, body {
+        overflow-y: auto !important;
+        height: auto !important;
+      }
+      body {
+        font-size: 0.875rem;
+      }
+      main {
+        overflow: visible !important;
+        height: auto !important;
+        flex: none !important;
+      }
+      #assets-mobile-container {
+        overflow-y: visible !important;
+        height: auto !important;
+        flex: none !important;
+      }
+      #assets-mobile-container:not(.hidden) {
+        display: grid;
+        gap: 0.875rem;
+      }
+      #assets-table-container,
+      #vehiculos-table-container,
+      #soat-table-container,
+      #celulares-table-container,
+      #inventario-table-container,
+      #terceros-table-container {
+        display: none !important;
+      }
+      /* Mejorar botones de exportar en móvil */
+      #btn-export-excel,
+      #btn-export-pdf {
+        flex: 1;
+        justify-content: center;
+        min-height: 2.75rem;
+      }
+      /* Pie de página más compacto */
+      footer {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        margin-top: 2rem !important;
+      }
     }
-    .spinner {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #00B0F0;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 1rem auto;
+
+    /* Estilos del menú lateral móvil */
+    #mobile-menu-drawer.invisible {
+      pointer-events: none;
+      visibility: hidden;
     }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    #mobile-menu-drawer:not(.invisible) {
+      visibility: visible;
     }
-    a {
-      color: #00B0F0;
-      font-weight: bold;
-      text-decoration: none;
+
+    /* Scrollbar estilizado y visible para navegación horizontal cómoda */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
     }
-    a:hover {
-      text-decoration: underline;
+    ::-webkit-scrollbar-track {
+      background: #f8fafc;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+      border: 2px solid #f8fafc;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    /* Estilo para Firefox */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: #cbd5e1 #f8fafc;
     }
   </style>
 </head>
-<body>
-  <div class="loader-container">
-    <div class="spinner"></div>
-    <h2 style="margin-bottom: 0.5rem; color: #0f172a;">Cargando Control Patrimonial...</h2>
-    <p style="font-size: 0.875rem; color: #64748b;">Redirigiendo a la Consulta Pública de Activos.</p>
-    <p style="font-size: 0.75rem; color: #94a3b8; margin-top: 1rem;">Si no eres redirigido automáticamente, <a href="public_dashboard/">haz clic aquí</a>.</p>
+<body class="h-full flex flex-col bg-slate-50 text-slate-900 overflow-hidden font-sans">
+
+  <!-- Encabezado y Filtros Fijos -->
+  <div class="bg-slate-50 border-b border-slate-200/80 shadow-sm w-full shrink-0">
+    <!-- Encabezado Compacto Celeste -->
+    <header class="bg-[#00B0F0] text-white py-3 px-4 sm:px-6 lg:px-8 border-b border-[#009ad4] shadow-sm">
+      <div class="max-w-[1600px] mx-auto flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <img src="logo.jpg" alt="Logo EPS Selva Central" class="w-10 h-10 object-contain rounded-lg bg-white p-0.5 shadow-sm">
+          <div>
+            <span class="bg-white/20 text-white border border-white/10 text-[0.6rem] font-bold px-2 py-0.5 rounded-full uppercase">
+              EPS SELVA CENTRAL
+            </span>
+            <h1 class="text-base sm:text-lg font-bold leading-tight mt-0.5">CONTROL PATRIMONIAL</h1>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <p class="text-white/85 text-[0.75rem] font-semibold tracking-wider uppercase max-md:hidden md:block">
+            Consulta de Activos Fijos
+          </p>
+          <!-- Botón de Menú Hamburguesa en Móvil -->
+          <button id="hamburger-btn" class="md:hidden flex items-center justify-center p-2 rounded-lg text-white hover:bg-white/10 active:bg-white/20 transition-colors focus:outline-none cursor-pointer" aria-label="Abrir menú">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Selector de Pestañas Superior (Tabs Switcher) -->
+    <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-3.5 pb-1">
+      <div class="max-md:hidden md:grid md:grid-cols-3 xl:flex bg-slate-200/60 p-1.5 rounded-2xl shrink-0 gap-1.5 w-full border border-slate-200/80 shadow-sm">
+        <button id="tab-activos" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 bg-brand-500 text-white shadow-md shadow-brand-500/15 whitespace-nowrap">
+          💼 Activos Fijos
+        </button>
+        <button id="tab-obras" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
+          🚧 Obras en Curso
+        </button>
+        <button id="tab-vehiculos" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
+          🚗 Vehículos - SOAT & RT
+        </button>
+        <button id="tab-inventario" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
+          🔍 Sobrantes/Faltantes
+        </button>
+        <button id="tab-terceros" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
+          🤝 Bienes de Terceros
+        </button>
+        <button id="tab-celulares" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
+          📱 Celulares
+        </button>
+        <button id="tab-salidas" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
+          ↳ Salida de Bienes
+        </button>
+        <button id="tab-asignacion" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
+          📋 Asignación de Bienes
+        </button>
+        <button id="tab-contable" class="w-full xl:w-auto xl:flex-1 col-span-2 sm:col-span-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
+          📊 Reporte Contable
+        </button>
+      </div>
+    </div>
+    
+    <!-- Filtros Compactos Inferiores -->
+    <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pb-3.5 pt-1.5">
+      <!-- Botón para alternar filtros en móvil -->
+      <div class="flex md:hidden items-center justify-between mb-2">
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Filtros de Búsqueda</span>
+        <button id="btn-toggle-filters" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-extrabold text-brand-700 bg-brand-50 hover:bg-brand-100 border border-brand-200 rounded-lg transition-all active:scale-[0.98] cursor-pointer">
+          🔍 Mostrar/Ocultar Filtros
+        </button>
+      </div>
+
+      <div id="filters-content" class="hidden md:flex bg-white border border-slate-200/80 rounded-2xl p-3 shadow-sm flex-row items-end gap-2 w-full">
+        <!-- Buscador -->
+        <div id="search-filter-wrapper" class="flex-1 min-w-[200px]">
+          <label for="search" class="block text-[0.625rem] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Buscador Inteligente</label>
+          <div class="relative">
+            <input 
+              type="text" 
+              id="search" 
+              placeholder="Buscar por código, denominación, marca, modelo, responsable..." 
+              class="control-field w-full h-9 pl-3 pr-8 bg-slate-50 border border-slate-200 rounded-xl text-[0.75rem] font-semibold text-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all placeholder:text-slate-400"
+            >
+            <button 
+              id="btn-clear-search" 
+              type="button"
+              class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none hidden p-1 font-bold text-xs cursor-pointer"
+              title="Borrar búsqueda"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <!-- Sucursal -->
+        <div id="sucursal-filter-wrapper" class="w-28 shrink-0">
+          <label for="filter-sucursal" class="block text-[0.625rem] font-extrabold text-slate-500 uppercase tracking-wider mb-1 truncate">Sucursal</label>
+          <select 
+            id="filter-sucursal" 
+            class="control-field w-full h-9 px-2 text-[0.75rem] font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-slate-800 cursor-pointer truncate"
+          >
+            <option value="">Todas</option>
+          </select>
+        </div>
+
+        <!-- Categoría (Multiselección) -->
+        <div id="categoria-filter-wrapper" class="w-32 shrink-0 relative">
+          <label class="block text-[0.625rem] font-extrabold text-slate-500 uppercase tracking-wider mb-1 truncate">Categoría</label>
+          <div class="relative">
+            <button 
+              type="button" 
+              id="btn-select-categoria" 
+              class="control-field w-full h-9 px-2 bg-slate-50 border border-slate-200 rounded-xl text-[0.75rem] font-semibold text-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all flex items-center justify-between text-left cursor-pointer truncate"
+            >
+              <span id="label-select-categoria" class="truncate">Todas</span>
+              <svg class="w-3 h-3 text-slate-400 shrink-0 ml-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="icon-categoria">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            <div 
+              id="dropdown-categoria" 
+              class="hidden absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-50 p-2 min-w-[180px]"
+            >
+              <label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 rounded-lg cursor-pointer text-xs font-semibold text-slate-700 border-b border-slate-100 mb-1">
+                <input type="checkbox" id="chk-all-categoria" class="rounded border-slate-300 text-brand-500 focus:ring-brand-500 cursor-pointer">
+                <span>Seleccionar Todas</span>
+              </label>
+              <div id="options-container-categoria" class="flex flex-col gap-0.5 max-h-48 overflow-y-auto">
+                <!-- Se inyectará vía JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subcategoría (Multiselección) -->
+        <div id="subcategoria-filter-wrapper" class="w-32 shrink-0 relative">
+          <label class="block text-[0.625rem] font-extrabold text-slate-500 uppercase tracking-wider mb-1 truncate">Subcategoría</label>
+          <div class="relative">
+            <button 
+              type="button" 
+              id="btn-select-subcategoria" 
+              class="control-field w-full h-9 px-2 bg-slate-50 border border-slate-200 rounded-xl text-[0.75rem] font-semibold text-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all flex items-center justify-between text-left cursor-pointer truncate"
+            >
+              <span id="label-select-subcategoria" class="truncate">Todas</span>
+              <svg class="w-3 h-3 text-slate-400 shrink-0 ml-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="icon-subcategoria">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            <div 
+              id="dropdown-subcategoria" 
+              class="hidden absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-50 p-2 min-w-[180px]"
+            >
+              <label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 rounded-lg cursor-pointer text-xs font-semibold text-slate-700 border-b border-slate-100 mb-1">
+                <input type="checkbox" id="chk-all-subcategoria" class="rounded border-slate-300 text-brand-500 focus:ring-brand-500 cursor-pointer">
+                <span>Seleccionar Todas</span>
+              </label>
+              <div id="options-container-subcategoria" class="flex flex-col gap-0.5 max-h-48 overflow-y-auto">
+                <!-- Se inyectará vía JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Estado del Activo / Tipo -->
+        <div id="estado-filter-wrapper" class="w-24 shrink-0">
+          <label id="filter-estado-label" for="filter-estado" class="block text-[0.625rem] font-extrabold text-slate-500 uppercase tracking-wider mb-1 truncate">Estado</label>
+          <select 
+            id="filter-estado" 
+            class="control-field w-full h-9 px-2 text-[0.75rem] font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-slate-800 cursor-pointer truncate"
+          >
+            <option value="">Todos</option>
+            <option value="BUENO">BUENO</option>
+            <option value="REGULAR">REGULAR</option>
+            <option value="MALO">MALO</option>
+            <option value="PARA BAJA">PARA BAJA</option>
+            <option value="BAJA">BAJA</option>
+          </select>
+        </div>
+
+        <!-- Filtro Año de Registro -->
+        <div id="global-year-filter-wrapper" class="w-20 shrink-0">
+          <label for="filter-global-year" class="block text-[0.625rem] font-extrabold text-slate-500 uppercase tracking-wider mb-1 truncate">Año</label>
+          <select 
+            id="filter-global-year" 
+            class="control-field w-full h-9 px-2 text-[0.75rem] font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-slate-800 cursor-pointer truncate"
+          >
+            <option value="">Todos</option>
+          </select>
+        </div>
+
+        <!-- Filtro Mes de Registro -->
+        <div id="global-month-filter-wrapper" class="w-24 shrink-0">
+          <label for="filter-global-month" class="block text-[0.625rem] font-extrabold text-slate-500 uppercase tracking-wider mb-1 truncate">Mes</label>
+          <select 
+            id="filter-global-month" 
+            class="control-field w-full h-9 px-2 text-[0.75rem] font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-slate-800 cursor-pointer truncate"
+          >
+            <option value="">Todos</option>
+            <option value="1">Enero</option>
+            <option value="2">Febrero</option>
+            <option value="3">Marzo</option>
+            <option value="4">Abril</option>
+            <option value="5">Mayo</option>
+            <option value="6">Junio</option>
+            <option value="7">Julio</option>
+            <option value="8">Agosto</option>
+            <option value="9">Septiembre</option>
+            <option value="10">Octubre</option>
+            <option value="11">Noviembre</option>
+            <option value="12">Diciembre</option>
+          </select>
+        </div>
+
+
+        <!-- Estado SOAT -->
+        <div id="soat-estado-filter-wrapper" class="w-24 shrink-0 hidden">
+          <label for="filter-soat-estado" class="block text-[0.625rem] font-extrabold text-slate-500 uppercase tracking-wider mb-1 truncate">Estado SOAT</label>
+          <select 
+            id="filter-soat-estado" 
+            class="control-field w-full h-9 px-2 text-[0.75rem] font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-slate-800 cursor-pointer truncate"
+          >
+            <option value="">Todos</option>
+            <option value="VIGENTE">VIGENTE</option>
+            <option value="POR_VENCER">POR VENCER</option>
+            <option value="VENCIDO">VENCIDO</option>
+          </select>
+        </div>
+
+        <!-- Botón Borrar Filtros -->
+        <button 
+          id="btn-clear-filters" 
+          type="button"
+          class="control-field h-9 px-3 text-[0.75rem] font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-1 hidden shrink-0 whitespace-nowrap"
+        >
+          🔄 Borrar
+        </button>
+      </div>
+    </div>
   </div>
+
+  <!-- Contenido de Control y Búsqueda -->
+  <main class="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 overflow-hidden flex flex-col min-h-0">
+
+    <!-- Indicador de Resultados y Botones de Descarga -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5 shrink-0">
+      <h2 id="module-title" class="text-xl sm:text-[1.35rem] font-bold text-slate-800">Catálogo de Activos Fijos</h2>
+      <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+        <div id="results-count" class="text-[0.8125rem] bg-slate-100 text-slate-600 px-3 py-2 rounded-lg font-semibold border border-slate-200/60 shadow-sm whitespace-nowrap">
+          Cargando registros...
+        </div>
+        <!-- Botón Exportar Excel -->
+        <button id="btn-export-excel" class="control-field flex items-center gap-1.5 px-4 py-2 text-[0.8125rem] font-extrabold text-white bg-[#00b074] hover:bg-[#009b66] rounded-2xl transition-all active:scale-[0.98] whitespace-nowrap cursor-pointer border-none shadow-sm">
+          📊 Excel
+        </button>
+        <!-- Botón Exportar PDF -->
+        <button id="btn-export-pdf" class="control-field flex items-center gap-1.5 px-4 py-2 text-[0.8125rem] font-extrabold text-white bg-[#ff3b5c] hover:bg-[#e02e4d] rounded-2xl transition-all active:scale-[0.98] whitespace-nowrap cursor-pointer border-none shadow-sm">
+          📕 PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Fallbacks / Estados de carga y error -->
+    <div id="status-container" class="hidden">
+      <!-- Mensaje de Carga -->
+      <div id="status-loading" class="text-center py-12">
+        <div class="inline-block w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
+        <p class="text-[0.9375rem] text-slate-500 mt-2 font-medium">Obteniendo activos de forma estática...</p>
+      </div>
+      
+      <!-- Mensaje de Error -->
+      <div id="status-error" class="hidden max-w-xl mx-auto bg-rose-50 border border-rose-200 text-rose-800 p-6 rounded-2xl text-center">
+        <span class="text-3xl">⚠️</span>
+        <h3 class="text-lg font-bold mt-2">Error de Sincronización</h3>
+        <p class="text-sm text-slate-500 mt-1" id="error-message">
+          No se ha encontrado el archivo de datos sincronizados.
+        </p>
+      </div>
+    </div>
+
+    <!-- Contenedores de Tarjetas y Tablas para Cada Módulo -->
+    <div id="assets-mobile-container" class="hidden md:hidden mobile-card-grid overflow-y-auto flex-1 min-h-0 py-1"></div>
+
+    <!-- Tabla: Activos Fijos -->
+    <div id="assets-table-container" class="hidden md:flex flex-col flex-1 min-h-0 rounded-xl shadow-sm border border-slate-200 bg-white overflow-hidden">
+      <div class="overflow-x-auto overflow-y-auto smooth-scroll w-full flex-1 min-h-0">
+        <table class="min-w-[1520px] w-full divide-y divide-slate-200 border-collapse">
+          <thead class="sticky top-0 bg-[#00B0F0] text-white z-20 shadow-md">
+            <tr>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[140px]">Cód. Patrimonial</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[150px]">DOCUMENTO<br/>C. CONTABLE<br/>C. COSTO</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[120px]">Fecha de Ingreso</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[150px]">SUCURSAL<br/>FINANCIADO</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[220px]">DENOMINACIÓN<br/>SUB CATEGORIA<br/>N° ACTA</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[160px]">CARACTERÍSTICAS</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[200px]">ESPECIFICACIONES</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[110px]">Estado</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[110px]">Valor Libros</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[110px]">Valor Neto</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[180px]">RESPONSABLE<br/>PUESTO</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[90px]">GESTIÓN</th>
+            </tr>
+          </thead>
+          <tbody id="assets-tbody" class="bg-white divide-y divide-slate-100">
+            <!-- Las filas se inyectarán vía JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tabla: Obras en Curso -->
+    <div id="obras-table-container" class="hidden md:flex flex-col flex-1 min-h-0 rounded-xl shadow-sm border border-slate-200 bg-white overflow-hidden">
+      <div class="overflow-x-auto overflow-y-auto smooth-scroll w-full flex-1 min-h-0">
+        <table class="min-w-[1520px] w-full divide-y divide-slate-200 border-collapse">
+          <thead class="sticky top-0 bg-[#00B0F0] text-white z-20 shadow-md">
+            <tr>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[140px]">Cód. Patrimonial</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[150px]">DOCUMENTO<br/>C. CONTABLE<br/>C. COSTO</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[120px]">Fecha de Ingreso</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[150px]">SUCURSAL<br/>FINANCIADO</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[220px]">DENOMINACIÓN<br/>SUB CATEGORIA<br/>N° ACTA</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[160px]">CARACTERÍSTICAS</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[200px]">ESPECIFICACIONES</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[110px]">Estado</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[110px]">Valor Libros</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[110px]">Valor Neto</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[180px]">RESPONSABLE<br/>PUESTO</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[90px]">GESTIÓN</th>
+            </tr>
+          </thead>
+          <tbody id="obras-tbody" class="bg-white divide-y divide-slate-100">
+            <!-- Las filas se inyectarán vía JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tabla: Vehículos -->
+    <div id="vehiculos-table-container" class="hidden md:flex flex-col flex-1 min-h-0 rounded-xl shadow-sm border border-slate-200 bg-white overflow-hidden">
+      <div class="overflow-x-auto overflow-y-auto smooth-scroll w-full flex-1 min-h-0">
+        <table class="min-w-[1380px] w-full divide-y divide-slate-200 border-collapse">
+          <thead class="sticky top-0 bg-[#00B0F0] text-white z-20 shadow-md">
+            <tr>
+              <th scope="col" class="px-3 py-2.5 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide w-[110px]">Placa</th>
+              <th scope="col" class="px-3 py-2.5 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide w-[130px]">Cód. Patrimonial</th>
+              <th scope="col" class="px-3 py-2.5 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide w-[150px]">Ubicación Financiado</th>
+              <th scope="col" class="px-3 py-2.5 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide w-[220px]">DENOMINACIÓN<br/>CARACTERÍSTICAS</th>
+              <th scope="col" class="px-3 py-2.5 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide w-[220px]">Especificaciones Técnicas</th>
+              <th scope="col" class="px-3 py-2.5 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide w-[110px]">Estado</th>
+              <th scope="col" class="px-3 py-2.5 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide w-[150px]">SOAT</th>
+              <th scope="col" class="px-3 py-2.5 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide w-[160px]">Rev. Técnica (Vencimiento)</th>
+              <th scope="col" class="px-3 py-2.5 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide w-[190px]">Responsable</th>
+            </tr>
+          </thead>
+          <tbody id="vehiculos-tbody" class="bg-white divide-y divide-slate-100">
+            <!-- Las filas se inyectarán vía JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tabla: Celulares -->
+    <div id="celulares-table-container" class="hidden md:flex flex-col flex-1 min-h-0 rounded-xl shadow-sm border border-slate-200 bg-white overflow-hidden">
+      <div class="overflow-x-auto overflow-y-auto smooth-scroll w-full flex-1 min-h-0">
+        <table class="min-w-[1250px] w-full divide-y divide-slate-200 border-collapse">
+          <thead class="sticky top-0 bg-[#00B0F0] text-white z-20 shadow-md">
+            <tr>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Cód. Control</th>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">N° Línea</th>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Marca / Modelo</th>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">IMEI / Operador</th>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Sucursal</th>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Fecha Ingreso</th>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Fecha Asignación</th>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Asignado a</th>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Renovación (3 Años / Estado)</th>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Estado</th>
+            </tr>
+          </thead>
+          <tbody id="celulares-tbody" class="bg-white divide-y divide-slate-100">
+            <!-- Las filas se inyectarán vía JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Tabla: Inventario Físico -->
+    <div id="inventario-table-container" class="hidden md:flex flex-col flex-1 min-h-0 rounded-xl shadow-sm border border-slate-200 bg-white overflow-hidden">
+      <div class="overflow-x-auto overflow-y-auto smooth-scroll w-full flex-1 min-h-0">
+        <table class="min-w-[1350px] w-full divide-y divide-slate-200 border-collapse">
+          <thead class="sticky top-0 bg-[#00B0F0] text-white z-20 shadow-md">
+            <tr>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Cód. Patrimonial</th>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Tipo</th>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Categoría / Subcategoría</th>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Ubicación</th>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Denominación del Activo</th>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Especificaciones</th>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Características / Accesorios</th>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Observaciones</th>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Fecha Registro</th>
+            </tr>
+          </thead>
+          <tbody id="inventario-tbody" class="bg-white divide-y divide-slate-100">
+            <!-- Las filas se inyectarán vía JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tabla: Bienes de Terceros -->
+    <div id="terceros-table-container" class="hidden md:flex flex-col flex-1 min-h-0 rounded-xl shadow-sm border border-slate-200 bg-white overflow-hidden">
+      <div class="overflow-x-auto overflow-y-auto smooth-scroll w-full flex-1 min-h-0">
+        <table class="min-w-[1350px] w-full divide-y divide-slate-200 border-collapse">
+          <thead class="sticky top-0 bg-[#00B0F0] text-white z-20 shadow-md">
+            <tr>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Cód. Patrimonial</th>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Tipo</th>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Ubicación</th>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Denominación</th>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Especificaciones</th>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Características / Accesorios</th>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Responsable</th>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Observaciones</th>
+              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Fecha Registro</th>
+            </tr>
+          </thead>
+          <tbody id="terceros-tbody" class="bg-white divide-y divide-slate-100">
+            <!-- Las filas se inyectarán vía JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Módulo: Salida de Bienes (Registro + Tabla) -->
+    <div id="salidas-table-container" class="hidden flex-col flex-1 min-h-0 rounded-2xl shadow-sm border border-slate-200 bg-slate-50/50 p-3.5 space-y-3.5 overflow-y-auto smooth-scroll">
+      
+      <!-- Bar Superior Unificada: Sub-navegación + Código Orden + Selector de Modo -->
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200 shadow-xs shrink-0">
+        <!-- Subtabs -->
+        <div class="flex items-center gap-5 border-b md:border-b-0 border-slate-150 pb-2 md:pb-0 w-full md:w-auto">
+          <button type="button" id="btn-salidas-subtab-form" class="text-xs font-extrabold pb-1 border-b-2 border-brand-500 text-brand-600 transition-all cursor-pointer bg-transparent border-t-0 border-x-0">
+            ✍️ Registro y Gestión
+          </button>
+          <button type="button" id="btn-salidas-subtab-history" class="text-xs font-bold pb-1 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all cursor-pointer bg-transparent border-t-0 border-x-0">
+            📋 Tablas y Consultas
+          </button>
+        </div>
+
+        <!-- Indicadores y Modo -->
+        <div class="flex flex-wrap items-center justify-between md:justify-end gap-3 w-full md:w-auto">
+          <div class="flex items-center gap-1.5 bg-brand-50/80 px-3 py-1 rounded-xl border border-brand-200/80">
+            <span class="text-[10px] font-extrabold text-brand-700 uppercase tracking-wider">N° ORDEN:</span>
+            <span id="salida-codigo-badge" class="font-mono font-extrabold text-brand-700 text-xs">OS-2026-AUTO</span>
+          </div>
+
+          <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl shrink-0">
+            <button type="button" id="btn-salida-modo-sistema" class="px-3 py-1 text-xs font-bold rounded-lg transition-all border-none cursor-pointer bg-brand-500 text-white shadow-xs">
+              ⚡ Opción 1: Filtrar Sistema
+            </button>
+            <button type="button" id="btn-salida-modo-manual" class="px-3 py-1 text-xs font-bold rounded-lg transition-all border-none cursor-pointer text-slate-600 hover:bg-white bg-transparent">
+              ✍️ Opción 2: Manual
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISTA 1: Formulario Interactivo (Registro y Gestión) -->
+      <div id="salidas-form-view" class="space-y-3.5">
+        <!-- Grid de 2 Columnas -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 pb-4">
+          
+          <!-- Columna Izquierda: Información General, Titular, Firmas -->
+          <div class="lg:col-span-4 space-y-3.5">
+            
+            <!-- Card 1: Información General -->
+            <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-xs space-y-3">
+              <h4 class="font-extrabold text-xs text-slate-800 uppercase tracking-wider border-b border-slate-150 pb-1.5">Información General</h4>
+              
+              <div>
+                <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">FECHA DE LA ORDEN *</label>
+                <input type="date" id="salida-fecha" class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" required />
+              </div>
+
+              <div>
+                <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">SOLICITO (TIPO DE SALIDA) *</label>
+                <div class="grid grid-cols-2 gap-1.5">
+                  <label class="flex items-center gap-1.5 p-1.5 border border-slate-200 rounded-xl text-[11px] font-semibold text-slate-700 cursor-pointer hover:bg-slate-50">
+                    <input type="radio" name="salida_tipo_public" value="Mantenimiento" checked class="w-3.5 h-3.5 text-brand-500 border-slate-300" />
+                    Mantenimiento
+                  </label>
+                  <label class="flex items-center gap-1.5 p-1.5 border border-slate-200 rounded-xl text-[11px] font-semibold text-slate-700 cursor-pointer hover:bg-slate-50">
+                    <input type="radio" name="salida_tipo_public" value="Trabajo de campo" class="w-3.5 h-3.5 text-brand-500 border-slate-300" />
+                    Trabajo de campo
+                  </label>
+                  <label class="flex items-center gap-1.5 p-1.5 border border-slate-200 rounded-xl text-[11px] font-semibold text-slate-700 cursor-pointer hover:bg-slate-50">
+                    <input type="radio" name="salida_tipo_public" value="Evento institucional" class="w-3.5 h-3.5 text-brand-500 border-slate-300" />
+                    Evento Inst.
+                  </label>
+                  <label class="flex items-center gap-1.5 p-1.5 border border-slate-200 rounded-xl text-[11px] font-semibold text-slate-700 cursor-pointer hover:bg-slate-50">
+                    <input type="radio" name="salida_tipo_public" value="Otros" class="w-3.5 h-3.5 text-brand-500 border-slate-300" />
+                    Otros
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">MOTIVO DETALLADO *</label>
+                <textarea id="salida-motivo" rows="2" placeholder="Escriba el motivo detallado de la salida..." class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" style="resize:none" required></textarea>
+              </div>
+            </div>
+
+            <!-- Card 2: Titular del Bien -->
+            <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-xs space-y-3">
+              <h4 class="font-extrabold text-xs text-slate-800 uppercase tracking-wider border-b border-slate-150 pb-1.5">Titular del Bien</h4>
+              
+              <div class="relative">
+                <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">NOMBRE RESPONSABLE *</label>
+                <input type="text" id="salida-responsable" placeholder="Escriba para filtrar responsable..." class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" required />
+                <div id="salida-resp-sug" class="hidden absolute top-full left-0 right-0 z-30 bg-white border border-slate-200 rounded-xl shadow-lg mt-1 max-h-48 overflow-y-auto"></div>
+              </div>
+
+              <!-- Distribución Optimizado: Cargo y Sucursal en 2 columnas -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                  <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">PUESTO *</label>
+                  <input type="text" id="salida-cargo" placeholder="Escriba puesto..." class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" required />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">SUCURSAL *</label>
+                  <select id="salida-ubicacion" class="w-full rounded-xl border border-slate-200 px-2.5 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" required>
+                    <option value="">-- Seleccionar --</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 3: Firmas y Observaciones -->
+            <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-xs space-y-3">
+              <h4 class="font-extrabold text-xs text-slate-800 uppercase tracking-wider border-b border-slate-150 pb-1.5">Firmas y Observaciones</h4>
+              
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                  <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">RESP. ÁREA TÉCNICA</label>
+                  <input type="text" id="salida-resp-tecnico" value="ÁREA TÉCNICA" placeholder="Quien entrega..." class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">OBSERVACIONES</label>
+                  <input type="text" id="salida-observaciones" placeholder="Opcional..." class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" />
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Columna Derecha: Tabla de Bienes y Acciones -->
+          <div class="lg:col-span-8 space-y-3.5">
+            
+            <!-- Card de Bienes -->
+            <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-xs space-y-3">
+              <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                  <h4 class="font-extrabold text-xs text-slate-900 uppercase tracking-wider">Agregar Bienes a la Orden</h4>
+                  <span id="salida-bienes-header" class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-[11px] font-bold border border-slate-200">
+                    0 Seleccionados
+                  </span>
+                </div>
+              </div>
+
+              <!-- Fila integrada de Búsqueda y Botón Agregar Manual -->
+              <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-2.5">
+                <div id="salida-search-activo-wrapper" class="relative flex-1">
+                  <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">BUSCAR POR CÓDIGO PATRIMONIAL O DENOMINACIÓN</label>
+                  <input type="text" id="salida-search-activo" placeholder="🔍 Ej: 742205560002 o LAPTOP..." class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" />
+                  <div id="salida-activo-sug" class="hidden absolute top-full left-0 right-0 z-30 bg-white border border-slate-200 rounded-xl shadow-lg mt-1 max-h-48 overflow-y-auto"></div>
+                </div>
+
+                <button type="button" id="btn-salida-add-manual" class="hidden shrink-0 px-3.5 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all border border-slate-300 cursor-pointer h-8">
+                  + + Agregar Fila Manual
+                </button>
+              </div>
+
+              <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                <table class="w-full text-left text-xs border-collapse">
+                  <thead class="bg-slate-100 text-slate-700 font-extrabold uppercase text-[10px] tracking-wider">
+                    <tr>
+                      <th id="col-salida-chk" class="p-2 w-10 text-center">Inc.</th>
+                      <th class="p-2 w-10 text-center">N°</th>
+                      <th class="p-2 w-32">Cód. Patrimonial</th>
+                      <th class="p-2">Denominación</th>
+                      <th class="p-2">Características (Color, Marca, Modelo, Serie)</th>
+                      <th class="p-2 w-24 text-center">Estado</th>
+                      <th class="p-2 w-10 text-center">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="salida-bienes-form-tbody" class="divide-y divide-slate-100">
+                    <tr>
+                      <td colspan="10" class="p-6 text-center text-slate-400 font-medium">
+                        <div class="flex flex-col items-center justify-center space-y-1.5">
+                          <span class="text-2xl">📋</span>
+                          <p class="text-xs font-semibold">No se han agregado bienes a la orden. Búscalos arriba para agregarlos.</p>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Barra de Botones de Acción -->
+            <div class="flex items-center justify-end gap-3 p-3 bg-white rounded-2xl border border-slate-200 shadow-xs">
+              <button type="button" id="btn-salida-limpiar" class="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-bold rounded-xl text-xs transition-all cursor-pointer shadow-xs">
+                Limpiar Formulario
+              </button>
+              <button type="button" id="btn-salida-generar-pdf" class="px-5 py-2 bg-[#00B0F0] hover:bg-[#009ad4] active:scale-[0.98] text-white font-extrabold rounded-xl text-xs shadow-md transition-all cursor-pointer border-none flex items-center gap-2">
+                📄 Generar Orden de Salida (PDF)
+              </button>
+            </div>
+
+            <!-- Nota de Responsabilidad Banner -->
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 space-y-1">
+              <div class="flex items-center gap-1.5 text-xs font-bold text-slate-800">
+                <span>⚠️</span>
+                <span>NOTA DE RESPONSABILIDAD (INCLUIDA EN EL PDF)</span>
+              </div>
+              <p class="text-[10px] text-slate-500 leading-relaxed uppercase">
+                EL TRABAJADOR ES RESPONSABLE DIRECTO Y ABSOLUTO DE LA EXISTENCIA, PERMANENCIA, CONSERVACIÓN DEL BIEN EN USO, EVITAR PERDIDA, SUSTRACCIÓN, DETERIODO ETC. EN CASO DE PÉRDIDA, EXTRAVIO O DETERIORO POR EL MAL USO DE LOS BIENES PATRIMONIALES DESCRITOS, ESTOS SERÁN REPUESTOS O REPARADOS POR EL TRABAJADOR RESPONSABLE DE LOS MISMOS. CUALQUIER MOVIMIENTOS DENTRO O FUERA DE LA ENTIDAD DEBERA SER COMUNICADO AL RESPONSABLE DE CONTROL PATRIMONIAL, BAJO RESPONSABILIDAD.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- VISTA 2: Tabla de Consulta de Salidas (Tablas y Consultas) -->
+      <div id="salidas-history-view" class="hidden flex-1 overflow-x-auto overflow-y-auto smooth-scroll w-full bg-white rounded-2xl border border-slate-200">
+        <table class="min-w-[1200px] w-full divide-y divide-slate-200 border-collapse">
+          <thead class="bg-[#004C96] text-white font-bold uppercase tracking-wider text-[10px] sticky top-0 z-10 shadow-md">
+            <tr>
+              <th scope="col" class="px-4 py-3 text-left w-28">N° Orden</th>
+              <th scope="col" class="px-4 py-3 text-left w-24">Fecha</th>
+              <th scope="col" class="px-4 py-3 text-left">Responsable</th>
+              <th scope="col" class="px-4 py-3 text-left w-36">Tipo Salida</th>
+              <th scope="col" class="px-4 py-3 text-left">Motivo de Salida</th>
+              <th scope="col" class="px-4 py-3 text-center w-20">Bienes</th>
+              <th scope="col" class="px-4 py-3 text-center w-36">Estado Devolución</th>
+              <th scope="col" class="px-4 py-3 text-center w-24">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="salidas-tbody" class="bg-white divide-y divide-slate-100 text-xs">
+            <!-- Se inyectará vía JS -->
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- Tabla / Panel: Asignación de Bienes -->
+    <div id="asignacion-table-container" class="hidden flex flex-col md:flex-row flex-1 min-h-0 gap-5 overflow-hidden w-full">
+      <!-- Panel Izquierdo: Lista de Actas -->
+      <div class="w-full md:w-80 bg-white border border-slate-200 rounded-xl p-4 flex flex-col shrink-0 shadow-sm min-h-0">
+        <label for="search-acta" class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Filtrar por N° de Acta</label>
+        <input 
+          type="text" 
+          id="search-acta" 
+          placeholder="Ej: 016-2026..." 
+          class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all placeholder:text-slate-400 mb-3"
+        >
+        <div id="actas-list" class="flex-1 overflow-y-auto space-y-1 pr-1">
+          <!-- Se poblará vía JS -->
+        </div>
+      </div>
+
+      <!-- Panel Derecho: Formulario y Vista Previa -->
+      <div class="flex-1 bg-white border border-slate-200 rounded-xl p-5 flex flex-col shadow-sm min-h-0 overflow-y-auto">
+        <div class="border-b border-slate-100 pb-3 mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h3 class="text-base font-extrabold text-slate-800 uppercase tracking-tight">Acta de Asignación de Bienes</h3>
+            <p class="text-xs text-slate-400 mt-0.5">Visualice y exporte las actas de asignación en formato oficial PDF.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+          <div>
+            <label class="block text-[0.75rem] font-bold text-slate-500 mb-1 uppercase tracking-wide">Nro de Acta</label>
+            <input 
+              type="text" 
+              id="acta-nro" 
+              value="017-2026" 
+              class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all font-mono font-bold text-slate-700"
+            >
+          </div>
+          <div>
+            <label class="block text-[0.75rem] font-bold text-slate-500 mb-1 uppercase tracking-wide">Fecha de Alta / Asignación</label>
+            <input 
+              type="date" 
+              id="acta-fecha" 
+              class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-slate-700 font-semibold"
+            >
+          </div>
+          <div>
+            <label class="block text-[0.75rem] font-bold text-slate-500 mb-1 uppercase tracking-wide">Solicitante (Requerimiento)</label>
+            <input 
+              type="text" 
+              id="acta-solicitante" 
+              placeholder="Nombre del solicitante" 
+              class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-slate-700 font-semibold"
+            >
+          </div>
+          <div class="flex items-end">
+            <button 
+              id="btn-generar-acta-pdf" 
+              class="w-full py-2.5 px-4 bg-[#00B0F0] hover:bg-[#009ad4] active:scale-[0.98] text-white font-extrabold text-sm rounded-lg transition-all shadow-md shadow-brand-500/10 flex items-center justify-center gap-2 cursor-pointer border-none"
+            >
+              📕 Generar Acta PDF
+            </button>
+          </div>
+        </div>
+
+        <!-- Información del Responsable Seleccionado -->
+        <div class="bg-slate-50 border border-slate-200/60 rounded-xl p-4 mb-5">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <span class="block text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wide">Usuario Responsable</span>
+              <span id="acta-usuario-nombre" class="font-bold text-slate-800 text-sm">—</span>
+            </div>
+            <div>
+              <span class="block text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wide">Puesto / Cargo</span>
+              <span id="acta-usuario-puesto" class="font-bold text-slate-800 text-sm">—</span>
+            </div>
+            <div>
+              <span class="block text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wide">Sucursal</span>
+              <span id="acta-usuario-sucursal" class="font-bold text-slate-800 text-sm">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabla de Bienes a Asignar -->
+        <div class="border border-slate-200 rounded-xl overflow-hidden flex flex-col flex-1 min-h-[250px]">
+          <div class="overflow-x-auto overflow-y-auto smooth-scroll w-full flex-1">
+            <table class="min-w-[1200px] w-full divide-y divide-slate-200 border-collapse">
+              <thead class="bg-slate-50 sticky top-0 z-10 shadow-[0_1px_0_0_rgba(226,232,240,1)]">
+                <tr>
+                  <th scope="col" class="px-4 py-2.5 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide w-24">Cód. Patrimonial</th>
+                  <th scope="col" class="px-4 py-2.5 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Denominación</th>
+                  <th scope="col" class="px-4 py-2.5 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide w-20">Color</th>
+                  <th scope="col" class="px-4 py-2.5 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide w-24">Marca</th>
+                  <th scope="col" class="px-4 py-2.5 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide w-24">Modelo</th>
+                  <th scope="col" class="px-4 py-2.5 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">N° Serie</th>
+                  <th scope="col" class="px-4 py-2.5 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide w-20">Vida Útil</th>
+                  <th scope="col" class="px-4 py-2.5 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide w-20">Estado</th>
+                  <th scope="col" class="px-4 py-2.5 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide w-24">Orden Compra</th>
+                  <th scope="col" class="px-4 py-2.5 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide w-24">Cta Contable</th>
+                  <th scope="col" class="px-4 py-2.5 text-left text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wide">Especificaciones / Accesorios</th>
+                </tr>
+              </thead>
+              <tbody id="asignacion-tbody" class="bg-white divide-y divide-slate-100">
+                <!-- Se inyectará vía JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla: Reporte Contable -->
+    <div id="contable-table-container" class="hidden flex flex-col flex-1 min-h-0 rounded-xl shadow-sm border border-slate-200 bg-white overflow-hidden">
+      <!-- Period Filters and Digit Switch for Public Dashboard -->
+      <div class="p-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 shrink-0">
+        <div class="flex items-center gap-2">
+          <label for="contable-digit-select" class="text-xs font-bold text-slate-600">Nivel de Cuenta:</label>
+          <select id="contable-digit-select" class="px-2 py-1 text-xs border border-slate-350 rounded bg-white text-slate-800 font-semibold focus:outline-none focus:ring-1 focus:ring-brand-500">
+            <option value="10">10 Dígitos (Sub-cuenta)</option>
+            <option value="3">3 Dígitos (Mayor)</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-2">
+          <label for="contable-type-select" class="text-xs font-bold text-slate-600">Tipo de Elemento:</label>
+          <select id="contable-type-select" class="px-2 py-1 text-xs border border-slate-350 rounded bg-white text-slate-800 font-semibold focus:outline-none focus:ring-1 focus:ring-brand-500">
+            <option value="Todos">Todos</option>
+            <option value="ACTIVO">ACTIVO FIJO</option>
+            <option value="DEPRECIACION">DEPRECIACIÓN</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-2">
+          <label for="contable-localidad-select" class="text-xs font-bold text-slate-600">Localidad:</label>
+          <select id="contable-localidad-select" class="px-2 py-1 text-xs border border-slate-350 rounded bg-white text-slate-800 font-semibold focus:outline-none focus:ring-1 focus:ring-brand-500">
+            <option value="Todos">Todas las Localidades</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-1.5">
+            <label for="contable-year-select" class="text-xs font-bold text-slate-600">Año:</label>
+            <select id="contable-year-select" class="px-2 py-1 text-xs border border-slate-350 rounded bg-white text-slate-800 font-semibold focus:outline-none focus:ring-1 focus:ring-brand-500">
+              <option value="Todos">Todos</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <label for="contable-month-select" class="text-xs font-bold text-slate-600">Mes:</label>
+            <select id="contable-month-select" class="px-2 py-1 text-xs border border-slate-350 rounded bg-white text-slate-800 font-semibold focus:outline-none focus:ring-1 focus:ring-brand-500">
+              <option value="Todos">Todos</option>
+              <option value="1">Enero</option>
+              <option value="2">Febrero</option>
+              <option value="3">Marzo</option>
+              <option value="4">Abril</option>
+              <option value="5">Mayo</option>
+              <option value="6">Junio</option>
+              <option value="7">Julio</option>
+              <option value="8">Agosto</option>
+              <option value="9">Septiembre</option>
+              <option value="10">Octubre</option>
+              <option value="11">Noviembre</option>
+              <option value="12">Diciembre</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="overflow-x-auto overflow-y-auto smooth-scroll w-full flex-1 min-h-0">
+        <table class="min-w-[800px] w-full divide-y divide-slate-200 border-collapse">
+          <thead class="sticky top-0 bg-[#00B0F0] text-white z-20 shadow-md">
+            <tr>
+              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide w-24">Código PCGE</th>
+              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Descripción de la Cuenta Contable</th>
+              <th scope="col" class="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide w-48">Tipo de Elemento</th>
+              <th scope="col" class="px-5 py-3 text-right text-[0.6875rem] font-extrabold text-white uppercase tracking-wide w-36">Saldo Total</th>
+            </tr>
+          </thead>
+          <tbody id="contable-tbody" class="bg-white divide-y divide-slate-100">
+            <!-- Las filas se inyectarán vía JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Contenedor: Ficha de Activo -->
+    <div id="ficha-container" class="hidden flex flex-col flex-1 min-h-0 bg-white border border-slate-200 rounded-xl p-5 shadow-sm overflow-y-auto w-full">
+      <div class="border-b border-slate-100 pb-3 mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h3 class="text-base font-extrabold text-slate-800 uppercase tracking-tight">Ficha de Registro del Bien</h3>
+          <p class="text-xs text-slate-400 mt-0.5">Consulte la ficha técnica oficial del activo por su código patrimonial.</p>
+        </div>
+      </div>
+      
+      <!-- Buscador de Ficha -->
+      <div class="flex flex-col sm:flex-row gap-3 mb-6 items-end">
+        <div class="flex-grow">
+          <label for="ficha-search-cod" class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Código Patrimonial (9 dígitos)</label>
+          <input 
+            type="text" 
+            id="ficha-search-cod" 
+            placeholder="Ej: 310040041..." 
+            class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all font-mono font-bold text-slate-700"
+          >
+        </div>
+        <div>
+          <button 
+            id="btn-generar-ficha-pdf" 
+            class="w-full sm:w-auto py-2.5 px-4 bg-rose-600 hover:bg-rose-700 active:scale-[0.98] text-white font-extrabold text-sm rounded-lg transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer border-none"
+          >
+            📕 Exportar Ficha PDF
+          </button>
+        </div>
+      </div>
+
+      <!-- Ficha Visual Layout -->
+      <div id="ficha-visual-content" class="hidden border border-slate-200 rounded-xl p-6 bg-slate-50/50 max-w-4xl mx-auto w-full space-y-6">
+        <!-- Cabecera -->
+        <div class="flex justify-between items-start border-b border-slate-200 pb-4">
+          <div class="text-[10px] text-slate-500 leading-tight space-y-0.5">
+            <div class="font-bold text-slate-700">EPS SELVA CENTRAL S.A.</div>
+            <div id="ficha-val-localidad">LA MERCED</div>
+            <div>Versión: 2026.1.1-Juan Eder Systems</div>
+          </div>
+          <div class="text-[10px] text-slate-500 text-right leading-tight space-y-0.5">
+            <div id="ficha-val-fecha">Fecha: 13-07-2026</div>
+            <div id="ficha-val-hora">Hora: 09:23:08</div>
+          </div>
+        </div>
+
+        <div class="text-center font-bold text-lg text-slate-800 tracking-wide uppercase">
+          FICHA DE REGISTRO DEL BIEN
+        </div>
+
+        <div class="border-b border-slate-200 pb-2">
+          <span id="ficha-val-cod-patrimonial" class="font-bold text-base text-brand-600">310040041</span>
+          <span id="ficha-val-denominacion" class="font-bold text-base text-slate-700 ml-4">LAPTOP</span>
+        </div>
+
+        <!-- Dos Columnas de Datos -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-600">
+          <div class="space-y-2">
+            <div><span class="font-bold text-slate-500">Fec Ingreso:</span> <span id="ficha-val-fec-ingreso">—</span></div>
+            <div><span class="font-bold text-slate-500">Fec Alta:</span> <span id="ficha-val-fec-alta">—</span></div>
+            <div><span class="font-bold text-slate-500">Fec Entrega:</span> <span id="ficha-val-fec-entrega">—</span></div>
+            <div><span class="font-bold text-slate-500">Estado:</span> <span id="ficha-val-estado">—</span></div>
+            <div><span class="font-bold text-slate-500">Proyecto:</span> <span>—</span></div>
+            <div><span class="font-bold text-slate-500">Principal:</span> <span>Si</span></div>
+            <div><span class="font-bold text-slate-500">Vida útil:</span> <span id="ficha-val-vida-util">—</span></div>
+          </div>
+          <div class="space-y-2">
+            <div><span class="font-bold text-slate-500">Histórico:</span> <span id="ficha-val-historico">—</span></div>
+            <div><span class="font-bold text-slate-500">Libros:</span> <span id="ficha-val-libros">—</span></div>
+            <div><span class="font-bold text-slate-500">Tasación:</span> <span>0.00</span></div>
+            <div><span class="font-bold text-slate-500">Reposición:</span> <span>0.00</span></div>
+            <div><span class="font-bold text-slate-500">Revaluado:</span> <span>0.00</span></div>
+            <div><span class="font-bold text-slate-500">Dep Inic:</span> <span>0.00</span></div>
+            <div><span class="font-bold text-slate-500">Factor:</span> <span>—</span></div>
+            <div><span class="font-bold text-slate-500">Tipo ing:</span> <span>CO - Compra</span></div>
+            <div><span class="font-bold text-slate-500">Docum:</span> <span>OC - Orden de Compra</span></div>
+            <div><span class="font-bold text-slate-500">O/C:</span> <span id="ficha-val-n-doc">—</span></div>
+            <div><span class="font-bold text-slate-500">Seguro:</span> <span>Si</span></div>
+            <div><span class="font-bold text-slate-500">Neto:</span> <span id="ficha-val-neto">—</span></div>
+            <div><span class="font-bold text-slate-500">Depreciación:</span> <span id="ficha-val-depreciacion">—</span></div>
+          </div>
+        </div>
+
+        <!-- Segmento Independiente: Detalle Físico -->
+        <div class="border-t border-slate-200 pt-3 space-y-1 text-xs text-slate-600">
+          <div class="font-bold text-xs text-slate-500 mb-1">Detalle Físico del Activo / Especificaciones:</div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <div><span class="font-bold text-slate-500">Marca:</span> <span id="ficha-val-marca">—</span></div>
+            <div><span class="font-bold text-slate-500">Modelo:</span> <span id="ficha-val-modelo">—</span></div>
+            <div><span class="font-bold text-slate-500">N° Serie:</span> <span id="ficha-val-serie">—</span></div>
+          </div>
+          <div class="mt-1"><span class="font-bold text-slate-500">Especificaciones:</span> <span id="ficha-val-especificaciones">—</span></div>
+        </div>
+
+        <div class="border-t border-b border-slate-200 py-3 space-y-1 text-xs text-slate-600">
+          <div><span class="font-bold text-slate-500">Localización:</span> <span id="ficha-val-localizacion">—</span></div>
+          <div><span class="font-bold text-slate-500">Responsable:</span> <span id="ficha-val-responsable">—</span></div>
+          <div><span class="font-bold text-slate-500">Cuenta:</span> <span id="ficha-val-cuenta">—</span></div>
+          <div><span class="font-bold text-slate-500">C.Costo:</span> <span id="ficha-val-c-costo">—</span></div>
+        </div>
+
+        <div class="space-y-1 text-xs text-slate-600">
+          <div><span class="font-bold text-slate-500">Cod. Regulatorio:</span> <span>—</span></div>
+          <div><span class="font-bold text-slate-500">Cla. SUNASS:</span> <span>clasificacion</span></div>
+          <div><span class="font-bold text-slate-500">Tipo Serv. SUNASS:</span> <span>servicios</span></div>
+          <div><span class="font-bold text-slate-500">Mod. Adquisicion:</span> <span id="ficha-val-mod-adq">—</span></div>
+        </div>
+
+        <div class="space-y-2">
+          <div class="font-bold text-xs text-slate-500">Historial de Depreciación:</div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-center border-collapse text-[10px] text-slate-600 border border-slate-200">
+              <thead>
+                <tr class="bg-slate-100 font-bold border-b border-slate-200">
+                  <th class="p-1 border border-slate-200">Ene</th>
+                  <th class="p-1 border border-slate-200">Feb</th>
+                  <th class="p-1 border border-slate-200">Mar</th>
+                  <th class="p-1 border border-slate-200">Abr</th>
+                  <th class="p-1 border border-slate-200">May</th>
+                  <th class="p-1 border border-slate-200">Jun</th>
+                  <th class="p-1 border border-slate-200">Jul</th>
+                  <th class="p-1 border border-slate-200">Ago</th>
+                  <th class="p-1 border border-slate-200">Set</th>
+                  <th class="p-1 border border-slate-200">Oct</th>
+                  <th class="p-1 border border-slate-200">Nov</th>
+                  <th class="p-1 border border-slate-200">Dic</th>
+                  <th class="p-1 border border-slate-200 font-bold">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="p-1 border border-slate-200">0.00</td>
+                  <td class="p-1 border border-slate-200">0.00</td>
+                  <td class="p-1 border border-slate-200">0.00</td>
+                  <td class="p-1 border border-slate-200">0.00</td>
+                  <td class="p-1 border border-slate-200">0.00</td>
+                  <td class="p-1 border border-slate-200">0.00</td>
+                  <td class="p-1 border border-slate-200">0.00</td>
+                  <td class="p-1 border border-slate-200">0.00</td>
+                  <td class="p-1 border border-slate-200">0.00</td>
+                  <td class="p-1 border border-slate-200">0.00</td>
+                  <td class="p-1 border border-slate-200">0.00</td>
+                  <td class="p-1 border border-slate-200">0.00</td>
+                  <td class="p-1 border border-slate-200 font-bold">0.00</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="border-t border-slate-200 pt-3 text-xs text-slate-600">
+          <span class="font-bold text-slate-500">Detalle Activo:</span>
+          <p id="ficha-val-detalle-activo" class="mt-1 font-medium bg-slate-100/50 p-2.5 rounded-lg border border-slate-150">—</p>
+        </div>
+
+        <!-- Imágenes del Activo -->
+        <div id="ficha-images-wrapper" class="hidden space-y-2">
+          <div class="font-bold text-xs text-slate-500">Imágenes Registradas:</div>
+          <div id="ficha-images-container" class="grid grid-cols-3 gap-4">
+            <!-- Inyectadas dinámicamente -->
+          </div>
+        </div>
+      </div>
+      
+      <div id="ficha-empty-state" class="text-center py-12 text-slate-400">
+        <span class="text-3xl">📄</span>
+        <p class="text-sm font-semibold mt-2">Ingrese un código patrimonial para consultar la ficha.</p>
+      </div>
+    </div>
+
+    <!-- Lista Vacía -->
+    <div id="empty-state" class="hidden text-center py-16 text-slate-400">
+      <span class="text-4xl">📦</span>
+      <h3 class="text-base font-semibold mt-2">No hay resultados</h3>
+      <p class="text-sm text-slate-400 mt-1">Prueba a modificar los filtros o el buscador.</p>
+    </div>
+
+  </main>
+
+  <!-- Pie de Página -->
+  <footer class="bg-white border-t border-slate-200/80 py-4 mt-12 shrink-0">
+    <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 text-center text-[0.8125rem] text-slate-400">
+      Control Patrimonial v1.0.0 © 2026 - Juan Eder Systems
+    </div>
+  </footer>
+
+  <!-- Menú Lateral Responsive (Drawer) -->
+  <div id="mobile-menu-drawer" class="fixed inset-0 z-50 invisible transition-all duration-300" role="dialog" aria-modal="true">
+    <!-- Overlay de fondo -->
+    <div id="mobile-menu-overlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm opacity-0 transition-opacity duration-300"></div>
+    
+    <!-- Contenido del Drawer -->
+    <div id="mobile-menu-content" class="fixed inset-y-0 left-0 w-full max-w-xs bg-white shadow-2xl flex flex-col transform -translate-x-full transition-transform duration-300">
+      <!-- Encabezado del Drawer -->
+      <div class="p-4 bg-[#00B0F0] text-white flex items-center justify-between shadow-sm">
+        <div class="flex items-center gap-2.5">
+          <img src="logo.jpg" alt="Logo EPS Selva Central" class="w-8 h-8 object-contain rounded-lg bg-white p-0.5">
+          <div class="text-left">
+            <span class="text-[9px] bg-white/20 text-white px-1.5 py-0.2 rounded-full uppercase font-bold">EPS Selva Central</span>
+            <div class="text-xs font-bold leading-none mt-0.5">Control Patrimonial</div>
+          </div>
+        </div>
+        <button id="close-menu-btn" class="text-white hover:text-slate-100 p-2 rounded-lg hover:bg-white/10 active:bg-white/20 transition-colors focus:outline-none cursor-pointer" aria-label="Cerrar menú">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Cuerpo del Drawer (Lista vertical de opciones) -->
+      <nav class="flex-1 py-4 overflow-y-auto px-3 space-y-1 bg-slate-50">
+        <button data-tab="activos" class="mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left">
+          💼 Activos Fijos
+        </button>
+        <button data-tab="obras" class="mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left">
+          🚧 Obras en Curso
+        </button>
+        <button data-tab="vehiculos" class="mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left">
+          🚗 Vehículos - SOAT & RT
+        </button>
+        <button data-tab="inventario" class="mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left">
+          🔍 Sobrantes/Faltantes
+        </button>
+        <button data-tab="terceros" class="mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left">
+          🤝 Bienes de Terceros
+        </button>
+        <button data-tab="celulares" class="mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left">
+          📱 Celulares
+        </button>
+        <button data-tab="salidas" class="mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left">
+          ↳ Salida de Bienes
+        </button>
+        <button data-tab="asignacion" class="mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left">
+          📋 Asignación de Bienes
+        </button>
+        <button data-tab="contable" class="mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left">
+          📊 Reporte Contable
+        </button>
+      </nav>
+      
+      <!-- Footer del Drawer -->
+      <div class="p-4 border-t border-slate-150 bg-white text-center text-xs text-slate-400 font-semibold">
+        Juan Eder Systems © 2026
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=5"></script>
 </body>
 </html>
