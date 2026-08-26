@@ -909,90 +909,114 @@ export default function SoatModule() {
               <tbody className="divide-y divide-slate-100">
                 {filteredAndSorted.map((r, idx) => {
                   return (
-                    <tr key={r.id_soat || r.cod_patrimonial} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'} hover:bg-blue-50/75 transition-colors duration-150 text-slate-700`}>
+                    <tr key={r.id_soat || r.cod_patrimonial} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'} hover:bg-blue-50/50 transition-colors duration-150 text-slate-700`}>
                       {/* Código Patrimonial */}
-                      <td className="px-3 py-2.5 whitespace-nowrap align-middle">
+                      <td className="px-4 py-3 whitespace-nowrap align-middle">
                         <div className="flex flex-col gap-1 items-start">
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[12.5px] font-mono font-extrabold bg-blue-50/90 text-[#00509d] border border-blue-200/80 shadow-2xs">
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-mono font-extrabold bg-[#00509d]/10 text-[#00509d] border border-[#00509d]/20 shadow-2xs">
                             {r.cod_patrimonial}
                           </span>
                           <button onClick={() => setHistorialItem(r)}
-                            className="flex items-center gap-1 text-[10.5px] font-semibold text-brand-600 hover:underline bg-transparent border-none p-0 cursor-pointer">
-                            <History className="w-2.5 h-2.5" /> Ver Historial
+                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-600 hover:text-brand-800 hover:underline bg-transparent border-none p-0 cursor-pointer transition-colors mt-0.5">
+                            <History className="w-3 h-3" /> Ver Historial
                           </button>
                         </div>
                       </td>
 
                       {/* Placa */}
-                      <td className="px-3 py-2.5 whitespace-nowrap align-middle">
-                        {r.placa
-                          ? <span className="font-mono font-bold text-blue-700 bg-blue-50/90 border border-blue-200/80 px-2.5 py-1 rounded-lg text-[11.5px] whitespace-nowrap tracking-wider shadow-2xs">{r.placa}</span>
-                          : <span className="text-slate-400 text-[11px] italic font-medium">Sin placa</span>}
+                      <td className="px-4 py-3 whitespace-nowrap align-middle">
+                        {r.placa ? (
+                          <span className="font-mono font-bold text-slate-900 bg-white border-2 border-slate-900 px-2.5 py-1 rounded text-xs tracking-wider shadow-2xs whitespace-nowrap">
+                            {r.placa}
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 text-[11px] italic font-semibold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                            Sin placa
+                          </span>
+                        )}
                       </td>
 
-                      {/* Tipo de Vehículo */}
-                      <td className="px-3 py-2.5 align-middle text-xs">
-                        <p className="font-bold text-slate-800 text-[11.5px]">{r.tipo_vehiculo || '—'}</p>
-                        <div className="text-[10px] text-slate-500 mt-0.5 space-y-0.5 font-medium leading-none">
-                          <p>Ingreso: <span className="text-slate-600">{formatDate(r.fecha_alta_factura || r.fecha_alta)}</span></p>
-                          <p>Asignación: <span className="text-slate-600">{formatDate(r.fecha_registro_contable)}</span></p>
+                      {/* Vehículo / Tipo */}
+                      <td className="px-4 py-3 align-middle text-xs">
+                        <div className="flex flex-col min-w-[160px]">
+                          <p className="font-bold text-slate-900 text-[12px] leading-tight max-w-[220px] truncate" title={r.denominacion || r.tipo_vehiculo}>
+                            {r.denominacion || r.tipo_vehiculo || '—'}
+                          </p>
+                          {r.denominacion && r.tipo_vehiculo && r.denominacion.toUpperCase() !== r.tipo_vehiculo.toUpperCase() && (
+                            <p className="text-[11px] font-semibold text-brand-600 mt-0.5">{r.tipo_vehiculo}</p>
+                          )}
+                          <div className="text-[10.5px] text-slate-400 mt-1 font-medium leading-tight">
+                            Ingreso: <span className="text-slate-600 font-semibold">{formatDate(r.fecha_alta_factura || r.fecha_alta)}</span>
+                          </div>
                         </div>
                       </td>
 
                       {/* Sucursal */}
-                      <td className="px-3 py-2.5 align-middle text-[11.5px] font-bold text-slate-800">
-                        {r.sucursal || '—'}
+                      <td className="px-4 py-3 align-middle">
+                        <div className="flex flex-col">
+                          <span className="text-xs font-extrabold text-slate-800 tracking-tight">{r.sucursal || '—'}</span>
+                          {r.localidad && (
+                            <span className="text-[10.5px] font-bold text-brand-600 uppercase tracking-wide mt-0.5">{r.localidad}</span>
+                          )}
+                        </div>
                       </td>
 
                       {/* Vigencia SOAT */}
-                      <td className="px-3 py-2.5 align-middle">
+                      <td className="px-4 py-3 align-middle">
                         {r.estado_soat === 'NO_REGISTRADO' ? (
                           <div className="flex flex-col gap-1">
                             <div>
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-500 border border-slate-200">
                                 <Clock className="w-3 h-3 text-slate-400" />
-                                No Registrado
+                                Sin SOAT Registrado
                               </span>
                             </div>
-                            <p className="text-[11px] text-slate-500 font-medium mt-0.5">
-                              Sin Póliza
-                            </p>
                           </div>
                         ) : (
                           <div className="flex flex-col gap-1">
-                            <div>
+                            <div className="flex items-center gap-1.5 flex-wrap">
                               <SoatBadge estado={r.estado_soat} />
-                            </div>
-                            <p className="text-[11px] text-slate-600 font-medium mt-0.5">
-                              vence: <strong className="text-slate-800">{r.fecha_vencimiento ? formatDate(r.fecha_vencimiento) : '—'}</strong>
-                              {r.dias_vigencia !== null && (
-                                <span className={`ml-1 font-bold ${r.dias_vigencia < 0 ? 'text-rose-600' : r.dias_vigencia <= 30 ? 'text-amber-600' : 'text-emerald-700'}`}>
-                                  ({r.dias_vigencia < 0 ? `venció hace ${Math.abs(r.dias_vigencia)}d` : `${r.dias_vigencia}d rest.`})
+                              {r.compania_aseguradora && (
+                                <span className="text-[10.5px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
+                                  {r.compania_aseguradora}
                                 </span>
                               )}
-                            </p>
+                            </div>
+                            <div className="text-[11px] text-slate-600 font-medium mt-0.5 leading-tight">
+                              <div>
+                                vence: <strong className="text-slate-900 font-bold">{r.fecha_vencimiento ? formatDate(r.fecha_vencimiento) : '—'}</strong>
+                                {r.dias_vigencia !== null && (
+                                  <span className={`ml-1 font-extrabold ${
+                                    r.dias_vigencia < 0 ? 'text-rose-600' : r.dias_vigencia <= 30 ? 'text-amber-600' : 'text-emerald-700'
+                                  }`}>
+                                    ({r.dias_vigencia < 0 ? `venció hace ${Math.abs(r.dias_vigencia)}d` : `${r.dias_vigencia}d rest.`})
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                           </div>
                         )}
                       </td>
 
                       {/* Rev. Técnica */}
-                      <td className="px-3 py-2.5 align-middle">
+                      <td className="px-4 py-3 align-middle">
                         {(() => {
                           if (!r.vencimiento_rev_tec) {
                             return (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-500 border border-slate-200">
-                                Sin Rev. Tec.
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium text-slate-400 bg-slate-100 border border-slate-200">
+                                Sin Rev. Téc.
                               </span>
                             );
                           }
                           const revState = r.estado_rev_tec || 'VIGENTE';
-                          const badgeClass = revState === 'VIGENTE' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                                             revState === 'POR_VENCER' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                                             'bg-rose-50 text-rose-700 border-rose-200';
+                          const badgeClass = revState === 'VIGENTE' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80' :
+                                             revState === 'POR_VENCER' ? 'bg-amber-50 text-amber-700 border-amber-200/80' :
+                                             'bg-rose-50 text-rose-700 border-rose-200/80';
                           return (
                             <div className="flex flex-col gap-1">
                               <div>
-                                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border ${badgeClass}`}>
+                                <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${badgeClass}`}>
+                                  <span className={`w-1.5 h-1.5 rounded-full ${revState === 'VIGENTE' ? 'bg-emerald-500' : revState === 'POR_VENCER' ? 'bg-amber-500' : 'bg-rose-500'}`} />
                                   {revState === 'POR_VENCER' ? 'Por Vencer' : revState}
                                 </span>
                               </div>
@@ -1010,13 +1034,13 @@ export default function SoatModule() {
                       </td>
 
                       {/* Acciones */}
-                      <td className="px-3 py-2.5 whitespace-nowrap text-center align-middle">
-                        <div className="flex items-center justify-center gap-1">
+                      <td className="px-4 py-3 whitespace-nowrap text-center align-middle">
+                        <div className="flex items-center justify-center gap-1.5">
                           {r.estado_soat === 'NO_REGISTRADO' ? (
                             <button
                               onClick={() => { setEditItem({ cod_patrimonial: r.cod_patrimonial, numero_poliza: '', compania_aseguradora: '', fecha_inicio: '', fecha_vencimiento: '', monto: '' }); setShowForm(true); }}
                               title="Registrar SOAT para este vehículo"
-                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-brand-50 hover:bg-brand-100 border border-brand-200/80 text-brand-700 hover:text-brand-800 rounded-lg text-[11px] font-bold transition-all active:scale-95 cursor-pointer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#00509d] hover:bg-[#003f7e] text-white rounded-xl text-xs font-bold shadow-xs active:scale-95 transition-all cursor-pointer border-none"
                             >
                               <Plus className="w-3.5 h-3.5" />
                               <span>Registrar</span>
@@ -1024,11 +1048,11 @@ export default function SoatModule() {
                           ) : (
                             <>
                               <button onClick={() => { setEditItem(r); setShowForm(true); }} title="Renovar / Editar SOAT"
-                                className="h-7 w-7 bg-brand-50 hover:bg-brand-100 border border-brand-200/60 text-brand-600 hover:text-brand-700 rounded-lg transition-all duration-150 active:scale-95 inline-flex items-center justify-center shadow-2xs border-none cursor-pointer">
+                                className="h-8 w-8 bg-slate-100 hover:bg-brand-50 border border-slate-200 hover:border-brand-200 text-slate-600 hover:text-brand-600 rounded-xl transition-all duration-150 active:scale-95 inline-flex items-center justify-center shadow-xs cursor-pointer border-none">
                                 <Pencil className="w-3.5 h-3.5" />
                               </button>
                               <button onClick={() => setDeleteItem(r)} title="Eliminar SOAT"
-                                className="h-7 w-7 bg-rose-50 hover:bg-rose-100 border border-rose-200/60 text-rose-500 hover:text-rose-600 rounded-lg transition-all duration-150 active:scale-95 inline-flex items-center justify-center shadow-2xs border-none cursor-pointer">
+                                className="h-8 w-8 bg-slate-100 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-600 hover:text-rose-600 rounded-xl transition-all duration-150 active:scale-95 inline-flex items-center justify-center shadow-xs cursor-pointer border-none">
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             </>

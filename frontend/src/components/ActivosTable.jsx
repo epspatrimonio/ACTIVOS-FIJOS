@@ -394,7 +394,12 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
           const y = new Date(dateStr).getFullYear();
           if (y && !isNaN(y)) year = y;
         }
-        return `Acta N° ${item.n_acta} - ${year}`;
+        let text = String(item.n_acta).trim();
+        const hasPrefix = /^acta\s*n[°o]?\s*/i.test(text);
+        const prefix = hasPrefix ? '' : 'Acta N° ';
+        const hasYear = /\b(19|20)\d{2}\b/.test(text);
+        const suffix = hasYear ? '' : ` - ${year}`;
+        return `${prefix}${text}${suffix}`;
       }
       case 'marca': return item.marca || '';
       case 'placa': return item.placa || '';
@@ -848,7 +853,12 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                             const y = new Date(dateStr).getFullYear();
                             if (y && !isNaN(y)) year = y;
                           }
-                          return `Acta N° ${activo.n_acta} - ${year}`;
+                          let text = String(activo.n_acta).trim();
+                          const hasPrefix = /^acta\s*n[°o]?\s*/i.test(text);
+                          const prefix = hasPrefix ? '' : 'Acta N° ';
+                          const hasYear = /\b(19|20)\d{2}\b/.test(text);
+                          const suffix = hasYear ? '' : ` - ${year}`;
+                          return `${prefix}${text}${suffix}`;
                         })()}
                       </div>
                     )}

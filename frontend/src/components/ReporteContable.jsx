@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { FileSpreadsheet, FileText, Calendar, Filter, Layers, Calculator, ShieldCheck } from 'lucide-react';
-import { fetchCuentasContables } from '../utils/api';
+import React, { useState, useEffect, useMemo } from 'react';
+import { FileSpreadsheet, FileText, Calendar, Filter, Layers, Calculator, ShieldCheck, MapPin } from 'lucide-react';
+import { fetchCuentasContables, fetchLocalidades } from '../utils/api';
 import { generateStandardPDF } from '../utils/pdfExportHelper';
 
 export default function ReporteContable({ assets = [], loading: assetsLoading = false, error: assetsError = null }) {
@@ -8,28 +8,49 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
   const [selectedYear, setSelectedYear] = useState('Todos');
   const [selectedMonth, setSelectedMonth] = useState('Todos');
   const [selectedType, setSelectedType] = useState('Todos'); // 'Todos' | 'ACTIVO' | 'DEPRECIACION' | 'OBRAS_EN_CURSO'
+  const [selectedLocalidad, setSelectedLocalidad] = useState('Todos');
   const [cuentasMap, setCuentasMap] = useState({});
   const [loadingCuentas, setLoadingCuentas] = useState(false);
+  const [apiLocalidades, setApiLocalidades] = useState([]);
 
-  // Cargar catálogo de cuentas contables para obtener descripciones precisas
+  // Cargar catálogo de cuentas contables y lista de localidades
   useEffect(() => {
-    async function loadCuentas() {
+    async function loadInitialData() {
       setLoadingCuentas(true);
       try {
-        const data = await fetchCuentasContables();
+        const [dataCuentas, dataLocalidades] = await Promise.all([
+          fetchCuentasContables().catch(() => []),
+          fetchLocalidades().catch(() => [])
+        ]);
+        
         const mapping = {};
-        data.forEach(item => {
+        dataCuentas.forEach(item => {
           mapping[item.cuenta_contable] = item.descripcion || item.nombre;
         });
         setCuentasMap(mapping);
+        setApiLocalidades(dataLocalidades);
       } catch (err) {
-        console.error('Error al cargar cuentas contables:', err);
+        console.error('Error al cargar datos iniciales en ReporteContable:', err);
       } finally {
         setLoadingCuentas(false);
       }
     }
-    loadCuentas();
+    loadInitialData();
   }, []);
+
+  // Consolidar lista de localidades combinando API y activos recibidos
+  const localidadesOptions = useMemo(() => {
+    const setLoc = new Set();
+    apiLocalidades.forEach(l => {
+      if (l.label) setLoc.add(l.label.trim().toUpperCase());
+    });
+    assets.forEach(a => {
+      if (a.localidad && a.localidad.trim()) {
+        setLoc.add(a.localidad.trim().toUpperCase());
+      }
+    });
+    return Array.from(setLoc).sort();
+  }, [apiLocalidades, assets]);
 
   // Generar lista de años únicos a partir de las fechas de alta o registro
   const getAvailableYears = () => {
@@ -152,7 +173,13 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
         return;
       }
 
-      // 1. Filtrado por período
+      // 1. Filtrado por localidad
+      if (selectedLocalidad !== 'Todos') {
+        const itemLoc = (item.localidad || '').trim().toUpperCase();
+        if (itemLoc !== selectedLocalidad.trim().toUpperCase()) return;
+      }
+
+      // 2. Filtrado por período
       const dateStr = item.fecha_alta_factura || item.fecha_alta || item.fecha_registro_contable;
       if (!dateStr && (selectedYear !== 'Todos' || selectedMonth !== 'Todos')) return;
 
@@ -270,8 +297,9 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Reporte_Contable");
     
+    const locTag = selectedLocalidad !== 'Todos' ? `_Localidad_${selectedLocalidad}` : '';
     // Guardar archivo
-    XLSX.writeFile(wb, `Reporte_Contable_${digitMode}D_Periodo_${selectedYear}_${selectedMonth}.xlsx`);
+    XLSX.writeFile(wb, `Reporte_Contable_${digitMode}D_Periodo_${selectedYear}_${selectedMonth}${locTag}.xlsx`);
   };
 
   // EXPORTAR A PDF
@@ -298,9 +326,11 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
       3: { cellWidth: 30, halign: 'right' }
     };
 
+    const locSubtitle = selectedLocalidad !== 'Todos' ? ` | LOCALIDAD: ${selectedLocalidad}` : '';
+
     await generateStandardPDF({
       title: "CONTROL PATRIMONIAL",
-      subtitle: `REPORTE CONTABLE AGRUPADO (${digitMode} DÍGITOS) - AÑO: ${selectedYear} | MES: ${monthName}`,
+      subtitle: `REPORTE CONTABLE AGRUPADO (${digitMode} DÍGITOS) - AÑO: ${selectedYear} | MES: ${monthName}${locSubtitle}`,
       headers: headers,
       data: data,
       columnStyles: columnStyles,
@@ -324,47 +354,49 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
       </div>
 
       {/* Panel de Filtros y Configuración */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm shrink-0">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end">
+      <div className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-sm shrink-0">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5 items-end">
           
           {/* Selector de Dígitos */}
           <div>
-            <label className="block text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-brand-500" />
+            <label className="block text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center gap-1.5 whitespace-nowrap">
+              <Layers className="w-3.5 h-3.5 text-brand-500 shrink-0" />
               <span>Nivel de Cuenta</span>
             </label>
-            <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+            <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 h-10 items-center">
               <button
                 type="button"
                 onClick={() => setDigitMode(3)}
-                className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                  digitMode === 3 ? 'bg-white text-slate-900 shadow' : 'text-slate-500 hover:text-slate-800'
+                title="3 Dígitos (Mayor)"
+                className={`flex-1 h-8 flex items-center justify-center text-xs font-bold rounded-lg transition-all border-none cursor-pointer ${
+                  digitMode === 3 ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800 bg-transparent'
                 }`}
               >
-                3 Dígitos (Mayor)
+                3 Dígitos
               </button>
               <button
                 type="button"
                 onClick={() => setDigitMode(10)}
-                className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                  digitMode === 10 ? 'bg-white text-slate-900 shadow' : 'text-slate-500 hover:text-slate-800'
+                title="10 Dígitos (Sub-cuenta)"
+                className={`flex-1 h-8 flex items-center justify-center text-xs font-bold rounded-lg transition-all border-none cursor-pointer ${
+                  digitMode === 10 ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800 bg-transparent'
                 }`}
               >
-                10 Dígitos (Sub-cuenta)
+                10 Dígitos
               </button>
             </div>
           </div>
 
           {/* Selector de Tipo de Elemento */}
           <div>
-            <label className="block text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Filter className="w-3.5 h-3.5 text-brand-500" />
+            <label className="block text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center gap-1.5 whitespace-nowrap">
+              <Filter className="w-3.5 h-3.5 text-brand-500 shrink-0" />
               <span>Tipo de Elemento</span>
             </label>
             <select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
-              className="block w-full rounded-xl border border-slate-200 py-2.5 px-3 bg-slate-50 text-xs font-semibold focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-slate-800"
+              className="block w-full h-10 rounded-xl border border-slate-200 px-3 bg-slate-50 text-xs font-semibold text-slate-800 focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all cursor-pointer truncate"
             >
               <option value="Todos">Todos los elementos</option>
               <option value="ACTIVO">Activo Fijo</option>
@@ -372,16 +404,34 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
             </select>
           </div>
 
+          {/* Selector de Localidad */}
+          <div>
+            <label className="block text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center gap-1.5 whitespace-nowrap">
+              <MapPin className="w-3.5 h-3.5 text-brand-500 shrink-0" />
+              <span>Localidad</span>
+            </label>
+            <select
+              value={selectedLocalidad}
+              onChange={(e) => setSelectedLocalidad(e.target.value)}
+              className="block w-full h-10 rounded-xl border border-slate-200 px-3 bg-slate-50 text-xs font-semibold text-slate-800 focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all cursor-pointer truncate"
+            >
+              <option value="Todos">Todas las localidades</option>
+              {localidadesOptions.map(loc => (
+                <option key={loc} value={loc}>{loc}</option>
+              ))}
+            </select>
+          </div>
+
           {/* Selector de Año */}
           <div>
-            <label className="block text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-brand-500" />
+            <label className="block text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center gap-1.5 whitespace-nowrap">
+              <Calendar className="w-3.5 h-3.5 text-brand-500 shrink-0" />
               <span>Año de Registro</span>
             </label>
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(e.target.value)}
-              className="block w-full rounded-xl border border-slate-200 py-2.5 px-3 bg-slate-50 text-xs font-semibold focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-slate-800"
+              className="block w-full h-10 rounded-xl border border-slate-200 px-3 bg-slate-50 text-xs font-semibold text-slate-800 focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all cursor-pointer truncate"
             >
               <option value="Todos">Todos los años</option>
               {years.map(y => (
@@ -392,14 +442,14 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
 
           {/* Selector de Mes */}
           <div>
-            <label className="block text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-brand-500" />
+            <label className="block text-[0.6875rem] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center gap-1.5 whitespace-nowrap">
+              <Calendar className="w-3.5 h-3.5 text-brand-500 shrink-0" />
               <span>Mes de Registro</span>
             </label>
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value === 'Todos' ? 'Todos' : Number(e.target.value))}
-              className="block w-full rounded-xl border border-slate-200 py-2.5 px-3 bg-slate-50 text-xs font-semibold focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-slate-800"
+              className="block w-full h-10 rounded-xl border border-slate-200 px-3 bg-slate-50 text-xs font-semibold text-slate-800 focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all cursor-pointer truncate"
             >
               {months.map(m => (
                 <option key={m.value} value={m.value}>{m.label}</option>
@@ -408,17 +458,17 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
           </div>
 
           {/* Botones de Descarga */}
-          <div className="flex gap-2 justify-end">
+          <div className="flex gap-2 justify-end h-10">
             <button
               onClick={handleExportExcel}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#00b074] hover:bg-[#009b66] text-white font-extrabold py-2.5 px-4 rounded-2xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none"
+              className="flex-1 h-10 flex items-center justify-center gap-1.5 bg-[#00b074] hover:bg-[#009b66] text-white font-extrabold px-3.5 rounded-xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none"
             >
               <FileSpreadsheet className="w-4 h-4 text-white" />
               <span>Excel</span>
             </button>
             <button
               onClick={handleExportPDF}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#ff3b5c] hover:bg-[#e02e4d] text-white font-extrabold py-2.5 px-4 rounded-2xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none"
+              className="flex-1 h-10 flex items-center justify-center gap-1.5 bg-[#ff3b5c] hover:bg-[#e02e4d] text-white font-extrabold px-3.5 rounded-xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none"
             >
               <FileText className="w-4 h-4 text-white" />
               <span>PDF</span>
