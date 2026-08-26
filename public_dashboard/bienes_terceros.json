@@ -1,0 +1,23 @@
+[
+  {
+    "cod_patrimonial": "TER-00001",
+    "tipo": "TERCERO",
+    "denominacion": "LAPTOP",
+    "marca": "LENOVO",
+    "modelo": "IDEAPAD",
+    "numero_serie": "SDDD522SD",
+    "color": "NEGRO",
+    "caracteristicas_accesorios": "INLUYE CARGADOR DE BATERÍA",
+    "cod_personal": "B026",
+    "propietario_manual": null,
+    "fecha_ingreso": "2026-07-27",
+    "fecha_salida": null,
+    "observaciones": null,
+    "id_sucursal": 1,
+    "localidad": "SEDE CENTRAL",
+    "responsable": "BOHORQUEZ AGUILAR JUAN EDER",
+    "sucursal": "SEDE CENTRAL",
+    "created_at": "2026-07-27T21:24:07.894720Z",
+    "updated_at": "2026-07-27T22:45:59.155410Z"
+  }
+]
