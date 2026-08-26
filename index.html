@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="refresh" content="0; url=public_dashboard/">
+  <title>Control Patrimonial - EPS Selva Central</title>
+  <script>
+    window.location.replace("public_dashboard/");
+  </script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f8fafc;
+      color: #334155;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .loader-container {
+      text-align: center;
+      padding: 2rem;
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #00B0F0;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    a {
+      color: #00B0F0;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="loader-container">
+    <div class="spinner"></div>
+    <h2 style="margin-bottom: 0.5rem; color: #0f172a;">Cargando Control Patrimonial...</h2>
+    <p style="font-size: 0.875rem; color: #64748b;">Redirigiendo a la Consulta Pública de Activos.</p>
+    <p style="font-size: 0.75rem; color: #94a3b8; margin-top: 1rem;">Si no eres redirigido automáticamente, <a href="public_dashboard/">haz clic aquí</a>.</p>
+  </div>
+</body>
+</html>
