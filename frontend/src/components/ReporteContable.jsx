@@ -98,6 +98,45 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
     return 'CUENTA CONTABLE COMPLEMENTARIA';
   };
 
+  // Cálculo dinámico de depreciación por activo
+  const getAssetDepreciacion = (item) => {
+    const cost = Number(item.valor_en_libros) || 0;
+    if (cost <= 0) return 0;
+
+    const cc = item.cuenta_contable || '';
+    if (cc.startsWith('331') || cc.startsWith('339')) return 0;
+
+    const lifeYears = Number(item.vida_util_anios) || 0;
+    const startStr = item.fecha_alta_factura || item.fecha_alta || item.fecha_registro_contable;
+    const storedDep = Number(item.depreciacion_acumulada) || 0;
+
+    // Si hay un valor estático almacenado > 0 y NO se está evaluando un periodo específico, usarlo
+    if (storedDep > 0 && selectedYear === 'Todos' && selectedMonth === 'Todos') {
+      return storedDep;
+    }
+
+    // Calcular depreciación acumulada dinámica según fecha de alta
+    if (lifeYears > 0 && startStr) {
+      const startDate = new Date(startStr);
+      const startYear = startDate.getFullYear();
+      const startMonth = startDate.getMonth() + 1;
+
+      const now = new Date();
+      const evalYear = selectedYear !== 'Todos' ? Number(selectedYear) : now.getFullYear();
+      const evalMonth = selectedMonth !== 'Todos' ? Number(selectedMonth) : 12;
+
+      const totalLifeMonths = lifeYears * 12;
+      const monthlyRate = cost / totalLifeMonths;
+      const elapsedMonths = (evalYear - startYear) * 12 + (evalMonth - startMonth) + 1;
+
+      if (elapsedMonths <= 0) return 0;
+      if (elapsedMonths >= totalLifeMonths) return cost;
+      return Math.min(cost, monthlyRate * elapsedMonths);
+    }
+
+    return storedDep;
+  };
+
   // Filtrado y procesamiento de saldos contables
   const processLedger = () => {
     const ledger = {};
@@ -114,7 +153,7 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
       }
 
       // 1. Filtrado por período
-      const dateStr = item.fecha_alta_factura || item.fecha_registro_contable;
+      const dateStr = item.fecha_alta_factura || item.fecha_alta || item.fecha_registro_contable;
       if (!dateStr && (selectedYear !== 'Todos' || selectedMonth !== 'Todos')) return;
 
       if (dateStr) {
@@ -127,7 +166,7 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
       }
 
       const cost = Number(item.valor_en_libros) || 0;
-      const dep = Number(item.depreciacion_acumulada) || 0;
+      const dep = getAssetDepreciacion(item);
 
       // Definir códigos de costo (33) y depreciación (68) según modo
       let costKey = cc;
@@ -165,29 +204,29 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
     });
 
     // Convertir a lista y ordenar por código contable
-    const ledgerList = Object.values(ledger).sort((a, b) => a.codigo.localeCompare(b.codigo));
-
-    // Filtrar por tipo
-    return ledgerList.filter(item => {
-      if (selectedType === 'Todos') return true;
-      if (selectedType === 'ACTIVO') return item.tipo === 'ACTIVO';
-      if (selectedType === 'DEPRECIACION') return item.tipo === 'DEPRECIACIÓN';
-      return true;
-    });
+    return Object.values(ledger).sort((a, b) => a.codigo.localeCompare(b.codigo));
   };
 
-  const ledgerData = processLedger();
+  const allLedgerData = processLedger();
 
-  // Sumas de resumen
-  const totalCosto = ledgerData
+  // Sumas de resumen globales (sin ser afectadas por el filtro de tabla TIPO DE ELEMENTO)
+  const totalCosto = allLedgerData
     .filter(x => x.codigo.startsWith('33'))
     .reduce((sum, item) => sum + item.monto, 0);
 
-  const totalDepreciacion = ledgerData
+  const totalDepreciacion = allLedgerData
     .filter(x => x.codigo.startsWith('68'))
     .reduce((sum, item) => sum + item.monto, 0);
 
   const valorNeto = totalCosto - totalDepreciacion;
+
+  // Filtrar filas para la tabla según TIPO DE ELEMENTO
+  const ledgerData = allLedgerData.filter(item => {
+    if (selectedType === 'Todos') return true;
+    if (selectedType === 'ACTIVO') return item.tipo === 'ACTIVO';
+    if (selectedType === 'DEPRECIACION') return item.tipo === 'DEPRECIACIÓN';
+    return true;
+  });
 
   const formatMoney = (value) => {
     return new Intl.NumberFormat('es-PE', {

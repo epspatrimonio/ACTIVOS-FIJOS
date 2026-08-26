@@ -73,7 +73,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
     
     // Fila 1
     doc.setFont("helvetica", "bold"); doc.text("Fec Ingreso:", marginX, posY);
-    doc.setFont("helvetica", "normal"); doc.text(formatDateStr(activo.fecha_registro_contable) || '—', marginX + 22, posY);
+    doc.setFont("helvetica", "normal"); doc.text(formatDateStr(activo.fecha_alta_factura || activo.fecha_registro_contable) || '—', marginX + 22, posY);
     
     doc.setFont("helvetica", "bold"); doc.text("Histórico:", 105, posY);
     doc.setFont("helvetica", "normal"); doc.text(`S/. ${Number(activo.valor_en_libros || 0).toFixed(2)}`, 105 + 22, posY);
@@ -214,7 +214,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
     const getHistorialDepreciacion = (act, year) => {
       const cost = Number(act.valor_en_libros) || 0;
       const lifeYears = Number(act.vida_util_anios) || 0;
-      const startStr = act.fecha_registro_contable || act.fecha_alta_factura;
+      const startStr = act.fecha_alta_factura || act.fecha_alta || act.fecha_registro_contable;
       
       const monthlyValues = Array(13).fill("0.00");
       
