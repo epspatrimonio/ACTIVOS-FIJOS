@@ -5,7 +5,7 @@ import ExcelHeaderFilter from './ExcelHeaderFilter';
 
 export default function ActivosTable({ activos, loading, error, onEdit, onDeleteSuccess, activeTab }) {
   const colSpanCount = activeTab === 'OBRAS' ? 14 : activeTab === 'INVENTARIO' ? 14 : 15;
-  const tableMinWidth = activeTab === 'OBRAS' ? 'min-w-[1700px]' : 'min-w-[1850px]';
+  const tableMinWidth = activeTab === 'OBRAS' ? 'min-w-[1700px]' : 'min-w-[2100px]';
   const [colFilters, setColFilters] = useState({});
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
 
@@ -344,15 +344,58 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
     setSortConfig({ key: columnKey, direction });
   };
 
+  const getFinanciadoText = (v) => {
+    if (!v) return '';
+    const codPat = String(v.cod_patrimonial || '').trim();
+    const ctaContable = String(v.cuenta_contable || '').trim();
+    const docTipo = (v.documento_tipo || '').toUpperCase().trim();
+    const fuenteStr = (
+      v.fuente || 
+      v.fuente_origen || 
+      v.documento_concepto || 
+      v.concepto || 
+      v.observaciones || 
+      v.n_doc || 
+      ''
+    ).trim().toUpperCase();
+
+    if (codPat.startsWith('339') || ctaContable.startsWith('339') || docTipo === 'OBRA') {
+      return 'Obra en curso';
+    } else if (fuenteStr.includes('TRANSF') || fuenteStr.includes('TRANSFERENCIA')) {
+      return 'Transferencia';
+    } else if (fuenteStr.includes('OBRA') || fuenteStr.includes('LIQ')) {
+      return 'Liq. Obra';
+    } else if (fuenteStr.includes('DONAC')) {
+      return 'Donación';
+    } else if (docTipo === 'COMPRA') {
+      return '';
+    } else if (docTipo === 'INCORPORACION') {
+      return (v.fuente || v.fuente_origen || '').trim();
+    }
+    return '';
+  };
+
   const getColValue = (item, key) => {
     switch (key) {
       case 'cod_patrimonial': return item.cod_patrimonial || '';
       case 'n_doc': return item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OC-${item.n_doc}` : `INC-${item.n_doc}`) : '';
       case 'fecha_ingreso': return item.fecha_alta_factura || '';
-      case 'ubicacion': return `${item.sucursal || ''} / ${item.localidad || ''}`;
+      case 'ubicacion': return item.sucursal || '';
+      case 'fuente': return getFinanciadoText(item);
       case 'cuenta_contable': return item.cuenta_contable || '';
       case 'centro_costo': return item.centro_costo || '';
       case 'denominacion': return item.denominacion || '';
+      case 'subcategoria': return item.subcategoria || item.categoria || '';
+      case 'n_acta': {
+        if (!item.n_acta) return '';
+        const dateStr = item.fecha_alta_factura || item.fecha_registro_contable || item.fecha_ingreso || item.fecha_asignacion;
+        let year = new Date().getFullYear();
+        if (dateStr) {
+          const y = new Date(dateStr).getFullYear();
+          if (y && !isNaN(y)) year = y;
+        }
+        return `Acta N° ${item.n_acta} - ${year}`;
+      }
       case 'marca': return item.marca || '';
       case 'placa': return item.placa || '';
       case 'estado': return item.estado_activo || '';
@@ -460,9 +503,9 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
       {/* Contenedor de scroll con altura máxima para hacer efectiva la cabecera sticky */}
       <div className="overflow-x-auto overflow-y-auto w-full flex-1 min-h-0">
         <table className={`${tableMinWidth} w-full divide-y divide-slate-200 border-collapse`}>
-          <thead className="sticky top-0 bg-[#00B0F0] text-white z-20 shadow-md">
+          <thead className="sticky top-0 bg-[#004C96] text-white z-20 shadow-md">
             <tr>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
+              <th scope="col" className="px-3.5 py-2.5 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wider leading-tight min-w-[140px]">
                 <ExcelHeaderFilter
                   title="Cód. Patrimonial"
                   columnKey="cod_patrimonial"
@@ -474,77 +517,42 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   getValue={(item) => getColValue(item, 'cod_patrimonial')}
                 />
               </th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
-                <ExcelHeaderFilter
-                  title="Documento N Doc"
-                  columnKey="n_doc"
-                  data={activos}
-                  selectedValues={colFilters.n_doc}
-                  onFilterChange={(vals) => handleFilterChange('n_doc', vals)}
-                  currentSort={sortConfig}
-                  onSortChange={handleSortChange}
-                  getValue={(item) => getColValue(item, 'n_doc')}
-                />
+              <th scope="col" className="px-3.5 py-2.5 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wider leading-tight min-w-[210px]">
+                <div className="flex flex-col items-center gap-0.5">
+                  <ExcelHeaderFilter
+                    title="DOCUMENTO"
+                    columnKey="n_doc"
+                    data={activos}
+                    selectedValues={colFilters.n_doc}
+                    onFilterChange={(vals) => handleFilterChange('n_doc', vals)}
+                    currentSort={sortConfig}
+                    onSortChange={handleSortChange}
+                    getValue={(item) => getColValue(item, 'n_doc')}
+                  />
+                  <ExcelHeaderFilter
+                    title="C. CONTABLE"
+                    columnKey="cuenta_contable"
+                    data={activos}
+                    selectedValues={colFilters.cuenta_contable}
+                    onFilterChange={(vals) => handleFilterChange('cuenta_contable', vals)}
+                    currentSort={sortConfig}
+                    onSortChange={handleSortChange}
+                    getValue={(item) => getColValue(item, 'cuenta_contable')}
+                  />
+                  <ExcelHeaderFilter
+                    title="C. COSTO"
+                    columnKey="centro_costo"
+                    data={activos}
+                    selectedValues={colFilters.centro_costo}
+                    onFilterChange={(vals) => handleFilterChange('centro_costo', vals)}
+                    currentSort={sortConfig}
+                    onSortChange={handleSortChange}
+                    getValue={(item) => getColValue(item, 'centro_costo')}
+                  />
+                </div>
               </th>
-              {activeTab === 'INVENTARIO' && (
-                <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
-                  <ExcelHeaderFilter
-                    title="Cuenta / C. Costo"
-                    columnKey="cuenta_contable"
-                    data={activos}
-                    selectedValues={colFilters.cuenta_contable}
-                    onFilterChange={(vals) => handleFilterChange('cuenta_contable', vals)}
-                    currentSort={sortConfig}
-                    onSortChange={handleSortChange}
-                    getValue={(item) => getColValue(item, 'cuenta_contable')}
-                  />
-                </th>
-              )}
 
-              {activeTab === 'OBRAS' && (
-                <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
-                  <ExcelHeaderFilter
-                    title="Cuenta Contable"
-                    columnKey="cuenta_contable"
-                    data={activos}
-                    selectedValues={colFilters.cuenta_contable}
-                    onFilterChange={(vals) => handleFilterChange('cuenta_contable', vals)}
-                    currentSort={sortConfig}
-                    onSortChange={handleSortChange}
-                    getValue={(item) => getColValue(item, 'cuenta_contable')}
-                  />
-                </th>
-              )}
-
-              {activeTab !== 'INVENTARIO' && activeTab !== 'OBRAS' && (
-                <>
-                  <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
-                    <ExcelHeaderFilter
-                      title="Cuenta Contable"
-                      columnKey="cuenta_contable"
-                      data={activos}
-                      selectedValues={colFilters.cuenta_contable}
-                      onFilterChange={(vals) => handleFilterChange('cuenta_contable', vals)}
-                      currentSort={sortConfig}
-                      onSortChange={handleSortChange}
-                      getValue={(item) => getColValue(item, 'cuenta_contable')}
-                    />
-                  </th>
-                  <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
-                    <ExcelHeaderFilter
-                      title="Centro de Costo"
-                      columnKey="centro_costo"
-                      data={activos}
-                      selectedValues={colFilters.centro_costo}
-                      onFilterChange={(vals) => handleFilterChange('centro_costo', vals)}
-                      currentSort={sortConfig}
-                      onSortChange={handleSortChange}
-                      getValue={(item) => getColValue(item, 'centro_costo')}
-                    />
-                  </th>
-                </>
-              )}
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
+              <th scope="col" className="px-3.5 py-2.5 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wider leading-tight min-w-[150px]">
                 <ExcelHeaderFilter
                   title="Fecha de Ingreso"
                   columnKey="fecha_ingreso"
@@ -556,31 +564,67 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   getValue={(item) => formatDate(getColValue(item, 'fecha_ingreso'))}
                 />
               </th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
-                <ExcelHeaderFilter
-                  title="Ubicación (Sucursal / Localidad)"
-                  columnKey="ubicacion"
-                  data={activos}
-                  selectedValues={colFilters.ubicacion}
-                  onFilterChange={(vals) => handleFilterChange('ubicacion', vals)}
-                  currentSort={sortConfig}
-                  onSortChange={handleSortChange}
-                  getValue={(item) => getColValue(item, 'ubicacion')}
-                />
+
+              <th scope="col" className="px-3.5 py-2.5 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wider leading-tight min-w-[180px]">
+                <div className="flex flex-col items-center gap-0.5">
+                  <ExcelHeaderFilter
+                    title="SUCURSAL"
+                    columnKey="ubicacion"
+                    data={activos}
+                    selectedValues={colFilters.ubicacion}
+                    onFilterChange={(vals) => handleFilterChange('ubicacion', vals)}
+                    currentSort={sortConfig}
+                    onSortChange={handleSortChange}
+                    getValue={(item) => getColValue(item, 'ubicacion')}
+                  />
+                  <ExcelHeaderFilter
+                    title="FINANCIADO"
+                    columnKey="fuente"
+                    data={activos}
+                    selectedValues={colFilters.fuente}
+                    onFilterChange={(vals) => handleFilterChange('fuente', vals)}
+                    currentSort={sortConfig}
+                    onSortChange={handleSortChange}
+                    getValue={(item) => getFinanciadoText(item)}
+                  />
+                </div>
               </th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
-                <ExcelHeaderFilter
-                  title="Denominación del Activo"
-                  columnKey="denominacion"
-                  data={activos}
-                  selectedValues={colFilters.denominacion}
-                  onFilterChange={(vals) => handleFilterChange('denominacion', vals)}
-                  currentSort={sortConfig}
-                  onSortChange={handleSortChange}
-                  getValue={(item) => getColValue(item, 'denominacion')}
-                />
+
+              <th scope="col" className="px-3.5 py-2.5 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wider leading-tight min-w-[250px]">
+                <div className="flex flex-col items-start gap-0.5">
+                  <ExcelHeaderFilter
+                    title="DENOMINACIÓN"
+                    columnKey="denominacion"
+                    data={activos}
+                    selectedValues={colFilters.denominacion}
+                    onFilterChange={(vals) => handleFilterChange('denominacion', vals)}
+                    currentSort={sortConfig}
+                    onSortChange={handleSortChange}
+                    getValue={(item) => getColValue(item, 'denominacion')}
+                  />
+                  <ExcelHeaderFilter
+                    title="SUB CATEGORIA"
+                    columnKey="subcategoria"
+                    data={activos}
+                    selectedValues={colFilters.subcategoria}
+                    onFilterChange={(vals) => handleFilterChange('subcategoria', vals)}
+                    currentSort={sortConfig}
+                    onSortChange={handleSortChange}
+                    getValue={(item) => getColValue(item, 'subcategoria')}
+                  />
+                  <ExcelHeaderFilter
+                    title="N° ACTA"
+                    columnKey="n_acta"
+                    data={activos}
+                    selectedValues={colFilters.n_acta}
+                    onFilterChange={(vals) => handleFilterChange('n_acta', vals)}
+                    currentSort={sortConfig}
+                    onSortChange={handleSortChange}
+                    getValue={(item) => getColValue(item, 'n_acta')}
+                  />
+                </div>
               </th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
+              <th scope="col" className="px-3.5 py-2.5 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wider leading-tight min-w-[210px]">
                 <ExcelHeaderFilter
                   title="Características"
                   columnKey="marca"
@@ -592,7 +636,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   getValue={(item) => getColValue(item, 'marca')}
                 />
               </th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
+              <th scope="col" className="px-3.5 py-2.5 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wider leading-tight min-w-[250px]">
                 <ExcelHeaderFilter
                   title="Especificaciones"
                   columnKey="placa"
@@ -604,7 +648,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   getValue={(item) => getColValue(item, 'placa')}
                 />
               </th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
+              <th scope="col" className="px-3.5 py-2.5 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wider leading-tight min-w-[130px]">
                 <ExcelHeaderFilter
                   title="Estado"
                   columnKey="estado"
@@ -616,7 +660,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   getValue={(item) => getColValue(item, 'estado')}
                 />
               </th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
+              <th scope="col" className="px-3.5 py-2.5 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wider leading-tight min-w-[140px]">
                 <ExcelHeaderFilter
                   title="Valor Libros"
                   columnKey="valor_en_libros"
@@ -628,7 +672,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   getValue={(item) => String(getColValue(item, 'valor_en_libros'))}
                 />
               </th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
+              <th scope="col" className="px-3.5 py-2.5 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wider leading-tight min-w-[140px]">
                 <ExcelHeaderFilter
                   title="Valor Neto"
                   columnKey="valor_neto"
@@ -640,29 +684,31 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   getValue={(item) => String(getColValue(item, 'valor_neto'))}
                 />
               </th>
-              <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
-                <ExcelHeaderFilter
-                  title="Responsable"
-                  columnKey="responsable"
-                  data={activos}
-                  selectedValues={colFilters.responsable}
-                  onFilterChange={(vals) => handleFilterChange('responsable', vals)}
-                  currentSort={sortConfig}
-                  onSortChange={handleSortChange}
-                  getValue={(item) => getColValue(item, 'responsable')}
-                />
-                <ExcelHeaderFilter
-                  title="Puesto"
-                  columnKey="puesto"
-                  data={activos}
-                  selectedValues={colFilters.puesto}
-                  onFilterChange={(vals) => handleFilterChange('puesto', vals)}
-                  currentSort={sortConfig}
-                  onSortChange={handleSortChange}
-                  getValue={(item) => getColValue(item, 'puesto')}
-                />
+              <th scope="col" className="px-3.5 py-2.5 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wider leading-tight min-w-[230px]">
+                <div className="flex flex-col items-start gap-0.5">
+                  <ExcelHeaderFilter
+                    title="RESPONSABLE"
+                    columnKey="responsable"
+                    data={activos}
+                    selectedValues={colFilters.responsable}
+                    onFilterChange={(vals) => handleFilterChange('responsable', vals)}
+                    currentSort={sortConfig}
+                    onSortChange={handleSortChange}
+                    getValue={(item) => getColValue(item, 'responsable')}
+                  />
+                  <ExcelHeaderFilter
+                    title="PUESTO"
+                    columnKey="puesto"
+                    data={activos}
+                    selectedValues={colFilters.puesto}
+                    onFilterChange={(vals) => handleFilterChange('puesto', vals)}
+                    currentSort={sortConfig}
+                    onSortChange={handleSortChange}
+                    getValue={(item) => getColValue(item, 'puesto')}
+                  />
+                </div>
               </th>
-              <th scope="col" className="px-5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Gestión</th>
+              <th scope="col" className="px-3.5 py-2.5 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wider leading-tight min-w-[120px]">Gestión</th>
             </tr>
           </thead>
           
@@ -733,42 +779,21 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                     {activo.cod_patrimonial}
                   </td>
                   
-                  <td className="px-5 py-4 whitespace-nowrap">
+                  {/* Documento / Cta Contable / Centro Costo */}
+                  <td className="px-5 py-4 whitespace-nowrap text-center">
                     <div className="font-bold text-slate-800 text-[0.8125rem]">
                       {activo.n_doc ? (activo.documento_tipo === 'COMPRA' ? `OC-${activo.n_doc}` : activo.documento_tipo === 'OBRA' ? `OC-${activo.n_doc}` : `INC-${activo.n_doc}`) : '—'}
                     </div>
-                    <div className="text-[0.75rem] text-slate-500 font-mono font-medium mt-0.5">
+                    <div className="text-[0.75rem] text-[#00B0F0] font-mono font-bold mt-0.5">
                       {activo.cuenta_contable || '—'}
                     </div>
+                    <div className="text-[0.75rem] text-slate-400 font-mono mt-0.5">
+                      {activo.centro_costo || '—'}
+                    </div>
                   </td>
-
-                  {/* Cuenta Contable / Centro Costo */}
-                  {activeTab === 'INVENTARIO' && (
-                    <td className="px-5 py-4 whitespace-nowrap text-xs font-mono text-slate-700">
-                      <div className="font-semibold text-slate-800">{activo.cuenta_contable || '—'}</div>
-                      <div className="text-slate-400 mt-0.5">{activo.centro_costo || '—'}</div>
-                    </td>
-                  )}
-
-                  {activeTab === 'OBRAS' && (
-                    <td className="px-5 py-4 whitespace-nowrap text-xs font-mono font-semibold text-slate-700">
-                      {activo.cuenta_contable || '—'}
-                    </td>
-                  )}
-
-                  {activeTab !== 'INVENTARIO' && activeTab !== 'OBRAS' && (
-                    <>
-                      <td className="px-5 py-4 whitespace-nowrap text-xs font-mono font-semibold text-slate-700">
-                        {activo.cuenta_contable || '—'}
-                      </td>
-                      <td className="px-5 py-4 whitespace-nowrap text-xs font-mono font-semibold text-slate-700">
-                        {activo.centro_costo || '—'}
-                      </td>
-                    </>
-                  )}
                   
                   {/* Fecha de Ingreso */}
-                  <td className="px-5 py-4 whitespace-nowrap text-xs">
+                  <td className="px-5 py-4 whitespace-nowrap text-center text-xs">
                     <p className="text-slate-700 font-semibold leading-none">
                       Alta: <span className="text-slate-500 font-normal">{formatDate(activo.fecha_alta_factura)}</span>
                     </p>
@@ -777,33 +802,53 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                     </p>
                   </td>
                   
-                  {/* Ubicación */}
-                  <td className="px-5 py-4 whitespace-nowrap">
+                  {/* Ubicación / Financiado */}
+                  <td className="px-5 py-4 whitespace-nowrap text-center">
                     <div className="font-bold text-slate-800 text-[0.8125rem]">
                       {activo.sucursal || '—'}
                     </div>
-                    <div className="text-[0.6875rem] text-brand-600 font-bold uppercase tracking-wide mt-0.5">
-                      {activo.localidad || '—'}
-                    </div>
+                    {activo.localidad && activo.localidad.toUpperCase() !== (activo.sucursal || '').toUpperCase() && (
+                      <div className="text-[0.75rem] text-slate-600 font-medium mt-0.5">
+                        ({activo.localidad})
+                      </div>
+                    )}
+                    {getFinanciadoText(activo) && (
+                      <div className="text-[0.6875rem] text-slate-500 italic font-medium mt-0.5">
+                        {getFinanciadoText(activo)}
+                      </div>
+                    )}
                   </td>
                   
-                  {/* Denominación */}
+                  {/* Denominación / Subcategoría / N° Acta */}
                   <td className="px-5 py-4 min-w-[200px]">
                     <div className="text-[0.875rem] font-bold text-slate-900 leading-snug">
                       {activo.denominacion}
                     </div>
-                    <div className="text-[0.6875rem] text-brand-600 font-bold mt-1 uppercase">
-                      {activo.subcategoria || '—'}
+                    <div className="text-[0.6875rem] text-[#00B0F0] font-bold italic uppercase mt-0.5">
+                      {activo.subcategoria || activo.categoria || '—'}
                     </div>
+                    {activo.n_acta && (
+                      <div className="text-[0.6875rem] text-amber-600 font-mono font-semibold mt-0.5">
+                        {(() => {
+                          const dateStr = activo.fecha_alta_factura || activo.fecha_registro_contable || activo.fecha_ingreso || activo.fecha_asignacion;
+                          let year = new Date().getFullYear();
+                          if (dateStr) {
+                            const y = new Date(dateStr).getFullYear();
+                            if (y && !isNaN(y)) year = y;
+                          }
+                          return `Acta N° ${activo.n_acta} - ${year}`;
+                        })()}
+                      </div>
+                    )}
                   </td>
                   
                   {/* Características */}
                   <td className="px-5 py-4 text-[0.8125rem] min-w-[180px] text-slate-600 leading-normal">
                     <div className="space-y-0.5">
+                      <div><span className="font-semibold text-slate-400">Color:</span> <span className="text-slate-700">{activo.color || '—'}</span></div>
                       <div><span className="font-semibold text-slate-400">Marca:</span> <span className="text-slate-850 font-medium">{activo.marca || 'S/M'}</span></div>
                       <div><span className="font-semibold text-slate-400">Modelo:</span> <span className="text-slate-850 font-medium">{activo.modelo || 'S/M'}</span></div>
                       <div><span className="font-semibold text-slate-400">Serie:</span> <span className="text-slate-850 font-mono font-medium">{activo.numero_serie || 'S/S'}</span></div>
-                      {activo.color && <div><span className="font-semibold text-slate-400">Color:</span> <span className="text-slate-700">{activo.color}</span></div>}
                     </div>
                   </td>
                   
@@ -817,23 +862,22 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                       if (isVehicle) {
                         return (
                           <div className="space-y-0.5 text-slate-600">
-                            <div><span className="font-semibold text-slate-400">Color:</span> {activo.color || '—'}</div>
-                            <div><span className="font-semibold text-slate-400">Marca:</span> {activo.marca || '—'}</div>
-                            <div><span className="font-semibold text-slate-400">Modelo:</span> {activo.modelo || '—'}</div>
-                            <div><span className="font-semibold text-slate-400">Placa:</span> <span className="font-extrabold font-mono text-slate-900">{activo.placa || '—'}</span></div>
-                            <div><span className="font-semibold text-slate-400">Motor:</span> {activo.nro_motor || '—'}</div>
-                            <div><span className="font-semibold text-slate-400">Chasis:</span> {activo.nro_chasis || '—'}</div>
+                            <div><span className="font-semibold text-slate-400">Placa:</span> <span className="font-extrabold font-mono text-slate-900 bg-amber-100/80 px-1 py-0.5 rounded">{activo.placa || '—'}</span></div>
+                            <div><span className="font-semibold text-slate-400">Motor:</span> <span className="text-slate-800 font-mono">{activo.nro_motor || activo.num_motor || '—'}</span></div>
+                            <div><span className="font-semibold text-slate-400">Chasis:</span> <span className="text-slate-800 font-mono">{activo.nro_chasis || activo.num_chasis || '—'}</span></div>
+                            <div><span className="font-semibold text-slate-400">Categoría:</span> <span className="text-slate-800">{activo.categoria_vehiculo || activo.subcategoria || activo.categoria || 'VEHÍCULO'}</span></div>
+                            <div><span className="font-semibold text-slate-400">Año Modelo:</span> <span className="text-slate-800">{activo.vehiculo_anio || activo.anio_fabricacion || activo.anio_modelo || '—'}</span></div>
                           </div>
                         );
                       } else {
                         const especStr = (activo.especificaciones || activo.especificacion || activo.caracteristicas_accesorios || activo.observaciones || '').trim();
                         return (
-                          <div className="space-y-0.5 text-slate-600">
-                            <div><span className="font-semibold text-slate-400">Color:</span> {activo.color || '—'}</div>
-                            <div><span className="font-semibold text-slate-400">Marca:</span> {activo.marca || '—'}</div>
-                            <div><span className="font-semibold text-slate-400">Modelo:</span> {activo.modelo || '—'}</div>
-                            <div><span className="font-semibold text-slate-400">Serie:</span> {activo.numero_serie || '—'}</div>
-                            {especStr && <div><span className="font-semibold text-slate-400">Especificaciones:</span> {especStr}</div>}
+                          <div className="text-slate-600">
+                            {especStr ? (
+                              <span className="text-slate-800 font-medium">{especStr}</span>
+                            ) : (
+                              <span className="text-slate-400 font-mono">—</span>
+                            )}
                           </div>
                         );
                       }
@@ -855,19 +899,14 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                     S/. {new Intl.NumberFormat('es-PE', { minimumFractionDigits: 2 }).format(Number(activo.valor_neto) || 0)}
                   </td>
 
-                  {/* Responsable */}
+                  {/* Responsable / Puesto */}
                   <td className="px-5 py-4 min-w-[200px]">
                     <div className="text-[0.8125rem] font-bold text-slate-800 leading-snug">
-                      {activo.responsable || '—'}
+                      {activo.responsable || 'Sin asignar'}
                     </div>
                     {activo.puesto && (
-                      <div className="text-[0.6875rem] text-brand-600 font-bold mt-0.5 uppercase tracking-wide">
+                      <div className="text-[0.6875rem] text-slate-500 italic font-medium uppercase mt-0.5">
                         {activo.puesto}
-                      </div>
-                    )}
-                    {activo.unidad && activo.unidad !== activo.puesto && (
-                      <div className="text-[0.6875rem] text-slate-400 font-semibold mt-0.5 truncate max-w-[190px]" title={activo.unidad}>
-                        {activo.unidad}
                       </div>
                     )}
                   </td>

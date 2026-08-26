@@ -1071,7 +1071,7 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
                 </div>
               ) : (
                 <table className="w-full text-left border-collapse text-xs">
-                  <thead className="bg-[#00509d] text-white sticky top-0 z-10 font-bold">
+                  <thead className="bg-[#004C96] text-white sticky top-0 z-10 font-bold shadow-md">
                     <tr>
                       <th className="p-3 w-28 text-left text-[0.72rem] font-bold text-white uppercase tracking-wider">
                         <div className="flex items-center justify-between">

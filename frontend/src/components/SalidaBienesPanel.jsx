@@ -492,7 +492,7 @@ export default function SalidaBienesPanel({ initialSubTab = 'MODULE' }) {
         ) : (
           <div className="flex-1 overflow-auto min-h-0">
             <table className="w-full text-left text-xs border-collapse">
-              <thead className="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider text-[10px] sticky top-0 z-10 border-b border-slate-200">
+              <thead className="bg-[#004C96] text-white font-bold uppercase tracking-wider text-[10px] sticky top-0 z-10 shadow-md">
                 <tr>
                   <th className="p-3 w-28">N° Orden</th>
                   <th className="p-3 w-24">Fecha</th>

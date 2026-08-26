@@ -174,7 +174,7 @@ export default function App() {
     return localStorage.getItem('isLoggedIn') === 'true';
   });
   const [activeTab, setActiveTab] = useState('INVENTARIO'); // INVENTARIO | OBRAS | REGISTRO | DOCUMENTOS | CELULARES | VEHICULOS | SOAT | SINCRONIZAR
-  const [filters, setFilters] = useState({ search: '', estado_activo: '', id_sucursal: '', cod_personal: '', n_doc: '' });
+  const [filters, setFilters] = useState({ search: '', estado_activo: '', id_sucursal: '', n_doc: '', categoria: '', subcategoria: '' });
   const [activos, setActivos] = useState([]);
   const [filteredActivos, setFilteredActivos] = useState([]);
   const [filteredObras, setFilteredObras] = useState([]);
@@ -384,7 +384,9 @@ export default function App() {
 
       let especsFormatted = '';
       if (isVehiculo) {
-        especsFormatted = `Color: ${item.color || '—'}\nMarca: ${item.marca || '—'}\nModelo: ${item.modelo || '—'}\nPlaca: ${item.placa || '—'}\nMotor: ${item.nro_motor || '—'}\nChasis: ${item.nro_chasis || '—'}`;
+        const catVeh = item.categoria_vehiculo || item.subcategoria || item.categoria || 'VEHÍCULO';
+        const anioVeh = item.vehiculo_anio || item.anio_fabricacion || item.anio_modelo || '—';
+        especsFormatted = `Color: ${item.color || '—'}\nMarca: ${item.marca || '—'}\nModelo: ${item.modelo || '—'}\nPlaca: ${item.placa || '—'}\nMotor: ${item.nro_motor || '—'}\nChasis: ${item.nro_chasis || '—'}\nCategoría: ${catVeh}\nAño Modelo: ${anioVeh}`;
       } else {
         const especStr = (item.especificaciones || item.especificacion || item.caracteristicas_accesorios || item.observaciones || '').trim();
         const lines = [
@@ -494,7 +496,7 @@ export default function App() {
     }
   }, [filters.estado_activo, filters.id_sucursal, activeTab, isLoggedIn]);
 
-  // Filtro del buscador y responsable en memoria local (cliente)
+  // Filtro del buscador global, categoría, subcategoría y documento en memoria local
   useEffect(() => {
     let result = activos;
 
@@ -505,12 +507,24 @@ export default function App() {
         const matchDenom = act.denominacion?.toLowerCase().includes(searchLower);
         const matchMarca = act.marca?.toLowerCase().includes(searchLower);
         const matchModelo = act.modelo?.toLowerCase().includes(searchLower);
-        return matchCod || matchDenom || matchMarca || matchModelo;
+        const matchResp = act.responsable?.toLowerCase().includes(searchLower);
+        const matchPuesto = act.puesto?.toLowerCase().includes(searchLower);
+        const matchActa = act.n_acta?.toString().toLowerCase().includes(searchLower);
+        const matchSubcat = act.subcategoria?.toLowerCase().includes(searchLower);
+        const matchCat = act.categoria?.toLowerCase().includes(searchLower);
+        return matchCod || matchDenom || matchMarca || matchModelo || matchResp || matchPuesto || matchActa || matchSubcat || matchCat;
       });
     }
 
-    if (filters.cod_personal) {
-      result = result.filter((act) => act.cod_personal === filters.cod_personal);
+    if (filters.categoria) {
+      result = result.filter((act) => {
+        const cat = act.categoria || (act.cod_categoria ? `Categoría ${act.cod_categoria}` : null);
+        return cat === filters.categoria;
+      });
+    }
+
+    if (filters.subcategoria) {
+      result = result.filter((act) => act.subcategoria === filters.subcategoria);
     }
 
     if (filters.n_doc) {
@@ -523,7 +537,7 @@ export default function App() {
 
     setFilteredActivos(assetsOnly);
     setFilteredObras(obrasOnly);
-  }, [filters.search, filters.cod_personal, filters.n_doc, activos]);
+  }, [filters.search, filters.categoria, filters.subcategoria, filters.n_doc, activos]);
 
   const [openDropdown, setOpenDropdown] = useState(null);
   const navRef = useRef(null);
@@ -585,14 +599,13 @@ export default function App() {
                 icon={ClipboardList}
                 isOpen={openDropdown === 'CONSULTAS'}
                 onToggle={() => setOpenDropdown(openDropdown === 'CONSULTAS' ? null : 'CONSULTAS')}
-                active={['INVENTARIO', 'OBRAS', 'VEHICULOS', 'SOAT', 'CELULARES', 'INVENTARIO_FISICO', 'TERCEROS_TABLA', 'SALIDAS_TABLA', 'TRANSFERENCIAS_TABLA'].includes(activeTab)}
+                active={['INVENTARIO', 'OBRAS', 'SOAT', 'CELULARES', 'INVENTARIO_FISICO', 'TERCEROS_TABLA', 'SALIDAS_TABLA', 'TRANSFERENCIAS_TABLA'].includes(activeTab)}
                 items={[
                   { label: 'Activos Fijos', icon: <ClipboardList className="w-3.5 h-3.5" />, active: activeTab === 'INVENTARIO', onClick: () => { handleTabChange('INVENTARIO'); setOpenDropdown(null); } },
                   { label: 'Obras en Curso', icon: <Hammer className="w-3.5 h-3.5" />, active: activeTab === 'OBRAS', onClick: () => { handleTabChange('OBRAS'); setOpenDropdown(null); } },
-                  { label: 'Flota de Vehículos', icon: <Car className="w-3.5 h-3.5" />, active: activeTab === 'VEHICULOS', onClick: () => { handleTabChange('VEHICULOS'); setOpenDropdown(null); } },
                   { label: 'SOAT y Rev. Técnica', icon: <ShieldCheck className="w-3.5 h-3.5" />, active: activeTab === 'SOAT', onClick: () => { handleTabChange('SOAT'); setOpenDropdown(null); } },
                   { label: 'Equipos Celulares', icon: <Smartphone className="w-3.5 h-3.5" />, active: activeTab === 'CELULARES', onClick: () => { handleTabChange('CELULARES'); setOpenDropdown(null); } },
-                  { label: 'Inventario Físico', icon: <ClipboardCheck className="w-3.5 h-3.5" />, active: activeTab === 'INVENTARIO_FISICO', onClick: () => { handleTabChange('INVENTARIO_FISICO'); setOpenDropdown(null); } },
+                  { label: 'Sobrantes/Faltantes', icon: <ClipboardCheck className="w-3.5 h-3.5" />, active: activeTab === 'INVENTARIO_FISICO', onClick: () => { handleTabChange('INVENTARIO_FISICO'); setOpenDropdown(null); } },
                   { label: 'Bienes de Terceros (Tabla)', icon: <Users className="w-3.5 h-3.5" />, active: activeTab === 'TERCEROS_TABLA', onClick: () => { handleTabChange('TERCEROS_TABLA'); setOpenDropdown(null); } },
                   { label: 'Salida de Bienes (Historial)', icon: <LogOut className="w-3.5 h-3.5 rotate-180" />, active: activeTab === 'SALIDAS_TABLA', onClick: () => { handleTabChange('SALIDAS_TABLA'); setOpenDropdown(null); } },
                   { label: 'Reasignaciones (Historial)', icon: <ArrowLeftRight className="w-3.5 h-3.5" />, active: activeTab === 'TRANSFERENCIAS_TABLA', onClick: () => { handleTabChange('TRANSFERENCIAS_TABLA'); setOpenDropdown(null); } },
@@ -640,6 +653,14 @@ export default function App() {
           {/* Selector de Pestañas Rápido Estilo public_dashboard (Single row pill switcher) */}
           <div className="py-2 overflow-x-auto border-t border-white/10 flex items-center gap-1.5 no-scrollbar">
             <button
+              onClick={() => handleTabChange('DOCUMENTOS')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'DOCUMENTOS' ? 'bg-white text-[#00509d] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              📄 Documentos
+            </button>
+            <button
               onClick={() => handleTabChange('INVENTARIO')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'INVENTARIO' ? 'bg-white text-[#00509d] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
@@ -654,14 +675,6 @@ export default function App() {
               }`}
             >
               🚧 Obras en Curso
-            </button>
-            <button
-              onClick={() => handleTabChange('VEHICULOS')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeTab === 'VEHICULOS' ? 'bg-white text-[#00509d] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              🚗 Vehículos
             </button>
             <button
               onClick={() => handleTabChange('SOAT')}
@@ -685,7 +698,7 @@ export default function App() {
                 activeTab === 'INVENTARIO_FISICO' ? 'bg-white text-[#00509d] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
               }`}
             >
-              🔍 Inv. Físico
+              🔍 Sobrantes/Faltantes
             </button>
             <button
               onClick={() => handleTabChange('TERCEROS_TABLA')}
@@ -694,14 +707,6 @@ export default function App() {
               }`}
             >
               🤝 Bienes de Terceros
-            </button>
-            <button
-              onClick={() => handleTabChange('DOCUMENTOS')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeTab === 'DOCUMENTOS' ? 'bg-white text-[#00509d] shadow-sm font-extrabold' : 'text-white/80 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              📄 Documentos
             </button>
             <button
               onClick={() => handleTabChange('REGISTRO')}
@@ -770,7 +775,7 @@ export default function App() {
             </div>
             
             <div className="shrink-0">
-              <Filters filters={filters} onChange={setFilters} activeTab={activeTab} />
+              <Filters filters={filters} onChange={setFilters} activeTab={activeTab} activos={activos} />
             </div>
 
             <div className="flex-1 min-h-0 overflow-hidden">
@@ -816,7 +821,7 @@ export default function App() {
             </div>
             
             <div className="shrink-0">
-              <Filters filters={filters} onChange={setFilters} activeTab={activeTab} />
+              <Filters filters={filters} onChange={setFilters} activeTab={activeTab} activos={activos} />
             </div>
 
             <div className="flex-1 min-h-0 overflow-hidden">

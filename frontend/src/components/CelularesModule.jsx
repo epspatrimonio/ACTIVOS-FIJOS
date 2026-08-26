@@ -830,7 +830,7 @@ export default function CelularesModule() {
         ) : (
           <div style={{ overflow: 'auto', flex: 1 }}>
             <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'0.8125rem' }}>
-              <thead className="sticky top-0 bg-[#00509d] text-white z-10 shadow-sm font-bold">
+              <thead className="sticky top-0 bg-[#004C96] text-white z-10 shadow-md font-bold">
                 <tr className="border-b border-white/10 text-[0.72rem] font-bold text-white uppercase tracking-wider">
                   <th style={{ padding:'10px 8px', textAlign:'left' }}>
                     <ExcelHeaderFilter

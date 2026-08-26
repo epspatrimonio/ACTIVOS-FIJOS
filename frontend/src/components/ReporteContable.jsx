@@ -433,7 +433,7 @@ export default function ReporteContable({ assets = [], loading: assetsLoading = 
         <div className="glass-panel rounded-xl border border-slate-200 overflow-hidden w-full max-w-full h-full flex flex-col">
           <div className="overflow-x-auto overflow-y-auto w-full flex-1 min-h-0">
             <table className="min-w-[800px] w-full divide-y divide-slate-200 border-collapse">
-              <thead className="sticky top-0 bg-[#00509d] text-white z-10 shadow-sm">
+              <thead className="sticky top-0 bg-[#004C96] text-white z-10 shadow-md">
                 <tr>
                   <th scope="col" className="px-5 py-3 text-left text-[0.72rem] font-bold text-white uppercase tracking-wider w-28">Código PCGE</th>
                   <th scope="col" className="px-5 py-3 text-left text-[0.72rem] font-bold text-white uppercase tracking-wider">Descripción de la Cuenta Contable</th>

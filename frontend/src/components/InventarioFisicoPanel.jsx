@@ -564,7 +564,7 @@ export default function InventarioFisicoPanel() {
             </div>
           ) : (
             <table className="w-full text-left border-collapse">
-              <thead className="bg-[#00509d] text-white sticky top-0 z-10 font-bold">
+              <thead className="bg-[#004C96] text-white sticky top-0 z-10 font-bold shadow-md">
                 <tr className="border-b border-white/10 text-[0.72rem] font-bold text-white uppercase tracking-wider">
                   <th className="px-5 py-3">
                     <ExcelHeaderFilter

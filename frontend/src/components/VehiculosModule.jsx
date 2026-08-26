@@ -1264,7 +1264,7 @@ export default function VehiculosModule() {
         ) : (
           <div className="overflow-auto flex-1">
             <table className="min-w-[1750px] w-full text-sm">
-              <thead className="bg-[#00B0F0] text-white sticky top-0 z-10 font-bold shadow-md">
+              <thead className="bg-[#004C96] text-white sticky top-0 z-10 font-bold shadow-md">
                 <tr>
                   <th className="px-4 py-3 text-center text-[11px] font-extrabold text-white uppercase tracking-wider whitespace-nowrap">
                     <ExcelHeaderFilter

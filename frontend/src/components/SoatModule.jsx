@@ -759,7 +759,7 @@ export default function SoatModule() {
         ) : (
           <div className="overflow-auto flex-1">
             <table className="w-full text-sm">
-              <thead className="bg-[#00509d] text-white sticky top-0 z-10 font-bold">
+              <thead className="bg-[#004C96] text-white sticky top-0 z-10 font-bold shadow-md">
                 <tr>
                   <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">
                     <ExcelHeaderFilter

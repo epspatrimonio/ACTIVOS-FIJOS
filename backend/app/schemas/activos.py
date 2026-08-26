@@ -148,6 +148,7 @@ class ActivoPublicoDTO(BaseModel):
     valor_en_libros: Decimal
     igv: Optional[Decimal] = None
     informe_conformidad: Optional[str] = None
+    n_acta: Optional[str] = None
     n_acta_entrega: Optional[str] = None
     depreciacion_acumulada: Optional[Decimal] = None
     valor_neto: Optional[Decimal] = None

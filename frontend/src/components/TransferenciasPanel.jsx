@@ -784,7 +784,7 @@ export default function TransferenciasPanel({ initialSubTab = 'REGISTRO' }) {
         {/* Tabla de Historial */}
         <div className="overflow-x-auto rounded-xl border border-slate-200">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-100 text-slate-700 font-extrabold uppercase tracking-wider">
+            <thead className="bg-[#004C96] text-white font-extrabold uppercase tracking-wider sticky top-0 z-10 shadow-md">
               <tr>
                 <th className="p-3">N° Acta</th>
                 <th className="p-3">Fecha</th>
