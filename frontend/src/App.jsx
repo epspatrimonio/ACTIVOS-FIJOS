@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   ClipboardList, FolderOpen, PlusCircle, Smartphone, Car, ShieldCheck, 
   RefreshCw, LayoutDashboard, LogOut, Mail, Lock, AlertCircle,
   ClipboardCheck, Users, Hammer, Coins, FileSpreadsheet, FileText, ArrowLeftRight,
-  ChevronDown, Menu, X, ExternalLink
+  ChevronDown, Menu, X, ExternalLink, Package, HardHat
 } from 'lucide-react';
 
 import Filters from './components/Filters';
@@ -174,7 +174,7 @@ export default function App() {
     return localStorage.getItem('isLoggedIn') === 'true';
   });
   const [activeTab, setActiveTab] = useState('INVENTARIO'); // INVENTARIO | OBRAS | REGISTRO | DOCUMENTOS | CELULARES | VEHICULOS | SOAT | SINCRONIZAR
-  const [filters, setFilters] = useState({ search: '', estado_activo: '', id_sucursal: '', n_doc: '', categoria: '', subcategoria: '' });
+  const [filters, setFilters] = useState({ search: '', estado_activo: '', id_sucursal: '', n_doc: '', categoria: '', subcategoria: '', anio: '', mes: '' });
   const [activos, setActivos] = useState([]);
   const [filteredActivos, setFilteredActivos] = useState([]);
   const [filteredObras, setFilteredObras] = useState([]);
@@ -531,13 +531,74 @@ export default function App() {
       result = result.filter((act) => act.n_doc === filters.n_doc);
     }
 
+    if (filters.cuenta_contable) {
+      result = result.filter((act) => act.cuenta_contable === filters.cuenta_contable);
+    }
+
+    const parseYearMonth = (dateVal) => {
+      if (!dateVal || dateVal === '—') return { year: null, month: null };
+      const dateStr = String(dateVal).trim();
+      if (!dateStr || dateStr === 'null' || dateStr === 'undefined') return { year: null, month: null };
+      const clean = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr;
+      if (clean.includes('-')) {
+        const parts = clean.split('-');
+        if (parts.length >= 2) {
+          if (parts[0].length === 4) return { year: parts[0], month: parseInt(parts[1], 10).toString() };
+          if (parts[2]?.length === 4) return { year: parts[2], month: parseInt(parts[1], 10).toString() };
+        }
+      } else if (clean.includes('/')) {
+        const parts = clean.split('/');
+        if (parts.length >= 3) {
+          if (parts[2].length === 4) return { year: parts[2], month: parseInt(parts[1], 10).toString() };
+          if (parts[0].length === 4) return { year: parts[0], month: parseInt(parts[1], 10).toString() };
+        }
+      }
+      return { year: null, month: null };
+    };
+
+    if (filters.anio) {
+      result = result.filter((act) => {
+        const dateStr = act.fecha_alta_factura || act.fecha_registro_contable || act.fecha_asignacion || act.fecha_ingreso || act.fecha_alta || act.created_at;
+        const { year } = parseYearMonth(dateStr);
+        return year === filters.anio;
+      });
+    }
+
+    if (filters.mes) {
+      result = result.filter((act) => {
+        const dateStr = act.fecha_alta_factura || act.fecha_registro_contable || act.fecha_asignacion || act.fecha_ingreso || act.fecha_alta || act.created_at;
+        const { month } = parseYearMonth(dateStr);
+        return month === filters.mes;
+      });
+    }
+
     // Dividir los bienes muebles en Activos Fijos generales y Obras en Curso (inician con 339)
     const assetsOnly = result.filter((act) => !act.cod_patrimonial?.startsWith('339'));
     const obrasOnly = result.filter((act) => act.cod_patrimonial?.startsWith('339'));
 
     setFilteredActivos(assetsOnly);
     setFilteredObras(obrasOnly);
-  }, [filters.search, filters.categoria, filters.subcategoria, filters.n_doc, activos]);
+  }, [filters.search, filters.categoria, filters.subcategoria, filters.n_doc, filters.cuenta_contable, filters.anio, filters.mes, activos]);
+
+  const formatMoney = (val) => {
+    return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(val || 0);
+  };
+
+  const totalValorLibrosActivos = useMemo(() => {
+    return filteredActivos.reduce((sum, a) => sum + (Number(a.valor_en_libros) || 0), 0);
+  }, [filteredActivos]);
+
+  const totalValorNetoActivos = useMemo(() => {
+    return filteredActivos.reduce((sum, a) => sum + (Number(a.valor_neto) || 0), 0);
+  }, [filteredActivos]);
+
+  const totalValorLibrosObras = useMemo(() => {
+    return filteredObras.reduce((sum, a) => sum + (Number(a.valor_en_libros) || 0), 0);
+  }, [filteredObras]);
+
+  const totalValorNetoObras = useMemo(() => {
+    return filteredObras.reduce((sum, a) => sum + (Number(a.valor_neto) || 0), 0);
+  }, [filteredObras]);
 
   const [openDropdown, setOpenDropdown] = useState(null);
   const navRef = useRef(null);
@@ -736,8 +797,8 @@ export default function App() {
         </div>
       </header>
 
-      <main className={`flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-w-0 ${
-        ['INVENTARIO', 'OBRAS', 'CONTABLE', 'VEHICULOS', 'SOAT', 'CELULARES', 'INVENTARIO_FISICO', 'BIENES_TERCEROS', 'TERCEROS_REGISTRO', 'TERCEROS_TABLA', 'TRANSFERENCIAS', 'TRANSFERENCIAS_REGISTRO', 'TRANSFERENCIAS_TABLA', 'SALIDAS', 'SALIDAS_REGISTRO', 'SALIDAS_TABLA', 'DASHBOARD', 'ADMIN'].includes(activeTab) ? 'overflow-hidden flex flex-col' : 'overflow-y-auto'
+      <main className={`flex-1 max-w-[1600px] w-full mx-auto px-3 sm:px-5 lg:px-6 py-3 sm:py-4 min-w-0 ${
+        ['DOCUMENTOS', 'INVENTARIO', 'OBRAS', 'CONTABLE', 'VEHICULOS', 'SOAT', 'CELULARES', 'INVENTARIO_FISICO', 'BIENES_TERCEROS', 'TERCEROS_REGISTRO', 'TERCEROS_TABLA', 'TRANSFERENCIAS', 'TRANSFERENCIAS_REGISTRO', 'TRANSFERENCIAS_TABLA', 'SALIDAS', 'SALIDAS_REGISTRO', 'SALIDAS_TABLA', 'DASHBOARD', 'ADMIN'].includes(activeTab) ? 'overflow-hidden flex flex-col' : 'overflow-y-auto'
       }`}>
         <React.Suspense fallback={
           <div className="flex items-center justify-center p-12 text-slate-500 font-semibold space-x-2 animate-pulse">
@@ -746,27 +807,38 @@ export default function App() {
           </div>
         }>
           {activeTab === 'INVENTARIO' && (
-          <div className="flex-1 flex flex-col min-h-0 space-y-4 animate-fadeIn w-full max-w-full overflow-hidden">
-            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between shrink-0 mb-2">
+          <div className="flex-1 flex flex-col min-h-0 space-y-2 animate-fadeIn w-full max-w-full overflow-hidden">
+            <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between shrink-0 mb-1">
               <div className="module-heading">
                 <p className="module-kicker">Inventario operativo</p>
-                <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">ACTIVOS FIJOS REGISTRADOS</h2>
-                <p className="text-sm text-slate-500">Listado de bienes muebles patrimoniales.</p>
+                <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                  <span className="inline-flex items-center justify-center p-1.5 rounded-xl bg-brand-50 text-[#00509d] border border-brand-100/60 shadow-xs">
+                    <Package className="w-5 h-5" />
+                  </span>
+                  <span>ACTIVOS FIJOS REGISTRADOS</span>
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Listado y control patrimonial de bienes muebles.</p>
               </div>
               <div className="flex flex-wrap items-center gap-2 shrink-0">
                 <div className="metric-pill">
                   Total encontrados: <strong>{filteredActivos.length}</strong>
                 </div>
+                <div className="metric-pill bg-blue-50/90 text-blue-800 border border-blue-200/80">
+                  Valor Libros: <strong>{formatMoney(totalValorLibrosActivos)}</strong>
+                </div>
+                <div className="metric-pill bg-emerald-50/90 text-emerald-800 border border-emerald-200/80">
+                  Valor Neto: <strong>{formatMoney(totalValorNetoActivos)}</strong>
+                </div>
                 <button
                   onClick={() => handleExportActivosExcel(filteredActivos, 'Inventario')}
-                  className="flex items-center justify-center gap-1.5 bg-[#00b074] hover:bg-[#009b66] text-white font-extrabold py-1.5 px-3.5 rounded-2xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none h-8"
+                  className="flex items-center justify-center gap-1.5 bg-[#00b074] hover:bg-[#009b66] text-white font-extrabold py-1.5 px-3.5 rounded-xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none h-8"
                 >
                   <FileSpreadsheet className="w-3.5 h-3.5 text-white" />
                   <span>Excel</span>
                 </button>
                 <button
                   onClick={() => handleExportActivosPDF(filteredActivos, 'Inventario')}
-                  className="flex items-center justify-center gap-1.5 bg-[#ff3b5c] hover:bg-[#e02e4d] text-white font-extrabold py-1.5 px-3.5 rounded-2xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none h-8"
+                  className="flex items-center justify-center gap-1.5 bg-[#ff3b5c] hover:bg-[#e02e4d] text-white font-extrabold py-1.5 px-3.5 rounded-xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none h-8"
                 >
                   <FileText className="w-3.5 h-3.5 text-white" />
                   <span>PDF</span>
@@ -792,27 +864,38 @@ export default function App() {
         )}
 
         {activeTab === 'OBRAS' && (
-          <div className="flex-1 flex flex-col min-h-0 space-y-4 animate-fadeIn w-full max-w-full overflow-hidden">
-            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between shrink-0 mb-2">
+          <div className="flex-1 flex flex-col min-h-0 space-y-2 animate-fadeIn w-full max-w-full overflow-hidden">
+            <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between shrink-0 mb-1">
               <div className="module-heading">
                 <p className="module-kicker">Obras en ejecución y proyectos</p>
-                <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">OBRAS EN CURSO</h2>
-                <p className="text-sm text-slate-500">Listado de bienes patrimoniales asociados a proyectos y obras en curso (PMO).</p>
+                <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                  <span className="inline-flex items-center justify-center p-1.5 rounded-xl bg-amber-50 text-amber-600 border border-amber-100/60 shadow-xs">
+                    <HardHat className="w-5 h-5" />
+                  </span>
+                  <span>OBRAS EN CURSO (CUENTA 339)</span>
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Listado de bienes patrimoniales asociados a proyectos y obras en curso (PMO).</p>
               </div>
               <div className="flex flex-wrap items-center gap-2 shrink-0">
                 <div className="metric-pill">
                   Total encontrados: <strong>{filteredObras.length}</strong>
                 </div>
+                <div className="metric-pill bg-amber-50/90 text-amber-800 border border-amber-200/80">
+                  Valor Libros: <strong>{formatMoney(totalValorLibrosObras)}</strong>
+                </div>
+                <div className="metric-pill bg-emerald-50/90 text-emerald-800 border border-emerald-200/80">
+                  Valor Neto: <strong>{formatMoney(totalValorNetoObras)}</strong>
+                </div>
                 <button
                   onClick={() => handleExportActivosExcel(filteredObras, 'Obras_En_Curso')}
-                  className="flex items-center justify-center gap-1.5 bg-[#00b074] hover:bg-[#009b66] text-white font-extrabold py-1.5 px-3.5 rounded-2xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none h-8"
+                  className="flex items-center justify-center gap-1.5 bg-[#00b074] hover:bg-[#009b66] text-white font-extrabold py-1.5 px-3.5 rounded-xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none h-8"
                 >
                   <FileSpreadsheet className="w-3.5 h-3.5 text-white" />
                   <span>Excel</span>
                 </button>
                 <button
                   onClick={() => handleExportActivosPDF(filteredObras, 'Obras_En_Curso')}
-                  className="flex items-center justify-center gap-1.5 bg-[#ff3b5c] hover:bg-[#e02e4d] text-white font-extrabold py-1.5 px-3.5 rounded-2xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none h-8"
+                  className="flex items-center justify-center gap-1.5 bg-[#ff3b5c] hover:bg-[#e02e4d] text-white font-extrabold py-1.5 px-3.5 rounded-xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none h-8"
                 >
                   <FileText className="w-3.5 h-3.5 text-white" />
                   <span>PDF</span>
@@ -846,7 +929,7 @@ export default function App() {
         )}
 
         {activeTab === 'DOCUMENTOS' && (
-          <div className="space-y-4 animate-fadeIn w-full max-w-full overflow-hidden">
+          <div className="flex-1 flex flex-col min-h-0 space-y-4 animate-fadeIn w-full max-w-full overflow-hidden">
             <DocumentosPanel onDocumentRegistered={handleDocumentRegistered} />
           </div>
         )}

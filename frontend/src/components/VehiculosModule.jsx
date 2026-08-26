@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Car, Plus, Pencil, Trash2, X, Save, Search, RefreshCw, Loader2,
+  Car, Truck, Plus, Pencil, Trash2, X, Save, Search, RefreshCw, Loader2,
   AlertCircle, Building2, User, Calendar, Tag,
   AlertTriangle, CheckCircle2, Hash, ChevronDown, Settings2, Info,
   FileSpreadsheet, FileText
@@ -1116,38 +1116,40 @@ export default function VehiculosModule() {
   return (
     <div className="flex-1 flex flex-col min-h-0 space-y-4 overflow-hidden animate-fadeIn h-full">
       {/* HEADER */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between shrink-0 mb-1">
         <div className="module-heading">
-          <p className="module-kicker">Gestión de activos vehiculares</p>
-          <h2 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2 mt-0.5">
-            <Car className="w-6 h-6 text-brand-500" />
-            Control de Vehículos
+          <p className="module-kicker">Gestión de transporte</p>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+            <span className="inline-flex items-center justify-center p-1.5 rounded-xl bg-blue-50 text-blue-600 border border-blue-100/60 shadow-xs">
+              <Truck className="w-5 h-5" />
+            </span>
+            <span>FLOTA VEHICULAR PATRIMONIAL</span>
           </h2>
-          <p className="text-sm text-slate-500 mt-0.5">
-            Flota de vehículos y sus características técnicas particulares
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+            Control de unidades, placas, revisiones técnicas y asignaciones.
           </p>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <button onClick={loadData} className="p-2.5 rounded-2xl bg-white border border-slate-200 text-slate-500 hover:text-slate-700 transition-all shadow-sm cursor-pointer h-10 flex items-center justify-center" title="Actualizar">
-            <RefreshCw className="w-4 h-4" />
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <button onClick={loadData} className="p-2 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-slate-700 transition-all shadow-sm cursor-pointer h-8.5 w-8.5 flex items-center justify-center" title="Actualizar">
+            <RefreshCw className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={handleExportExcel}
-            className="flex items-center justify-center gap-1.5 bg-[#00b074] hover:bg-[#009b66] text-white font-extrabold py-2 px-4 rounded-2xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none h-10"
+            className="flex items-center justify-center gap-1.5 bg-[#00b074] hover:bg-[#009b66] text-white font-extrabold py-1.5 px-3.5 rounded-xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none h-8.5"
           >
-            <FileSpreadsheet className="w-4 h-4 text-white" />
+            <FileSpreadsheet className="w-3.5 h-3.5 text-white" />
             <span>Excel</span>
           </button>
           <button
             onClick={handleExportPDF}
-            className="flex items-center justify-center gap-1.5 bg-[#ff3b5c] hover:bg-[#e02e4d] text-white font-extrabold py-2 px-4 rounded-2xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none h-10"
+            className="flex items-center justify-center gap-1.5 bg-[#ff3b5c] hover:bg-[#e02e4d] text-white font-extrabold py-1.5 px-3.5 rounded-xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none h-8.5"
           >
-            <FileText className="w-4 h-4 text-white" />
+            <FileText className="w-3.5 h-3.5 text-white" />
             <span>PDF</span>
           </button>
           <button onClick={() => { setEditItem(null); setShowForm(true); }}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#00509d] hover:bg-[#003f7e] text-white text-sm font-bold rounded-2xl shadow-sm transition-all active:scale-[0.98] border-none cursor-pointer h-10">
-            <Plus className="w-4 h-4" />
+            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#00509d] hover:bg-[#003f7e] text-white text-xs font-bold rounded-xl shadow-sm transition-all active:scale-[0.98] border-none cursor-pointer h-8.5">
+            <Plus className="w-3.5 h-3.5" />
             Registrar Vehículo
           </button>
         </div>

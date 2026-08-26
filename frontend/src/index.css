@@ -8,18 +8,26 @@
     overflow: hidden;
     background:
       linear-gradient(180deg, #f8fafc 0%, #eef3f8 45%, #f8fafc 100%);
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     font-size: 15px;
     line-height: 1.5;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     letter-spacing: -0.010em;
+    font-variant-numeric: tabular-nums;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Plus Jakarta Sans', 'Roboto', sans-serif;
     letter-spacing: -0.02em;
+  }
+
+  /* Mejora de lectura para códigos, números de expedientes y fechas */
+  .font-mono {
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif !important;
+    font-variant-numeric: tabular-nums !important;
+    letter-spacing: 0.02em !important;
   }
 
   label {

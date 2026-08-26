@@ -3,12 +3,19 @@ import { Search, Filter, RotateCcw } from 'lucide-react';
 import { fetchSucursales, fetchPersonal, fetchCompras, fetchIncorporaciones } from '../utils/api';
 import SearchableSelect from './SearchableSelect';
 
-const ESTADOS_ACTIVO = [
-  { value: 'BUENO', label: 'BUENO' },
-  { value: 'REGULAR', label: 'REGULAR' },
-  { value: 'MALO', label: 'MALO' },
-  { value: 'PARA BAJA', label: 'PARA BAJA' },
-  { value: 'BAJA', label: 'BAJA' },
+const MESES = [
+  { value: '1', label: 'Enero' },
+  { value: '2', label: 'Febrero' },
+  { value: '3', label: 'Marzo' },
+  { value: '4', label: 'Abril' },
+  { value: '5', label: 'Mayo' },
+  { value: '6', label: 'Junio' },
+  { value: '7', label: 'Julio' },
+  { value: '8', label: 'Agosto' },
+  { value: '9', label: 'Septiembre' },
+  { value: '10', label: 'Octubre' },
+  { value: '11', label: 'Noviembre' },
+  { value: '12', label: 'Diciembre' },
 ];
 
 export default function Filters({ filters, onChange, activeTab, activos = [] }) {
@@ -45,7 +52,7 @@ export default function Filters({ filters, onChange, activeTab, activos = [] }) 
   };
 
   const handleReset = () => {
-    onChange({ search: '', estado_activo: '', id_sucursal: '', n_doc: '', categoria: '', subcategoria: '' });
+    onChange({ search: '', estado_activo: '', id_sucursal: '', n_doc: '', categoria: '', subcategoria: '', anio: '', mes: '' });
   };
 
   // Categorías y Subcategorías dinámicas extraídas del dataset
@@ -73,6 +80,44 @@ export default function Filters({ filters, onChange, activeTab, activos = [] }) 
     return Array.from(set).sort().map(s => ({ value: s, label: s }));
   }, [activos, filters.categoria]);
 
+  // Años dinámicos del dataset
+  const anioOptions = React.useMemo(() => {
+    const set = new Set();
+    activos.forEach(a => {
+      const dateVal = a.fecha_alta_factura || a.fecha_registro_contable || a.fecha_asignacion || a.fecha_ingreso || a.fecha_alta || a.created_at;
+      if (dateVal) {
+        const dateStr = String(dateVal).trim();
+        const clean = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr;
+        let year = null;
+        if (clean.includes('-')) {
+          const parts = clean.split('-');
+          if (parts[0].length === 4) year = parts[0];
+          else if (parts[2]?.length === 4) year = parts[2];
+        } else if (clean.includes('/')) {
+          const parts = clean.split('/');
+          if (parts[2]?.length === 4) year = parts[2];
+          else if (parts[0]?.length === 4) year = parts[0];
+        }
+        if (year && year.length === 4 && !isNaN(year)) {
+          set.add(year);
+        }
+      }
+    });
+    return Array.from(set).sort((a, b) => b.localeCompare(a)).map(y => ({ value: y, label: y }));
+  }, [activos]);
+
+  // Cuentas contables dinámicas del dataset
+  const cuentaContableOptions = React.useMemo(() => {
+    const set = new Set();
+    activos.forEach(a => {
+      if (a.cuenta_contable) {
+        const cta = String(a.cuenta_contable).trim();
+        if (cta && cta !== '—') set.add(cta);
+      }
+    });
+    return Array.from(set).sort().map(c => ({ value: c, label: c }));
+  }, [activos]);
+
   const documentoOptions = [
     ...compras.map(c => ({
       value: c.n_doc,
@@ -84,38 +129,75 @@ export default function Filters({ filters, onChange, activeTab, activos = [] }) 
     }))
   ];
 
-  const gridColsClass = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5";
+  const gridColsClass = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5 items-end";
 
   return (
-    <div className="glass-panel rounded-xl p-4 sm:p-5 mb-6 relative z-30">
-      <div className="flex items-center justify-between gap-3 mb-4 border-b border-slate-100 pb-3">
+    <div className="glass-panel rounded-xl p-3 sm:p-3.5 mb-2.5 relative z-30">
+      {/* Cabecera superior del panel de filtros con Año y Mes a la derecha */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2 border-b border-slate-100 pb-2">
         <div className="flex items-center space-x-2">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-brand-50 text-brand-600 border border-brand-100/40">
-            <Filter className="w-4 h-4" />
+          <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-brand-50 text-brand-600 border border-brand-100/40 shrink-0">
+            <Filter className="w-3.5 h-3.5" />
           </span>
           <div>
-            <span className="text-sm font-bold text-slate-800">Filtros de búsqueda</span>
-            <p className="text-[0.75rem] text-slate-500">
-              Refina los activos fijos por documento, sucursal, categoría y subcategoría. Busca por código o responsable en Búsqueda Rápida.
+            <span className="text-xs font-bold text-slate-800">Filtros de búsqueda</span>
+            <p className="text-[10.5px] text-slate-500 leading-tight">
+              Refina los activos fijos por documento, sucursal, categoría, subcategoría, cuenta contable, año y mes.
             </p>
+          </div>
+        </div>
+
+        {/* Filtros de Cta. Contable, Año y Mes ubicados en la parte superior derecha */}
+        <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+          {activeTab === 'INVENTARIO' && (
+            <div className="w-32 sm:w-36">
+              <SearchableSelect
+                label="Cta. Contable"
+                name="cuenta_contable"
+                value={filters.cuenta_contable || ''}
+                onChange={(e) => handleSelectChange('cuenta_contable', e.target.value)}
+                options={cuentaContableOptions}
+                placeholder="Todas"
+              />
+            </div>
+          )}
+          <div className="w-24 sm:w-28">
+            <SearchableSelect
+              label="Año"
+              name="anio"
+              value={filters.anio || ''}
+              onChange={(e) => handleSelectChange('anio', e.target.value)}
+              options={anioOptions}
+              placeholder="Todos"
+            />
+          </div>
+          <div className="w-28 sm:w-32">
+            <SearchableSelect
+              label="Mes"
+              name="mes"
+              value={filters.mes || ''}
+              onChange={(e) => handleSelectChange('mes', e.target.value)}
+              options={MESES}
+              placeholder="Todos"
+            />
           </div>
         </div>
       </div>
 
       <div className={gridColsClass}>
-        {/* 1. Búsqueda Rápida */}
-        <div className="relative">
-          <label className="block text-[0.8125rem] font-semibold text-slate-600 mb-1.5">Búsqueda rápida</label>
+        {/* 1. Búsqueda Rápida / Inteligente (Ampliado col-span-2 para mayor comodidad) */}
+        <div className="lg:col-span-2 relative">
+          <label className="block text-[11px] font-semibold text-slate-600 mb-1">Búsqueda rápida</label>
           <div className="relative">
-            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-slate-400" />
+            <span className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+              <Search className="h-3.5 w-3.5 text-slate-400" />
             </span>
             <input
               type="text"
               value={filters.search || ''}
               onChange={handleTextChange}
-              placeholder="Código, denom, resp, acta..."
-              className="block w-full pl-9 pr-3 py-2 bg-slate-50/80 border border-slate-200 rounded-lg focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-600 transition-all placeholder-slate-400 text-xs"
+              placeholder="Escribe código, denominación, responsable, N° acta..."
+              className="block w-full pl-8 pr-3 py-1.5 bg-slate-50/80 border border-slate-200 rounded-lg focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-600 transition-all placeholder-slate-400 text-[11.5px]"
             />
           </div>
         </div>
@@ -161,8 +243,8 @@ export default function Filters({ filters, onChange, activeTab, activos = [] }) 
 
         {/* 5. Subcategoría + Botón Restablecer */}
         <div>
-          <div className="flex items-end space-x-2 w-full">
-            <div className="flex-grow">
+          <div className="flex items-end space-x-1.5 w-full">
+            <div className="flex-grow min-w-0">
               <SearchableSelect
                 label="Sub Categoría"
                 name="subcategoria"
@@ -175,9 +257,9 @@ export default function Filters({ filters, onChange, activeTab, activos = [] }) 
             <button
               onClick={handleReset}
               title="Restablecer filtros"
-              className="h-[38px] w-10 bg-white border border-slate-200 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all flex items-center justify-center flex-shrink-0 shadow-sm"
+              className="h-[32px] w-9 bg-white border border-slate-200 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all flex items-center justify-center flex-shrink-0 shadow-sm cursor-pointer"
             >
-              <RotateCcw className="w-4 h-4" />
+              <RotateCcw className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>

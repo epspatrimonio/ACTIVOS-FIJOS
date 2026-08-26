@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  Users, Plus, Search, Trash2, Edit3, X, AlertCircle, CheckCircle2, ChevronDown,
+  Users, Handshake, Plus, Search, Trash2, Edit3, X, AlertCircle, CheckCircle2, ChevronDown,
   FileSpreadsheet, FileText, PlusCircle, ClipboardList, Calendar, Check,
   UserCheck, Tag
 } from 'lucide-react';
@@ -621,14 +621,16 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
   return (
     <div className="flex-1 flex flex-col min-h-0 space-y-4 animate-fadeIn w-full max-w-full overflow-hidden">
       {/* Módulo Kicker & Título Principal */}
-      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between shrink-0 mb-1">
+      <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between shrink-0 mb-1">
         <div className="module-heading">
-          <p className="module-kicker">Módulo de Ingreso y Control</p>
-          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-            <Users className="w-6 h-6 text-purple-600" />
+          <p className="module-kicker">Custodia externa y control</p>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+            <span className="inline-flex items-center justify-center p-1.5 rounded-xl bg-purple-50 text-purple-600 border border-purple-100/60 shadow-xs">
+              <Handshake className="w-5 h-5" />
+            </span>
             <span>BIENES DE TERCEROS</span>
           </h2>
-          <p className="text-sm text-slate-500">
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
             Registro de propietarios (Personal EPS / Externo), fechas de ingreso/salida y emisión de actas PDF.
           </p>
         </div>
@@ -1151,10 +1153,10 @@ export default function BienesTercerosPanel({ initialSubTab = 'REGISTRO' }) {
                           )}
                         </td>
                         <td className="p-3 text-slate-600 leading-snug">
-                          <div><span className="font-semibold text-slate-700">M:</span> {item.marca || 'S/M'}</div>
-                          <div><span className="font-semibold text-slate-700">Mod:</span> {item.modelo || 'S/M'}</div>
+                          <div><span className="font-semibold text-slate-700">Color:</span> {item.color || '—'}</div>
+                          <div><span className="font-semibold text-slate-700">Marca:</span> {item.marca || 'S/M'}</div>
+                          <div><span className="font-semibold text-slate-700">Modelo:</span> {item.modelo || 'S/M'}</div>
                           <div><span className="font-semibold text-slate-700">Serie:</span> {item.numero_serie || 'S/S'}</div>
-                          {item.color && <div><span className="font-semibold text-slate-700">Color:</span> {item.color}</div>}
                         </td>
                         <td className="p-3 text-slate-600">
                           <div className="font-semibold text-slate-800">{item.sucursal || '—'}</div>

@@ -740,13 +740,18 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="flex-1 flex flex-col min-h-0 space-y-4 h-full overflow-hidden">
       {/* Header Panel */}
-      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+      <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between shrink-0 mb-1">
         <div className="module-heading">
           <p className="module-kicker">Gestión documental</p>
-          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Expedientes de Adquisición</h2>
-          <p className="text-sm text-slate-500">Registra y administra órdenes de compra o resoluciones de incorporación.</p>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+            <span className="inline-flex items-center justify-center p-1.5 rounded-xl bg-slate-100 text-slate-700 border border-slate-200 shadow-xs">
+              <FileText className="w-5 h-5" />
+            </span>
+            <span>EXPEDIENTES Y DOCUMENTOS DE INCORPORACIÓN</span>
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Registra y administra órdenes de compra o resoluciones de incorporación.</p>
         </div>
         <button
           onClick={() => {
@@ -767,14 +772,14 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
       </div>
 
       {success && (
-        <div className="flex items-center space-x-3 bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-2xl animate-fadeIn">
+        <div className="flex items-center space-x-3 bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-2xl animate-fadeIn shrink-0">
           <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
           <span className="text-sm font-semibold">¡Documento registrado correctamente en el sistema!</span>
         </div>
       )}
 
       {error && (
-        <div className="flex items-start space-x-3 bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-2xl animate-fadeIn">
+        <div className="flex items-start space-x-3 bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-2xl animate-fadeIn shrink-0">
           <AlertCircle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
           <div className="text-sm">
             <span className="font-semibold">Error al registrar:</span>
@@ -785,7 +790,7 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
 
       {showForm ? (
         /* FORMULARIO DE REGISTRO */
-        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm animate-fadeIn">
+        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm animate-fadeIn flex-1 min-h-0 overflow-y-auto">
           {/* Tipo de Documento */}
           <div className="mb-6 max-w-xs">
             <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Tipo de Documento</label>
@@ -1208,9 +1213,9 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
         </div>
       ) : (
         /* TABLAS DE EXPEDIENTES EXISTENTES */
-        <div className="space-y-6">
+        <div className="flex-1 flex flex-col min-h-0 space-y-4 overflow-hidden">
           {/* Navegación interna (Compras / Incorporaciones) */}
-          <div className="flex space-x-2 border-b border-slate-100 pb-px">
+          <div className="flex space-x-2 border-b border-slate-100 pb-px shrink-0">
             <button
               onClick={() => setDocType('COMPRA')}
               className={`px-4 py-2 text-xs font-bold uppercase tracking-wider border-b-2 transition-all ${
@@ -1244,7 +1249,7 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
           </div>
 
           {/* Barra de Filtros */}
-          <div className="glass-panel rounded-xl p-5 relative z-30">
+          <div className="glass-panel rounded-xl p-4 shrink-0 relative z-30">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-1">N° Documento / Expediente</label>
@@ -1288,15 +1293,15 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
           </div>
 
           {loading ? (
-            <div className="text-center text-xs text-slate-400 py-12 animate-pulse">
+            <div className="text-center text-xs text-slate-400 py-12 animate-pulse shrink-0">
               Cargando expedientes registrados...
             </div>
           ) : (
-            <>
+            <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
               {docType === 'COMPRA' && (
                 /* TABLA COMPRAS */
-                <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                  <div className="overflow-x-auto min-h-[380px]">
+                <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex-1 min-h-0 flex flex-col">
+                  <div className="overflow-auto flex-1 min-h-0">
                     <table className="min-w-full divide-y divide-slate-100 text-left text-xs">
                       <thead className="bg-[#004C96] text-white font-bold uppercase tracking-wider sticky top-0 z-10 shadow-md">
                         <tr>
@@ -1421,8 +1426,8 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
 
               {docType === 'INCORPORACION' && (
                 /* TABLA INCORPORACIONES */
-                <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                  <div className="overflow-x-auto min-h-[380px]">
+                <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex-1 min-h-0 flex flex-col">
+                  <div className="overflow-auto flex-1 min-h-0">
                     <table className="min-w-full divide-y divide-slate-100 text-left text-xs">
                       <thead className="bg-[#004C96] text-white font-bold uppercase tracking-wider sticky top-0 z-10 shadow-md">
                         <tr>
@@ -1560,8 +1565,8 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
 
               {docType === 'OBRA' && (
                 /* TABLA OBRAS */
-                <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                  <div className="overflow-x-auto min-h-[380px]">
+                <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex-1 min-h-0 flex flex-col">
+                  <div className="overflow-auto flex-1 min-h-0">
                     <table className="min-w-full divide-y divide-slate-100 text-left text-xs">
                       <thead className="bg-[#004C96] text-white font-bold uppercase tracking-wider sticky top-0 z-10 shadow-md">
                         <tr>
@@ -1656,7 +1661,7 @@ export default function DocumentosPanel({ onDocumentRegistered }) {
                   </div>
                 </div>
               )}
-            </>
+            </div>
           )}
         </div>
       )}

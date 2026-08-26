@@ -505,7 +505,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
         <table className={`${tableMinWidth} w-full divide-y divide-slate-200 border-collapse`}>
           <thead className="sticky top-0 bg-[#004C96] text-white z-20 shadow-md">
             <tr>
-              <th scope="col" className="px-3.5 py-2.5 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wider leading-tight min-w-[140px]">
+              <th scope="col" className="px-2.5 py-1.5 text-left text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight min-w-[140px]">
                 <ExcelHeaderFilter
                   title="Cód. Patrimonial"
                   columnKey="cod_patrimonial"
@@ -517,10 +517,11 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   getValue={(item) => getColValue(item, 'cod_patrimonial')}
                 />
               </th>
-              <th scope="col" className="px-3.5 py-2.5 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wider leading-tight min-w-[210px]">
-                <div className="flex flex-col items-center gap-0.5">
+              <th scope="col" className="px-2.5 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight min-w-[210px]">
+                <div className="inline-flex flex-col items-start gap-0.5 min-w-[110px]">
                   <ExcelHeaderFilter
                     title="DOCUMENTO"
+                    className="w-full justify-between"
                     columnKey="n_doc"
                     data={activos}
                     selectedValues={colFilters.n_doc}
@@ -531,6 +532,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   />
                   <ExcelHeaderFilter
                     title="C. CONTABLE"
+                    className="w-full justify-between"
                     columnKey="cuenta_contable"
                     data={activos}
                     selectedValues={colFilters.cuenta_contable}
@@ -541,6 +543,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   />
                   <ExcelHeaderFilter
                     title="C. COSTO"
+                    className="w-full justify-between"
                     columnKey="centro_costo"
                     data={activos}
                     selectedValues={colFilters.centro_costo}
@@ -552,7 +555,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                 </div>
               </th>
 
-              <th scope="col" className="px-3.5 py-2.5 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wider leading-tight min-w-[150px]">
+              <th scope="col" className="px-2.5 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight min-w-[150px]">
                 <ExcelHeaderFilter
                   title="Fecha de Ingreso"
                   columnKey="fecha_ingreso"
@@ -565,10 +568,11 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                 />
               </th>
 
-              <th scope="col" className="px-3.5 py-2.5 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wider leading-tight min-w-[180px]">
-                <div className="flex flex-col items-center gap-0.5">
+              <th scope="col" className="px-2.5 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight min-w-[180px]">
+                <div className="inline-flex flex-col items-start gap-0.5 min-w-[100px]">
                   <ExcelHeaderFilter
-                    title="SUCURSAL"
+                    title="UBICACIÓN"
+                    className="w-full justify-between"
                     columnKey="ubicacion"
                     data={activos}
                     selectedValues={colFilters.ubicacion}
@@ -579,6 +583,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   />
                   <ExcelHeaderFilter
                     title="FINANCIADO"
+                    className="w-full justify-between"
                     columnKey="fuente"
                     data={activos}
                     selectedValues={colFilters.fuente}
@@ -590,10 +595,11 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                 </div>
               </th>
 
-              <th scope="col" className="px-3.5 py-2.5 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wider leading-tight min-w-[250px]">
-                <div className="flex flex-col items-start gap-0.5">
+              <th scope="col" className="px-2.5 py-1.5 text-left text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight min-w-[250px]">
+                <div className="inline-flex flex-col items-start gap-0.5 min-w-[125px]">
                   <ExcelHeaderFilter
                     title="DENOMINACIÓN"
+                    className="w-full justify-between"
                     columnKey="denominacion"
                     data={activos}
                     selectedValues={colFilters.denominacion}
@@ -604,6 +610,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   />
                   <ExcelHeaderFilter
                     title="SUB CATEGORIA"
+                    className="w-full justify-between"
                     columnKey="subcategoria"
                     data={activos}
                     selectedValues={colFilters.subcategoria}
@@ -614,6 +621,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   />
                   <ExcelHeaderFilter
                     title="N° ACTA"
+                    className="w-full justify-between"
                     columnKey="n_acta"
                     data={activos}
                     selectedValues={colFilters.n_acta}
@@ -624,7 +632,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   />
                 </div>
               </th>
-              <th scope="col" className="px-3.5 py-2.5 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wider leading-tight min-w-[210px]">
+              <th scope="col" className="px-2.5 py-1.5 text-left text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight min-w-[210px]">
                 <ExcelHeaderFilter
                   title="Características"
                   columnKey="marca"
@@ -636,7 +644,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   getValue={(item) => getColValue(item, 'marca')}
                 />
               </th>
-              <th scope="col" className="px-3.5 py-2.5 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wider leading-tight min-w-[250px]">
+              <th scope="col" className="px-2.5 py-1.5 text-left text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight min-w-[250px]">
                 <ExcelHeaderFilter
                   title="Especificaciones"
                   columnKey="placa"
@@ -648,7 +656,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   getValue={(item) => getColValue(item, 'placa')}
                 />
               </th>
-              <th scope="col" className="px-3.5 py-2.5 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wider leading-tight min-w-[130px]">
+              <th scope="col" className="px-2.5 py-1.5 text-left text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight min-w-[130px]">
                 <ExcelHeaderFilter
                   title="Estado"
                   columnKey="estado"
@@ -660,7 +668,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   getValue={(item) => getColValue(item, 'estado')}
                 />
               </th>
-              <th scope="col" className="px-3.5 py-2.5 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wider leading-tight min-w-[140px]">
+              <th scope="col" className="px-2.5 py-1.5 text-left text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight min-w-[140px]">
                 <ExcelHeaderFilter
                   title="Valor Libros"
                   columnKey="valor_en_libros"
@@ -672,7 +680,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   getValue={(item) => String(getColValue(item, 'valor_en_libros'))}
                 />
               </th>
-              <th scope="col" className="px-3.5 py-2.5 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wider leading-tight min-w-[140px]">
+              <th scope="col" className="px-2.5 py-1.5 text-left text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight min-w-[140px]">
                 <ExcelHeaderFilter
                   title="Valor Neto"
                   columnKey="valor_neto"
@@ -684,10 +692,11 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   getValue={(item) => String(getColValue(item, 'valor_neto'))}
                 />
               </th>
-              <th scope="col" className="px-3.5 py-2.5 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wider leading-tight min-w-[230px]">
-                <div className="flex flex-col items-start gap-0.5">
+              <th scope="col" className="px-2.5 py-1.5 text-left text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight min-w-[230px]">
+                <div className="inline-flex flex-col items-start gap-0.5 min-w-[110px]">
                   <ExcelHeaderFilter
                     title="RESPONSABLE"
+                    className="w-full justify-between"
                     columnKey="responsable"
                     data={activos}
                     selectedValues={colFilters.responsable}
@@ -698,6 +707,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   />
                   <ExcelHeaderFilter
                     title="PUESTO"
+                    className="w-full justify-between"
                     columnKey="puesto"
                     data={activos}
                     selectedValues={colFilters.puesto}
@@ -708,7 +718,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   />
                 </div>
               </th>
-              <th scope="col" className="px-3.5 py-2.5 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wider leading-tight min-w-[120px]">Gestión</th>
+              <th scope="col" className="px-2.5 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight min-w-[120px]">Gestión</th>
             </tr>
           </thead>
           
@@ -772,28 +782,30 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                 </td>
               </tr>
             ) : (
-              filteredAndSortedActivos.map((activo) => (
-                <tr key={activo.cod_patrimonial} className="table-row-hover text-slate-700">
+              filteredAndSortedActivos.map((activo, idx) => (
+                <tr key={activo.cod_patrimonial} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'} hover:bg-blue-50/75 transition-colors duration-150 text-slate-700`}>
                   {/* Código Patrimonial */}
-                  <td className="px-5 py-4 whitespace-nowrap text-[0.875rem] font-mono font-bold text-slate-900">
-                    {activo.cod_patrimonial}
+                  <td className="px-3 py-2.5 whitespace-nowrap text-left align-middle">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[11px] font-mono font-bold bg-blue-50/80 text-[#00509d] border border-blue-200/60 shadow-2xs">
+                      {activo.cod_patrimonial}
+                    </span>
                   </td>
                   
                   {/* Documento / Cta Contable / Centro Costo */}
-                  <td className="px-5 py-4 whitespace-nowrap text-center">
-                    <div className="font-bold text-slate-800 text-[0.8125rem]">
+                  <td className="px-3 py-2.5 whitespace-nowrap text-center align-middle">
+                    <div className="font-extrabold text-slate-800 text-[12px] font-mono leading-none">
                       {activo.n_doc ? (activo.documento_tipo === 'COMPRA' ? `OC-${activo.n_doc}` : activo.documento_tipo === 'OBRA' ? `OC-${activo.n_doc}` : `INC-${activo.n_doc}`) : '—'}
                     </div>
-                    <div className="text-[0.75rem] text-[#00B0F0] font-mono font-bold mt-0.5">
+                    <div className="text-[11.5px] text-[#0077b6] font-mono font-extrabold mt-1 leading-none">
                       {activo.cuenta_contable || '—'}
                     </div>
-                    <div className="text-[0.75rem] text-slate-400 font-mono mt-0.5">
+                    <div className="text-[11px] text-slate-600 font-mono font-semibold mt-1 leading-none">
                       {activo.centro_costo || '—'}
                     </div>
                   </td>
                   
                   {/* Fecha de Ingreso */}
-                  <td className="px-5 py-4 whitespace-nowrap text-center text-xs">
+                  <td className="px-3 py-2.5 whitespace-nowrap text-center align-middle text-[11px]">
                     <p className="text-slate-700 font-semibold leading-none">
                       Alta: <span className="text-slate-500 font-normal">{formatDate(activo.fecha_alta_factura)}</span>
                     </p>
@@ -803,32 +815,32 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   </td>
                   
                   {/* Ubicación / Financiado */}
-                  <td className="px-5 py-4 whitespace-nowrap text-center">
-                    <div className="font-bold text-slate-800 text-[0.8125rem]">
+                  <td className="px-3 py-2.5 whitespace-nowrap text-center align-middle">
+                    <div className="font-bold text-slate-800 text-[11.5px]">
                       {activo.sucursal || '—'}
                     </div>
                     {activo.localidad && activo.localidad.toUpperCase() !== (activo.sucursal || '').toUpperCase() && (
-                      <div className="text-[0.75rem] text-slate-600 font-medium mt-0.5">
+                      <div className="text-[10px] text-slate-500 font-medium mt-0.5">
                         ({activo.localidad})
                       </div>
                     )}
                     {getFinanciadoText(activo) && (
-                      <div className="text-[0.6875rem] text-slate-500 italic font-medium mt-0.5">
+                      <div className="text-[10px] text-slate-400 italic font-medium mt-0.5">
                         {getFinanciadoText(activo)}
                       </div>
                     )}
                   </td>
                   
                   {/* Denominación / Subcategoría / N° Acta */}
-                  <td className="px-5 py-4 min-w-[200px]">
-                    <div className="text-[0.875rem] font-bold text-slate-900 leading-snug">
+                  <td className="px-3 py-2.5 min-w-[200px] align-middle">
+                    <div className="text-[11.5px] font-bold text-slate-900 leading-snug">
                       {activo.denominacion}
                     </div>
-                    <div className="text-[0.6875rem] text-[#00B0F0] font-bold italic uppercase mt-0.5">
+                    <div className="text-[10px] text-brand-600 font-bold italic uppercase mt-0.5">
                       {activo.subcategoria || activo.categoria || '—'}
                     </div>
                     {activo.n_acta && (
-                      <div className="text-[0.6875rem] text-amber-600 font-mono font-semibold mt-0.5">
+                      <div className="text-[10px] text-amber-600 font-mono font-semibold mt-0.5">
                         {(() => {
                           const dateStr = activo.fecha_alta_factura || activo.fecha_registro_contable || activo.fecha_ingreso || activo.fecha_asignacion;
                           let year = new Date().getFullYear();
@@ -843,17 +855,17 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   </td>
                   
                   {/* Características */}
-                  <td className="px-5 py-4 text-[0.8125rem] min-w-[180px] text-slate-600 leading-normal">
+                  <td className="px-3 py-2.5 text-[11px] min-w-[170px] text-slate-600 leading-tight align-middle">
                     <div className="space-y-0.5">
                       <div><span className="font-semibold text-slate-400">Color:</span> <span className="text-slate-700">{activo.color || '—'}</span></div>
-                      <div><span className="font-semibold text-slate-400">Marca:</span> <span className="text-slate-850 font-medium">{activo.marca || 'S/M'}</span></div>
-                      <div><span className="font-semibold text-slate-400">Modelo:</span> <span className="text-slate-850 font-medium">{activo.modelo || 'S/M'}</span></div>
-                      <div><span className="font-semibold text-slate-400">Serie:</span> <span className="text-slate-850 font-mono font-medium">{activo.numero_serie || 'S/S'}</span></div>
+                      <div><span className="font-semibold text-slate-400">Marca:</span> <span className="text-slate-800 font-medium">{activo.marca || 'S/M'}</span></div>
+                      <div><span className="font-semibold text-slate-400">Modelo:</span> <span className="text-slate-800 font-medium">{activo.modelo || 'S/M'}</span></div>
+                      <div><span className="font-semibold text-slate-400">Serie:</span> <span className="text-slate-800 font-mono font-medium">{activo.numero_serie || 'S/S'}</span></div>
                     </div>
                   </td>
                   
                   {/* Especificaciones */}
-                  <td className="px-5 py-4 text-[0.8125rem] min-w-[220px] leading-snug">
+                  <td className="px-3 py-2.5 text-[11px] min-w-[200px] leading-snug align-middle">
                     {(() => {
                       const isVehicle = (activo.categoria && activo.categoria.toLowerCase().includes('vehiculo')) ||
                                         (activo.subcategoria && activo.subcategoria.toLowerCase().includes('vehiculo')) ||
@@ -885,39 +897,39 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   </td>
                   
                   {/* Estado */}
-                  <td className="px-5 py-4 whitespace-nowrap">
+                  <td className="px-3 py-2.5 whitespace-nowrap text-center align-middle">
                     {getEstadoBadge(activo.estado_activo)}
                   </td>
                   
                   {/* Valor Libros */}
-                  <td className="px-5 py-4 whitespace-nowrap text-[0.8125rem] font-medium text-slate-500">
+                  <td className="px-3 py-2.5 whitespace-nowrap text-[11px] font-medium text-slate-600 align-middle">
                     S/. {new Intl.NumberFormat('es-PE', { minimumFractionDigits: 2 }).format(Number(activo.valor_en_libros) || 0)}
                   </td>
                   
                   {/* Valor Neto */}
-                  <td className="px-5 py-4 whitespace-nowrap text-[0.8125rem] font-bold text-emerald-600">
+                  <td className="px-3 py-2.5 whitespace-nowrap text-[11.5px] font-bold text-emerald-700 align-middle">
                     S/. {new Intl.NumberFormat('es-PE', { minimumFractionDigits: 2 }).format(Number(activo.valor_neto) || 0)}
                   </td>
 
                   {/* Responsable / Puesto */}
-                  <td className="px-5 py-4 min-w-[200px]">
-                    <div className="text-[0.8125rem] font-bold text-slate-800 leading-snug">
+                  <td className="px-3 py-2.5 min-w-[180px] align-middle">
+                    <div className="text-[11.5px] font-bold text-slate-800 leading-snug">
                       {activo.responsable || 'Sin asignar'}
                     </div>
                     {activo.puesto && (
-                      <div className="text-[0.6875rem] text-slate-500 italic font-medium uppercase mt-0.5">
+                      <div className="text-[10px] text-slate-500 font-medium uppercase mt-0.5">
                         {activo.puesto}
                       </div>
                     )}
                   </td>
                   
                   {/* Gestión */}
-                  <td className="px-5 py-4 whitespace-nowrap text-center text-xs">
-                    <div className="flex items-center justify-center space-x-1.5">
+                  <td className="px-3 py-2.5 whitespace-nowrap text-center align-middle text-xs">
+                    <div className="flex items-center justify-center space-x-1">
                       <button
                         onClick={() => generateFichaPDF(activo)}
                         title="Descargar Ficha del Activo"
-                        className="h-8 w-8 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/50 text-emerald-600 hover:text-emerald-700 rounded-lg transition-all duration-200 active:scale-95 inline-flex items-center justify-center shadow-sm"
+                        className="h-7 w-7 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/60 text-emerald-600 hover:text-emerald-700 rounded-lg transition-all duration-150 active:scale-95 inline-flex items-center justify-center shadow-2xs"
                       >
                         <Download className="w-3.5 h-3.5" />
                       </button>
@@ -931,7 +943,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                           target="_blank"
                           rel="noreferrer"
                           title="Ver Expediente de Adquisición"
-                          className="h-8 w-8 bg-amber-50 hover:bg-amber-100 border border-amber-200/50 text-amber-600 hover:text-amber-700 rounded-lg transition-all duration-200 active:scale-95 inline-flex items-center justify-center shadow-sm"
+                          className="h-7 w-7 bg-amber-50 hover:bg-amber-100 border border-amber-200/60 text-amber-600 hover:text-amber-700 rounded-lg transition-all duration-150 active:scale-95 inline-flex items-center justify-center shadow-2xs"
                         >
                           <FileText className="w-3.5 h-3.5" />
                         </a>
@@ -939,14 +951,14 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                       <button
                         onClick={() => onEdit(activo)}
                         title="Editar Activo"
-                        className="h-8 w-8 bg-brand-50 hover:bg-brand-100 border border-brand-200/50 text-brand-600 hover:text-brand-700 rounded-lg transition-all duration-200 active:scale-95 inline-flex items-center justify-center shadow-sm"
+                        className="h-7 w-7 bg-brand-50 hover:bg-brand-100 border border-brand-200/60 text-brand-600 hover:text-brand-700 rounded-lg transition-all duration-150 active:scale-95 inline-flex items-center justify-center shadow-2xs"
                       >
                         <Edit3 className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => handleDelete(activo.cod_patrimonial)}
                         title="Eliminar Activo"
-                        className="h-8 w-8 bg-rose-50 hover:bg-rose-100 border border-rose-200/50 text-rose-500 hover:text-rose-600 rounded-lg transition-all duration-200 active:scale-95 inline-flex items-center justify-center shadow-sm"
+                        className="h-7 w-7 bg-rose-50 hover:bg-rose-100 border border-rose-200/60 text-rose-500 hover:text-rose-600 rounded-lg transition-all duration-150 active:scale-95 inline-flex items-center justify-center shadow-2xs"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>

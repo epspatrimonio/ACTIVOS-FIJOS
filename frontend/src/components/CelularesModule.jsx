@@ -62,21 +62,29 @@ function VidaUtilIndicator({ dias, estado, fechaRenovacion }) {
   const Icon = cfg.icon;
   const pct = Math.max(0, Math.min(100, ((dias ?? 0) / 1095) * 100));
   const barColor = estado === 'VIGENTE' ? '#22c55e' : estado === 'POR_RENOVAR' ? '#f59e0b' : '#ef4444';
+
   return (
-    <div className="mt-1">
-      <div className="flex items-center gap-1.5 mb-1">
-        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${cfg.color}`}>
-          <Icon className="w-2.5 h-2.5" />{cfg.label}
+    <div className="flex flex-col gap-1 min-w-[160px] py-0.5">
+      <div className="flex items-center justify-between gap-1.5">
+        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${cfg.color}`}>
+          <Icon className="w-3 h-3" />
+          {cfg.label}
         </span>
         {dias !== null && (
-          <span className="text-[10px] text-slate-400">
-            {dias < 0 ? `Vencida hace ${Math.abs(dias)}d` : `${dias}d restantes`}
-            {fechaRenovacion && ` · renova: ${fmt(fechaRenovacion)}`}
+          <span className={`text-[11px] font-bold ${dias < 0 ? 'text-rose-600' : dias <= 90 ? 'text-amber-600' : 'text-emerald-700'}`}>
+            {dias < 0 ? `-${Math.abs(dias)}d` : `${dias}d rest.`}
           </span>
         )}
       </div>
-      <div style={{ height: 4, borderRadius: 9999, background: '#f1f5f9', overflow: 'hidden' }}>
-        <div style={{ height: '100%', width: `${pct}%`, background: barColor, borderRadius: 9999, transition: 'width .4s' }} />
+
+      {fechaRenovacion && (
+        <p className="text-[11px] text-slate-600 font-medium leading-tight mt-0.5">
+          Renovación: <strong className="text-slate-800">{fmt(fechaRenovacion)}</strong>
+        </p>
+      )}
+
+      <div className="w-full h-1.5 rounded-full bg-slate-200/90 overflow-hidden mt-0.5 shadow-2xs">
+        <div className="h-full rounded-full transition-all duration-300" style={{ width: `${pct}%`, background: barColor }} />
       </div>
     </div>
   );
@@ -672,35 +680,41 @@ export default function CelularesModule() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16, height: '100%', minHeight: 0, overflow: 'hidden' }} className="flex-1 animate-fadeIn">
       {/* HEADER */}
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:16 }}>
-        <div style={{ borderLeft:'4px solid #0e6fdc', paddingLeft:16 }}>
-          <p style={{ margin:0, fontSize:'0.6875rem', fontWeight:800, color:'#0e6fdc', textTransform:'uppercase', letterSpacing:'0.06em' }}>Activos sujetos a control</p>
-          <h2 style={{ margin:'4px 0', fontSize:'1.5rem', fontWeight:900, color:'#0f172a', display:'flex', alignItems:'center', gap:8 }}>
-            <Smartphone style={{ width:24, height:24, color:'#0e6fdc' }} /> Celulares
+      <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between shrink-0 mb-1">
+        <div className="module-heading">
+          <p className="module-kicker">Flota de comunicaciones</p>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+            <span className="inline-flex items-center justify-center p-1.5 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100/60 shadow-xs">
+              <Smartphone className="w-5 h-5" />
+            </span>
+            <span>ASIGNACIÓN DE CELULARES Y LÍNEAS</span>
           </h2>
-          <p style={{ margin:0, fontSize:'0.875rem', color:'#64748b' }}>Control, asignación y vida útil de equipos móviles</p>
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+            Control, asignación y vida útil de equipos móviles y planes corporativos.
+          </p>
         </div>
-        <div style={{ display:'flex', gap:8, alignItems:'center' }}>
-          <button onClick={load} className="p-2.5 rounded-2xl bg-white border border-slate-200 text-slate-500 hover:text-slate-700 transition-all shadow-sm cursor-pointer h-10 flex items-center justify-center" title="Actualizar">
-            <RefreshCw className="w-4 h-4" />
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <button onClick={load} className="p-2 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-slate-700 transition-all shadow-sm cursor-pointer h-8.5 w-8.5 flex items-center justify-center" title="Actualizar">
+            <RefreshCw className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={handleExportExcel}
-            className="flex items-center justify-center gap-1.5 bg-[#00b074] hover:bg-[#009b66] text-white font-extrabold py-2 px-4 rounded-2xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none h-10"
+            className="flex items-center justify-center gap-1.5 bg-[#00b074] hover:bg-[#009b66] text-white font-extrabold py-1.5 px-3.5 rounded-xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none h-8.5"
           >
-            <FileSpreadsheet className="w-4 h-4 text-white" />
+            <FileSpreadsheet className="w-3.5 h-3.5 text-white" />
             <span>Excel</span>
           </button>
           <button
             onClick={handleExportPDF}
-            className="flex items-center justify-center gap-1.5 bg-[#ff3b5c] hover:bg-[#e02e4d] text-white font-extrabold py-2 px-4 rounded-2xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none h-10"
+            className="flex items-center justify-center gap-1.5 bg-[#ff3b5c] hover:bg-[#e02e4d] text-white font-extrabold py-1.5 px-3.5 rounded-xl text-xs shadow-sm active:scale-[0.98] transition-all cursor-pointer border-none h-8.5"
           >
-            <FileText className="w-4 h-4 text-white" />
+            <FileText className="w-3.5 h-3.5 text-white" />
             <span>PDF</span>
           </button>
           <button onClick={openNew}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#00509d] hover:bg-[#003f7e] text-white text-xs font-bold rounded-2xl shadow-sm transition-all active:scale-[0.98] border-none cursor-pointer h-10">
-            <Plus className="w-4 h-4" /> Registrar Celular
+            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#00509d] hover:bg-[#003f7e] text-white text-xs font-bold rounded-xl shadow-sm transition-all active:scale-[0.98] cursor-pointer h-8.5 border-none">
+            <Plus className="w-3.5 h-3.5" />
+            Registrar Celular
           </button>
         </div>
       </div>

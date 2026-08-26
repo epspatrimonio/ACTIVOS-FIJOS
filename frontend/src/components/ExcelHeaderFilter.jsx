@@ -249,20 +249,20 @@ export default function ExcelHeaderFilter({
   ) : null;
 
   return (
-    <div className={`relative inline-flex items-center gap-1 group/header select-none ${className}`}>
-      <span className="font-extrabold text-white text-[0.6875rem] uppercase tracking-wider leading-tight">{title}</span>
+    <div className={`relative inline-flex items-center gap-1.5 group/header select-none ${className}`}>
+      <span className="font-bold text-white text-[0.625rem] uppercase tracking-wide leading-tight">{title}</span>
       <button
         ref={btnRef}
         type="button"
         onClick={() => isOpen ? setIsOpen(false) : openPopover()}
-        className={`p-0.5 rounded transition-all cursor-pointer ${
+        className={`p-0.5 rounded transition-all cursor-pointer shrink-0 ${
           isFilteredActive || isSortedActive
             ? 'text-amber-300 bg-white/20 ring-1 ring-amber-300/40'
             : 'text-white/70 hover:text-white hover:bg-white/15'
         }`}
         title={`Filtrar ${title}`}
       >
-        <Filter className="w-3.5 h-3.5" />
+        <Filter className="w-3 h-3" />
       </button>
       {popoverContent}
     </div>
