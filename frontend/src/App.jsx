@@ -3,7 +3,7 @@ import {
   ClipboardList, FolderOpen, PlusCircle, Smartphone, Car, ShieldCheck, 
   RefreshCw, LayoutDashboard, LogOut, Mail, Lock, AlertCircle,
   ClipboardCheck, Users, Hammer, Coins, FileSpreadsheet, FileText, ArrowLeftRight,
-  ChevronDown, Menu, X
+  ChevronDown, Menu, X, ExternalLink
 } from 'lucide-react';
 
 import Filters from './components/Filters';
@@ -281,29 +281,151 @@ export default function App() {
   };
 
   const handleExportActivosPDF = async (data, title) => {
-    const headers = [["Código", "Documento", "Sucursal / Localidad", "Denominación del Activo", "Marca/Modelo/Serie", "Estado", "Valor Libros", "Valor Neto", "Responsable"]];
-    const tableRows = data.map(item => [
-      item.cod_patrimonial,
-      item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OC-${item.n_doc}` : `INC-${item.n_doc}`) : '—',
-      `${item.sucursal || '—'}\n(${item.localidad || '—'})`,
-      item.denominacion,
-      `M: ${item.marca || 'S/M'}\nMod: ${item.modelo || 'S/M'}\nSerie: ${item.numero_serie || 'S/S'}`,
-      item.estado_activo,
-      new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(Number(item.valor_en_libros) || 0),
-      new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(Number(item.valor_neto) || 0),
-      item.responsable || 'Sin asignar'
-    ]);
+    const headers = [["Código", "Documento\nCta Contable", "Ubicación\nFinanciado", "Denominación del Activo\nCategoría del Activo", "Características\nEspecificaciones", "Estado", "Valor Libros", "Valor Neto", "Responsable"]];
+    
+    const getUbicacionFinanciado = (v) => {
+      const sucursal = (v.sucursal || '—').trim();
+      const localidad = v.localidad ? v.localidad.trim() : '';
+
+      const codPat = String(v.cod_patrimonial || '').trim();
+      const ctaContable = String(v.cuenta_contable || '').trim();
+      const docTipo = (v.documento_tipo || '').toUpperCase().trim();
+      const fuenteStr = (
+        v.fuente || 
+        v.fuente_origen || 
+        v.documento_concepto || 
+        v.concepto || 
+        v.observaciones || 
+        v.n_doc || 
+        ''
+      ).trim().toUpperCase();
+
+      let financiado = '';
+      if (codPat.startsWith('339') || ctaContable.startsWith('339') || docTipo === 'OBRA') {
+        financiado = 'Obra en curso';
+      } else if (fuenteStr.includes('TRANSF') || fuenteStr.includes('TRANSFERENCIA')) {
+        financiado = 'Transferencia';
+      } else if (fuenteStr.includes('OBRA') || fuenteStr.includes('LIQ')) {
+        financiado = 'Liq. Obra';
+      } else if (fuenteStr.includes('DONAC')) {
+        financiado = 'Donación';
+      } else if (docTipo === 'COMPRA') {
+        financiado = '';
+      } else if (docTipo === 'INCORPORACION') {
+        financiado = (v.fuente || v.fuente_origen || '').trim();
+      }
+
+      const lines = [sucursal];
+      if (localidad && localidad.toUpperCase() !== sucursal.toUpperCase()) {
+        lines.push(localidad);
+      }
+      if (financiado) {
+        lines.push(financiado);
+      }
+
+      return lines.join('\n');
+    };
+
+    const tableRows = data.map(item => {
+      const docCode = item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OC-${item.n_doc}` : `INC-${item.n_doc}`) : '—';
+      const docObj = {
+        content: `${docCode}\n${item.cuenta_contable || '—'}`,
+        doc: docCode,
+        cta: item.cuenta_contable || '—'
+      };
+
+      const getFinanciadoText = (v) => {
+        const codPat = String(v.cod_patrimonial || '').trim();
+        const ctaContable = String(v.cuenta_contable || '').trim();
+        const docTipo = (v.documento_tipo || '').toUpperCase().trim();
+        const fuenteStr = (
+          v.fuente || 
+          v.fuente_origen || 
+          v.documento_concepto || 
+          v.concepto || 
+          v.observaciones || 
+          v.n_doc || 
+          ''
+        ).trim().toUpperCase();
+
+        if (codPat.startsWith('339') || ctaContable.startsWith('339') || docTipo === 'OBRA') {
+          return 'Obra en curso';
+        } else if (fuenteStr.includes('TRANSF') || fuenteStr.includes('TRANSFERENCIA')) {
+          return 'Transferencia';
+        } else if (fuenteStr.includes('OBRA') || fuenteStr.includes('LIQ')) {
+          return 'Liq. Obra';
+        } else if (fuenteStr.includes('DONAC')) {
+          return 'Donación';
+        } else if (docTipo === 'COMPRA') {
+          return '';
+        } else if (docTipo === 'INCORPORACION') {
+          return (v.fuente || v.fuente_origen || '').trim();
+        }
+        return '';
+      };
+
+      const ubiObj = {
+        content: getUbicacionFinanciado(item),
+        sucursal: (item.sucursal || '—').trim(),
+        localidad: (item.localidad && item.localidad.trim().toUpperCase() !== (item.sucursal || '').trim().toUpperCase()) ? item.localidad.trim() : '',
+        financiado: getFinanciadoText(item)
+      };
+
+      const denomObj = {
+        content: `${(item.denominacion || '').toUpperCase()}\n${(item.subcategoria || item.categoria || '—').toUpperCase()}`,
+        denom: item.denominacion || '',
+        cat: item.subcategoria || item.categoria || '—'
+      };
+
+      const isVehiculo = (item.categoria && item.categoria.toLowerCase().includes('vehiculo')) ||
+                         (item.subcategoria && item.subcategoria.toLowerCase().includes('vehiculo')) ||
+                         (item.cod_categoria && String(item.cod_categoria).startsWith('4')) ||
+                         (item.placa && item.placa !== '');
+
+      let especsFormatted = '';
+      if (isVehiculo) {
+        especsFormatted = `Color: ${item.color || '—'}\nMarca: ${item.marca || '—'}\nModelo: ${item.modelo || '—'}\nPlaca: ${item.placa || '—'}\nMotor: ${item.nro_motor || '—'}\nChasis: ${item.nro_chasis || '—'}`;
+      } else {
+        const especStr = (item.especificaciones || item.especificacion || item.caracteristicas_accesorios || item.observaciones || '').trim();
+        const lines = [
+          `Color: ${item.color || '—'}`,
+          `Marca: ${item.marca || '—'}`,
+          `Modelo: ${item.modelo || '—'}`,
+          `Serie: ${item.numero_serie || '—'}`
+        ];
+        if (especStr) lines.push(`Especificaciones: ${especStr}`);
+        especsFormatted = lines.join('\n');
+      }
+
+      const respObj = {
+        content: `${item.responsable || 'Sin asignar'}${item.puesto ? `\n${item.puesto}` : ''}`,
+        resp: item.responsable || 'Sin asignar',
+        puesto: item.puesto || ''
+      };
+
+      return [
+        item.cod_patrimonial,
+        docObj,
+        ubiObj,
+        denomObj,
+        especsFormatted,
+        item.estado_activo,
+        new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(Number(item.valor_en_libros) || 0),
+        new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(Number(item.valor_neto) || 0),
+        respObj
+      ];
+    });
 
     const columnStyles = {
-      0: { cellWidth: 22 },
-      1: { cellWidth: 22 },
-      2: { cellWidth: 32 },
-      3: { cellWidth: 55 },
-      4: { cellWidth: 45 },
-      5: { cellWidth: 18 },
+      0: { cellWidth: 24, fontStyle: 'bold', halign: 'center' },
+      1: { cellWidth: 24, fontStyle: 'bold', halign: 'center' },
+      2: { cellWidth: 30, halign: 'center' },
+      3: { cellWidth: 44 },
+      4: { cellWidth: 50 },
+      5: { cellWidth: 20, halign: 'center' },
       6: { cellWidth: 24, halign: 'right' },
       7: { cellWidth: 24, halign: 'right' },
-      8: { cellWidth: 35 }
+      8: { cellWidth: 32 }
     };
 
     await generateStandardPDF({
@@ -497,6 +619,7 @@ export default function App() {
                 active={['SINCRONIZAR', 'ADMIN'].includes(activeTab)}
                 items={[
                   { label: 'Sincronizar Dashboard Público', icon: <RefreshCw className="w-3.5 h-3.5" />, active: activeTab === 'SINCRONIZAR', onClick: () => { handleTabChange('SINCRONIZAR'); setOpenDropdown(null); } },
+                  { label: 'Abrir Dashboard Público ↗', icon: <ExternalLink className="w-3.5 h-3.5" />, onClick: () => { window.open(getDashboardUrl(), '_blank'); setOpenDropdown(null); } },
                   { label: 'Administración del Sistema', icon: <Lock className="w-3.5 h-3.5" />, active: activeTab === 'ADMIN', onClick: () => { handleTabChange('ADMIN'); setOpenDropdown(null); } }
                 ]}
               />

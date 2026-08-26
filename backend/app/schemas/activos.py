@@ -155,6 +155,10 @@ class ActivoPublicoDTO(BaseModel):
     cuenta_contable: Optional[str] = None
     centro_costo: Optional[str] = None
     requerido_por: Optional[str] = None
+    fuente: Optional[str] = None
+    fuente_origen: Optional[str] = None
+    nota_pedido: Optional[str] = None
+    certificacion_presupuestal: Optional[str] = None
     pdf_expediente_path: Optional[str] = None
     imagen_1_path: Optional[str] = None
     imagen_2_path: Optional[str] = None

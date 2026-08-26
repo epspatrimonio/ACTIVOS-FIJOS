@@ -460,7 +460,7 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
       {/* Contenedor de scroll con altura máxima para hacer efectiva la cabecera sticky */}
       <div className="overflow-x-auto overflow-y-auto w-full flex-1 min-h-0">
         <table className={`${tableMinWidth} w-full divide-y divide-slate-200 border-collapse`}>
-          <thead className="sticky top-0 bg-[#00509d] text-white z-20 shadow-md">
+          <thead className="sticky top-0 bg-[#00B0F0] text-white z-20 shadow-md">
             <tr>
               <th scope="col" className="px-5 py-3 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">
                 <ExcelHeaderFilter
@@ -734,9 +734,12 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   </td>
                   
                   <td className="px-5 py-4 whitespace-nowrap">
-                    <span className="px-2.5 py-1 text-xs font-semibold text-brand-600 bg-brand-50/50 border border-brand-200 rounded-full">
+                    <div className="font-bold text-slate-800 text-[0.8125rem]">
                       {activo.n_doc ? (activo.documento_tipo === 'COMPRA' ? `OC-${activo.n_doc}` : activo.documento_tipo === 'OBRA' ? `OC-${activo.n_doc}` : `INC-${activo.n_doc}`) : '—'}
-                    </span>
+                    </div>
+                    <div className="text-[0.75rem] text-slate-500 font-mono font-medium mt-0.5">
+                      {activo.cuenta_contable || '—'}
+                    </div>
                   </td>
 
                   {/* Cuenta Contable / Centro Costo */}
@@ -805,40 +808,34 @@ export default function ActivosTable({ activos, loading, error, onEdit, onDelete
                   </td>
                   
                   {/* Especificaciones */}
-                  <td className="px-5 py-4 text-[0.8125rem] min-w-[200px] text-slate-500 leading-normal">
+                  <td className="px-5 py-4 text-[0.8125rem] min-w-[220px] leading-snug">
                     {(() => {
-                      const isVehicle = (activo.categoria && activo.categoria.toLowerCase().startsWith('vehiculo')) ||
-                                        (activo.cod_categoria && String(activo.cod_categoria).startsWith('4'));
+                      const isVehicle = (activo.categoria && activo.categoria.toLowerCase().includes('vehiculo')) ||
+                                        (activo.subcategoria && activo.subcategoria.toLowerCase().includes('vehiculo')) ||
+                                        (activo.cod_categoria && String(activo.cod_categoria).startsWith('4')) ||
+                                        (activo.placa && activo.placa !== '');
                       if (isVehicle) {
                         return (
-                          <div className="space-y-1">
-                            <p className="flex items-center gap-1.5 flex-wrap leading-none mb-1">
-                              <span className="font-semibold text-slate-400">Placa:</span>
-                              {activo.placa ? (
-                                <span className="font-mono font-bold text-white bg-[#00509d] px-2 py-0.5 rounded-md text-[10px] tracking-wider whitespace-nowrap shadow-sm">
-                                  {activo.placa}
-                                </span>
-                              ) : (
-                                <span className="text-slate-400 text-xs italic whitespace-nowrap">S/P</span>
-                              )}
-                            </p>
-                            {activo.nro_motor && (
-                              <div><span className="font-semibold text-slate-400 font-mono">Motor:</span> <span className="text-slate-700 font-mono">{activo.nro_motor}</span></div>
-                            )}
-                            {(activo.nro_chasis || activo.numero_serie) && (
-                              <div><span className="font-semibold text-slate-400 font-mono">Chasis:</span> <span className="text-slate-700 font-mono">{activo.nro_chasis || activo.numero_serie}</span></div>
-                            )}
-                            {activo.combustible && (
-                              <div className="mt-1"><span className="font-semibold text-slate-400">Combustible:</span> <span className="text-slate-650 bg-slate-100 px-1 py-0.5 rounded text-[10px] font-bold">{activo.combustible}</span></div>
-                            )}
+                          <div className="space-y-0.5 text-slate-600">
+                            <div><span className="font-semibold text-slate-400">Color:</span> {activo.color || '—'}</div>
+                            <div><span className="font-semibold text-slate-400">Marca:</span> {activo.marca || '—'}</div>
+                            <div><span className="font-semibold text-slate-400">Modelo:</span> {activo.modelo || '—'}</div>
+                            <div><span className="font-semibold text-slate-400">Placa:</span> <span className="font-extrabold font-mono text-slate-900">{activo.placa || '—'}</span></div>
+                            <div><span className="font-semibold text-slate-400">Motor:</span> {activo.nro_motor || '—'}</div>
+                            <div><span className="font-semibold text-slate-400">Chasis:</span> {activo.nro_chasis || '—'}</div>
                           </div>
                         );
                       } else {
-                        return activo.caracteristicas_accesorios ? (
-                          <div className="text-xs text-slate-600 max-w-[200px] truncate" title={activo.caracteristicas_accesorios}>
-                            {activo.caracteristicas_accesorios}
+                        const especStr = (activo.especificaciones || activo.especificacion || activo.caracteristicas_accesorios || activo.observaciones || '').trim();
+                        return (
+                          <div className="space-y-0.5 text-slate-600">
+                            <div><span className="font-semibold text-slate-400">Color:</span> {activo.color || '—'}</div>
+                            <div><span className="font-semibold text-slate-400">Marca:</span> {activo.marca || '—'}</div>
+                            <div><span className="font-semibold text-slate-400">Modelo:</span> {activo.modelo || '—'}</div>
+                            <div><span className="font-semibold text-slate-400">Serie:</span> {activo.numero_serie || '—'}</div>
+                            {especStr && <div><span className="font-semibold text-slate-400">Especificaciones:</span> {especStr}</div>}
                           </div>
-                        ) : <span className="text-slate-400 italic">—</span>;
+                        );
                       }
                     })()}
                   </td>

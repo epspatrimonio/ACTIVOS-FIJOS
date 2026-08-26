@@ -40,9 +40,147 @@ export async function generateStandardPDF({
     head: headers,
     body: data,
     theme: 'grid',
-    headStyles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold' },
+    pageBreak: 'auto',
+    rowPageBreak: 'avoid',
+    headStyles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center' },
     styles: { fontSize: 8, cellPadding: 2, valign: 'middle' },
-    columnStyles: columnStyles
+    columnStyles: columnStyles,
+    willDrawCell: function (data) {
+      if (data.section === 'body' && (data.column.index === 1 || data.column.index === 2 || data.column.index === 3 || data.column.index === 8)) {
+        data.cell.customRaw = data.cell.raw;
+        data.cell.text = [];
+      }
+    },
+    didDrawCell: function (data) {
+      if (data.section === 'body' && data.cell.customRaw) {
+        const cell = data.cell;
+        const raw = cell.customRaw;
+        const x = cell.x + cell.padding('left');
+        const centerX = cell.x + cell.width / 2;
+        const availWidth = cell.width - cell.padding('left') - cell.padding('right');
+        const lineStep = 3.2;
+
+        if (data.column.index === 1 && raw && raw.doc !== undefined) { // Documento / Cta Contable (Centrado)
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(7.5);
+          const docLines = doc.splitTextToSize(raw.doc, availWidth);
+
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(7);
+          const ctaLines = doc.splitTextToSize(raw.cta, availWidth);
+
+          const totalCount = docLines.length + ctaLines.length;
+          let y = cell.y + (cell.height - (totalCount - 1) * lineStep) / 2 + 0.8;
+
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(7.5);
+          doc.setTextColor(30, 41, 59);
+          docLines.forEach(l => {
+            doc.text(l, centerX, y, { align: 'center' });
+            y += lineStep;
+          });
+
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(7);
+          doc.setTextColor(0, 176, 240); // Celeste #00B0F0 para Cta Contable!
+          ctaLines.forEach(l => {
+            doc.text(l, centerX, y, { align: 'center' });
+            y += lineStep;
+          });
+        } else if (data.column.index === 2 && raw && raw.sucursal !== undefined) { // Ubicación / Financiado (Centrado)
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(7.5);
+          const sucLines = doc.splitTextToSize(raw.sucursal.toUpperCase(), availWidth);
+          const locLines = raw.localidad ? doc.splitTextToSize(`(${raw.localidad.toUpperCase()})`, availWidth) : [];
+
+          doc.setFont("helvetica", "italic");
+          doc.setFontSize(6.5);
+          const finLines = raw.financiado ? doc.splitTextToSize(raw.financiado, availWidth) : [];
+
+          const totalCount = sucLines.length + locLines.length + finLines.length;
+          let y = cell.y + (cell.height - (totalCount - 1) * lineStep) / 2 + 0.8;
+
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(7.5);
+          doc.setTextColor(30, 41, 59);
+          sucLines.forEach(l => {
+            doc.text(l, centerX, y, { align: 'center' });
+            y += lineStep;
+          });
+
+          locLines.forEach(l => {
+            doc.text(l, centerX, y, { align: 'center' });
+            y += lineStep;
+          });
+
+          if (finLines.length > 0) {
+            doc.setFont("helvetica", "italic"); // Cursiva!
+            doc.setFontSize(6.5); // Fuente de menor tamaño!
+            doc.setTextColor(71, 85, 105);
+            finLines.forEach(l => {
+              doc.text(l, centerX, y, { align: 'center' });
+              y += lineStep;
+            });
+          }
+        } else if (data.column.index === 3 && raw && raw.denom !== undefined) { // Denominación / Categoría
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(7.5);
+          const denomLines = doc.splitTextToSize((raw.denom || '').toUpperCase(), availWidth);
+
+          doc.setFont("helvetica", "italic");
+          doc.setFontSize(6.5);
+          const catLines = doc.splitTextToSize((raw.cat || '—').toUpperCase(), availWidth);
+
+          const totalCount = denomLines.length + catLines.length;
+          let y = cell.y + (cell.height - (totalCount - 1) * lineStep) / 2 + 0.8;
+
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(7.5);
+          doc.setTextColor(30, 41, 59);
+          denomLines.forEach(l => {
+            doc.text(l, x, y);
+            y += lineStep;
+          });
+
+          doc.setFont("helvetica", "italic");
+          doc.setFontSize(6.5);
+          doc.setTextColor(0, 176, 240); // Celeste #00B0F0 para toda la subcategoría
+          catLines.forEach(l => {
+            doc.text(l, x, y);
+            y += lineStep;
+          });
+        } else if (data.column.index === 8 && raw && raw.resp !== undefined) { // Responsable / Puesto
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(7);
+          const respLines = doc.splitTextToSize((raw.resp || 'Sin asignar').toUpperCase(), availWidth);
+
+          doc.setFont("helvetica", "italic");
+          doc.setFontSize(6);
+          const puestoLines = raw.puesto ? doc.splitTextToSize(raw.puesto.toUpperCase(), availWidth) : [];
+
+          const totalCount = respLines.length + puestoLines.length;
+          let y = cell.y + (cell.height - (totalCount - 1) * lineStep) / 2 + 0.8;
+
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(7);
+          doc.setTextColor(30, 41, 59);
+          respLines.forEach(l => {
+            doc.text(l, x, y);
+            y += lineStep;
+          });
+
+          if (puestoLines.length > 0) {
+            doc.setFont("helvetica", "italic");
+            doc.setFontSize(6);
+            doc.setTextColor(100, 116, 139);
+            puestoLines.forEach(l => {
+              doc.text(l, x, y);
+              y += lineStep;
+            });
+          }
+        }
+      }
+    }
   });
 
   const totalPages = doc.internal.getNumberOfPages();

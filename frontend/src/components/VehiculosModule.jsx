@@ -846,9 +846,14 @@ export default function VehiculosModule() {
       });
 
       const sortedCombined = combined.sort((a, b) => {
-        const dateA = a.fecha_alta_factura || a.fecha_registro_contable || a.fecha_asignacion || '0000-00-00';
-        const dateB = b.fecha_alta_factura || b.fecha_registro_contable || b.fecha_asignacion || '0000-00-00';
-        return dateB.localeCompare(dateA);
+        const sucA = (a.sucursal || '').trim();
+        const sucB = (b.sucursal || '').trim();
+        const compSuc = sucA.localeCompare(sucB, 'es', { sensitivity: 'base' });
+        if (compSuc !== 0) return compSuc;
+
+        const denA = (a.denominacion || '').trim();
+        const denB = (b.denominacion || '').trim();
+        return denA.localeCompare(denB, 'es', { sensitivity: 'base' });
       });
       setVehicles(sortedCombined);
     } catch (e) {
@@ -945,8 +950,8 @@ export default function VehiculosModule() {
       [
         "Placa",
         "Cód. Patrimonial",
-        "Ubicación",
-        "Denominación",
+        "Ubicación Financiado",
+        "DENOMINACIÓN / CARACTERÍSTICAS",
         "Especificaciones Técnicas",
         "Estado",
         "SOAT",
@@ -954,15 +959,66 @@ export default function VehiculosModule() {
         "Responsable"
       ]
     ];
-    const sortedFiltered = [...filtered].sort((a, b) =>
-      (a.denominacion || '').localeCompare(b.denominacion || '', 'es', { sensitivity: 'base' })
-    );
+
+    const getUbicacionFinanciado = (v) => {
+      const sucursal = (v.sucursal || '—').trim();
+      const localidad = v.localidad ? v.localidad.trim() : '';
+
+      const codPat = String(v.cod_patrimonial || '').trim();
+      const ctaContable = String(v.cuenta_contable || '').trim();
+      const docTipo = (v.documento_tipo || '').toUpperCase().trim();
+      const fuenteStr = (
+        v.fuente || 
+        v.fuente_origen || 
+        v.documento_concepto || 
+        v.concepto || 
+        v.observaciones || 
+        v.n_doc || 
+        ''
+      ).trim().toUpperCase();
+
+      let financiado = '';
+      if (codPat.startsWith('339') || ctaContable.startsWith('339') || docTipo === 'OBRA') {
+        financiado = 'Obra en curso';
+      } else if (fuenteStr.includes('TRANSF') || fuenteStr.includes('TRANSFERENCIA')) {
+        financiado = 'Transferencia';
+      } else if (fuenteStr.includes('OBRA') || fuenteStr.includes('LIQ')) {
+        financiado = 'Liq. Obra';
+      } else if (fuenteStr.includes('DONAC')) {
+        financiado = 'Donación';
+      } else if (docTipo === 'COMPRA') {
+        financiado = '';
+      } else if (docTipo === 'INCORPORACION') {
+        financiado = (v.fuente || v.fuente_origen || '').trim();
+      }
+
+      const lines = [sucursal];
+      if (localidad && localidad.toUpperCase() !== sucursal.toUpperCase()) {
+        lines.push(localidad);
+      }
+      if (financiado) {
+        lines.push(financiado);
+      }
+
+      return lines.join('\n');
+    };
+
+    const sortedFiltered = [...filtered].sort((a, b) => {
+      const sucA = (a.sucursal || '').trim();
+      const sucB = (b.sucursal || '').trim();
+      const compSuc = sucA.localeCompare(sucB, 'es', { sensitivity: 'base' });
+      if (compSuc !== 0) return compSuc;
+
+      const denA = (a.denominacion || '').trim();
+      const denB = (b.denominacion || '').trim();
+      return denA.localeCompare(denB, 'es', { sensitivity: 'base' });
+    });
     const tableRows = sortedFiltered.map(v => [
       v.placa || 'S/P',
       v.cod_patrimonial || '—',
-      `${v.sucursal || '—'}${v.localidad ? `\n(${v.localidad})` : ''}`,
-      `${v.denominacion || ''}${v.anio_fabricacion || v.vehiculo_anio ? `\nAño: ${v.anio_fabricacion || v.vehiculo_anio}` : ''}`,
-      `Color: ${v.color || '—'}\nMarca: ${v.marca || '—'}\nModelo: ${v.modelo || '—'}\nMotor: ${v.nro_motor || '—'}\nChasis: ${v.nro_chasis || '—'}\nCombustible: ${v.combustible || '—'}`,
+      getUbicacionFinanciado(v),
+      `${(v.denominacion || '').toUpperCase()}\nMarca: ${v.marca || '—'}\nModelo: ${v.modelo || '—'}\nAño: ${v.vehiculo_anio || v.anio_fabricacion || '—'}\nCAT: ${(v.subcategoria || 'VEHÍCULO').toUpperCase()}`,
+      `Motor: ${v.nro_motor || '—'}\nChasis: ${v.nro_chasis || '—'}\nCombustible: ${v.combustible || '—'}`,
       v.estado_activo || '—',
       v.soat_estado ? `${v.soat_estado}\nVence: ${v.soat_vencimiento ? formatDate(v.soat_vencimiento) : '—'}` : 'No Registrado',
       v.vencimiento_rev_tec ? `${v.estado_rev_tec || 'VIGENTE'}\nVence: ${formatDate(v.vencimiento_rev_tec)}` : 'No registrado',
@@ -970,20 +1026,20 @@ export default function VehiculosModule() {
     ]);
 
     const columnStyles = {
-      0: { cellWidth: 20 },
-      1: { cellWidth: 26 },
-      2: { cellWidth: 28 },
-      3: { cellWidth: 46 },
-      4: { cellWidth: 54 },
-      5: { cellWidth: 18 },
-      6: { cellWidth: 25 },
-      7: { cellWidth: 25 },
+      0: { cellWidth: 20, fontStyle: 'bold', halign: 'center' },
+      1: { cellWidth: 26, fontStyle: 'bold', halign: 'center' },
+      2: { cellWidth: 30 },
+      3: { cellWidth: 44 },
+      4: { cellWidth: 52 },
+      5: { cellWidth: 22, halign: 'center' },
+      6: { cellWidth: 24 },
+      7: { cellWidth: 24 },
       8: { cellWidth: 27 }
     };
 
     await generateStandardPDF({
       title: "CONTROL PATRIMONIAL",
-      subtitle: "INVENTARIO DE VEHÍCULOS",
+      subtitle: "VEHÍCULOS - SOAT & RT",
       headers: headers,
       data: tableRows,
       columnStyles: columnStyles,
@@ -1208,9 +1264,9 @@ export default function VehiculosModule() {
         ) : (
           <div className="overflow-auto flex-1">
             <table className="min-w-[1750px] w-full text-sm">
-              <thead className="bg-[#00509d] text-white sticky top-0 z-10 font-bold">
+              <thead className="bg-[#00B0F0] text-white sticky top-0 z-10 font-bold shadow-md">
                 <tr>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-4 py-3 text-center text-[11px] font-extrabold text-white uppercase tracking-wider whitespace-nowrap">
                     <ExcelHeaderFilter
                       title="Placa"
                       columnKey="placa"
@@ -1222,7 +1278,7 @@ export default function VehiculosModule() {
                       getValue={(item) => getColValue(item, 'placa')}
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-4 py-3 text-center text-[11px] font-extrabold text-white uppercase tracking-wider whitespace-nowrap">
                     <ExcelHeaderFilter
                       title="Cód. Patrimonial"
                       columnKey="cod_patrimonial"
@@ -1234,21 +1290,9 @@ export default function VehiculosModule() {
                       getValue={(item) => getColValue(item, 'cod_patrimonial')}
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-4 py-3 text-center text-[11px] font-extrabold text-white uppercase tracking-wider whitespace-nowrap">
                     <ExcelHeaderFilter
-                      title="Tipo / Subcat"
-                      columnKey="tipo_vehiculo"
-                      data={vehicles}
-                      selectedValues={colFilters.tipo_vehiculo}
-                      onFilterChange={(vals) => handleFilterChange('tipo_vehiculo', vals)}
-                      currentSort={sortConfig}
-                      onSortChange={handleSortChange}
-                      getValue={(item) => getColValue(item, 'tipo_vehiculo')}
-                    />
-                  </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">
-                    <ExcelHeaderFilter
-                      title="Ubicación"
+                      title="Ubicación Financiado"
                       columnKey="sucursal"
                       data={vehicles}
                       selectedValues={colFilters.sucursal}
@@ -1258,9 +1302,9 @@ export default function VehiculosModule() {
                       getValue={(item) => getColValue(item, 'sucursal')}
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-4 py-3 text-center text-[11px] font-extrabold text-white uppercase tracking-wider whitespace-nowrap">
                     <ExcelHeaderFilter
-                      title="Denominación / Marca / Modelo"
+                      title="DENOMINACIÓN / CARACTERÍSTICAS"
                       columnKey="denominacion"
                       data={vehicles}
                       selectedValues={colFilters.denominacion}
@@ -1270,10 +1314,10 @@ export default function VehiculosModule() {
                       getValue={(item) => getColValue(item, 'denominacion')}
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-4 py-3 text-center text-[11px] font-extrabold text-white uppercase tracking-wider whitespace-nowrap">
                     Especificaciones Técnicas
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-4 py-3 text-center text-[11px] font-extrabold text-white uppercase tracking-wider whitespace-nowrap">
                     <ExcelHeaderFilter
                       title="Estado"
                       columnKey="estado_activo"
@@ -1285,13 +1329,13 @@ export default function VehiculosModule() {
                       getValue={(item) => getColValue(item, 'estado_activo')}
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-4 py-3 text-center text-[11px] font-extrabold text-white uppercase tracking-wider whitespace-nowrap">
                     SOAT
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-4 py-3 text-center text-[11px] font-extrabold text-white uppercase tracking-wider whitespace-nowrap">
                     Rev. Técnica
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-4 py-3 text-center text-[11px] font-extrabold text-white uppercase tracking-wider whitespace-nowrap">
                     <ExcelHeaderFilter
                       title="Responsable"
                       columnKey="responsable"
@@ -1303,14 +1347,14 @@ export default function VehiculosModule() {
                       getValue={(item) => getColValue(item, 'responsable')}
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-extrabold text-white/90 uppercase tracking-wider whitespace-nowrap">Gestión</th>
+                  <th className="px-4 py-3 text-center text-[11px] font-extrabold text-white uppercase tracking-wider whitespace-nowrap">Gestión</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filteredAndSorted.map(v => (
                   <tr key={v.cod_patrimonial} className="transition-colors group hover:bg-slate-50/50">
                     {/* Placa */}
-                    <td className="px-4 py-3 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap text-center">
                       {v.placa ? (
                         <span className="font-mono font-bold text-slate-900 bg-white border-2 border-slate-900 px-3 py-1 rounded text-xs tracking-wider shadow-sm whitespace-nowrap">
                           {v.placa}
@@ -1321,32 +1365,31 @@ export default function VehiculosModule() {
                     </td>
 
                     {/* Código Patrimonial */}
-                    <td className="px-4 py-3 whitespace-nowrap font-mono font-bold text-slate-800 text-xs">
+                    <td className="px-4 py-3 whitespace-nowrap font-mono font-bold text-slate-800 text-xs text-center">
                       {v.cod_patrimonial}
                     </td>
 
-                    {/* Tipo / Subcategoria */}
-                    <td className="px-4 py-3 whitespace-nowrap text-xs font-semibold text-brand-600">
-                      {v.subcategoria || 'VEHÍCULO'}
+                    {/* Ubicación Financiado */}
+                    <td className="px-4 py-3 whitespace-nowrap text-center">
+                      {getUbicacionFinanciado(v).split('\n').map((line, idx) => {
+                        if (idx === 0) return <div key={idx} className="font-extrabold text-slate-900 text-[0.8125rem]">{line}</div>;
+                        if (idx === 1 && line !== 'Transferencia' && line !== 'Obra en curso' && line !== 'Liq. Obra' && line !== 'Donación') {
+                          return <div key={idx} className="text-[0.75rem] text-slate-600 font-bold uppercase mt-0.5">{line}</div>;
+                        }
+                        return <div key={idx} className="text-[0.6875rem] text-brand-600 font-bold uppercase tracking-wide mt-0.5">{line}</div>;
+                      })}
                     </td>
 
-                    {/* Ubicación */}
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="font-bold text-slate-800 text-[0.8125rem]">
-                        {v.sucursal || '—'}
+                    {/* Denominación / Características */}
+                    <td className="px-4 py-3 min-w-[240px]">
+                      <div className="text-[0.8125rem] font-extrabold text-slate-900 leading-snug uppercase">
+                        {(v.denominacion || '').toUpperCase()}
                       </div>
-                      <div className="text-[0.6875rem] text-brand-500 font-bold uppercase tracking-wide mt-0.5">
-                        {v.localidad || '—'}
-                      </div>
-                    </td>
-
-                    {/* Denominación / Marca / Modelo */}
-                    <td className="px-4 py-3 min-w-[200px]">
-                      <div className="text-[0.875rem] font-bold text-slate-800 leading-snug">
-                        {v.denominacion}
-                      </div>
-                      <div className="text-[0.75rem] text-slate-400 mt-1">
-                        Año: {v.vehiculo_anio || '—'} &bull; Marca: {v.marca || '—'} &bull; Modelo: {v.modelo || '—'}
+                      <div className="text-[0.75rem] text-slate-600 mt-1 space-y-0.5 font-medium">
+                        <div><span className="font-bold text-slate-500">Marca:</span> {v.marca || '—'}</div>
+                        <div><span className="font-bold text-slate-500">Modelo:</span> {v.modelo || '—'}</div>
+                        <div><span className="font-bold text-slate-500">Año:</span> {v.vehiculo_anio || v.anio_fabricacion || '—'}</div>
+                        <div className="text-[0.7rem] font-semibold text-brand-600 italic mt-0.5">CAT: {(v.subcategoria || 'VEHÍCULO').toUpperCase()}</div>
                       </div>
                     </td>
 

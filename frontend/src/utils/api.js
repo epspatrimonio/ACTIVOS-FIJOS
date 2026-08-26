@@ -1,7 +1,14 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api';
 
 export function getDashboardUrl() {
-  return API_BASE_URL.replace('/api', '/public/');
+  if (typeof window !== 'undefined' && window.location.port === '5173') {
+    const host = window.location.hostname || '127.0.0.1';
+    return `http://${host}:8000/public/`;
+  }
+  if (API_BASE_URL.startsWith('http')) {
+    return API_BASE_URL.replace(/\/api\/?$/, '/public/');
+  }
+  return '/public/';
 }
 
 async function handleResponseError(response, defaultMsg) {
