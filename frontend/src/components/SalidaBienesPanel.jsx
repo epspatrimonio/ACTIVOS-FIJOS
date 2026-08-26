@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
-  FileSpreadsheet, FileText, Download, RefreshCw, Pencil, X, Check, Layers
+  FileSpreadsheet, FileText, Download, RefreshCw, Pencil, X, Check, Layers,
+  Plus, Trash2, Search, UserCheck, ShieldCheck, ClipboardCheck, ArrowRight,
+  LogOut, PlusCircle, ArrowLeftRight, Users, FolderOpen
 } from 'lucide-react';
-import { fetchSalidas, fetchPersonal, fetchSucursales } from '../utils/api';
+import { fetchSalidas, fetchPersonal, fetchSucursales, fetchPuestos, fetchActivos, createSalida } from '../utils/api';
 
 // ──────────────────────────────────────────────────────────────────────────────
 // UTILIDAD: Cargar imágenes
@@ -306,18 +308,572 @@ function EditModal({ salida, onClose, onSave }) {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-// COMPONENTE PRINCIPAL – Solo Historial
+// FORMULARIO NATIVO REACT DE REGISTRO
+// ──────────────────────────────────────────────────────────────────────────────
+function SalidaBienesForm({ onSuccess }) {
+  const [modo, setModo] = useState('SISTEMA'); // 'SISTEMA' | 'MANUAL'
+  const [fechaOrden, setFechaOrden] = useState(new Date().toISOString().split('T')[0]);
+  const [tipoSalida, setTipoSalida] = useState('Mantenimiento');
+  const [motivo, setMotivo] = useState('');
+  const [responsable, setResponsable] = useState('');
+  const [cargo, setCargo] = useState('');
+  const [ubicacion, setUbicacion] = useState('');
+  const [respTecnico, setRespTecnico] = useState('ÁREA TÉCNICA');
+  const [observaciones, setObservaciones] = useState('');
+  
+  const [bienes, setBienes] = useState([]);
+  const [allActivos, setAllActivos] = useState([]);
+  const [personalList, setPersonalList] = useState([]);
+  const [sucursalesList, setSucursalesList] = useState([]);
+  
+  const [searchActivo, setSearchActivo] = useState('');
+  const [showActivoSug, setShowActivoSug] = useState(false);
+  const [showRespSug, setShowRespSug] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    Promise.all([
+      fetchActivos().catch(() => []),
+      fetchPersonal().catch(() => []),
+      fetchSucursales().catch(() => []),
+    ]).then(([activosData, personalData, sucursalesData]) => {
+      setAllActivos(activosData || []);
+      if (Array.isArray(personalData)) {
+        setPersonalList(personalData.map(p => (p.label || p.personal || '').trim().toUpperCase()).filter(Boolean));
+      }
+      if (Array.isArray(sucursalesData)) {
+        const EXCLUDED = new Set(['SELVA CENTRAL', 'EPS SELVA CENTRAL', 'SELVA CENTRAL S.A.', 'RETIRADAS', 'SIN ASIGNAR']);
+        setSucursalesList(sucursalesData.map(s => (s.label || s.sucursal || '').trim().toUpperCase()).filter(s => s && !EXCLUDED.has(s)));
+      }
+    });
+  }, []);
+
+  const handleSelectResponsable = (name) => {
+    setResponsable(name);
+    setShowRespSug(false);
+    if (modo === 'SISTEMA' && name) {
+      const words = name.split(/\s+/).filter(Boolean);
+      const assigned = allActivos.filter(a => {
+        const r = (a.responsable || '').trim().toUpperCase();
+        return words.every(w => r.includes(w));
+      });
+      if (assigned.length > 0) {
+        setBienes(assigned.map(a => ({
+          cod_patrimonial: a.cod_patrimonial || '',
+          denominacion: a.denominacion || '',
+          color: a.color || 'NEGRO',
+          marca: a.marca || 'S/M',
+          modelo: a.modelo || 'S/M',
+          numero_serie: a.numero_serie || 'S/S',
+          estado_activo: a.estado_activo || 'BUENO',
+          accesorios: '',
+          seleccionado: true
+        })));
+        if (assigned[0].puesto) setCargo(assigned[0].puesto.toUpperCase());
+        if (assigned[0].sucursal) setUbicacion(assigned[0].sucursal.toUpperCase());
+      }
+    }
+  };
+
+  const handleAddActivo = (item) => {
+    if (bienes.some(b => b.cod_patrimonial === item.cod_patrimonial)) {
+      alert('Este bien ya ha sido agregado a la orden.');
+      return;
+    }
+    setBienes(prev => [...prev, {
+      cod_patrimonial: item.cod_patrimonial || '',
+      denominacion: item.denominacion || '',
+      color: item.color || 'NEGRO',
+      marca: item.marca || 'S/M',
+      modelo: item.modelo || 'S/M',
+      numero_serie: item.numero_serie || 'S/S',
+      estado_activo: item.estado_activo || 'BUENO',
+      accesorios: '',
+      seleccionado: true
+    }]);
+    setSearchActivo('');
+    setShowActivoSug(false);
+  };
+
+  const handleAddManualRow = () => {
+    setBienes(prev => [...prev, {
+      cod_patrimonial: '',
+      denominacion: '',
+      color: 'NEGRO',
+      marca: 'S/M',
+      modelo: 'S/M',
+      numero_serie: 'S/S',
+      estado_activo: 'BUENO',
+      accesorios: '',
+      isManual: true,
+      seleccionado: true
+    }]);
+  };
+
+  const handleRemoveBien = (index) => {
+    setBienes(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!fechaOrden || !responsable.trim() || !cargo.trim() || !ubicacion.trim() || !motivo.trim()) {
+      alert('Por favor complete todos los campos obligatorios (*).');
+      return;
+    }
+
+    const bienesAEnviar = bienes.filter(b => b.seleccionado !== false);
+    if (bienesAEnviar.length === 0) {
+      alert('Por favor seleccione al menos un bien patrimonial para la orden de salida.');
+      return;
+    }
+
+    for (let i = 0; i < bienesAEnviar.length; i++) {
+      if (!bienesAEnviar[i].denominacion || !bienesAEnviar[i].denominacion.trim()) {
+        alert(`Por favor ingrese la denominación para el bien N° ${i + 1}.`);
+        return;
+      }
+    }
+
+    setLoading(true);
+    try {
+      const payload = {
+        fecha_orden: fechaOrden,
+        tipo_salida: tipoSalida,
+        motivo: motivo.trim(),
+        responsable: responsable.trim().toUpperCase(),
+        cargo: cargo.trim().toUpperCase(),
+        ubicacion: ubicacion.trim().toUpperCase(),
+        resp_tecnico: respTecnico.trim().toUpperCase() || null,
+        observaciones: observaciones.trim() || null,
+        bienes: bienesAEnviar.map(b => ({
+          cod_patrimonial: b.cod_patrimonial || null,
+          denominacion: b.denominacion,
+          color: b.color || null,
+          marca: b.marca || null,
+          modelo: b.modelo || null,
+          numero_serie: b.numero_serie || null,
+          estado_activo: b.estado_activo || 'BUENO',
+          accesorios: b.accesorios || null
+        }))
+      };
+
+      const result = await createSalida(payload);
+      await generarOrdenSalidaPDF(result);
+      alert(`Orden de Salida ${result.n_orden || ''} registrada y descargada exitosamente.`);
+      if (onSuccess) onSuccess();
+    } catch (err) {
+      alert('Error al registrar la orden: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const inputCls = 'w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 bg-white text-slate-800 transition-all';
+  const labelCls = 'block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1';
+
+  return (
+    <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs space-y-6">
+      
+      {/* Selector de Modo */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-slate-150">
+        <div>
+          <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-tight">Nueva Orden de Salida</h3>
+          <p className="text-[11px] text-slate-500 mt-0.5">Seleccione la modalidad de registro e ingrese los datos correspondientes.</p>
+        </div>
+        <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-xl shrink-0">
+          <button
+            type="button"
+            onClick={() => { setModo('SISTEMA'); setBienes([]); }}
+            className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer border-none ${
+              modo === 'SISTEMA' ? 'bg-brand-500 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 bg-transparent'
+            }`}
+          >
+            💻 Desde Sistema
+          </button>
+          <button
+            type="button"
+            onClick={() => { setModo('MANUAL'); setBienes([{ isManual: true, seleccionado: true, denominacion: '', color: 'NEGRO', marca: 'S/M', modelo: 'S/M', numero_serie: 'S/S', estado_activo: 'BUENO' }]); }}
+            className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer border-none ${
+              modo === 'MANUAL' ? 'bg-brand-500 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 bg-transparent'
+            }`}
+          >
+            ✍️ Ingreso Manual Libre
+          </button>
+        </div>
+      </div>
+
+      {/* Datos Principales */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <label className={labelCls}>Fecha de la Orden *</label>
+          <input type="date" value={fechaOrden} onChange={e => setFechaOrden(e.target.value)} className={inputCls} required />
+        </div>
+        <div className="md:col-span-3">
+          <label className={labelCls}>Tipo de Salida *</label>
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            {['Mantenimiento', 'Trabajo de campo', 'Evento institucional', 'Otros'].map(t => (
+              <label key={t} className="flex items-center gap-1.5 text-xs font-bold text-slate-700 cursor-pointer">
+                <input
+                  type="radio"
+                  name="tipoSalida"
+                  value={t}
+                  checked={tipoSalida === t}
+                  onChange={e => setTipoSalida(e.target.value)}
+                  className="w-4 h-4 text-brand-500 border-slate-300 focus:ring-brand-500"
+                />
+                {t}
+              </label>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label className={labelCls}>Motivo Detallado de la Salida *</label>
+        <textarea
+          rows={2}
+          value={motivo}
+          onChange={e => setMotivo(e.target.value)}
+          placeholder="Ingrese el motivo o destino de los bienes..."
+          className={inputCls}
+          style={{ resize: 'none' }}
+          required
+        />
+      </div>
+
+      {/* Titular del Bien */}
+      <div className="space-y-3">
+        <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider border-b border-slate-150 pb-1.5">Titular del Bien</h4>
+        
+        <div className="relative">
+          <label className={labelCls}>NOMBRE RESPONSABLE *</label>
+          <input
+            type="text"
+            value={responsable}
+            onChange={e => {
+              setResponsable(e.target.value);
+              setShowRespSug(true);
+            }}
+            onFocus={() => setShowRespSug(true)}
+            placeholder="Escriba para filtrar responsable..."
+            className={inputCls}
+            required
+          />
+          {showRespSug && responsable.trim() && (
+            <div className="absolute top-full left-0 right-0 z-30 bg-white border border-slate-200 rounded-xl shadow-lg mt-1 max-h-48 overflow-y-auto">
+              {(() => {
+                const words = responsable.trim().toUpperCase().split(/\s+/).filter(Boolean);
+                const matches = personalList.filter(name => words.every(w => name.includes(w))).slice(0, 10);
+                if (matches.length === 0) return null;
+                return matches.map(name => (
+                  <div
+                    key={name}
+                    onClick={() => handleSelectResponsable(name)}
+                    className="p-2.5 hover:bg-brand-50 cursor-pointer text-xs font-bold text-slate-800 border-b border-slate-100 last:border-b-0"
+                  >
+                    {name}
+                  </div>
+                ));
+              })()}
+            </div>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className={labelCls}>PUESTO *</label>
+            <input
+              type="text"
+              value={cargo}
+              onChange={e => setCargo(e.target.value)}
+              placeholder="Escriba puesto..."
+              className={inputCls}
+              required
+            />
+          </div>
+
+          <div>
+            <label className={labelCls}>SUCURSAL *</label>
+            <select value={ubicacion} onChange={e => setUbicacion(e.target.value)} className={inputCls} required>
+              <option value="">-- Seleccionar Sucursal --</option>
+              {sucursalesList.map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Búsqueda o Agregado de Bienes */}
+      <div className="space-y-3 pt-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">
+            Descripción de los Bienes Patrimoniales ({bienes.length})
+          </h4>
+          {modo === 'SISTEMA' ? (
+            <div className="relative w-full sm:w-80">
+              <input
+                type="text"
+                value={searchActivo}
+                onChange={e => { setSearchActivo(e.target.value); setShowActivoSug(true); }}
+                onFocus={() => setShowActivoSug(true)}
+                placeholder="🔍 Buscar por Código o Descripción..."
+                className={inputCls}
+              />
+              {showActivoSug && searchActivo.trim() && (
+                <div className="absolute top-full left-0 right-0 z-30 bg-white border border-slate-200 rounded-xl shadow-lg mt-1 max-h-48 overflow-y-auto">
+                  {allActivos
+                    .filter(a =>
+                      (a.cod_patrimonial || '').toUpperCase().includes(searchActivo.trim().toUpperCase()) ||
+                      (a.denominacion || '').toUpperCase().includes(searchActivo.trim().toUpperCase())
+                    )
+                    .slice(0, 8)
+                    .map(a => (
+                      <div
+                        key={a.id || a.cod_patrimonial}
+                        onClick={() => handleAddActivo(a)}
+                        className="p-2.5 hover:bg-brand-50 cursor-pointer text-xs border-b border-slate-100 last:border-b-0"
+                      >
+                        <div className="font-extrabold text-brand-600 font-mono">{a.cod_patrimonial}</div>
+                        <div className="font-semibold text-slate-800 truncate">{a.denominacion}</div>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={handleAddManualRow}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-brand-700 bg-brand-50 hover:bg-brand-100 rounded-xl transition-all cursor-pointer border border-brand-200"
+            >
+              <Plus className="w-3.5 h-3.5" /> + Agregar Bien Manual
+            </button>
+          )}
+        </div>
+
+        {/* Tabla de Bienes */}
+        <div className="overflow-x-auto border border-slate-200 rounded-xl">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead className="bg-slate-100 text-slate-700 font-extrabold uppercase text-[10px] tracking-wider">
+              <tr>
+                {modo === 'SISTEMA' && <th className="p-2.5 w-10 text-center">Inc.</th>}
+                <th className="p-2.5 w-12 text-center">N°</th>
+                <th className="p-2.5 w-32">Cód. Patrimonial</th>
+                <th className="p-2.5">Denominación / Descripción *</th>
+                <th className="p-2.5 w-24">Color</th>
+                <th className="p-2.5 w-28">Marca</th>
+                <th className="p-2.5 w-28">Modelo</th>
+                <th className="p-2.5 w-28">Serie</th>
+                <th className="p-2.5 w-24 text-center">Estado</th>
+                <th className="p-2.5 w-12 text-center">Quitar</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {bienes.length === 0 ? (
+                <tr>
+                  <td colSpan={10} className="p-6 text-center text-slate-400 font-medium">
+                    No se han agregado bienes a la orden. Seleccione un responsable arriba o busque un bien.
+                  </td>
+                </tr>
+              ) : (
+                bienes.map((b, idx) => (
+                  <tr key={idx} className="hover:bg-slate-50 transition-colors align-middle">
+                    {modo === 'SISTEMA' && (
+                      <td className="p-2.5 text-center">
+                        <input
+                          type="checkbox"
+                          checked={b.seleccionado !== false}
+                          onChange={e => {
+                            const updated = [...bienes];
+                            updated[idx].seleccionado = e.target.checked;
+                            setBienes(updated);
+                          }}
+                          className="w-4 h-4 text-brand-500 rounded border-slate-300 cursor-pointer"
+                        />
+                      </td>
+                    )}
+                    <td className="p-2.5 text-center font-bold text-slate-500 text-[11px]">{idx + 1}</td>
+                    <td className="p-2.5 font-mono font-bold text-brand-600">
+                      {b.isManual ? (
+                        <input
+                          type="text"
+                          value={b.cod_patrimonial}
+                          onChange={e => {
+                            const updated = [...bienes];
+                            updated[idx].cod_patrimonial = e.target.value;
+                            setBienes(updated);
+                          }}
+                          placeholder="Opcional"
+                          className="w-full px-2 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-brand-500 font-mono"
+                        />
+                      ) : (
+                        b.cod_patrimonial || '—'
+                      )}
+                    </td>
+                    <td className="p-2.5">
+                      {b.isManual ? (
+                        <input
+                          type="text"
+                          value={b.denominacion}
+                          onChange={e => {
+                            const updated = [...bienes];
+                            updated[idx].denominacion = e.target.value;
+                            setBienes(updated);
+                          }}
+                          placeholder="Ej: LAPTOP LENOVO..."
+                          className="w-full px-2 py-1 text-xs font-semibold border border-slate-200 rounded-lg focus:outline-none focus:border-brand-500"
+                          required
+                        />
+                      ) : (
+                        <span className="font-semibold text-slate-800">{b.denominacion}</span>
+                      )}
+                    </td>
+                    <td className="p-2.5">
+                      <input
+                        type="text"
+                        value={b.color || ''}
+                        onChange={e => {
+                          const updated = [...bienes];
+                          updated[idx].color = e.target.value;
+                          setBienes(updated);
+                        }}
+                        className="w-full px-2 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-brand-500"
+                      />
+                    </td>
+                    <td className="p-2.5">
+                      <input
+                        type="text"
+                        value={b.marca || ''}
+                        onChange={e => {
+                          const updated = [...bienes];
+                          updated[idx].marca = e.target.value;
+                          setBienes(updated);
+                        }}
+                        className="w-full px-2 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-brand-500"
+                      />
+                    </td>
+                    <td className="p-2.5">
+                      <input
+                        type="text"
+                        value={b.modelo || ''}
+                        onChange={e => {
+                          const updated = [...bienes];
+                          updated[idx].modelo = e.target.value;
+                          setBienes(updated);
+                        }}
+                        className="w-full px-2 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-brand-500"
+                      />
+                    </td>
+                    <td className="p-2.5">
+                      <input
+                        type="text"
+                        value={b.numero_serie || ''}
+                        onChange={e => {
+                          const updated = [...bienes];
+                          updated[idx].numero_serie = e.target.value;
+                          setBienes(updated);
+                        }}
+                        className="w-full px-2 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-brand-500"
+                      />
+                    </td>
+                    <td className="p-2.5 text-center">
+                      <select
+                        value={b.estado_activo || 'BUENO'}
+                        onChange={e => {
+                          const updated = [...bienes];
+                          updated[idx].estado_activo = e.target.value;
+                          setBienes(updated);
+                        }}
+                        className="px-2 py-1 text-[11px] font-bold border border-slate-200 rounded-lg focus:outline-none focus:border-brand-500"
+                      >
+                        <option value="BUENO">BUENO</option>
+                        <option value="REGULAR">REGULAR</option>
+                        <option value="MALO">MALO</option>
+                      </select>
+                    </td>
+                    <td className="p-2.5 text-center">
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveBien(idx)}
+                        className="p-1 hover:bg-rose-50 text-rose-600 rounded-lg transition-colors cursor-pointer border-none"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Firmas y Observaciones */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className={labelCls}>Resp. Área Técnica / Firma de Salida</label>
+          <input
+            type="text"
+            value={respTecnico}
+            onChange={e => setRespTecnico(e.target.value)}
+            placeholder="Ej: ÁREA TÉCNICA / INGENIERÍA"
+            className={inputCls}
+          />
+        </div>
+        <div>
+          <label className={labelCls}>Observaciones Adicionales</label>
+          <input
+            type="text"
+            value={observaciones}
+            onChange={e => setObservaciones(e.target.value)}
+            placeholder="Ej: Salida autorizada para mantenimiento correctivo..."
+            className={inputCls}
+          />
+        </div>
+      </div>
+
+      {/* Botón Guardar */}
+      <div className="flex items-center justify-end pt-4 border-t border-slate-150">
+        <button
+          type="submit"
+          disabled={loading}
+          className="flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-extrabold py-2.5 px-6 rounded-xl text-xs shadow-md transition-all cursor-pointer border-none disabled:opacity-60"
+        >
+          <FileText className="w-4 h-4" />
+          {loading ? 'Generando y Guardando...' : 'Generar y Descargar Orden de Salida (PDF)'}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// COMPONENTE PRINCIPAL – Historial y Registro Nativo
 // ──────────────────────────────────────────────────────────────────────────────
 export default function SalidaBienesPanel({ initialSubTab = 'MODULE' }) {
   const [activeSubTab, setActiveSubTab] = useState(initialSubTab); // 'MODULE' | 'TABLE'
+  const [filtroSucursal, setFiltroSucursal] = useState('Todas');
+  const [sucursalesOptions, setSucursalesOptions] = useState([]);
 
   useEffect(() => {
     if (initialSubTab) setActiveSubTab(initialSubTab);
   }, [initialSubTab]);
+
   const [historial, setHistorial] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [editando, setEditando] = useState(null);
+
+  useEffect(() => {
+    fetchSucursales().then(data => {
+      if (Array.isArray(data)) {
+        const EXCLUDED = new Set(['SELVA CENTRAL', 'EPS SELVA CENTRAL', 'SELVA CENTRAL S.A.', 'RETIRADAS', 'SIN ASIGNAR']);
+        const opts = data.map(s => (s.label || s.sucursal || '').trim().toUpperCase()).filter(s => s && !EXCLUDED.has(s));
+        setSucursalesOptions([...new Set(opts)].sort());
+      }
+    }).catch(() => {});
+  }, []);
 
   const cargarHistorial = useCallback(async () => {
     setLoading(true);
@@ -334,16 +890,23 @@ export default function SalidaBienesPanel({ initialSubTab = 'MODULE' }) {
 
   useEffect(() => { cargarHistorial(); }, [cargarHistorial]);
 
+  const historialFiltrado = historial.filter(s => {
+    if (filtroSucursal !== 'Todas' && (s.ubicacion || '').trim().toUpperCase() !== filtroSucursal) {
+      return false;
+    }
+    return true;
+  });
+
   // ── Exportar Excel ────────────────────────────────────────────────────────
   const handleExcelExport = () => {
     if (!window.XLSX) { alert('La librería SheetJS no está cargada.'); return; }
-    const data = historial.map(s => ({
+    const data = historialFiltrado.map(s => ({
       'N° Orden': s.n_orden,
       'Fecha': s.fecha_orden,
       'Tipo de Salida': s.tipo_salida,
       'Responsable': s.responsable,
-      'Cargo': s.cargo,
-      'Ubicación / Dependencia': s.ubicacion,
+      'Cargo / Puesto': s.cargo,
+      'Sucursal / Ubicación': s.ubicacion,
       'Motivo de Salida': s.motivo,
       'Resp. Técnico Salida': s.resp_tecnico || '—',
       'Cantidad de Bienes': s.bienes ? s.bienes.length : 0,
@@ -369,7 +932,7 @@ export default function SalidaBienesPanel({ initialSubTab = 'MODULE' }) {
     doc.autoTable({
       startY: 32,
       head: [['N° Orden', 'Fecha', 'Responsable', 'Cargo / Dependencia', 'Tipo Salida', 'Motivo de Salida', 'Bienes']],
-      body: historial.map(s => [
+      body: historialFiltrado.map(s => [
         s.n_orden,
         (s.fecha_orden || '').split('-').reverse().join('/'),
         (s.responsable || '').toUpperCase(),
@@ -410,7 +973,7 @@ export default function SalidaBienesPanel({ initialSubTab = 'MODULE' }) {
         />
       )}
 
-      <div className="flex-1 flex flex-col space-y-4 animate-fadeIn w-full max-w-full">
+      <div className="flex-1 flex flex-col space-y-4 animate-fadeIn w-full max-w-full overflow-y-auto smooth-scroll pr-1 pb-8">
 
         {/* Encabezado del módulo */}
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between shrink-0 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
@@ -451,10 +1014,24 @@ export default function SalidaBienesPanel({ initialSubTab = 'MODULE' }) {
           {/* Herramientas (Solo en Vista Tabular) */}
           {activeSubTab === 'TABLE' && (
             <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-bold text-slate-500">Sucursal:</span>
+                <select
+                  value={filtroSucursal}
+                  onChange={e => setFiltroSucursal(e.target.value)}
+                  className="rounded-xl border border-slate-200 py-1.5 px-3 bg-white text-xs font-bold text-slate-700 focus:ring-2 focus:ring-brand-500 transition-all"
+                >
+                  <option value="Todas">Todas las Sucursales</option>
+                  {sucursalesOptions.map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+
               <div className="flex items-center gap-1.5 bg-slate-100 border border-slate-200 rounded-xl px-3 py-1.5">
                 <Layers className="w-3.5 h-3.5 text-slate-500" />
                 <span className="text-xs font-bold text-slate-700">
-                  {historial.length}&nbsp;<span className="font-normal text-slate-500">órdenes</span>
+                  {historialFiltrado.length}&nbsp;<span className="font-normal text-slate-500">órdenes</span>
                 </span>
               </div>
               <button
@@ -479,16 +1056,9 @@ export default function SalidaBienesPanel({ initialSubTab = 'MODULE' }) {
           )}
         </div>
 
-        {/* Vista iframe del Módulo Completo */}
+        {/* Formulario Nativo React */}
         {activeSubTab === 'MODULE' ? (
-          <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-xs w-full min-h-[920px]">
-            <iframe
-              src="/salidabienes/"
-              title="Módulo Salida de Bienes"
-              className="w-full h-[920px] min-h-[920px] border-0"
-              style={{ overflowY: 'auto' }}
-            />
-          </div>
+          <SalidaBienesForm onSuccess={() => { cargarHistorial(); setActiveSubTab('TABLE'); }} />
         ) : (
           <div className="flex-1 overflow-auto min-h-0">
             <table className="w-full text-left text-xs border-collapse">
@@ -518,10 +1088,10 @@ export default function SalidaBienesPanel({ initialSubTab = 'MODULE' }) {
                 {!loading && error && (
                   <tr><td colSpan={8} className="p-10 text-center text-rose-600 font-semibold">{error}</td></tr>
                 )}
-                {!loading && !error && historial.length === 0 && (
+                {!loading && !error && historialFiltrado.length === 0 && (
                   <tr><td colSpan={8} className="p-12 text-center text-slate-400 font-medium">No hay registros de salidas en el sistema.</td></tr>
                 )}
-                {!loading && !error && historial.map((s) => (
+                {!loading && !error && historialFiltrado.map((s) => (
                   <tr key={s.id} className="hover:bg-slate-50/70 transition-colors align-middle">
                     <td className="p-3 font-black text-brand-600 font-mono text-sm">{s.n_orden}</td>
                     <td className="p-3 text-slate-600 font-semibold">
@@ -637,4 +1207,3 @@ export default function SalidaBienesPanel({ initialSubTab = 'MODULE' }) {
     </>
   );
 }
-

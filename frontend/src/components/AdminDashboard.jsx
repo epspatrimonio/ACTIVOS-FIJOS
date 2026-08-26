@@ -651,7 +651,7 @@ export default function AdminDashboard() {
   const alertRt = getVehicles().filter(v => v.estado_activo !== 'PARA BAJA' && v.estado_activo !== 'BAJA').filter(v => v.vencimiento_rev_tec && (v.estado_rev_tec === 'VENCIDO' || v.estado_rev_tec === 'POR_VENCER'));
 
   return (
-    <div className="w-full flex-1 flex flex-col min-h-0 space-y-4">
+    <div className="w-full flex-1 flex flex-col min-h-0 space-y-4 overflow-y-auto smooth-scroll pr-1 pb-8">
       
       {/* Título de Encabezado */}
       <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between shrink-0 mb-2">

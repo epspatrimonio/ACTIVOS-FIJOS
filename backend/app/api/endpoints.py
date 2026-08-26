@@ -649,12 +649,23 @@ async def sincronizar_publico(db: AsyncSession = Depends(get_db)):
             for item in ter_items
         ]
         
+        # 5. Consultar y serializar salidas de bienes
+        sal_query = select(SalidaBienes).order_by(SalidaBienes.fecha_orden.desc(), SalidaBienes.id.desc())
+        sal_result = await db.execute(sal_query)
+        sal_items = sal_result.scalars().all()
+        
+        serialized_sal = [
+            SalidaBienesResponse.model_validate(item).model_dump(mode="json")
+            for item in sal_items
+        ]
+        
         # Obtener ruta física del config
         export_path = settings.PUBLIC_EXPORT_PATH
         dir_name = os.path.dirname(export_path)
         cel_export_path = os.path.join(dir_name, "celulares.json")
         inv_export_path = os.path.join(dir_name, "inventario_fisico.json")
         ter_export_path = os.path.join(dir_name, "bienes_terceros.json")
+        sal_export_path = os.path.join(dir_name, "salidas.json")
         
         # Crear directorios si no existen
         if dir_name:
@@ -670,6 +681,8 @@ async def sincronizar_publico(db: AsyncSession = Depends(get_db)):
                 json.dump(serialized_inv, f, ensure_ascii=False, indent=2)
             with open(ter_export_path, "w", encoding="utf-8") as f:
                 json.dump(serialized_ter, f, ensure_ascii=False, indent=2)
+            with open(sal_export_path, "w", encoding="utf-8") as f:
+                json.dump(serialized_sal, f, ensure_ascii=False, indent=2)
                 
             # Copiar archivos físicos subidos al dashboard público
             uploads_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "uploads")

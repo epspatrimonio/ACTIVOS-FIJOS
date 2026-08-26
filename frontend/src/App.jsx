@@ -649,9 +649,9 @@ export default function App() {
                 items={[
                   { label: 'Documentos', icon: <FolderOpen className="w-3.5 h-3.5" />, active: activeTab === 'DOCUMENTOS', onClick: () => { handleTabChange('DOCUMENTOS'); setOpenDropdown(null); } },
                   { label: 'Registrar Activo', icon: <PlusCircle className="w-3.5 h-3.5" />, active: activeTab === 'REGISTRO', onClick: () => { handleTabChange('REGISTRO'); setOpenDropdown(null); } },
-                  { label: 'Salida de Bienes (Registro)', icon: <LogOut className="w-3.5 h-3.5 rotate-180" />, active: activeTab === 'SALIDAS_REGISTRO', onClick: () => { handleTabChange('SALIDAS_REGISTRO'); setOpenDropdown(null); } },
-                  { label: 'Reasignación (Registro)', icon: <ArrowLeftRight className="w-3.5 h-3.5" />, active: activeTab === 'TRANSFERENCIAS_REGISTRO', onClick: () => { handleTabChange('TRANSFERENCIAS_REGISTRO'); setOpenDropdown(null); } },
-                  { label: 'Bienes de Terceros (Registro)', icon: <Users className="w-3.5 h-3.5" />, active: activeTab === 'TERCEROS_REGISTRO', onClick: () => { handleTabChange('TERCEROS_REGISTRO'); setOpenDropdown(null); } },
+                  { label: 'Salida de Bienes', icon: <LogOut className="w-3.5 h-3.5 rotate-180" />, active: activeTab === 'SALIDAS_REGISTRO', onClick: () => { handleTabChange('SALIDAS_REGISTRO'); setOpenDropdown(null); } },
+                  { label: 'Reasignación', icon: <ArrowLeftRight className="w-3.5 h-3.5" />, active: activeTab === 'TRANSFERENCIAS_REGISTRO', onClick: () => { handleTabChange('TRANSFERENCIAS_REGISTRO'); setOpenDropdown(null); } },
+                  { label: 'Bienes de Terceros', icon: <Users className="w-3.5 h-3.5" />, active: activeTab === 'TERCEROS_REGISTRO', onClick: () => { handleTabChange('TERCEROS_REGISTRO'); setOpenDropdown(null); } },
                 ]}
               />
 
@@ -665,11 +665,11 @@ export default function App() {
                   { label: 'Activos Fijos', icon: <ClipboardList className="w-3.5 h-3.5" />, active: activeTab === 'INVENTARIO', onClick: () => { handleTabChange('INVENTARIO'); setOpenDropdown(null); } },
                   { label: 'Obras en Curso', icon: <Hammer className="w-3.5 h-3.5" />, active: activeTab === 'OBRAS', onClick: () => { handleTabChange('OBRAS'); setOpenDropdown(null); } },
                   { label: 'SOAT y Rev. Técnica', icon: <ShieldCheck className="w-3.5 h-3.5" />, active: activeTab === 'SOAT', onClick: () => { handleTabChange('SOAT'); setOpenDropdown(null); } },
-                  { label: 'Equipos Celulares', icon: <Smartphone className="w-3.5 h-3.5" />, active: activeTab === 'CELULARES', onClick: () => { handleTabChange('CELULARES'); setOpenDropdown(null); } },
                   { label: 'Sobrantes/Faltantes', icon: <ClipboardCheck className="w-3.5 h-3.5" />, active: activeTab === 'INVENTARIO_FISICO', onClick: () => { handleTabChange('INVENTARIO_FISICO'); setOpenDropdown(null); } },
-                  { label: 'Bienes de Terceros (Tabla)', icon: <Users className="w-3.5 h-3.5" />, active: activeTab === 'TERCEROS_TABLA', onClick: () => { handleTabChange('TERCEROS_TABLA'); setOpenDropdown(null); } },
-                  { label: 'Salida de Bienes (Historial)', icon: <LogOut className="w-3.5 h-3.5 rotate-180" />, active: activeTab === 'SALIDAS_TABLA', onClick: () => { handleTabChange('SALIDAS_TABLA'); setOpenDropdown(null); } },
-                  { label: 'Reasignaciones (Historial)', icon: <ArrowLeftRight className="w-3.5 h-3.5" />, active: activeTab === 'TRANSFERENCIAS_TABLA', onClick: () => { handleTabChange('TRANSFERENCIAS_TABLA'); setOpenDropdown(null); } },
+                  { label: 'Bienes de Terceros', icon: <Users className="w-3.5 h-3.5" />, active: activeTab === 'TERCEROS_TABLA', onClick: () => { handleTabChange('TERCEROS_TABLA'); setOpenDropdown(null); } },
+                  { label: 'Equipos Celulares', icon: <Smartphone className="w-3.5 h-3.5" />, active: activeTab === 'CELULARES', onClick: () => { handleTabChange('CELULARES'); setOpenDropdown(null); } },
+                  { label: 'Salida de Bienes', icon: <LogOut className="w-3.5 h-3.5 rotate-180" />, active: activeTab === 'SALIDAS_TABLA', onClick: () => { handleTabChange('SALIDAS_TABLA'); setOpenDropdown(null); } },
+                  { label: 'Reasignación', icon: <ArrowLeftRight className="w-3.5 h-3.5" />, active: activeTab === 'TRANSFERENCIAS_TABLA', onClick: () => { handleTabChange('TRANSFERENCIAS_TABLA'); setOpenDropdown(null); } },
                 ]}
               />
 
@@ -1003,7 +1003,7 @@ export default function App() {
         )}
 
         {(activeTab === 'DASHBOARD' || activeTab === 'ADMIN') && (
-          <div className="space-y-4 animate-fadeIn pt-2 flex flex-col flex-1 min-h-0">
+          <div className="space-y-4 animate-fadeIn pt-2 flex flex-col flex-1 min-h-0 overflow-y-auto">
             <AdminDashboard />
           </div>
         )}
