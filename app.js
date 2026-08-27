@@ -110,7 +110,35 @@ document.addEventListener('DOMContentLoaded', () => {
           });
         }
       } catch (e) {}
-      
+
+      // Normalizar formato de ordenes legacy OS-YYYY-XXX a XXX-YYYY (ej: OS-2026-035 -> 035-2026)
+      salidas.forEach(s => {
+        if (s && s.n_orden && String(s.n_orden).startsWith('OS-')) {
+          const parts = String(s.n_orden).split('-');
+          if (parts.length === 3) {
+            s.n_orden = `${parts[2]}-${parts[1]}`;
+          }
+        }
+      });
+      try {
+        const localSaved = JSON.parse(localStorage.getItem('salidas_custom_history') || '[]');
+        if (Array.isArray(localSaved) && localSaved.length > 0) {
+          let updated = false;
+          localSaved.forEach(item => {
+            if (item && item.n_orden && String(item.n_orden).startsWith('OS-')) {
+              const parts = String(item.n_orden).split('-');
+              if (parts.length === 3) {
+                item.n_orden = `${parts[2]}-${parts[1]}`;
+                updated = true;
+              }
+            }
+          });
+          if (updated) {
+            localStorage.setItem('salidas_custom_history', JSON.stringify(localSaved));
+          }
+        }
+      } catch (e) {}
+
       // Cargar tipografía en paralelo
       loadAgencyFont();
 
@@ -1915,69 +1943,102 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Actualizar Badge N° Orden Correlativo
+  function generarProximoNumeroOrden(targetYear) {
+    const year = targetYear || new Date().getFullYear();
+    let maxNum = 0;
+    (salidas || []).forEach(s => {
+      if (!s || !s.n_orden) return;
+      const str = String(s.n_orden).trim();
+      const parts = str.split('-');
+      if (parts.length === 2 && !isNaN(parts[0])) {
+        const num = parseInt(parts[0], 10);
+        const y = parseInt(parts[1], 10);
+        if (y === Number(year) && num > maxNum) {
+          maxNum = num;
+        }
+      } else if (parts.length === 3 && !isNaN(parts[2])) {
+        const y = parseInt(parts[1], 10);
+        const num = parseInt(parts[2], 10);
+        if (y === Number(year) && num > maxNum) {
+          maxNum = num;
+        }
+      }
+    });
+    const nextNum = maxNum + 1;
+    return `${String(nextNum).padStart(3, '0')}-${year}`;
+  }
+
+  function updateSalidaCodigoBadge() {
     const codigoBadge = document.getElementById('salida-codigo-badge');
     if (codigoBadge) {
-      const count = (salidas ? salidas.length : 0) + 1;
-      codigoBadge.textContent = `OS-${new Date().getFullYear()}-${String(count).padStart(3, '0')}`;
+      const fechaVal = document.getElementById('salida-fecha')?.value;
+      const year = fechaVal ? new Date(fechaVal).getFullYear() : new Date().getFullYear();
+      codigoBadge.textContent = generarProximoNumeroOrden(year);
     }
+  }
 
-    // Limpiar Formulario
-    const btnLimpiar = document.getElementById('btn-salida-limpiar');
-    if (btnLimpiar) {
-      btnLimpiar.addEventListener('click', () => {
-        if (confirm('¿Desea limpiar todos los campos del formulario?')) {
-          if (document.getElementById('salida-motivo')) document.getElementById('salida-motivo').value = '';
-          if (document.getElementById('salida-responsable')) document.getElementById('salida-responsable').value = '';
-          if (document.getElementById('salida-cargo')) document.getElementById('salida-cargo').value = '';
-          if (document.getElementById('salida-observaciones')) document.getElementById('salida-observaciones').value = '';
-          salidaBienesSeleccionados = [];
-          renderSalidaBienesFormTable();
-        }
-      });
-    }
+  // Actualizar Badge N° Orden Correlativo
+  updateSalidaCodigoBadge();
 
-    // Cerrar sugerencias al hacer clic fuera
-    document.addEventListener('click', (e) => {
-      if (respInput && e.target !== respInput && respSug) respSug.classList.add('hidden');
-      if (activoInput && e.target !== activoInput && activoSug) activoSug.classList.add('hidden');
+  // Actualizar Badge cuando cambie la fecha
+  document.getElementById('salida-fecha')?.addEventListener('change', updateSalidaCodigoBadge);
+
+  // Limpiar Formulario
+  const btnLimpiar = document.getElementById('btn-salida-limpiar');
+  if (btnLimpiar) {
+    btnLimpiar.addEventListener('click', () => {
+      if (confirm('¿Desea limpiar todos los campos del formulario?')) {
+        if (document.getElementById('salida-motivo')) document.getElementById('salida-motivo').value = '';
+        if (document.getElementById('salida-responsable')) document.getElementById('salida-responsable').value = '';
+        if (document.getElementById('salida-cargo')) document.getElementById('salida-cargo').value = '';
+        if (document.getElementById('salida-observaciones')) document.getElementById('salida-observaciones').value = '';
+        salidaBienesSeleccionados = [];
+        renderSalidaBienesFormTable();
+      }
     });
+  }
 
-    // Submit / Generar PDF
-    const btnGenerarPDF = document.getElementById('btn-salida-generar-pdf');
-    if (btnGenerarPDF) {
-      btnGenerarPDF.addEventListener('click', async () => {
-        const fecha = document.getElementById('salida-fecha')?.value;
-        const tipoInput = document.querySelector('input[name="salida_tipo_public"]:checked');
-        const tipo = tipoInput ? tipoInput.value : 'Mantenimiento';
-        const motivo = document.getElementById('salida-motivo')?.value.trim();
-        const responsable = document.getElementById('salida-responsable')?.value.trim().toUpperCase();
-        const cargo = document.getElementById('salida-cargo')?.value.trim().toUpperCase();
-        const ubicacion = document.getElementById('salida-ubicacion')?.value.trim().toUpperCase();
-        const respTecnico = document.getElementById('salida-resp-tecnico')?.value.trim().toUpperCase() || 'ÁREA TÉCNICA';
-        const observaciones = document.getElementById('salida-observaciones')?.value.trim().toUpperCase();
+  // Cerrar sugerencias al hacer clic fuera
+  document.addEventListener('click', (e) => {
+    if (respInput && e.target !== respInput && respSug) respSug.classList.add('hidden');
+    if (activoInput && e.target !== activoInput && activoSug) activoSug.classList.add('hidden');
+  });
 
-        if (!fecha || !responsable || !cargo || !ubicacion || !motivo) {
-          alert('Por favor complete todos los datos obligatorios del formulario (Fecha, Motivo, Responsable, Cargo y Ubicación).');
+  // Submit / Generar PDF
+  const btnGenerarPDF = document.getElementById('btn-salida-generar-pdf');
+  if (btnGenerarPDF) {
+    btnGenerarPDF.addEventListener('click', async () => {
+      const fecha = document.getElementById('salida-fecha')?.value;
+      const tipoInput = document.querySelector('input[name="salida_tipo_public"]:checked');
+      const tipo = tipoInput ? tipoInput.value : 'Mantenimiento';
+      const motivo = document.getElementById('salida-motivo')?.value.trim();
+      const responsable = document.getElementById('salida-responsable')?.value.trim().toUpperCase();
+      const cargo = document.getElementById('salida-cargo')?.value.trim().toUpperCase();
+      const ubicacion = document.getElementById('salida-ubicacion')?.value.trim().toUpperCase();
+      const respTecnico = document.getElementById('salida-resp-tecnico')?.value.trim().toUpperCase() || 'ÁREA TÉCNICA';
+      const observaciones = document.getElementById('salida-observaciones')?.value.trim().toUpperCase();
+
+      if (!fecha || !responsable || !cargo || !ubicacion || !motivo) {
+        alert('Por favor complete todos los datos obligatorios del formulario (Fecha, Motivo, Responsable, Cargo y Ubicación).');
+        return;
+      }
+
+      const bienesAEnviar = salidaBienesSeleccionados.filter(b => b.seleccionado !== false);
+      if (bienesAEnviar.length === 0) {
+        alert('Por favor seleccione o agregue al menos un bien patrimonial para la orden de salida.');
+        return;
+      }
+
+      for (let i = 0; i < bienesAEnviar.length; i++) {
+        if (!bienesAEnviar[i].denominacion || !bienesAEnviar[i].denominacion.trim()) {
+          alert(`Por favor ingrese la denominación para el bien N° ${i + 1}.`);
           return;
         }
+      }
 
-        const bienesAEnviar = salidaBienesSeleccionados.filter(b => b.seleccionado !== false);
-        if (bienesAEnviar.length === 0) {
-          alert('Por favor seleccione o agregue al menos un bien patrimonial para la orden de salida.');
-          return;
-        }
-
-        for (let i = 0; i < bienesAEnviar.length; i++) {
-          if (!bienesAEnviar[i].denominacion || !bienesAEnviar[i].denominacion.trim()) {
-            alert(`Por favor ingrese la denominación para el bien N° ${i + 1}.`);
-            return;
-          }
-        }
-
-        // Generar N° Orden correlativo
-        const count = (salidas ? salidas.length : 0) + 1;
-        const n_orden = `OS-${new Date().getFullYear()}-${String(count).padStart(3, '0')}`;
+      // Generar N° Orden correlativo oficial (ej: 035-2026)
+      const year = fecha ? new Date(fecha).getFullYear() : new Date().getFullYear();
+      const n_orden = generarProximoNumeroOrden(year);
 
         const payload = {
           n_orden: n_orden,
@@ -2044,10 +2105,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderSalidaBienesFormTable();
 
         // Actualizar N° Orden correlativo para el siguiente registro
-        if (codigoBadge) {
-          const nextCount = (salidas ? salidas.length : 0) + 1;
-          codigoBadge.textContent = `OS-${new Date().getFullYear()}-${String(nextCount).padStart(3, '0')}`;
-        }
+        updateSalidaCodigoBadge();
 
         // Cambiar automáticamente a la subpestaña "Tablas y Consultas" para mostrar el nuevo registro inmediatamente
         if (btnSubtabHistory) {
