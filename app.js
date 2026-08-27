@@ -671,8 +671,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Cambiar la etiqueta del filtro de Estado/Tipo dinámicamente
     const label = document.getElementById('filter-estado-label');
     const isTipo = currentTab === 'inventario' || currentTab === 'terceros';
+    const isVehiculo = currentTab === 'vehiculos' || currentTab === 'soat';
     if (label) {
-      label.textContent = isTipo ? 'Tipo' : 'Estado';
+      label.textContent = isTipo ? 'Tipo' : (isVehiculo ? 'ESTADO VEH.' : 'Estado');
     }
     
     // Limpiar opciones manteniendo la primera por defecto
@@ -1153,7 +1154,11 @@ document.addEventListener('DOMContentLoaded', () => {
          ((currentTab === 'inventario' || currentTab === 'terceros') ? item.tipo === selectedEstado : item.estado_activo === selectedEstado));
 
       // Filtro de Estado del SOAT (para VEHICULOS y SOAT & RT)
-      const soatEstadoMatch = !selectedSoatEstado || (item.soat_estado === selectedSoatEstado);
+      const isBaja = item.estado_activo === 'PARA BAJA' || item.estado_activo === 'BAJA';
+      const soatEstadoMatch = !selectedSoatEstado || (
+        (item.soat_estado === selectedSoatEstado || item.estado_soat === selectedSoatEstado) &&
+        (selectedSoatEstado !== 'VENCIDO' || !isBaja)
+      );
 
       // Filtro de Categoría y Subcategoría (si aplica)
       const hasCategories = currentTab === 'activos' || currentTab === 'obras' || currentTab === 'inventario';
@@ -3945,7 +3950,7 @@ document.addEventListener('DOMContentLoaded', () => {
           8: { cellWidth: 24, halign: 'right' },
           9: { cellWidth: 28 }
         };
-      } else if (currentTab === 'vehiculos' || currentTab === 'soat') {
+      } else if (currentTab === 'vehiculos') {
         headers = [
           [
             "Placa",
@@ -4027,128 +4032,188 @@ document.addEventListener('DOMContentLoaded', () => {
           7: { cellWidth: 24 },
           8: { cellWidth: 27 }
         };
+      } else if (currentTab === 'soat') {
+        headers = [
+          [
+            "Placa",
+            "Cód. Patrimonial",
+            "Ubicación\nFinanciado",
+            "Denominación",
+            "Especificaciones Técnicas",
+            "Estado",
+            "SOAT",
+            "Revisión Técnica",
+            "Responsable"
+          ]
+        ];
+
+        const getUbicacionFinanciado = (item) => {
+          const sucursal = item.sucursal || '—';
+          const localidad = item.localidad || '';
+          const fuenteStr = String(item.fuente || '').toUpperCase();
+          const docTipo = String(item.doc_tipo || item.tipo_documento || '').toUpperCase();
+          let financiado = 'Rec. Propios';
+
+          if (fuenteStr.includes('CANON') || fuenteStr.includes('REGALIAS')) {
+            financiado = 'Canon / Reg.';
+          } else if (fuenteStr.includes('LIQUIDACION') || fuenteStr.includes('OBRA')) {
+            financiado = 'Liq. Obra';
+          } else if (fuenteStr.includes('DONAC')) {
+            financiado = 'Donación';
+          } else if (docTipo === 'COMPRA') {
+            financiado = '';
+          } else if (docTipo === 'INCORPORACION') {
+            financiado = (item.fuente || item.fuente_origen || '').trim();
+          }
+
+          const lines = [sucursal];
+          if (localidad && localidad.toUpperCase() !== sucursal.toUpperCase()) {
+            lines.push(localidad);
+          }
+          if (financiado) {
+            lines.push(financiado);
+          }
+
+          return lines.join('\n');
+        };
+
+        const sortedVehiculos = [...currentFilteredData].sort((a, b) => 
+          (a.denominacion || '').localeCompare(b.denominacion || '', 'es', { sensitivity: 'base' })
+        );
+        data = sortedVehiculos.map(item => [
+          item.placa || '—',
+          item.cod_patrimonial || '—',
+          getUbicacionFinanciado(item),
+          `${item.denominacion || ''}${item.vehiculo_anio ? `\nAño: ${item.vehiculo_anio}` : ''}`,
+          `Color: ${item.color || '—'}\nMarca: ${item.marca || '—'}\nModelo: ${item.modelo || '—'}\nMotor: ${item.nro_motor || item.numero_motor || '—'}\nChasis: ${item.nro_chasis || item.numero_chasis || item.numero_serie || '—'}\nCombustible: ${item.combustible || '—'}`,
+          item.estado_activo || 'BUENO',
+          item.soat_vencimiento || item.fecha_vencimiento ? `${item.soat_estado || item.estado_soat || 'VIGENTE'}\nVence: ${formatDate(item.soat_vencimiento || item.fecha_vencimiento)}` : 'No registrado',
+          item.vencimiento_rev_tec ? `${item.estado_rev_tec || 'VIGENTE'}\nVence: ${formatDate(item.vencimiento_rev_tec)}` : 'No registrado',
+          item.responsable || "Sin Asignar"
+        ]);
+        columnStyles = {
+          0: { cellWidth: 20, fontStyle: 'bold', halign: 'center' },
+          1: { cellWidth: 26, fontStyle: 'bold', halign: 'center' },
+          2: { cellWidth: 30, halign: 'center' },
+          3: { cellWidth: 42 },
+          4: { cellWidth: 54 },
+          5: { cellWidth: 22, halign: 'center' },
+          6: { cellWidth: 24, halign: 'center' },
+          7: { cellWidth: 24, halign: 'center' },
+          8: { cellWidth: 27 }
+        };
       } else if (currentTab === 'celulares') {
         headers = [
           [
             "Cód. Control",
-            "N° Línea / Operador",
-            "Marca / Modelo / IMEI",
-            "Sucursal / Localidad",
-            "Fechas (Ingreso / Asig)",
-            "Asignado a (Responsable / Puesto)",
-            "Vida Útil (3 Años / Renovación)",
-            "Estado",
-            "Observaciones / Detalle"
+            "Línea / IMEI",
+            "Equipo / Marca",
+            "Sucursal",
+            "Responsable / Puesto",
+            "Ingreso",
+            "Vigencia Control",
+            "Estado"
           ]
         ];
         data = currentFilteredData.map(item => {
-          let renovInfo = 'No Calculado';
-          const estVida = item.vida_util_estado === 'VENCIDA' ? 'VENCIDO' : (item.vida_util_estado === 'POR_RENOVAR' ? 'POR VENCER' : (item.vida_util_estado || 'VIGENTE'));
-          const lines = [estVida];
-          if (item.fecha_renovacion) lines.push(`Renov: ${formatDate(item.fecha_renovacion)}`);
+          const codControl = item.cod_control || '—';
+          const lineaImei = `N°: ${item.numero_linea || '—'}${item.imei ? `\nIMEI: ${item.imei}` : ''}`;
+          const equipoMarca = `${item.marca || 'S/M'}${item.modelo ? ` ${item.modelo}` : ''}${item.operador ? ` (${item.operador})` : ''}`;
+          const sucursal = `${item.sucursal || '—'}${item.localidad && item.localidad.trim().toUpperCase() !== (item.sucursal || '').trim().toUpperCase() ? ` (${item.localidad.trim()})` : ''}`;
+          const respPuesto = `${item.responsable || 'Sin Asignar'}${item.puesto ? `\n${item.puesto}` : ''}`;
+          const ingreso = formatDate(item.fecha_ingreso || item.fecha_asignacion);
+          let vigenciaControl = '—';
           if (item.dias_para_renovar !== undefined && item.dias_para_renovar !== null) {
-            const d = item.dias_para_renovar;
-            lines.push(d < 0 ? `(Excedido hace ${Math.abs(d)}d)` : `(${d}d rem.)`);
+            vigenciaControl = `${item.dias_para_renovar}d restantes`;
+          } else if (item.fecha_renovacion) {
+            vigenciaControl = `Renov: ${formatDate(item.fecha_renovacion)}`;
           }
-          renovInfo = lines.join('\n');
+          const estado = item.estado || 'ACTIVO';
 
-          return [
-            item.cod_control || '—',
-            `N°: ${item.numero_linea || '—'}\nOp: ${item.operador || '—'}`,
-            `${item.marca || 'S/M'} - ${item.modelo || 'S/M'}\nIMEI: ${item.imei || '—'}`,
-            `${item.sucursal || '—'}${item.localidad && item.localidad.trim().toUpperCase() !== (item.sucursal || '').trim().toUpperCase() ? `\n(${item.localidad.trim()})` : ''}`,
-            `Ingreso: ${formatDate(item.fecha_ingreso)}\nAsig: ${formatDate(item.fecha_asignacion)}`,
-            `${item.responsable || 'Sin Asignar'}${item.puesto ? `\n${item.puesto}` : ''}`,
-            renovInfo,
-            item.estado || 'ACTIVO',
-            item.observaciones || '—'
-          ];
+          return [codControl, lineaImei, equipoMarca, sucursal, respPuesto, ingreso, vigenciaControl, estado];
         });
+
         columnStyles = {
-          0: { cellWidth: 22, fontStyle: 'bold', halign: 'center' },
-          1: { cellWidth: 25, halign: 'center' },
-          2: { cellWidth: 35 },
+          0: { cellWidth: 24, fontStyle: 'bold', halign: 'center' },
+          1: { cellWidth: 32, halign: 'center' },
+          2: { cellWidth: 42 },
           3: { cellWidth: 28, halign: 'center' },
-          4: { cellWidth: 26, halign: 'center' },
-          5: { cellWidth: 38 },
+          4: { cellWidth: 62 },
+          5: { cellWidth: 24, halign: 'center' },
           6: { cellWidth: 32, halign: 'center' },
-          7: { cellWidth: 18, halign: 'center' },
-          8: { cellWidth: 45 }
+          7: { cellWidth: 25, halign: 'center' }
         };
       } else if (currentTab === 'inventario') {
         headers = [
           [
-            "Cód. Patrimonial",
+            "Código",
             "Tipo",
-            "Categoría / Subcat",
-            "Ubicación",
             "Denominación",
-            "Especificaciones",
-            "Características / Accesorios",
+            "Marca/Modelo/Serie/Color",
+            "Ubicación",
             "Responsable / Custodio",
             "Observaciones",
-            "Fecha Reg"
+            "Fecha Reg."
           ]
         ];
-        data = currentFilteredData.map(item => [
-          item.cod_patrimonial || '—',
-          item.tipo || '—',
-          `${item.categoria || '—'}\n${item.subcategoria || '—'}`,
-          `${item.sucursal || '—'}${item.localidad ? `\n(${item.localidad})` : ''}`,
-          item.denominacion || '',
-          `Marca: ${item.marca || 'S/M'}\nModelo: ${item.modelo || 'S/M'}\nSerie: ${item.numero_serie || 'S/S'}${item.color ? `\nColor: ${item.color}` : ''}`,
-          item.caracteristicas_accesorios || '—',
-          `${item.responsable || 'Sin Asignar'}${item.puesto ? `\n${item.puesto}` : ''}`,
-          item.observaciones || '—',
-          formatDate(item.created_at)
-        ]);
+        data = currentFilteredData.map(item => {
+          const cod = item.cod_patrimonial || '—';
+          const tipo = item.tipo || '—';
+          const denom = item.denominacion || '—';
+          const especs = `Marca: ${item.marca || 'S/M'}\nModelo: ${item.modelo || 'S/M'}\nSerie: ${item.numero_serie || 'S/S'}${item.color ? `\nColor: ${item.color}` : ''}`;
+          const ubi = `${item.sucursal || '—'}${item.localidad ? ` (${item.localidad})` : ''}`;
+          const resp = `${item.responsable || 'Sin Asignar'}${item.puesto ? `\n${item.puesto}` : ''}`;
+          const obs = item.observaciones || item.caracteristicas_accesorios || '—';
+          const fReg = formatDate(item.created_at || item.fecha_ingreso);
+
+          return [cod, tipo, denom, especs, ubi, resp, obs, fReg];
+        });
+
         columnStyles = {
-          0: { cellWidth: 22, fontStyle: 'bold', halign: 'center' },
-          1: { cellWidth: 18, halign: 'center' },
-          2: { cellWidth: 28 },
-          3: { cellWidth: 25, halign: 'center' },
-          4: { cellWidth: 35 },
-          5: { cellWidth: 32 },
-          6: { cellWidth: 30 },
-          7: { cellWidth: 32 },
-          8: { cellWidth: 30 },
-          9: { cellWidth: 17, halign: 'center' }
+          0: { cellWidth: 26, fontStyle: 'bold', halign: 'center' },
+          1: { cellWidth: 22, halign: 'center' },
+          2: { cellWidth: 45 },
+          3: { cellWidth: 48 },
+          4: { cellWidth: 32, halign: 'center' },
+          5: { cellWidth: 44 },
+          6: { cellWidth: 31 },
+          7: { cellWidth: 21, halign: 'center' }
         };
       } else if (currentTab === 'terceros') {
         headers = [
           [
-            "Cód. Patrimonial",
+            "Código",
             "Tipo",
+            "Denominación",
+            "Marca/Modelo/Serie/Color",
             "Ubicación",
-            "Denominación del Bien",
-            "Especificaciones (Marca/Mod/Serie)",
-            "Características / Accesorios",
-            "Responsable / Puesto",
-            "Observaciones",
-            "Fecha Reg"
+            "Propietario del Bien",
+            "F. Ingreso",
+            "F. Salida"
           ]
         ];
-        data = currentFilteredData.map(item => [
-          item.cod_patrimonial || '—',
-          item.tipo || 'TERCERO',
-          `${item.sucursal || '—'}${item.localidad ? `\n(${item.localidad})` : ''}`,
-          item.denominacion || '',
-          `Marca: ${item.marca || 'S/M'}\nModelo: ${item.modelo || 'S/M'}\nSerie: ${item.numero_serie || 'S/S'}${item.color ? `\nColor: ${item.color}` : ''}`,
-          item.caracteristicas_accesorios || '—',
-          `${item.responsable || 'Sin Asignar'}${item.puesto ? `\n${item.puesto}` : ''}`,
-          item.observaciones || '—',
-          formatDate(item.created_at || item.fecha_ingreso)
-        ]);
+        data = currentFilteredData.map(item => {
+          const cod = item.cod_patrimonial || '—';
+          const tipo = item.tipo || 'TERCERO';
+          const denom = item.denominacion || '—';
+          const especs = `Marca: ${item.marca || 'S/M'}\nModelo: ${item.modelo || 'S/M'}\nSerie: ${item.numero_serie || 'S/S'}${item.color ? `\nColor: ${item.color}` : ''}`;
+          const ubi = `${item.sucursal || '—'}${item.localidad ? ` (${item.localidad})` : ''}`;
+          const propietario = `${item.responsable || item.propietario_manual || 'Sin Asignar'}${item.puesto ? `\n${item.puesto}` : ''}`;
+          const fIngreso = formatDate(item.fecha_ingreso || item.created_at);
+          const fSalida = item.fecha_salida ? formatDate(item.fecha_salida) : 'Pendiente';
+
+          return [cod, tipo, denom, especs, ubi, propietario, fIngreso, fSalida];
+        });
+
         columnStyles = {
-          0: { cellWidth: 22, fontStyle: 'bold', halign: 'center' },
-          1: { cellWidth: 18, halign: 'center' },
-          2: { cellWidth: 28, halign: 'center' },
-          3: { cellWidth: 38 },
-          4: { cellWidth: 36 },
-          5: { cellWidth: 35 },
-          6: { cellWidth: 34 },
-          7: { cellWidth: 40 },
-          8: { cellWidth: 18, halign: 'center' }
+          0: { cellWidth: 26, fontStyle: 'bold', halign: 'center' },
+          1: { cellWidth: 22, halign: 'center' },
+          2: { cellWidth: 45 },
+          3: { cellWidth: 50 },
+          4: { cellWidth: 35, halign: 'center' },
+          5: { cellWidth: 46 },
+          6: { cellWidth: 24, halign: 'center' },
+          7: { cellWidth: 21, halign: 'center' }
         };
       } else if (currentTab === 'contable') {
         headers = [
@@ -4331,10 +4396,11 @@ document.addEventListener('DOMContentLoaded', () => {
       let subtitle = "";
       if (currentTab === 'activos') subtitle = "Inventario de Activos Fijos";
       else if (currentTab === 'obras') subtitle = "Inventario de Obras en Curso";
-      else if (currentTab === 'vehiculos' || currentTab === 'soat') subtitle = "Inventario de Vehículos (SOAT & RT)";
-      else if (currentTab === 'celulares') subtitle = "Inventario de Celulares";
-      else if (currentTab === 'inventario') subtitle = "Inventario Físico (Faltantes / Sobrantes)";
-      else if (currentTab === 'terceros') subtitle = "Bienes de Terceros (Terceros / Control)";
+      else if (currentTab === 'vehiculos') subtitle = "Inventario de Vehículos";
+      else if (currentTab === 'soat') subtitle = "REPORTE DE SOAT & REVISIÓN TÉCNICA VEHICULAR";
+      else if (currentTab === 'celulares') subtitle = "CONTROL DE EQUIPOS MÓVILES - CELULARES";
+      else if (currentTab === 'inventario') subtitle = "INVENTARIO FÍSICO - FALTANTES Y SOBRANTES";
+      else if (currentTab === 'terceros') subtitle = "BIENES DE TERCEROS Y CONTROL INTERNO";
       else if (currentTab === 'contable') {
         const contableLoc = document.getElementById('contable-localidad-select')?.value;
         subtitle = `Reporte Contable Agrupado${contableLoc && contableLoc !== 'Todos' ? ` - Localidad: ${contableLoc}` : ''}`;

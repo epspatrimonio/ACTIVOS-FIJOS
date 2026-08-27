@@ -1,5 +1,37 @@
 [
   {
+    "fecha_orden": "2026-08-27",
+    "tipo_salida": "Mantenimiento",
+    "motivo": "IMPRESORA EN MAL ESTADO",
+    "responsable": "ALCALDE RODRIGUEZ NAOMI YULIZA",
+    "cargo": "COMERCIAL",
+    "ubicacion": "PICHANAKI",
+    "resp_tecnico": "INFORMATICA",
+    "observaciones": "",
+    "estado_devolucion": "SALIDA",
+    "obs_devolucion": null,
+    "id": 39,
+    "n_orden": "035-2026",
+    "created_at": "2026-08-27T21:39:54.516225Z",
+    "updated_at": "2026-08-27T21:39:54.516225Z",
+    "bienes": [
+      {
+        "cod_patrimonial": "",
+        "denominacion": "IMPRESORA",
+        "color": "NEGRO",
+        "marca": "HP",
+        "modelo": "SSSD-S",
+        "numero_serie": "1254-SD",
+        "estado_activo": "MALO",
+        "accesorios": null,
+        "id": 121,
+        "id_salida": 39,
+        "created_at": "2026-08-27T21:39:54.516225Z",
+        "updated_at": "2026-08-27T21:39:54.516225Z"
+      }
+    ]
+  },
+  {
     "fecha_orden": "2026-08-26",
     "tipo_salida": "Mantenimiento",
     "motivo": "impresora mal estado",

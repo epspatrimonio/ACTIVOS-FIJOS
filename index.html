@@ -337,9 +337,9 @@
           </div>
         </div>
 
-        <!-- Estado del Activo / Tipo -->
-        <div id="estado-filter-wrapper" class="w-24 shrink-0">
-          <label id="filter-estado-label" for="filter-estado" class="block text-[0.625rem] font-extrabold text-slate-500 uppercase tracking-wider mb-1 truncate">Estado</label>
+        <!-- Estado del Activo / Tipo (ESTADO VEH.) -->
+        <div id="estado-filter-wrapper" class="w-28 shrink-0">
+          <label id="filter-estado-label" for="filter-estado" class="block text-[0.625rem] font-extrabold text-slate-500 uppercase tracking-wider mb-1 truncate">ESTADO VEH.</label>
           <select 
             id="filter-estado" 
             class="control-field w-full h-9 px-2 text-[0.75rem] font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-slate-800 cursor-pointer truncate"
@@ -350,6 +350,20 @@
             <option value="MALO">MALO</option>
             <option value="PARA BAJA">PARA BAJA</option>
             <option value="BAJA">BAJA</option>
+          </select>
+        </div>
+
+        <!-- Estado SOAT -->
+        <div id="soat-estado-filter-wrapper" class="w-28 shrink-0 hidden">
+          <label for="filter-soat-estado" class="block text-[0.625rem] font-extrabold text-slate-500 uppercase tracking-wider mb-1 truncate">Estado SOAT</label>
+          <select 
+            id="filter-soat-estado" 
+            class="control-field w-full h-9 px-2 text-[0.75rem] font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-slate-800 cursor-pointer truncate"
+          >
+            <option value="">Todos</option>
+            <option value="VIGENTE">VIGENTE</option>
+            <option value="POR_VENCER">POR VENCER</option>
+            <option value="VENCIDO">VENCIDO</option>
           </select>
         </div>
 
@@ -384,21 +398,6 @@
             <option value="10">Octubre</option>
             <option value="11">Noviembre</option>
             <option value="12">Diciembre</option>
-          </select>
-        </div>
-
-
-        <!-- Estado SOAT -->
-        <div id="soat-estado-filter-wrapper" class="w-24 shrink-0 hidden">
-          <label for="filter-soat-estado" class="block text-[0.625rem] font-extrabold text-slate-500 uppercase tracking-wider mb-1 truncate">Estado SOAT</label>
-          <select 
-            id="filter-soat-estado" 
-            class="control-field w-full h-9 px-2 text-[0.75rem] font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-slate-800 cursor-pointer truncate"
-          >
-            <option value="">Todos</option>
-            <option value="VIGENTE">VIGENTE</option>
-            <option value="POR_VENCER">POR VENCER</option>
-            <option value="VENCIDO">VENCIDO</option>
           </select>
         </div>
 
