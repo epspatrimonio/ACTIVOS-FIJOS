@@ -799,37 +799,37 @@ document.addEventListener('DOMContentLoaded', () => {
       let activeBtn;
       if (currentTab === 'activos') {
         activeBtn = tabActivos;
-        moduleTitle.textContent = 'Catálogo de Activos Fijos';
+        moduleTitle.textContent = 'CATÁLOGO DE ACTIVOS FIJOS';
       } else if (currentTab === 'ficha') {
         activeBtn = tabFicha;
-        moduleTitle.textContent = 'Ficha del Activo';
+        moduleTitle.textContent = 'FICHA DEL ACTIVO';
       } else if (currentTab === 'obras') {
         activeBtn = tabObras;
-        moduleTitle.textContent = 'Obras en Curso (PMO)';
+        moduleTitle.textContent = 'OBRAS EN CURSO (PMO)';
       } else if (currentTab === 'vehiculos') {
         activeBtn = tabVehiculos;
-        moduleTitle.textContent = 'VEHÍCULOS - SOAT & RT';
+        moduleTitle.textContent = 'VEHÍCULOS - SOAT & REVISIÓN TÉCNICA VEHICULAR';
       } else if (currentTab === 'salidas') {
         activeBtn = tabSalidas;
-        moduleTitle.textContent = 'Salida de Bienes (Registro y Consultas)';
+        moduleTitle.textContent = 'SALIDA DE BIENES (REGISTRO Y CONSULTAS)';
       } else if (currentTab === 'soat') {
         activeBtn = tabSoat;
-        moduleTitle.textContent = 'Monitoreo de SOAT y Revisión Técnica';
+        moduleTitle.textContent = 'MONITOREO DE SOAT Y REVISIÓN TÉCNICA VEHICULAR';
       } else if (currentTab === 'celulares') {
         activeBtn = tabCelulares;
-        moduleTitle.textContent = 'Control de Celulares y Líneas';
+        moduleTitle.textContent = 'EQUIPOS CELULARES';
       } else if (currentTab === 'inventario') {
         activeBtn = tabInventario;
-        moduleTitle.textContent = 'Inventario Físico (Faltantes / Sobrantes)';
+        moduleTitle.textContent = 'ACTIVOS FIJOS - FALTANTES / SOBRANTES';
       } else if (currentTab === 'terceros') {
         activeBtn = tabTerceros;
-        moduleTitle.textContent = 'Control de Bienes de Terceros y Control';
+        moduleTitle.textContent = 'BIENES DE TERCEROS';
       } else if (currentTab === 'asignacion') {
         activeBtn = tabAsignacion;
-        moduleTitle.textContent = 'Asignación de Bienes';
+        moduleTitle.textContent = 'ACTA DE BIENES';
       } else if (currentTab === 'contable') {
         activeBtn = tabContable;
-        moduleTitle.textContent = 'Reporte Contable Agrupado';
+        moduleTitle.textContent = 'REPORTE CONTABLE';
       }
       
       if (activeBtn) {
