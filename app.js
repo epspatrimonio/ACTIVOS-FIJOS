@@ -2831,6 +2831,15 @@ document.addEventListener('DOMContentLoaded', () => {
           ${soatBadge}
         </td>
         
+        <!-- Documento SOAT PDF -->
+        <td class="px-3.5 py-3 whitespace-nowrap text-center">
+          ${item.pdf_soat_path ? `
+            <a href="${item.pdf_soat_path.startsWith('/') ? item.pdf_soat_path : `/${item.pdf_soat_path}`}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg shadow-2xs transition-all" title="Ver / Descargar PDF del SOAT">
+              📄 PDF SOAT
+            </a>
+          ` : '<span class="text-xs text-slate-400 font-semibold">—</span>'}
+        </td>
+        
         <!-- Revisión Técnica -->
         <td class="px-3.5 py-3 whitespace-nowrap text-center">
           ${revTecBadge}
@@ -2911,7 +2920,14 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="mt-4 border-t border-slate-100 pt-3 grid grid-cols-2 gap-3">
         <div>
           <h4 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wide">Seguro SOAT</h4>
-          <div class="mt-1">${soatBadge}</div>
+          <div class="mt-1 flex flex-col items-start gap-1">
+            ${soatBadge}
+            ${item.pdf_soat_path ? `
+              <a href="${item.pdf_soat_path.startsWith('/') ? item.pdf_soat_path : `/${item.pdf_soat_path}`}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-md mt-1">
+                📄 PDF SOAT
+              </a>
+            ` : ''}
+          </div>
         </div>
         <div>
           <h4 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wide">Rev. Técnica</h4>
