@@ -2849,6 +2849,17 @@ document.addEventListener('DOMContentLoaded', () => {
         <td class="px-3.5 py-3 whitespace-nowrap text-[0.8125rem] font-bold text-slate-800">
           ${item.responsable || '—'}
         </td>
+        
+        <!-- GESTIÓN -->
+        <td class="px-3.5 py-3 whitespace-nowrap text-center">
+          ${item.pdf_soat_path ? `
+            <a href="${item.pdf_soat_path.startsWith('/') ? item.pdf_soat_path : `/${item.pdf_soat_path}`}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center p-2 text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-all border border-emerald-200/80 shadow-2xs group cursor-pointer" title="Descargar SOAT (PDF)">
+              <svg class="w-4 h-4 text-rose-600 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+            </a>
+          ` : '<span class="text-xs text-slate-400 font-semibold">—</span>'}
+        </td>
       `;
       tbody.appendChild(row);
       renderVehiculosMobileCard(item, soatBadge, revTecBadge);
