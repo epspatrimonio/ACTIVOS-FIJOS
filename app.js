@@ -95,21 +95,13 @@ document.addEventListener('DOMContentLoaded', () => {
         salidas = await salidasResponse.json();
       } else {
         salidas = [];
+        try {
+          const localSaved = JSON.parse(localStorage.getItem('salidas_custom_history') || '[]');
+          if (Array.isArray(localSaved) && localSaved.length > 0) {
+            salidas = localSaved;
+          }
+        } catch (e) {}
       }
-
-      // Combinar salidas registradas localmente en el navegador
-      try {
-        const localSaved = JSON.parse(localStorage.getItem('salidas_custom_history') || '[]');
-        if (Array.isArray(localSaved) && localSaved.length > 0) {
-          const existingOrders = new Set(salidas.map(s => s.n_orden));
-          localSaved.forEach(item => {
-            if (item && item.n_orden && !existingOrders.has(item.n_orden)) {
-              salidas.unshift(item);
-              existingOrders.add(item.n_orden);
-            }
-          });
-        }
-      } catch (e) {}
 
       // Normalizar formato de ordenes legacy OS-YYYY-XXX a XXX-YYYY (ej: OS-2026-035 -> 035-2026)
       salidas.forEach(s => {
