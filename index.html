@@ -205,33 +205,33 @@
 
     <!-- Selector de Pestañas Superior (Tabs Switcher) -->
     <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-3.5 pb-1">
-      <div class="max-md:hidden md:grid md:grid-cols-3 xl:flex bg-slate-200/60 p-1.5 rounded-2xl shrink-0 gap-1.5 w-full border border-slate-200/80 shadow-sm">
-        <button id="tab-activos" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 bg-brand-500 text-white shadow-md shadow-brand-500/15 whitespace-nowrap">
-          💼 ACTIVOS FIJOS
+      <div class="flex items-center overflow-x-auto smooth-scroll bg-slate-200/60 p-1.5 rounded-2xl gap-1 w-full border border-slate-200/80 shadow-sm scrollbar-none">
+        <button id="tab-activos" class="px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 bg-brand-500 text-white shadow-md shadow-brand-500/15 whitespace-nowrap shrink-0 flex-1 text-center">
+          💼 Activos Fijos
         </button>
-        <button id="tab-obras" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
-          🚧 OBRAS EN CURSO (PMO)
+        <button id="tab-obras" class="px-3.5 py-2 text-xs font-bold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap shrink-0 flex-1 text-center">
+          🚧 Obras en Curso
         </button>
-        <button id="tab-vehiculos" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
-          🚗 VEHÍCULOS - SOAT & RT
+        <button id="tab-vehiculos" class="px-3.5 py-2 text-xs font-bold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap shrink-0 flex-1 text-center">
+          🚗 Vehículos - SOAT & RT
         </button>
-        <button id="tab-inventario" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
-          🔍 FALTANTES / SOBRANTES
+        <button id="tab-inventario" class="px-3.5 py-2 text-xs font-bold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap shrink-0 flex-1 text-center">
+          🔍 Sobrantes/Faltantes
         </button>
-        <button id="tab-terceros" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
-          🤝 BIENES DE TERCEROS
+        <button id="tab-terceros" class="px-3.5 py-2 text-xs font-bold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap shrink-0 flex-1 text-center">
+          🤝 Bienes de Terceros
         </button>
-        <button id="tab-celulares" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
-          📱 EQUIPOS CELULARES
+        <button id="tab-celulares" class="px-3.5 py-2 text-xs font-bold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap shrink-0 flex-1 text-center">
+          📱 Celulares
         </button>
-        <button id="tab-salidas" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
-          ↳ SALIDA DE BIENES
+        <button id="tab-salidas" class="px-3.5 py-2 text-xs font-bold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap shrink-0 flex-1 text-center">
+          ↳ Salida de Bienes
         </button>
-        <button id="tab-asignacion" class="w-full xl:w-auto xl:flex-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
-          📋 ACTA DE BIENES
+        <button id="tab-asignacion" class="px-3.5 py-2 text-xs font-bold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap shrink-0 flex-1 text-center">
+          📋 Acta de Bienes
         </button>
-        <button id="tab-contable" class="w-full xl:w-auto xl:flex-1 col-span-2 sm:col-span-1 px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
-          📊 REPORTE CONTABLE
+        <button id="tab-contable" class="px-3.5 py-2 text-xs font-bold rounded-xl transition-all border-none cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap shrink-0 flex-1 text-center">
+          📊 Reporte Contable
         </button>
       </div>
     </div>
