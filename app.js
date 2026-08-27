@@ -3945,7 +3945,7 @@ document.addEventListener('DOMContentLoaded', () => {
           8: { cellWidth: 24, halign: 'right' },
           9: { cellWidth: 28 }
         };
-      } else if (currentTab === 'vehiculos') {
+      } else if (currentTab === 'vehiculos' || currentTab === 'soat') {
         headers = [
           [
             "Placa",
@@ -4027,80 +4027,53 @@ document.addEventListener('DOMContentLoaded', () => {
           7: { cellWidth: 24 },
           8: { cellWidth: 27 }
         };
-      } else if (currentTab === 'soat') {
-        headers = [
-          [
-            "Placa",
-            "Cód. Patrimonial",
-            "Tipo / Subcat",
-            "Ubicación",
-            "Denominación",
-            "Estado",
-            "SOAT",
-            "Revisión Técnica",
-            "Responsable"
-          ]
-        ];
-        data = currentFilteredData.map(item => [
-          item.placa || '—',
-          item.cod_patrimonial || '—',
-          item.subcategoria || 'VEHÍCULO',
-          `${item.sucursal || '—'}${item.localidad ? `\n(${item.localidad})` : ''}`,
-          `${item.denominacion || ''}\nAño: ${item.vehiculo_anio || '—'}`,
-          item.estado_activo || '—',
-          item.soat_estado ? `${item.soat_estado}\nPol: ${item.soat_poliza || '—'}\nVence: ${item.soat_vencimiento ? formatDate(item.soat_vencimiento) : '—'}` : 'No Registrado',
-          item.vencimiento_rev_tec ? `${item.estado_rev_tec}\nVence: ${formatDate(item.vencimiento_rev_tec)}` : 'No registrado',
-          item.responsable || "Sin Asignar"
-        ]);
-        columnStyles = {
-          0: { cellWidth: 20 },
-          1: { cellWidth: 25 },
-          2: { cellWidth: 25 },
-          3: { cellWidth: 28 },
-          4: { cellWidth: 45 },
-          5: { cellWidth: 15 },
-          6: { cellWidth: 43 },
-          7: { cellWidth: 43 },
-          8: { cellWidth: 28 }
-        };
       } else if (currentTab === 'celulares') {
         headers = [
           [
             "Cód. Control",
-            "N° Línea",
-            "Marca / Modelo",
-            "IMEI / Operador",
-            "Sucursal",
-            "Ingreso",
-            "Asignación",
-            "Asignado a",
-            "Renovación (3 Años)",
-            "Estado"
+            "N° Línea / Operador",
+            "Marca / Modelo / IMEI",
+            "Sucursal / Localidad",
+            "Fechas (Ingreso / Asig)",
+            "Asignado a (Responsable / Puesto)",
+            "Vida Útil (3 Años / Renovación)",
+            "Estado",
+            "Observaciones / Detalle"
           ]
         ];
-        data = currentFilteredData.map(item => [
-          item.cod_control || '—',
-          item.numero_linea || '—',
-          `M: ${item.marca || 'S/M'}\nMod: ${item.modelo || 'S/M'}`,
-          `IMEI: ${item.imei || '—'}\nOp: ${item.operador || '—'}`,
-          item.sucursal || '—',
-          formatDate(item.fecha_ingreso),
-          formatDate(item.fecha_asignacion),
-          item.asignado_a || 'Sin Asignar',
-          formatDate(item.fecha_renovacion),
-          item.estado || 'ACTIVO'
-        ]);
+        data = currentFilteredData.map(item => {
+          let renovInfo = 'No Calculado';
+          const estVida = item.vida_util_estado === 'VENCIDA' ? 'VENCIDO' : (item.vida_util_estado === 'POR_RENOVAR' ? 'POR VENCER' : (item.vida_util_estado || 'VIGENTE'));
+          const lines = [estVida];
+          if (item.fecha_renovacion) lines.push(`Renov: ${formatDate(item.fecha_renovacion)}`);
+          if (item.dias_para_renovar !== undefined && item.dias_para_renovar !== null) {
+            const d = item.dias_para_renovar;
+            lines.push(d < 0 ? `(Excedido hace ${Math.abs(d)}d)` : `(${d}d rem.)`);
+          }
+          renovInfo = lines.join('\n');
+
+          return [
+            item.cod_control || '—',
+            `N°: ${item.numero_linea || '—'}\nOp: ${item.operador || '—'}`,
+            `${item.marca || 'S/M'} - ${item.modelo || 'S/M'}\nIMEI: ${item.imei || '—'}`,
+            `${item.sucursal || '—'}${item.localidad && item.localidad.trim().toUpperCase() !== (item.sucursal || '').trim().toUpperCase() ? `\n(${item.localidad.trim()})` : ''}`,
+            `Ingreso: ${formatDate(item.fecha_ingreso)}\nAsig: ${formatDate(item.fecha_asignacion)}`,
+            `${item.responsable || 'Sin Asignar'}${item.puesto ? `\n${item.puesto}` : ''}`,
+            renovInfo,
+            item.estado || 'ACTIVO',
+            item.observaciones || '—'
+          ];
+        });
         columnStyles = {
-          0: { cellWidth: 25 },
-          1: { cellWidth: 25 },
-          2: { cellWidth: 32 },
-          3: { cellWidth: 28 },
-          4: { cellWidth: 40 },
-          5: { cellWidth: 35 },
-          6: { cellWidth: 35 },
-          7: { cellWidth: 38 },
-          8: { cellWidth: 36 },
-          9: { cellWidth: 18 }
+          0: { cellWidth: 22, fontStyle: 'bold', halign: 'center' },
+          1: { cellWidth: 25, halign: 'center' },
+          2: { cellWidth: 35 },
+          3: { cellWidth: 28, halign: 'center' },
+          4: { cellWidth: 26, halign: 'center' },
+          5: { cellWidth: 38 },
+          6: { cellWidth: 32, halign: 'center' },
+          7: { cellWidth: 18, halign: 'center' },
+          8: { cellWidth: 45 }
         };
       } else if (currentTab === 'inventario') {
         headers = [
@@ -4112,6 +4085,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "Denominación",
             "Especificaciones",
             "Características / Accesorios",
+            "Responsable / Custodio",
             "Observaciones",
             "Fecha Reg"
           ]
@@ -4124,19 +4098,21 @@ document.addEventListener('DOMContentLoaded', () => {
           item.denominacion || '',
           `Marca: ${item.marca || 'S/M'}\nModelo: ${item.modelo || 'S/M'}\nSerie: ${item.numero_serie || 'S/S'}${item.color ? `\nColor: ${item.color}` : ''}`,
           item.caracteristicas_accesorios || '—',
+          `${item.responsable || 'Sin Asignar'}${item.puesto ? `\n${item.puesto}` : ''}`,
           item.observaciones || '—',
           formatDate(item.created_at)
         ]);
         columnStyles = {
-          0: { cellWidth: 22 },
-          1: { cellWidth: 18 },
-          2: { cellWidth: 32 },
-          3: { cellWidth: 28 },
-          4: { cellWidth: 40 },
-          5: { cellWidth: 35 },
-          6: { cellWidth: 35 },
-          7: { cellWidth: 35 },
-          8: { cellWidth: 15 }
+          0: { cellWidth: 22, fontStyle: 'bold', halign: 'center' },
+          1: { cellWidth: 18, halign: 'center' },
+          2: { cellWidth: 28 },
+          3: { cellWidth: 25, halign: 'center' },
+          4: { cellWidth: 35 },
+          5: { cellWidth: 32 },
+          6: { cellWidth: 30 },
+          7: { cellWidth: 32 },
+          8: { cellWidth: 30 },
+          9: { cellWidth: 17, halign: 'center' }
         };
       } else if (currentTab === 'terceros') {
         headers = [
@@ -4144,35 +4120,35 @@ document.addEventListener('DOMContentLoaded', () => {
             "Cód. Patrimonial",
             "Tipo",
             "Ubicación",
-            "Denominación",
-            "Especificaciones",
+            "Denominación del Bien",
+            "Especificaciones (Marca/Mod/Serie)",
             "Características / Accesorios",
-            "Responsable",
+            "Responsable / Puesto",
             "Observaciones",
             "Fecha Reg"
           ]
         ];
         data = currentFilteredData.map(item => [
           item.cod_patrimonial || '—',
-          item.tipo || '—',
+          item.tipo || 'TERCERO',
           `${item.sucursal || '—'}${item.localidad ? `\n(${item.localidad})` : ''}`,
           item.denominacion || '',
           `Marca: ${item.marca || 'S/M'}\nModelo: ${item.modelo || 'S/M'}\nSerie: ${item.numero_serie || 'S/S'}${item.color ? `\nColor: ${item.color}` : ''}`,
           item.caracteristicas_accesorios || '—',
-          item.responsable || "Sin Asignar",
+          `${item.responsable || 'Sin Asignar'}${item.puesto ? `\n${item.puesto}` : ''}`,
           item.observaciones || '—',
-          formatDate(item.created_at)
+          formatDate(item.created_at || item.fecha_ingreso)
         ]);
         columnStyles = {
-          0: { cellWidth: 22 },
-          1: { cellWidth: 18 },
-          2: { cellWidth: 28 },
-          3: { cellWidth: 40 },
-          4: { cellWidth: 35 },
+          0: { cellWidth: 22, fontStyle: 'bold', halign: 'center' },
+          1: { cellWidth: 18, halign: 'center' },
+          2: { cellWidth: 28, halign: 'center' },
+          3: { cellWidth: 38 },
+          4: { cellWidth: 36 },
           5: { cellWidth: 35 },
-          6: { cellWidth: 32 },
-          7: { cellWidth: 32 },
-          8: { cellWidth: 15 }
+          6: { cellWidth: 34 },
+          7: { cellWidth: 40 },
+          8: { cellWidth: 18, halign: 'center' }
         };
       } else if (currentTab === 'contable') {
         headers = [

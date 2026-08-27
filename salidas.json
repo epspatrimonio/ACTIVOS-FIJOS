@@ -2,38 +2,6 @@
   {
     "fecha_orden": "2026-08-26",
     "tipo_salida": "Mantenimiento",
-    "motivo": "IMPRESORA MAL ESTADO",
-    "responsable": "BAUTISTA NAVARRO ELVIS MARCELINO",
-    "cargo": "CONTABILIDAD",
-    "ubicacion": "SEDE CENTRAL",
-    "resp_tecnico": "INFORMATICA",
-    "observaciones": null,
-    "estado_devolucion": "SALIDA",
-    "obs_devolucion": null,
-    "id": 39,
-    "n_orden": "035-2026",
-    "created_at": "2026-08-26T23:55:00.000000Z",
-    "updated_at": "2026-08-26T23:55:00.000000Z",
-    "bienes": [
-      {
-        "cod_patrimonial": "",
-        "denominacion": "IMPRESORA",
-        "color": "NEGRO",
-        "marca": "HP",
-        "modelo": "ASDASF",
-        "numero_serie": "ASDAS25",
-        "estado_activo": "MALO",
-        "accesorios": null,
-        "id": 121,
-        "id_salida": 39,
-        "created_at": "2026-08-26T23:55:00.000000Z",
-        "updated_at": "2026-08-26T23:55:00.000000Z"
-      }
-    ]
-  },
-  {
-    "fecha_orden": "2026-08-26",
-    "tipo_salida": "Mantenimiento",
     "motivo": "impresora mal estado",
     "responsable": "BAUTISTA NAVARRO ELVIS MARCELINO",
     "cargo": "CONTABILIDAD",
