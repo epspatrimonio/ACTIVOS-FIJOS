@@ -4331,7 +4331,7 @@ document.addEventListener('DOMContentLoaded', () => {
       let subtitle = "";
       if (currentTab === 'activos') subtitle = "Inventario de Activos Fijos";
       else if (currentTab === 'obras') subtitle = "Inventario de Obras en Curso";
-      else if (currentTab === 'vehiculos') subtitle = "Inventario de Vehículos";
+      else if (currentTab === 'vehiculos' || currentTab === 'soat') subtitle = "Inventario de Vehículos (SOAT & RT)";
       else if (currentTab === 'celulares') subtitle = "Inventario de Celulares";
       else if (currentTab === 'inventario') subtitle = "Inventario Físico (Faltantes / Sobrantes)";
       else if (currentTab === 'terceros') subtitle = "Bienes de Terceros (Terceros / Control)";
