@@ -5665,12 +5665,12 @@
     "vencimiento_rev_tec": null,
     "dias_vigencia_rev_tec": null,
     "estado_rev_tec": null,
-    "soat_poliza": "S/N",
-    "soat_compania": "Por definir",
+    "soat_poliza": "POL-999888",
+    "soat_compania": "La Positiva",
     "soat_vencimiento": "2027-06-17",
     "soat_dias_vigencia": 294,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": "soat_pdfs/410024003_soat.pdf"
   },
   {
     "cod_patrimonial": "410024002",
