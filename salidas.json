@@ -1,5 +1,37 @@
 [
   {
+    "fecha_orden": "2026-08-28",
+    "tipo_salida": "Trabajo de campo",
+    "motivo": "SUPERVISION DE OBRAS",
+    "responsable": "GARCIA LOPEZ MARIO",
+    "cargo": "INGENIERO RESIDENTE",
+    "ubicacion": "SATIPO",
+    "resp_tecnico": "CONTROL PATRIMONIAL",
+    "observaciones": "SALIDA TEMPORAL",
+    "estado_devolucion": "SALIDA",
+    "obs_devolucion": "",
+    "id": 40,
+    "n_orden": "036-2026",
+    "created_at": "2026-08-28T16:12:53.090739Z",
+    "updated_at": "2026-08-28T16:12:53.090739Z",
+    "bienes": [
+      {
+        "cod_patrimonial": "742205560099",
+        "denominacion": "ESTACION TOTAL TOPOGRAFICA",
+        "color": "AMARILLO",
+        "marca": "TOPCON",
+        "modelo": "GTS-250",
+        "numero_serie": "TP-9921",
+        "estado_activo": "BUENO",
+        "accesorios": "—",
+        "id": 122,
+        "id_salida": 40,
+        "created_at": "2026-08-28T16:12:53.090739Z",
+        "updated_at": "2026-08-28T16:12:53.090739Z"
+      }
+    ]
+  },
+  {
     "fecha_orden": "2026-08-27",
     "tipo_salida": "Mantenimiento",
     "motivo": "IMPRESORA EN MAL ESTADO",
