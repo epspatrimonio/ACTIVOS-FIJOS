@@ -1427,8 +1427,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  async function generarOrdenSalidaPDF_Public(salidaData) {
-    if (!window.jspdf?.jsPDF) { alert('La librería jsPDF no está disponible.'); return; }
+  async function generarOrdenSalidaPDF_Public(salidaData, skipConfirm = false) {
+    if (!skipConfirm) {
+      const verificado = confirm('¿Ha revisado y verificado que todos los datos consignados en la Orden de Salida de Bienes son correctos antes de generar e imprimir el documento PDF?');
+      if (!verificado) return false;
+    }
+    if (!window.jspdf?.jsPDF) { alert('La librería jsPDF no está disponible.'); return false; }
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const marginX = 15;
@@ -2258,9 +2262,16 @@ document.addEventListener('DOMContentLoaded', () => {
           <span class="bg-slate-100 px-2 py-0.5 rounded-lg text-[10px] font-extrabold border border-slate-200">${s.bienes ? s.bienes.length : 0}</span>
         </td>
         <td class="px-4 py-3 text-center">
-          <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-extrabold ${estadoBadge(s.estado_devolucion || 'SALIDA')}">
-            ${(s.estado_devolucion || 'SALIDA') === 'REGRESO' ? '🟢 REGRESO' : (s.estado_devolucion === 'OBSERVADO' ? '🟠 OBSERVADO' : '🔴 SALIDA')}
-          </span>
+          <select data-idx="${idx}" class="btn-change-devolucion px-2 py-1 rounded-md text-[10px] font-bold border transition-colors cursor-pointer focus:outline-none ${estadoBadge(s.estado_devolucion || 'SALIDA')}">
+            <option value="SALIDA" ${(s.estado_devolucion || 'SALIDA') === 'SALIDA' ? 'selected' : ''}>🔴 SALIDA</option>
+            <option value="REGRESO" ${s.estado_devolucion === 'REGRESO' ? 'selected' : ''}>🟢 REGRESO</option>
+            <option value="OBSERVADO" ${s.estado_devolucion === 'OBSERVADO' ? 'selected' : ''}>🟠 OBSERVADO</option>
+          </select>
+          ${(s.estado_devolucion === 'OBSERVADO' || s.obs_devolucion) ? `
+            <div data-obs-idx="${idx}" title="${s.obs_devolucion ? 'Observación: ' + s.obs_devolucion : 'Clic para editar'}" class="btn-edit-obs text-[9px] text-amber-700 italic mt-1 max-w-[130px] truncate cursor-pointer font-medium hover:underline mx-auto">
+              ${s.obs_devolucion ? '💬 ' + s.obs_devolucion : '+ Agregar obs.'}
+            </div>
+          ` : ''}
         </td>
         <td class="px-4 py-3 text-center">
           <button type="button" data-history-pdf="${idx}" class="btn-download-history-pdf px-2.5 py-1 bg-slate-900 hover:bg-slate-700 text-white font-extrabold rounded-lg text-[10px] transition-all cursor-pointer border-none shadow-xs">
@@ -2272,9 +2283,68 @@ document.addEventListener('DOMContentLoaded', () => {
 
     tbody.querySelectorAll('.btn-download-history-pdf').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        const idx = Number(e.target.getAttribute('data-history-pdf'));
+        const idx = Number(e.currentTarget.getAttribute('data-history-pdf'));
         if (data[idx]) {
           generarOrdenSalidaPDF_Public(data[idx]);
+        }
+      });
+    });
+
+    tbody.querySelectorAll('.btn-change-devolucion').forEach(selectEl => {
+      selectEl.addEventListener('change', async (e) => {
+        const idx = Number(e.currentTarget.getAttribute('data-idx'));
+        const targetSalida = data[idx];
+        if (!targetSalida) return;
+        const newEstado = e.currentTarget.value;
+        let newObs = targetSalida.obs_devolucion || '';
+        if (newEstado === 'OBSERVADO') {
+          const userObs = prompt('Ingrese la observación del retorno:', targetSalida.obs_devolucion || '');
+          if (userObs !== null) newObs = userObs.trim();
+        } else {
+          newObs = '';
+        }
+        try {
+          const targetId = targetSalida.id || targetSalida.n_orden;
+          const res = await fetch(`/api/activos/salidas/${targetId}/devolucion`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ estado_devolucion: newEstado, obs_devolucion: newObs })
+          });
+          if (res.ok) {
+            targetSalida.estado_devolucion = newEstado;
+            targetSalida.obs_devolucion = newObs;
+            renderSalidasRows(data);
+          } else {
+            targetSalida.estado_devolucion = newEstado;
+            targetSalida.obs_devolucion = newObs;
+            renderSalidasRows(data);
+          }
+        } catch (err) {
+          targetSalida.estado_devolucion = newEstado;
+          targetSalida.obs_devolucion = newObs;
+          renderSalidasRows(data);
+        }
+      });
+    });
+
+    tbody.querySelectorAll('.btn-edit-obs').forEach(obsEl => {
+      obsEl.addEventListener('click', async (e) => {
+        const idx = Number(e.currentTarget.getAttribute('data-obs-idx'));
+        const targetSalida = data[idx];
+        if (!targetSalida) return;
+        const userObs = prompt('Editar observación de retorno:', targetSalida.obs_devolucion || '');
+        if (userObs !== null) {
+          const newObs = userObs.trim();
+          try {
+            const targetId = targetSalida.id || targetSalida.n_orden;
+            await fetch(`/api/activos/salidas/${targetId}/devolucion`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ estado_devolucion: targetSalida.estado_devolucion || 'OBSERVADO', obs_devolucion: newObs })
+            });
+          } catch (err) {}
+          targetSalida.obs_devolucion = newObs;
+          renderSalidasRows(data);
         }
       });
     });

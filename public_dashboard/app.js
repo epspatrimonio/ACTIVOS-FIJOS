@@ -1427,8 +1427,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  async function generarOrdenSalidaPDF_Public(salidaData) {
-    if (!window.jspdf?.jsPDF) { alert('La librería jsPDF no está disponible.'); return; }
+  async function generarOrdenSalidaPDF_Public(salidaData, skipConfirm = false) {
+    if (!skipConfirm) {
+      const verificado = confirm('¿Ha revisado y verificado que todos los datos consignados en la Orden de Salida de Bienes son correctos antes de generar e imprimir el documento PDF?');
+      if (!verificado) return false;
+    }
+    if (!window.jspdf?.jsPDF) { alert('La librería jsPDF no está disponible.'); return false; }
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const marginX = 15;
@@ -2044,8 +2048,9 @@ document.addEventListener('DOMContentLoaded', () => {
           bienes: bienesAEnviar
         };
 
-        // Generar y descargar PDF client-side
-        await generarOrdenSalidaPDF_Public(payload);
+        // Generar y descargar PDF client-side con confirmación previa
+        const pdfOk = await generarOrdenSalidaPDF_Public(payload);
+        if (pdfOk === false) return;
 
         // Registrar en memoria y localStorage para persistencia en la consulta estática de forma inmediata
         const addAndSaveSalida = (newSalida) => {
