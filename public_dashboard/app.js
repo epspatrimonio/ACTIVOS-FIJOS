@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Estructuras de datos para la pestaña de Asignación (Acta-céntrica)
   let actasMap = {};
   let selectedActaKey = null;
+  let currentActaSubtab = 'activos'; // 'activos' | 'obras'
   let bienesSinActa = [];
   let responsablesSinActaMap = {};
   let agencyFontBase64 = null;
@@ -209,7 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
       responsablesSinActaMap = {};
 
       assets.forEach(item => {
-        let acta = item.n_acta_entrega ? item.n_acta_entrega.trim() : '';
+        let acta = (item.n_acta_entrega || (item.n_acta ? (String(item.n_acta).includes('-') ? item.n_acta : `0${item.n_acta}-2026`) : '')).trim();
         if (acta) {
           // Normalizar formato a XXX-YYYY (sin espacios)
           acta = acta.replace(/\s*-\s*/g, '-');
@@ -1324,6 +1325,15 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
+    // Ordenar activos y obras por fecha de ingreso (más reciente primero)
+    if (currentTab === 'activos' || currentTab === 'obras') {
+      filtered.sort((a, b) => {
+        const dA = a.fecha_alta || a.fecha_alta_factura || a.fecha_registro_contable || a.fecha_asignacion || '0000-00-00';
+        const dB = b.fecha_alta || b.fecha_alta_factura || b.fecha_registro_contable || b.fecha_asignacion || '0000-00-00';
+        return dB.localeCompare(dA);
+      });
+    }
+
     renderData(filtered);
   }
 
@@ -1707,7 +1717,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     // Fila 1
-    doc.setFont("helvetica", "bold"); doc.text("Fec Ingreso:", marginX, posY);
+    doc.setFont("helvetica", "bold"); doc.text("Ingreso:", marginX, posY);
     doc.setFont("helvetica", "normal"); doc.text(formatDateStr(activo.fecha_alta_factura || activo.fecha_registro_contable) || '—', marginX + 22, posY);
     doc.setFont("helvetica", "bold"); doc.text("Histórico:", 105, posY);
     doc.setFont("helvetica", "normal"); doc.text(`S/. ${Number(activo.valor_en_libros || 0).toFixed(2)}`, 105 + 22, posY);
@@ -1716,8 +1726,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Fila 2
     posY += 5;
-    doc.setFont("helvetica", "bold"); doc.text("Fec Alta:", marginX, posY);
-    doc.setFont("helvetica", "normal"); doc.text(formatDateStr(activo.fecha_alta_factura) || '—', marginX + 22, posY);
+    doc.setFont("helvetica", "bold"); doc.text("Alta:", marginX, posY);
+    doc.setFont("helvetica", "normal"); doc.text(formatDateStr(activo.fecha_alta || activo.fecha_asignacion) || '—', marginX + 22, posY);
     doc.setFont("helvetica", "bold"); doc.text("Libros:", 105, posY);
     doc.setFont("helvetica", "normal"); doc.text(`S/. ${Number(activo.valor_en_libros || 0).toFixed(2)}`, 105 + 22, posY);
     doc.setFont("helvetica", "bold"); doc.text("Docum:", 155, posY);
@@ -2515,7 +2525,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const valNetoFormateado = formatMoney(getNetValue(item));
 
       const financiadoText = getFinanciadoText(item);
-      const locText = (item.localidad && item.localidad.trim().toUpperCase() !== (item.sucursal || '').trim().toUpperCase()) ? `(${item.localidad.trim()})` : '';
+      const locText = item.localidad ? `(${item.localidad.trim()})` : '';
 
       row.innerHTML = `
         <td class="px-2 py-2.5 whitespace-nowrap text-center text-[0.75rem] font-mono font-bold text-slate-800">
@@ -2532,10 +2542,13 @@ document.addEventListener('DOMContentLoaded', () => {
             ${item.centro_costo || '—'}
           </div>
         </td>
-        <td class="px-2 py-2.5 whitespace-nowrap text-center">
-          <span class="px-2 py-0.5 text-[0.6875rem] font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-md">
-            ${formatDate(item.fecha_alta_factura || item.fecha_registro_contable)}
-          </span>
+        <td class="px-2 py-2.5 whitespace-nowrap text-center text-[0.6875rem]">
+          <div class="text-slate-700 font-semibold leading-tight">
+            Ingreso: <span class="text-slate-500 font-normal">${formatDate(item.fecha_alta_factura || item.fecha_registro_contable)}</span>
+          </div>
+          <div class="text-slate-700 font-semibold leading-tight mt-0.5">
+            Alta: <span class="text-slate-500 font-normal">${formatDate(item.fecha_alta || item.fecha_asignacion)}</span>
+          </div>
         </td>
         <td class="px-2 py-2.5 whitespace-nowrap text-center">
           <div class="font-bold text-slate-800 text-[0.75rem]">
@@ -2735,7 +2748,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const valNetoFormateado = formatMoney(getNetValue(item));
 
       const financiadoText = getFinanciadoText(item);
-      const locText = (item.localidad && item.localidad.trim().toUpperCase() !== (item.sucursal || '').trim().toUpperCase()) ? `(${item.localidad.trim()})` : '';
+      const locText = item.localidad ? `(${item.localidad.trim()})` : '';
 
       row.innerHTML = `
         <td class="px-2 py-2.5 whitespace-nowrap text-center text-[0.75rem] font-mono font-bold text-slate-800">
@@ -2752,10 +2765,13 @@ document.addEventListener('DOMContentLoaded', () => {
             ${item.centro_costo || '—'}
           </div>
         </td>
-        <td class="px-2 py-2.5 whitespace-nowrap text-center">
-          <span class="px-2 py-0.5 text-[0.6875rem] font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-md">
-            ${formatDate(item.fecha_alta_factura || item.fecha_registro_contable)}
-          </span>
+        <td class="px-2 py-2.5 whitespace-nowrap text-center text-[0.6875rem]">
+          <div class="text-slate-700 font-semibold leading-tight">
+            Ingreso: <span class="text-slate-500 font-normal">${formatDate(item.fecha_alta_factura || item.fecha_registro_contable)}</span>
+          </div>
+          <div class="text-slate-700 font-semibold leading-tight mt-0.5">
+            Alta: <span class="text-slate-500 font-normal">${formatDate(item.fecha_alta || item.fecha_asignacion)}</span>
+          </div>
         </td>
         <td class="px-2 py-2.5 whitespace-nowrap text-center">
           <div class="font-bold text-slate-800 text-[0.75rem]">
@@ -5020,9 +5036,37 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function initAsignacionEvents() {
+    const btnActivos = document.getElementById('acta-subtab-activos');
+    const btnObras = document.getElementById('acta-subtab-obras');
+
+    if (btnActivos && !btnActivos.dataset.listenerRegistered) {
+      btnActivos.addEventListener('click', () => {
+        currentActaSubtab = 'activos';
+        btnActivos.className = 'px-4 py-2 text-xs font-bold rounded-xl bg-[#00B0F0] text-white shadow-xs transition-all cursor-pointer';
+        if (btnObras) btnObras.className = 'px-4 py-2 text-xs font-bold rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all cursor-pointer';
+        selectedActaKey = null;
+        renderAsignacionTab();
+      });
+      btnActivos.dataset.listenerRegistered = 'true';
+    }
+
+    if (btnObras && !btnObras.dataset.listenerRegistered) {
+      btnObras.addEventListener('click', () => {
+        currentActaSubtab = 'obras';
+        btnObras.className = 'px-4 py-2 text-xs font-bold rounded-xl bg-[#00B0F0] text-white shadow-xs transition-all cursor-pointer';
+        if (btnActivos) btnActivos.className = 'px-4 py-2 text-xs font-bold rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all cursor-pointer';
+        selectedActaKey = null;
+        renderAsignacionTab();
+      });
+      btnObras.dataset.listenerRegistered = 'true';
+    }
+
     const searchActaInput = document.getElementById('search-acta');
     if (searchActaInput && !searchActaInput.dataset.listenerRegistered) {
       searchActaInput.addEventListener('input', () => {
+        if (selectedActaKey !== 'NUEVA_ACTA') {
+          selectedActaKey = null;
+        }
         renderAsignacionTab();
       });
       searchActaInput.dataset.listenerRegistered = 'true';
@@ -5040,7 +5084,15 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderAsignacionTab() {
     initAsignacionEvents();
 
-    const listActas = Object.keys(actasMap).sort((a, b) => {
+    const listActas = Object.keys(actasMap).filter(actaKey => {
+      const data = actasMap[actaKey];
+      if (!data || !data.bienes) return false;
+      return data.bienes.some(b => 
+        currentActaSubtab === 'activos' 
+          ? !String(b.cod_patrimonial).startsWith('339')
+          : String(b.cod_patrimonial).startsWith('339')
+      );
+    }).sort((a, b) => {
       const matchA = a.match(/^(\d+)-(\d+)/);
       const matchB = b.match(/^(\d+)-(\d+)/);
       if (matchA && matchB) {
@@ -5080,13 +5132,24 @@ document.addEventListener('DOMContentLoaded', () => {
     container.innerHTML = '';
 
     if (filteredList.length === 0) {
-      container.innerHTML = '<div class="text-xs text-slate-400 text-center py-4">No se encontraron actas</div>';
+      const emptyDiv = document.createElement('div');
+      emptyDiv.className = 'text-xs text-slate-400 text-center py-4';
+      emptyDiv.textContent = 'No se encontraron actas';
+      container.appendChild(emptyDiv);
       return;
     }
 
     filteredList.forEach(acta => {
       const data = actasMap[acta];
       if (!data) return;
+
+      const subtabBienes = (data.bienes || []).filter(b => 
+        currentActaSubtab === 'activos' 
+          ? !String(b.cod_patrimonial).startsWith('339')
+          : String(b.cod_patrimonial).startsWith('339')
+      );
+
+      if (subtabBienes.length === 0) return;
 
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -5100,7 +5163,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="font-extrabold text-[0.8125rem] truncate">Acta N° ${acta}</div>
         <div class="flex items-center justify-between gap-2 mt-0.5 text-slate-400">
           <span class="truncate font-medium text-[0.6875rem]">${data.responsable}</span>
-          <span class="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0">${data.bienes.length} bienes</span>
+          <span class="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0">${subtabBienes.length} bienes</span>
         </div>
       `;
 
@@ -5113,9 +5176,8 @@ document.addEventListener('DOMContentLoaded', () => {
       container.appendChild(btn);
     });
   }
+
   function selectActa(acta) {
-    const wrapperNueva = document.getElementById('nueva-acta-responsable-wrapper');
-    const selectResp = document.getElementById('nueva-acta-responsable');
     const inputNro = document.getElementById('acta-nro');
     const inputFecha = document.getElementById('acta-fecha');
     const inputSolicitante = document.getElementById('acta-solicitante');
@@ -5123,7 +5185,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     tbody.innerHTML = '';
     if (inputSolicitante) inputSolicitante.value = '';
-    if (wrapperNueva) wrapperNueva.classList.add('hidden');
 
     const data = actasMap[acta];
     if (!data) {
@@ -5132,9 +5193,15 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('acta-usuario-sucursal').textContent = '—';
       if (inputNro) inputNro.value = '';
       if (inputFecha) inputFecha.value = '';
-      tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-slate-400">Seleccione un acta para visualizar</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="11" class="text-center py-4 text-slate-400">Seleccione un acta para visualizar</td></tr>';
       return;
     }
+
+    const subtabBienes = (data.bienes || []).filter(b => 
+      currentActaSubtab === 'activos' 
+        ? !String(b.cod_patrimonial).startsWith('339')
+        : String(b.cod_patrimonial).startsWith('339')
+    );
 
     document.getElementById('acta-usuario-nombre').textContent = data.responsable;
     document.getElementById('acta-usuario-puesto').textContent = data.puesto;
@@ -5147,7 +5214,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (inputFecha) {
       let firstDate = null;
-      data.bienes.forEach(b => {
+      subtabBienes.forEach(b => {
         const d = b.fecha_asignacion || b.fecha_alta_factura || b.fecha_registro_contable;
         if (d && (!firstDate || d < firstDate)) {
           firstDate = d;
@@ -5156,15 +5223,14 @@ document.addEventListener('DOMContentLoaded', () => {
       inputFecha.value = firstDate ? firstDate.split('T')[0] : new Date().toISOString().split('T')[0];
     }
 
-    // Auto-populate Solicitante from first asset having requerido_por
     let defaultSolicitante = '';
-    const foundReq = data.bienes.find(b => b.requerido_por && b.requerido_por.trim() && b.requerido_por !== '—');
+    const foundReq = subtabBienes.find(b => b.requerido_por && b.requerido_por.trim() && b.requerido_por !== '—');
     if (foundReq) {
       defaultSolicitante = foundReq.requerido_por;
     }
     if (inputSolicitante) inputSolicitante.value = defaultSolicitante;
 
-    renderPreviewBienes(data.bienes);
+    renderPreviewBienes(subtabBienes);
   }
 
   function renderPreviewBienes(bienes) {
@@ -5213,15 +5279,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputSolicitante = document.getElementById('acta-solicitante');
     const solicitanteVal = (inputSolicitante && inputSolicitante.value.trim()) ? inputSolicitante.value.trim() : '—';
 
-    const data = actasMap[selectedActaKey];
-    if (!data || data.bienes.length === 0) {
-      alert("Por favor seleccione un acta válida para exportar.");
-      return;
+    if (selectedActaKey === 'NUEVA_ACTA') {
+      const selectResp = document.getElementById('nueva-acta-responsable');
+      const chosenResp = selectResp ? selectResp.value : '';
+      if (!chosenResp || !responsablesSinActaMap[chosenResp]) {
+        alert("Por favor seleccione un responsable para la nueva acta.");
+        return;
+      }
+      const respData = responsablesSinActaMap[chosenResp];
+      respName = respData.nombre;
+      puesto = respData.puesto;
+      sucursal = respData.sucursal;
+      bienes = respData.bienes.filter(b => 
+        currentActaSubtab === 'activos' 
+          ? !String(b.cod_patrimonial).startsWith('339')
+          : String(b.cod_patrimonial).startsWith('339')
+      );
+    } else {
+      const data = actasMap[selectedActaKey];
+      if (!data || data.bienes.length === 0) {
+        alert("Por favor seleccione un acta válida para exportar.");
+        return;
+      }
+
+      const subtabBienes = (data.bienes || []).filter(b => 
+        currentActaSubtab === 'activos' 
+          ? !String(b.cod_patrimonial).startsWith('339')
+          : String(b.cod_patrimonial).startsWith('339')
+      );
+
+      if (subtabBienes.length === 0) {
+        alert("No hay bienes disponibles en el tipo seleccionado.");
+        return;
+      }
+
+      respName = data.responsable;
+      bienes = subtabBienes;
+      puesto = data.puesto;
+      sucursal = data.sucursal;
     }
-    respName = data.responsable;
-    bienes = data.bienes;
-    puesto = data.puesto;
-    sucursal = data.sucursal;
 
     const pdfBtn = document.getElementById('btn-generar-acta-pdf');
     let originalText = "";
@@ -5293,17 +5389,17 @@ document.addEventListener('DOMContentLoaded', () => {
       ]);
 
       const columnStyles = {
-        0: { cellWidth: 24, fontStyle: 'bold' },
-        1: { cellWidth: 32 },
-        2: { cellWidth: 16 },
-        3: { cellWidth: 20 },
-        4: { cellWidth: 22 },
-        5: { cellWidth: 30 },
-        6: { cellWidth: 16 },
-        7: { cellWidth: 18 },
-        8: { cellWidth: 20 },
-        9: { cellWidth: 22 },
-        10: { cellWidth: 49 }
+        0: { cellWidth: 23, fontStyle: 'bold', halign: 'center' },
+        1: { cellWidth: 36, halign: 'left' },
+        2: { cellWidth: 20, halign: 'center' },
+        3: { cellWidth: 18, halign: 'center' },
+        4: { cellWidth: 18, halign: 'center' },
+        5: { cellWidth: 22, halign: 'center' },
+        6: { cellWidth: 16, halign: 'center' },
+        7: { cellWidth: 16, halign: 'center' },
+        8: { cellWidth: 22, halign: 'center' },
+        9: { cellWidth: 22, halign: 'center' },
+        10: { cellWidth: 56, halign: 'left' }
       };
 
       // Renderizar tabla principal
@@ -5312,8 +5408,8 @@ document.addEventListener('DOMContentLoaded', () => {
         body: data,
         startY: 77, 
         theme: 'grid',
-        styles: { fontSize: 7, cellPadding: 2, valign: 'middle' },
-        headStyles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold' },
+        styles: { fontSize: 6.8, cellPadding: 1.2, valign: 'middle', overflow: 'linebreak' },
+        headStyles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 6.5, halign: 'center' },
         columnStyles: columnStyles,
         margin: { top: 77, bottom: 42 } 
       });
