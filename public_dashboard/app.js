@@ -1078,28 +1078,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const filtered = baseData.filter(item => {
       if (currentTab === 'salida-tabla' || currentTab === 'salidas') {
-        const query = searchInput.value.toLowerCase().trim();
+        const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
         const searchMatch = !query || 
           (item.n_orden || '').toLowerCase().includes(query) ||
           (item.responsable || '').toLowerCase().includes(query) ||
+          (item.cargo || '').toLowerCase().includes(query) ||
+          (item.ubicacion || '').toLowerCase().includes(query) ||
           (item.motivo || '').toLowerCase().includes(query) ||
-          (item.tipo_salida || '').toLowerCase().includes(query);
+          (item.tipo_salida || '').toLowerCase().includes(query) ||
+          (item.estado_devolucion || '').toLowerCase().includes(query) ||
+          (item.bienes || []).some(b => 
+            (b.cod_patrimonial || '').toLowerCase().includes(query) ||
+            (b.denominacion || '').toLowerCase().includes(query) ||
+            (b.marca || '').toLowerCase().includes(query) ||
+            (b.modelo || '').toLowerCase().includes(query) ||
+            (b.numero_serie || '').toLowerCase().includes(query)
+          );
           
         let yearMatch = true;
         const selectedGlobalYear = document.getElementById('filter-global-year')?.value;
-        if (selectedGlobalYear && item.fecha_orden) {
-          const y = new Date(item.fecha_orden).getFullYear();
+        if (selectedGlobalYear && selectedGlobalYear !== 'Todos' && item.fecha_orden) {
+          const parts = String(item.fecha_orden).split('-');
+          const y = parts[0] ? Number(parts[0]) : new Date(item.fecha_orden).getFullYear();
           yearMatch = (y === Number(selectedGlobalYear));
         }
 
         let monthMatch = true;
         const selectedGlobalMonth = document.getElementById('filter-global-month')?.value;
-        if (selectedGlobalMonth && item.fecha_orden) {
-          const m = new Date(item.fecha_orden).getMonth() + 1;
+        if (selectedGlobalMonth && selectedGlobalMonth !== 'Todos' && item.fecha_orden) {
+          const parts = String(item.fecha_orden).split('-');
+          const m = parts[1] ? Number(parts[1]) : (new Date(item.fecha_orden).getMonth() + 1);
           monthMatch = (m === Number(selectedGlobalMonth));
         }
 
-        return searchMatch && yearMatch && monthMatch;
+        let sucursalMatch = true;
+        if (sucursalSelect && sucursalSelect.value && sucursalSelect.value !== 'Todas') {
+          sucursalMatch = (item.ubicacion || '').trim().toUpperCase() === sucursalSelect.value.trim().toUpperCase();
+        }
+
+        return searchMatch && yearMatch && monthMatch && sucursalMatch;
       }
 
       if (currentTab === 'contable') {
