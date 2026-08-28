@@ -9,6 +9,35 @@ document.addEventListener('DOMContentLoaded', () => {
   let responsablesMap = {};
   let selectedResponsableKey = null;
 
+  // Orden oficial jerárquico de Sucursales (SEDE CENTRAL primero, luego LA MERCED, SAN RAMÓN, etc.)
+  const SUCURSALES_ORDER = [
+    'SEDE CENTRAL',
+    'LA MERCED',
+    'SAN RAMON',
+    'SAN RAMÓN',
+    'PICHANAKI',
+    'SANGANI',
+    'OXAPAMPA',
+    'VILLA RICA',
+    'SATIPO',
+    'PERENE',
+    'PERENÉ'
+  ];
+
+  function sortSucursales(list) {
+    const EXCLUDED = new Set(['SELVA CENTRAL', 'EPS SELVA CENTRAL', 'SELVA CENTRAL S.A.', 'RETIRADAS', 'SIN ASIGNAR', 'TODAS', '']);
+    const cleanList = [...new Set((list || []).map(s => (s || '').trim().toUpperCase()))].filter(s => s && !EXCLUDED.has(s));
+
+    return cleanList.sort((a, b) => {
+      let idxA = SUCURSALES_ORDER.indexOf(a);
+      let idxB = SUCURSALES_ORDER.indexOf(b);
+      if (idxA === -1) idxA = 999;
+      if (idxB === -1) idxB = 999;
+      if (idxA !== idxB) return idxA - idxB;
+      return a.localeCompare(b);
+    });
+  }
+
   // Estructuras de datos para la pestaña de Asignación (Acta-céntrica)
   let actasMap = {};
   let selectedActaKey = null;
@@ -717,11 +746,11 @@ document.addEventListener('DOMContentLoaded', () => {
       stateOptions = ['TERCERO', 'CONTROL'];
     }
     
-    // Poblar Sucursales sin formato Sucursal (Localidad)
+    // Poblar Sucursales con SEDE CENTRAL primero
     // Consolidar de todos los datasets para mantener la lista completa y consistente en todas las pestañas
     const allItems = [...assets, ...celulares, ...inventario, ...terceros];
-    const sucursalNames = [...new Set(allItems.map(item => item.sucursal).filter(Boolean))];
-    sucursalNames.sort().forEach(suc => {
+    const sucursalNames = sortSucursales(allItems.map(item => item.sucursal));
+    sucursalNames.forEach(suc => {
       const option = document.createElement('option');
       option.value = suc;
       option.textContent = suc;
@@ -1811,11 +1840,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const prevSuc = sucursalSel.value;
       const prevYear = yearSel.value;
 
-      // Poblar Sucursales basadas en salidas y activos
-      const ubicaciones = [...new Set([
-        ...salidas.map(s => (s.ubicacion || '').trim().toUpperCase()).filter(Boolean),
-        ...assets.map(a => (a.sucursal || '').trim().toUpperCase()).filter(Boolean)
-      ])].sort();
+      // Poblar Sucursales basadas en salidas y activos con SEDE CENTRAL primero
+      const ubicaciones = sortSucursales([
+        ...salidas.map(s => (s.ubicacion || '').trim().toUpperCase()),
+        ...assets.map(a => (a.sucursal || '').trim().toUpperCase())
+      ]);
 
       sucursalSel.innerHTML = '<option value="">Todas</option>' + 
         ubicaciones.map(u => `<option value="${u}" ${u === prevSuc ? 'selected' : ''}>${u}</option>`).join('');
