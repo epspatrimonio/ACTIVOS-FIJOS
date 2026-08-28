@@ -269,11 +269,11 @@
         </div>
 
         <!-- Sucursal -->
-        <div id="sucursal-filter-wrapper" class="w-28 shrink-0">
-          <label for="filter-sucursal" class="block text-[0.625rem] font-extrabold text-slate-500 uppercase tracking-wider mb-1 truncate">Sucursal</label>
+        <div id="sucursal-filter-wrapper" class="w-40 min-w-[155px] shrink-0">
+          <label for="filter-sucursal" class="block text-[0.625rem] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Sucursal</label>
           <select 
             id="filter-sucursal" 
-            class="control-field w-full h-9 px-2 text-[0.75rem] font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-slate-800 cursor-pointer truncate"
+            class="control-field w-full h-9 px-2 text-[0.75rem] font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-slate-800 cursor-pointer"
           >
             <option value="">Todas</option>
           </select>
@@ -458,21 +458,21 @@
     <!-- Tabla: Activos Fijos -->
     <div id="assets-table-container" class="hidden md:flex flex-col flex-1 min-h-0 rounded-xl shadow-sm border border-slate-200 bg-white overflow-hidden">
       <div class="overflow-x-auto overflow-y-auto smooth-scroll w-full flex-1 min-h-0">
-        <table class="min-w-[1520px] w-full divide-y divide-slate-200 border-collapse">
+        <table class="min-w-[1500px] w-full divide-y divide-slate-200 border-collapse">
           <thead class="sticky top-0 bg-[#00B0F0] text-white z-20 shadow-md">
             <tr>
-              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[140px]">Cód. Patrimonial</th>
-              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[150px]">DOCUMENTO<br/>C. CONTABLE<br/>C. COSTO</th>
-              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[120px]">Fecha de Ingreso</th>
-              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[150px]">SUCURSAL<br/>FINANCIADO</th>
-              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[220px]">DENOMINACIÓN<br/>SUB CATEGORIA<br/>N° ACTA</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[125px]">Cód. Patrimonial</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[140px]">DOCUMENTO<br/>C. CONTABLE<br/>C. COSTO</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[115px]">Fecha de Ingreso</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[145px]">SUCURSAL<br/>FINANCIADO</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[210px]">DENOMINACIÓN<br/>SUB CATEGORIA<br/>N° ACTA</th>
               <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[160px]">CARACTERÍSTICAS</th>
-              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[200px]">ESPECIFICACIONES</th>
-              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[110px]">Estado</th>
-              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[110px]">Valor Libros</th>
-              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[110px]">Valor Neto</th>
-              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[180px]">RESPONSABLE<br/>PUESTO</th>
-              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[90px]">GESTIÓN</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[180px]">ESPECIFICACIONES</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[95px]">Estado</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[100px]">Valor Libros</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[100px]">Valor Neto</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[165px]">RESPONSABLE<br/>PUESTO</th>
+              <th scope="col" class="px-1.5 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[85px]">FICHA<br/>DIGITAL</th>
             </tr>
           </thead>
           <tbody id="assets-tbody" class="bg-white divide-y divide-slate-100">
@@ -485,21 +485,21 @@
     <!-- Tabla: Obras en Curso -->
     <div id="obras-table-container" class="hidden md:flex flex-col flex-1 min-h-0 rounded-xl shadow-sm border border-slate-200 bg-white overflow-hidden">
       <div class="overflow-x-auto overflow-y-auto smooth-scroll w-full flex-1 min-h-0">
-        <table class="min-w-[1520px] w-full divide-y divide-slate-200 border-collapse">
+        <table class="min-w-[1500px] w-full divide-y divide-slate-200 border-collapse">
           <thead class="sticky top-0 bg-[#00B0F0] text-white z-20 shadow-md">
             <tr>
-              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[140px]">Cód. Patrimonial</th>
-              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[150px]">DOCUMENTO<br/>C. CONTABLE<br/>C. COSTO</th>
-              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[120px]">Fecha de Ingreso</th>
-              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[150px]">SUCURSAL<br/>FINANCIADO</th>
-              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[220px]">DENOMINACIÓN<br/>SUB CATEGORIA<br/>N° ACTA</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[125px]">Cód. Patrimonial</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[140px]">DOCUMENTO<br/>C. CONTABLE<br/>C. COSTO</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[115px]">Fecha de Ingreso</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[145px]">SUCURSAL<br/>FINANCIADO</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[210px]">DENOMINACIÓN<br/>SUB CATEGORIA<br/>N° ACTA</th>
               <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[160px]">CARACTERÍSTICAS</th>
-              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[200px]">ESPECIFICACIONES</th>
-              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[110px]">Estado</th>
-              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[110px]">Valor Libros</th>
-              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[110px]">Valor Neto</th>
-              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[180px]">RESPONSABLE<br/>PUESTO</th>
-              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[90px]">GESTIÓN</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[180px]">ESPECIFICACIONES</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[95px]">Estado</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[100px]">Valor Libros</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[100px]">Valor Neto</th>
+              <th scope="col" class="px-2 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[165px]">RESPONSABLE<br/>PUESTO</th>
+              <th scope="col" class="px-1.5 py-1.5 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[85px]">FICHA<br/>DIGITAL</th>
             </tr>
           </thead>
           <tbody id="obras-tbody" class="bg-white divide-y divide-slate-100">
@@ -512,19 +512,19 @@
     <!-- Tabla: Vehículos -->
     <div id="vehiculos-table-container" class="hidden md:flex flex-col flex-1 min-h-0 rounded-xl shadow-sm border border-slate-200 bg-white overflow-hidden">
       <div class="overflow-x-auto overflow-y-auto smooth-scroll w-full flex-1 min-h-0">
-        <table class="min-w-[1380px] w-full divide-y divide-slate-200 border-collapse">
+        <table class="min-w-[1440px] w-full divide-y divide-slate-200 border-collapse">
           <thead class="sticky top-0 bg-[#00B0F0] text-white z-20 shadow-md">
             <tr>
-              <th scope="col" class="px-3 py-2.5 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide w-[110px]">Placa</th>
-              <th scope="col" class="px-3 py-2.5 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide w-[130px]">Cód. Patrimonial</th>
-              <th scope="col" class="px-3 py-2.5 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide w-[150px]">Ubicación Financiado</th>
-              <th scope="col" class="px-3 py-2.5 text-left text-[0.6875rem] font-extrabold text-white uppercase tracking-wide w-[220px]">DENOMINACIÓN<br/>CARACTERÍSTICAS</th>
-              <th scope="col" class="px-3 py-2.5 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide w-[220px]">Especificaciones Técnicas</th>
-              <th scope="col" class="px-3 py-2.5 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide w-[110px]">Estado</th>
-              <th scope="col" class="px-3 py-2.5 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide w-[150px]">SOAT</th>
-              <th scope="col" class="px-3 py-2.5 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide w-[160px]">Rev. Técnica (Vencimiento)</th>
-              <th scope="col" class="px-3 py-2.5 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide w-[190px]">Responsable</th>
-              <th scope="col" class="px-3 py-2.5 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide w-[140px]">Documento SOAT</th>
+              <th scope="col" class="px-2.5 py-2 text-center text-[0.65rem] font-extrabold text-white uppercase tracking-wide w-[105px]">Placa</th>
+              <th scope="col" class="px-2.5 py-2 text-center text-[0.65rem] font-extrabold text-white uppercase tracking-wide w-[120px]">Cód. Patrimonial</th>
+              <th scope="col" class="px-2.5 py-2 text-center text-[0.65rem] font-extrabold text-white uppercase tracking-wide w-[140px]">Ubicación Financiado</th>
+              <th scope="col" class="px-2.5 py-2 text-left text-[0.65rem] font-extrabold text-white uppercase tracking-wide w-[210px]">DENOMINACIÓN<br/>CARACTERÍSTICAS</th>
+              <th scope="col" class="px-2.5 py-2 text-center text-[0.65rem] font-extrabold text-white uppercase tracking-wide w-[200px]">Especificaciones Técnicas</th>
+              <th scope="col" class="px-2.5 py-2 text-center text-[0.65rem] font-extrabold text-white uppercase tracking-wide w-[95px]">Estado</th>
+              <th scope="col" class="px-2.5 py-2 text-center text-[0.65rem] font-extrabold text-white uppercase tracking-wide w-[135px]">SOAT</th>
+              <th scope="col" class="px-2.5 py-2 text-center text-[0.65rem] font-extrabold text-white uppercase tracking-wide w-[145px]">Rev. Técnica (Vencimiento)</th>
+              <th scope="col" class="px-2.5 py-2 text-center text-[0.65rem] font-extrabold text-white uppercase tracking-wide w-[165px]">Responsable</th>
+              <th scope="col" class="px-1.5 py-2 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[95px]">DOCUMENTO<br/>SOAT</th>
             </tr>
           </thead>
           <tbody id="vehiculos-tbody" class="bg-white divide-y divide-slate-100">

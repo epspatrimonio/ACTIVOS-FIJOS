@@ -2324,37 +2324,37 @@ document.addEventListener('DOMContentLoaded', () => {
       const locText = (item.localidad && item.localidad.trim().toUpperCase() !== (item.sucursal || '').trim().toUpperCase()) ? `(${item.localidad.trim()})` : '';
 
       row.innerHTML = `
-        <td class="px-3.5 py-4 whitespace-nowrap text-center text-[0.875rem] font-mono font-bold text-slate-800">
+        <td class="px-2 py-2.5 whitespace-nowrap text-center text-[0.75rem] font-mono font-bold text-slate-800">
           ${item.cod_patrimonial}
         </td>
-        <td class="px-3.5 py-4 whitespace-nowrap text-center">
-          <div class="font-bold text-slate-800 text-[0.8125rem]">
+        <td class="px-2 py-2.5 whitespace-nowrap text-center">
+          <div class="font-bold text-slate-800 text-[0.75rem]">
             ${item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OC-${item.n_doc}` : `INC-${item.n_doc}`) : '—'}
           </div>
-          <div class="text-[0.75rem] text-[#00B0F0] font-mono font-bold mt-0.5">
+          <div class="text-[0.6875rem] text-[#0088cc] font-mono font-bold mt-0.5">
             ${item.cuenta_contable || '—'}
           </div>
-          <div class="text-[0.75rem] text-slate-400 font-mono mt-0.5">
+          <div class="text-[0.6875rem] text-slate-400 font-mono mt-0.5">
             ${item.centro_costo || '—'}
           </div>
         </td>
-        <td class="px-3.5 py-4 whitespace-nowrap text-center">
-          <span class="px-2.5 py-1 text-xs font-medium text-slate-500 bg-slate-50 border border-slate-200 rounded-full">
+        <td class="px-2 py-2.5 whitespace-nowrap text-center">
+          <span class="px-2 py-0.5 text-[0.6875rem] font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-md">
             ${formatDate(item.fecha_alta_factura || item.fecha_registro_contable)}
           </span>
         </td>
-        <td class="px-3.5 py-4 whitespace-nowrap text-center">
-          <div class="font-bold text-slate-800 text-[0.8125rem]">
+        <td class="px-2 py-2.5 whitespace-nowrap text-center">
+          <div class="font-bold text-slate-800 text-[0.75rem]">
             ${item.sucursal || '—'}
           </div>
-          ${locText ? `<div class="text-[0.75rem] text-slate-600 font-medium mt-0.5">${locText}</div>` : ''}
-          ${financiadoText ? `<div class="text-[0.6875rem] text-slate-500 italic font-medium mt-0.5">${financiadoText}</div>` : ''}
+          ${locText ? `<div class="text-[0.6875rem] text-slate-600 font-medium mt-0.5">${locText}</div>` : ''}
+          ${financiadoText ? `<div class="text-[0.625rem] text-slate-500 italic font-medium mt-0.5">${financiadoText}</div>` : ''}
         </td>
-        <td class="px-3.5 py-4 min-w-[200px]">
-          <div class="text-[0.875rem] font-bold text-slate-800 leading-snug">
+        <td class="px-2 py-2.5 min-w-[200px]">
+          <div class="text-[0.75rem] font-bold text-slate-900 leading-snug uppercase">
             ${item.denominacion}
           </div>
-          <div class="text-[0.6875rem] text-[#00B0F0] font-bold italic uppercase mt-0.5">
+          <div class="text-[0.65rem] text-[#0088cc] font-bold italic uppercase mt-0.5">
             ${item.subcategoria || item.categoria || '—'}
           </div>
           ${(() => {
@@ -2371,18 +2371,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const prefix = hasPrefix ? '' : 'Acta N° ';
             const hasYear = /\b(19|20)\d{2}\b/.test(text);
             const suffix = hasYear ? '' : ` - ${year}`;
-            return `<div class="text-[0.6875rem] text-amber-600 font-mono font-semibold mt-0.5">${prefix}${text}${suffix}</div>`;
+            return `<div class="text-[0.65rem] text-amber-600 font-mono font-semibold mt-0.5">${prefix}${text}${suffix}</div>`;
           })()}
         </td>
-        <td class="px-3.5 py-4 text-[0.8125rem] min-w-[150px] text-slate-600 leading-normal">
+        <td class="px-2 py-2.5 text-[0.72rem] min-w-[150px] text-slate-600 leading-normal">
           <div class="space-y-0.5">
             <div><span class="font-semibold text-slate-400">Color:</span> <span class="text-slate-700">${item.color || '—'}</span></div>
-            <div><span class="font-semibold text-slate-400">Marca:</span> <span class="text-slate-850 font-medium">${item.marca || 'S/M'}</span></div>
-            <div><span class="font-semibold text-slate-400">Modelo:</span> <span class="text-slate-850 font-medium">${item.modelo || 'S/M'}</span></div>
-            <div><span class="font-semibold text-slate-400">Serie:</span> <span class="text-slate-850 font-mono font-medium">${item.numero_serie || 'S/S'}</span></div>
+            <div><span class="font-semibold text-slate-400">Marca:</span> <span class="text-slate-800 font-medium">${item.marca || 'S/M'}</span></div>
+            <div><span class="font-semibold text-slate-400">Modelo:</span> <span class="text-slate-800 font-medium">${item.modelo || 'S/M'}</span></div>
+            <div><span class="font-semibold text-slate-400">Serie:</span> <span class="text-slate-800 font-mono font-medium">${item.numero_serie || 'S/S'}</span></div>
           </div>
         </td>
-        <td class="px-3.5 py-4 text-[0.8125rem] min-w-[180px] leading-snug">
+        <td class="px-2 py-2.5 text-[0.72rem] min-w-[180px] leading-snug">
           ${(() => {
             const isVehiculo = (item.categoria && item.categoria.toLowerCase().includes('vehiculo')) ||
                                (item.subcategoria && item.subcategoria.toLowerCase().includes('vehiculo')) ||
@@ -2410,24 +2410,27 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           })()}
         </td>
-        <td class="px-3.5 py-4 whitespace-nowrap text-center">
+        <td class="px-2 py-2.5 whitespace-nowrap text-center">
           ${getEstadoBadgeHTML(item.estado_activo)}
         </td>
-        <td class="px-3.5 py-4 whitespace-nowrap text-right text-[0.8125rem] font-medium text-slate-500">
+        <td class="px-2 py-2.5 whitespace-nowrap text-right text-[0.75rem] font-medium text-slate-500">
           S/. ${valLibrosFormateado}
         </td>
-        <td class="px-3.5 py-4 whitespace-nowrap text-right text-[0.8125rem] font-bold text-emerald-600">
+        <td class="px-2 py-2.5 whitespace-nowrap text-right text-[0.75rem] font-bold text-emerald-600">
           S/. ${valNetoFormateado}
         </td>
-        <td class="px-3.5 py-4 min-w-[170px]">
-          <div class="font-bold text-slate-800 text-[0.8125rem]">
+        <td class="px-2 py-2.5 min-w-[160px]">
+          <div class="font-bold text-slate-800 text-[0.75rem]">
             ${item.responsable || 'Sin Asignar'}
           </div>
-          ${item.puesto ? `<div class="text-[0.6875rem] text-slate-500 italic font-medium uppercase mt-0.5">${item.puesto}</div>` : ''}
+          ${item.puesto ? `<div class="text-[0.65rem] text-slate-500 italic font-medium uppercase mt-0.5">${item.puesto}</div>` : ''}
         </td>
-        <td class="px-3.5 py-4 whitespace-nowrap text-center">
-          <button type="button" data-ficha-code="${item.cod_patrimonial}" class="btn-download-ficha-pdf p-1.5 text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-all border border-emerald-200 cursor-pointer" title="Descargar Ficha del Activo">
-            📥
+        <td class="px-1 py-2 whitespace-nowrap text-center">
+          <button type="button" data-ficha-code="${item.cod_patrimonial}" class="btn-download-ficha-pdf inline-flex items-center justify-center gap-1 px-1.5 py-1 text-emerald-800 bg-emerald-50 hover:bg-emerald-100 hover:text-emerald-950 border border-emerald-300 rounded-lg shadow-2xs transition-all active:scale-95 cursor-pointer" title="Descargar Ficha Digital del Activo (PDF)">
+            <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <span class="text-[9px] font-extrabold leading-tight text-center">FICHA<br/>DIGITAL</span>
           </button>
         </td>
       `;
@@ -2435,15 +2438,21 @@ document.addEventListener('DOMContentLoaded', () => {
       renderActivosMobileCard(item, valLibrosFormateado, valNetoFormateado);
     });
 
-    tbody.querySelectorAll('.btn-download-ficha-pdf').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const code = e.currentTarget.getAttribute('data-ficha-code');
-        const activo = assets.find(a => String(a.cod_patrimonial) === String(code));
-        if (activo) {
-          generarFichaPDF_Public(activo);
-        }
+    const bindFichaEvents = (container) => {
+      if (!container) return;
+      container.querySelectorAll('.btn-download-ficha-pdf').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const code = e.currentTarget.getAttribute('data-ficha-code');
+          const activo = assets.find(a => String(a.cod_patrimonial) === String(code));
+          if (activo) {
+            generarFichaPDF_Public(activo);
+          }
+        });
       });
-    });
+    };
+
+    bindFichaEvents(tbody);
+    bindFichaEvents(document.getElementById('assets-mobile-container'));
   }
 
   function renderActivosMobileCard(item, valLibrosFormateado, valNetoFormateado) {
@@ -2509,6 +2518,15 @@ document.addEventListener('DOMContentLoaded', () => {
         `}
         <div class="mt-1"><span class="font-semibold text-slate-400">Responsable:</span> ${item.responsable || 'Sin asignar'}</div>
       </div>
+
+      <div class="mt-3 pt-2.5 border-t border-slate-100 flex justify-end">
+        <button type="button" data-ficha-code="${item.cod_patrimonial}" class="btn-download-ficha-pdf inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 hover:text-emerald-950 border border-emerald-300/80 rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer" title="Descargar Ficha Digital del Activo (PDF)">
+          <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          <span>FICHA DIGITAL</span>
+        </button>
+      </div>
     `;
     mobileContainer.appendChild(mobileCard);
   }
@@ -2526,37 +2544,37 @@ document.addEventListener('DOMContentLoaded', () => {
       const locText = (item.localidad && item.localidad.trim().toUpperCase() !== (item.sucursal || '').trim().toUpperCase()) ? `(${item.localidad.trim()})` : '';
 
       row.innerHTML = `
-        <td class="px-3.5 py-4 whitespace-nowrap text-center text-[0.875rem] font-mono font-bold text-slate-800">
+        <td class="px-2 py-2.5 whitespace-nowrap text-center text-[0.75rem] font-mono font-bold text-slate-800">
           ${item.cod_patrimonial}
         </td>
-        <td class="px-3.5 py-4 whitespace-nowrap text-center">
-          <div class="font-bold text-slate-800 text-[0.8125rem]">
+        <td class="px-2 py-2.5 whitespace-nowrap text-center">
+          <div class="font-bold text-slate-800 text-[0.75rem]">
             ${item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OC-${item.n_doc}` : `INC-${item.n_doc}`) : '—'}
           </div>
-          <div class="text-[0.75rem] text-[#00B0F0] font-mono font-bold mt-0.5">
+          <div class="text-[0.6875rem] text-[#0088cc] font-mono font-bold mt-0.5">
             ${item.cuenta_contable || '—'}
           </div>
-          <div class="text-[0.75rem] text-slate-400 font-mono mt-0.5">
+          <div class="text-[0.6875rem] text-slate-400 font-mono mt-0.5">
             ${item.centro_costo || '—'}
           </div>
         </td>
-        <td class="px-3.5 py-4 whitespace-nowrap text-center">
-          <span class="px-2.5 py-1 text-xs font-medium text-slate-500 bg-slate-50 border border-slate-200 rounded-full">
+        <td class="px-2 py-2.5 whitespace-nowrap text-center">
+          <span class="px-2 py-0.5 text-[0.6875rem] font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-md">
             ${formatDate(item.fecha_alta_factura || item.fecha_registro_contable)}
           </span>
         </td>
-        <td class="px-3.5 py-4 whitespace-nowrap text-center">
-          <div class="font-bold text-slate-800 text-[0.8125rem]">
+        <td class="px-2 py-2.5 whitespace-nowrap text-center">
+          <div class="font-bold text-slate-800 text-[0.75rem]">
             ${item.sucursal || '—'}
           </div>
-          ${locText ? `<div class="text-[0.75rem] text-slate-600 font-medium mt-0.5">${locText}</div>` : ''}
-          ${financiadoText ? `<div class="text-[0.6875rem] text-slate-500 italic font-medium mt-0.5">${financiadoText}</div>` : ''}
+          ${locText ? `<div class="text-[0.6875rem] text-slate-600 font-medium mt-0.5">${locText}</div>` : ''}
+          ${financiadoText ? `<div class="text-[0.625rem] text-slate-500 italic font-medium mt-0.5">${financiadoText}</div>` : ''}
         </td>
-        <td class="px-3.5 py-4 min-w-[200px]">
-          <div class="text-[0.875rem] font-bold text-slate-800 leading-snug">
+        <td class="px-2 py-2.5 min-w-[200px]">
+          <div class="text-[0.75rem] font-bold text-slate-900 leading-snug uppercase">
             ${item.denominacion}
           </div>
-          <div class="text-[0.6875rem] text-[#00B0F0] font-bold italic uppercase mt-0.5">
+          <div class="text-[0.65rem] text-[#0088cc] font-bold italic uppercase mt-0.5">
             ${item.subcategoria || item.categoria || '—'}
           </div>
           ${(() => {
@@ -2573,18 +2591,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const prefix = hasPrefix ? '' : 'Acta N° ';
             const hasYear = /\b(19|20)\d{2}\b/.test(text);
             const suffix = hasYear ? '' : ` - ${year}`;
-            return `<div class="text-[0.6875rem] text-amber-600 font-mono font-semibold mt-0.5">${prefix}${text}${suffix}</div>`;
+            return `<div class="text-[0.65rem] text-amber-600 font-mono font-semibold mt-0.5">${prefix}${text}${suffix}</div>`;
           })()}
         </td>
-        <td class="px-3.5 py-4 text-[0.8125rem] min-w-[150px] text-slate-600 leading-normal">
+        <td class="px-2 py-2.5 text-[0.72rem] min-w-[150px] text-slate-600 leading-normal">
           <div class="space-y-0.5">
             <div><span class="font-semibold text-slate-400">Color:</span> <span class="text-slate-700">${item.color || '—'}</span></div>
-            <div><span class="font-semibold text-slate-400">Marca:</span> <span class="text-slate-850 font-medium">${item.marca || 'S/M'}</span></div>
-            <div><span class="font-semibold text-slate-400">Modelo:</span> <span class="text-slate-850 font-medium">${item.modelo || 'S/M'}</span></div>
-            <div><span class="font-semibold text-slate-400">Serie:</span> <span class="text-slate-850 font-mono font-medium">${item.numero_serie || 'S/S'}</span></div>
+            <div><span class="font-semibold text-slate-400">Marca:</span> <span class="text-slate-800 font-medium">${item.marca || 'S/M'}</span></div>
+            <div><span class="font-semibold text-slate-400">Modelo:</span> <span class="text-slate-800 font-medium">${item.modelo || 'S/M'}</span></div>
+            <div><span class="font-semibold text-slate-400">Serie:</span> <span class="text-slate-800 font-mono font-medium">${item.numero_serie || 'S/S'}</span></div>
           </div>
         </td>
-        <td class="px-3.5 py-4 text-[0.8125rem] min-w-[180px] leading-snug">
+        <td class="px-2 py-2.5 text-[0.72rem] min-w-[180px] leading-snug">
           ${(() => {
             const isVehiculo = (item.categoria && item.categoria.toLowerCase().includes('vehiculo')) ||
                                (item.subcategoria && item.subcategoria.toLowerCase().includes('vehiculo')) ||
@@ -2612,24 +2630,27 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           })()}
         </td>
-        <td class="px-3.5 py-4 whitespace-nowrap text-center">
+        <td class="px-2 py-2.5 whitespace-nowrap text-center">
           ${getEstadoBadgeHTML(item.estado_activo)}
         </td>
-        <td class="px-3.5 py-4 whitespace-nowrap text-right text-[0.8125rem] font-medium text-slate-500">
+        <td class="px-2 py-2.5 whitespace-nowrap text-right text-[0.75rem] font-medium text-slate-500">
           S/. ${valLibrosFormateado}
         </td>
-        <td class="px-3.5 py-4 whitespace-nowrap text-right text-[0.8125rem] font-bold text-emerald-600">
+        <td class="px-2 py-2.5 whitespace-nowrap text-right text-[0.75rem] font-bold text-emerald-600">
           S/. ${valNetoFormateado}
         </td>
-        <td class="px-3.5 py-4 min-w-[170px]">
-          <div class="font-bold text-slate-800 text-[0.8125rem]">
+        <td class="px-2 py-2.5 min-w-[160px]">
+          <div class="font-bold text-slate-800 text-[0.75rem]">
             ${item.responsable || 'Sin Asignar'}
           </div>
-          ${item.puesto ? `<div class="text-[0.6875rem] text-slate-500 italic font-medium uppercase mt-0.5">${item.puesto}</div>` : ''}
+          ${item.puesto ? `<div class="text-[0.65rem] text-slate-500 italic font-medium uppercase mt-0.5">${item.puesto}</div>` : ''}
         </td>
-        <td class="px-3.5 py-4 whitespace-nowrap text-center">
-          <button type="button" data-ficha-code="${item.cod_patrimonial}" class="btn-download-ficha-pdf p-1.5 text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-all border border-emerald-200 cursor-pointer" title="Descargar Ficha del Activo">
-            📥
+        <td class="px-1 py-2 whitespace-nowrap text-center">
+          <button type="button" data-ficha-code="${item.cod_patrimonial}" class="btn-download-ficha-pdf inline-flex items-center justify-center gap-1 px-1.5 py-1 text-emerald-800 bg-emerald-50 hover:bg-emerald-100 hover:text-emerald-950 border border-emerald-300 rounded-lg shadow-2xs transition-all active:scale-95 cursor-pointer" title="Descargar Ficha Digital de Obra (PDF)">
+            <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <span class="text-[9px] font-extrabold leading-tight text-center">FICHA<br/>DIGITAL</span>
           </button>
         </td>
       `;
@@ -2637,15 +2658,21 @@ document.addEventListener('DOMContentLoaded', () => {
       renderObrasMobileCard(item, valLibrosFormateado, valNetoFormateado);
     });
 
-    tbody.querySelectorAll('.btn-download-ficha-pdf').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const code = e.currentTarget.getAttribute('data-ficha-code');
-        const activo = assets.find(a => String(a.cod_patrimonial) === String(code));
-        if (activo) {
-          generarFichaPDF_Public(activo);
-        }
+    const bindObrasFichaEvents = (container) => {
+      if (!container) return;
+      container.querySelectorAll('.btn-download-ficha-pdf').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const code = e.currentTarget.getAttribute('data-ficha-code');
+          const activo = assets.find(a => String(a.cod_patrimonial) === String(code));
+          if (activo) {
+            generarFichaPDF_Public(activo);
+          }
+        });
       });
-    });
+    };
+
+    bindObrasFichaEvents(tbody);
+    bindObrasFichaEvents(document.getElementById('assets-mobile-container'));
   }
 
   function renderObrasMobileCard(item, valLibrosFormateado, valNetoFormateado) {
@@ -2710,6 +2737,15 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="mt-1"><span class="font-semibold text-slate-400">Serie:</span> ${item.numero_serie || 'S/S'}</div>
         `}
         <div class="mt-1"><span class="font-semibold text-slate-400">Responsable:</span> ${item.responsable || 'Sin asignar'}</div>
+      </div>
+
+      <div class="mt-3 pt-2.5 border-t border-slate-100 flex justify-end">
+        <button type="button" data-ficha-code="${item.cod_patrimonial}" class="btn-download-ficha-pdf inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 hover:text-emerald-950 border border-emerald-300/80 rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer" title="Descargar Ficha Digital de Obra (PDF)">
+          <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          <span>FICHA DIGITAL</span>
+        </button>
       </div>
     `;
     mobileContainer.appendChild(mobileCard);
@@ -2776,43 +2812,43 @@ document.addEventListener('DOMContentLoaded', () => {
       
       row.innerHTML = `
         <!-- Placa -->
-        <td class="px-3.5 py-3 whitespace-nowrap text-center">
-          <span class="font-mono font-bold text-slate-900 bg-white border-2 border-slate-900 px-2.5 py-0.5 rounded text-xs tracking-wider shadow-sm">
+        <td class="px-2 py-2.5 whitespace-nowrap text-center">
+          <span class="font-mono font-bold text-slate-900 bg-white border border-slate-800 px-2 py-0.5 rounded text-[11px] tracking-wider shadow-2xs">
             ${item.placa || 'SIN PLACA'}
           </span>
         </td>
         
         <!-- Código Patrimonial -->
-        <td class="px-3.5 py-3 whitespace-nowrap text-center text-[0.875rem] font-mono font-bold text-slate-800">
+        <td class="px-2 py-2.5 whitespace-nowrap text-center text-[0.75rem] font-mono font-bold text-slate-800">
           ${item.cod_patrimonial}
         </td>
         
         <!-- Ubicación Financiado -->
-        <td class="px-3.5 py-3 whitespace-nowrap text-center">
+        <td class="px-2 py-2.5 whitespace-nowrap text-center">
           ${getUbicacionFinanciado(item).split('\n').map((line, idx) => {
-            if (idx === 0) return `<div class="font-extrabold text-slate-900 text-[0.8125rem]">${line}</div>`;
+            if (idx === 0) return `<div class="font-bold text-slate-900 text-[0.75rem]">${line}</div>`;
             if (idx === 1 && line !== 'Transferencia' && line !== 'Obra en curso' && line !== 'Liq. Obra' && line !== 'Donación') {
-              return `<div class="text-[0.75rem] text-slate-600 font-bold uppercase mt-0.5">${line}</div>`;
+              return `<div class="text-[0.6875rem] text-slate-500 font-medium mt-0.5">${line}</div>`;
             }
-            return `<div class="text-[0.6875rem] text-brand-600 font-bold uppercase tracking-wide mt-0.5">${line}</div>`;
+            return `<span class="inline-block text-[0.625rem] font-bold text-slate-600 bg-slate-100 border border-slate-200 uppercase tracking-wider px-1.5 py-0.5 rounded mt-0.5">${line}</span>`;
           }).join('')}
         </td>
         
         <!-- Denominación / Características -->
-        <td class="px-3.5 py-3 w-[220px]">
-          <div class="text-[0.8125rem] font-extrabold text-slate-900 leading-snug uppercase">
+        <td class="px-2 py-2.5 w-[210px]">
+          <div class="text-[0.75rem] font-bold text-slate-900 leading-snug uppercase">
             ${(item.denominacion || '').toUpperCase()}
           </div>
-          <div class="text-[0.75rem] text-slate-600 mt-1 space-y-0.5 font-medium">
-            <div><span class="font-bold text-slate-400">Marca:</span> ${item.marca || '—'}</div>
-            <div><span class="font-bold text-slate-400">Modelo:</span> ${item.modelo || '—'}</div>
-            <div><span class="font-bold text-slate-400">Año:</span> ${item.vehiculo_anio || '—'}</div>
-            <div class="text-[0.7rem] font-semibold text-brand-600 italic mt-0.5">CAT: ${(item.subcategoria || 'VEHÍCULO').toUpperCase()}</div>
+          <div class="text-[0.7rem] text-slate-600 mt-1 space-y-0.5 font-medium">
+            <div><span class="font-semibold text-slate-400">Marca:</span> ${item.marca || '—'}</div>
+            <div><span class="font-semibold text-slate-400">Modelo:</span> ${item.modelo || '—'}</div>
+            <div><span class="font-semibold text-slate-400">Año:</span> ${item.vehiculo_anio || '—'}</div>
+            <div class="text-[0.65rem] font-bold text-brand-600 italic mt-0.5">CAT: ${(item.subcategoria || 'VEHÍCULO').toUpperCase()}</div>
           </div>
         </td>
         
         <!-- Especificaciones Técnicas -->
-        <td class="px-3.5 py-3 text-[0.8125rem] w-[220px] text-slate-500 leading-snug">
+        <td class="px-2 py-2.5 text-[0.72rem] w-[200px] text-slate-600 leading-snug">
           <div><span class="font-medium text-slate-400">Motor:</span> ${item.nro_motor || '—'}</div>
           <div><span class="font-medium text-slate-400">Chasis:</span> ${item.nro_chasis || '—'}</div>
           <div><span class="font-medium text-slate-400">Combustible:</span> ${item.combustible || '—'}</div>
@@ -2822,33 +2858,33 @@ document.addEventListener('DOMContentLoaded', () => {
         </td>
         
         <!-- Estado Físico -->
-        <td class="px-3.5 py-3 whitespace-nowrap text-center">
+        <td class="px-2 py-2.5 whitespace-nowrap text-center">
           ${getEstadoBadgeHTML(item.estado_activo)}
         </td>
         
         <!-- SOAT -->
-        <td class="px-3.5 py-3 whitespace-nowrap text-center">
+        <td class="px-2 py-2.5 whitespace-nowrap text-center">
           ${soatBadge}
         </td>
         
         <!-- Revisión Técnica -->
-        <td class="px-3.5 py-3 whitespace-nowrap text-center">
+        <td class="px-2 py-2.5 whitespace-nowrap text-center">
           ${revTecBadge}
         </td>
         
         <!-- Responsable -->
-        <td class="px-3.5 py-3 whitespace-nowrap text-[0.8125rem] font-bold text-slate-800">
+        <td class="px-2 py-2.5 whitespace-nowrap text-[0.75rem] font-bold text-slate-800">
           ${item.responsable || '—'}
         </td>
 
         <!-- Documento SOAT PDF (Al Final) -->
-        <td class="px-3.5 py-3 whitespace-nowrap text-center">
+        <td class="px-1 py-2 whitespace-nowrap text-center">
           ${item.pdf_soat_path ? `
-            <a href="${getSoatPdfUrl(item.pdf_soat_path)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 hover:text-rose-900 border border-rose-200/80 rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer" title="Ver / Descargar PDF del SOAT" download="${item.cod_patrimonial}_soat.pdf">
+            <a href="${getSoatPdfUrl(item.pdf_soat_path)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-1 px-1.5 py-1 text-rose-700 bg-rose-50 hover:bg-rose-100 hover:text-rose-900 border border-rose-200 rounded-lg shadow-2xs transition-all active:scale-95 cursor-pointer" title="Ver / Descargar PDF del SOAT" download="${item.cod_patrimonial}_soat.pdf">
               <svg class="w-3.5 h-3.5 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
               </svg>
-              <span>PDF SOAT</span>
+              <span class="text-[9px] font-extrabold leading-tight text-center">PDF<br/>SOAT</span>
             </a>
           ` : '<span class="text-xs text-slate-400 font-semibold">—</span>'}
         </td>
