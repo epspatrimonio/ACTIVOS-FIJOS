@@ -6,7 +6,6 @@ frontend/
 backups/
 uploads/
 salidabienes/
-public_dashboard/
 __pycache__/
 *.pyc
 *.pyo
