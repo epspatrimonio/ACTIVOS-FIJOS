@@ -1087,7 +1087,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const filtered = baseData.filter(item => {
       if (currentTab === 'salida-tabla' || currentTab === 'salidas') {
-        const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        const querySalida = (document.getElementById('filter-salida-search')?.value || '').toLowerCase().trim();
+        const queryGlobal = (searchInput ? searchInput.value.toLowerCase().trim() : '');
+        const query = querySalida || queryGlobal;
+
         const searchMatch = !query || 
           (item.n_orden || '').toLowerCase().includes(query) ||
           (item.responsable || '').toLowerCase().includes(query) ||
@@ -1104,23 +1107,30 @@ document.addEventListener('DOMContentLoaded', () => {
             (b.numero_serie || '').toLowerCase().includes(query)
           );
           
+        let sucursalMatch = true;
+        const selectedSalidaSucursal = document.getElementById('filter-salida-sucursal')?.value;
+        if (selectedSalidaSucursal && selectedSalidaSucursal !== 'Todas' && selectedSalidaSucursal !== '') {
+          const itemSuc = (item.ubicacion || '').trim().toUpperCase();
+          sucursalMatch = (itemSuc === selectedSalidaSucursal.trim().toUpperCase());
+        }
+
         let yearMatch = true;
-        const selectedGlobalYear = document.getElementById('filter-global-year')?.value;
-        if (selectedGlobalYear && selectedGlobalYear !== 'Todos' && item.fecha_orden) {
+        const selectedSalidaYear = document.getElementById('filter-salida-year')?.value || document.getElementById('filter-global-year')?.value;
+        if (selectedSalidaYear && selectedSalidaYear !== 'Todos' && selectedSalidaYear !== '' && item.fecha_orden) {
           const parts = String(item.fecha_orden).split('-');
           const y = parts[0] ? Number(parts[0]) : new Date(item.fecha_orden).getFullYear();
-          yearMatch = (y === Number(selectedGlobalYear));
+          yearMatch = (y === Number(selectedSalidaYear));
         }
 
         let monthMatch = true;
-        const selectedGlobalMonth = document.getElementById('filter-global-month')?.value;
-        if (selectedGlobalMonth && selectedGlobalMonth !== 'Todos' && item.fecha_orden) {
+        const selectedSalidaMonth = document.getElementById('filter-salida-month')?.value || document.getElementById('filter-global-month')?.value;
+        if (selectedSalidaMonth && selectedSalidaMonth !== 'Todos' && selectedSalidaMonth !== '' && item.fecha_orden) {
           const parts = String(item.fecha_orden).split('-');
           const m = parts[1] ? Number(parts[1]) : (new Date(item.fecha_orden).getMonth() + 1);
-          monthMatch = (m === Number(selectedGlobalMonth));
+          monthMatch = (m === Number(selectedSalidaMonth));
         }
 
-        return searchMatch && yearMatch && monthMatch;
+        return searchMatch && sucursalMatch && yearMatch && monthMatch;
       }
 
       if (currentTab === 'contable') {
@@ -1790,6 +1800,40 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
+    function populateSalidasFilters() {
+      const sucursalSel = document.getElementById('filter-salida-sucursal');
+      const yearSel = document.getElementById('filter-salida-year');
+      if (!sucursalSel || !yearSel) return;
+
+      const prevSuc = sucursalSel.value;
+      const prevYear = yearSel.value;
+
+      // Poblar Sucursales basadas en salidas y activos
+      const ubicaciones = [...new Set([
+        ...salidas.map(s => (s.ubicacion || '').trim().toUpperCase()).filter(Boolean),
+        ...assets.map(a => (a.sucursal || '').trim().toUpperCase()).filter(Boolean)
+      ])].sort();
+
+      sucursalSel.innerHTML = '<option value="">Todas</option>' + 
+        ubicaciones.map(u => `<option value="${u}" ${u === prevSuc ? 'selected' : ''}>${u}</option>`).join('');
+
+      // Poblar Años basados en salidas
+      const years = [...new Set(
+        salidas.map(s => {
+          if (!s.fecha_orden) return null;
+          const parts = String(s.fecha_orden).split('-');
+          return parts[0] ? Number(parts[0]) : new Date(s.fecha_orden).getFullYear();
+        }).filter(Boolean)
+      )].sort((a, b) => b - a);
+
+      if (!years.includes(new Date().getFullYear())) {
+        years.unshift(new Date().getFullYear());
+      }
+
+      yearSel.innerHTML = '<option value="">Todos</option>' +
+        years.map(y => `<option value="${y}" ${String(y) === String(prevYear) ? 'selected' : ''}>${y}</option>`).join('');
+    }
+
     // Subtab switching (Registro y Gestión vs Tablas y Consultas)
     if (btnSubtabForm && btnSubtabHistory && formView && historyView) {
       btnSubtabForm.addEventListener('click', () => {
@@ -1797,13 +1841,52 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSubtabHistory.className = "text-xs font-bold pb-1 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all cursor-pointer bg-transparent border-t-0 border-x-0";
         formView.classList.remove('hidden');
         historyView.classList.add('hidden');
+        document.getElementById('salidas-form-controls')?.classList.remove('hidden');
+        document.getElementById('salidas-history-filters')?.classList.add('hidden');
       });
       btnSubtabHistory.addEventListener('click', () => {
         btnSubtabHistory.className = "text-xs font-extrabold pb-1 border-b-2 border-brand-500 text-brand-600 transition-all cursor-pointer bg-transparent border-t-0 border-x-0";
         btnSubtabForm.className = "text-xs font-bold pb-1 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all cursor-pointer bg-transparent border-t-0 border-x-0";
         historyView.classList.remove('hidden');
         formView.classList.add('hidden');
+        document.getElementById('salidas-form-controls')?.classList.add('hidden');
+        document.getElementById('salidas-history-filters')?.classList.remove('hidden');
+        populateSalidasFilters();
         applyFilters();
+      });
+    }
+
+    // Listeners de filtros de Salida de Bienes (Sucursal, Año, Mes, Búsqueda)
+    ['filter-salida-sucursal', 'filter-salida-year', 'filter-salida-month'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('change', applyFilters);
+    });
+    const salidaSearchInput = document.getElementById('filter-salida-search');
+    if (salidaSearchInput) {
+      salidaSearchInput.addEventListener('input', applyFilters);
+    }
+
+    // Botón Exportar / Sincronizar JSON de Salidas
+    const btnExportSalidasJson = document.getElementById('btn-salidas-export-json');
+    if (btnExportSalidasJson) {
+      btnExportSalidasJson.addEventListener('click', () => {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(salidas, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", `salidas_${new Date().toISOString().slice(0,10)}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+
+        try {
+          navigator.clipboard.writeText(JSON.stringify(salidas, null, 2)).then(() => {
+            alert(`✅ Se descargó el archivo salidas.json (${salidas.length} órdenes) y se copió al portapapeles.\n\nPuedes importarlo directamente en el APP Control Patrimonial.`);
+          }).catch(() => {
+            alert(`✅ Se descargó el archivo salidas.json con ${salidas.length} órdenes.`);
+          });
+        } catch (e) {
+          alert(`✅ Se descargó el archivo salidas.json con ${salidas.length} órdenes.`);
+        }
       });
     }
 

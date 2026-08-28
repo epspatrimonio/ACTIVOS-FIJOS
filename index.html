@@ -609,10 +609,10 @@
     <!-- Módulo: Salida de Bienes (Registro + Tabla) -->
     <div id="salidas-table-container" class="hidden flex-col flex-1 min-h-0 rounded-2xl shadow-sm border border-slate-200 bg-slate-50/50 p-3.5 space-y-3.5 overflow-y-auto smooth-scroll">
       
-      <!-- Bar Superior Unificada: Sub-navegación + Código Orden + Selector de Modo -->
+      <!-- Bar Superior Unificada: Sub-navegación + Controles Dinámicos (Formulario vs Historial) -->
       <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200 shadow-xs shrink-0">
         <!-- Subtabs -->
-        <div class="flex items-center gap-5 border-b md:border-b-0 border-slate-150 pb-2 md:pb-0 w-full md:w-auto">
+        <div class="flex items-center gap-5 border-b md:border-b-0 border-slate-150 pb-2 md:pb-0 w-full md:w-auto shrink-0">
           <button type="button" id="btn-salidas-subtab-form" class="text-xs font-extrabold pb-1 border-b-2 border-brand-500 text-brand-600 transition-all cursor-pointer bg-transparent border-t-0 border-x-0">
             ✍️ Registro y Gestión
           </button>
@@ -621,8 +621,8 @@
           </button>
         </div>
 
-        <!-- Indicadores y Modo -->
-        <div class="flex flex-wrap items-center justify-between md:justify-end gap-3 w-full md:w-auto">
+        <!-- Controles para Vista 1: Registro (N° Orden y Modo) -->
+        <div id="salidas-form-controls" class="flex flex-wrap items-center justify-between md:justify-end gap-3 w-full md:w-auto">
           <div class="flex items-center gap-1.5 bg-brand-50/80 px-3 py-1 rounded-xl border border-brand-200/80">
             <span class="text-[10px] font-extrabold text-brand-700 uppercase tracking-wider">N° ORDEN:</span>
             <span id="salida-codigo-badge" class="font-mono font-extrabold text-brand-700 text-xs">OS-2026-AUTO</span>
@@ -636,6 +636,55 @@
               ✍️ Opción 2: Manual
             </button>
           </div>
+        </div>
+
+        <!-- Controles para Vista 2: Tablas y Consultas (Filtro por Sucursal, Año, Mes y Búsqueda) -->
+        <div id="salidas-history-filters" class="hidden flex-wrap items-center justify-between md:justify-end gap-2.5 w-full md:w-auto">
+          <!-- Filtro Sucursal -->
+          <div class="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded-xl border border-slate-200">
+            <label for="filter-salida-sucursal" class="text-[10px] font-extrabold text-slate-500 uppercase">Sucursal:</label>
+            <select id="filter-salida-sucursal" class="text-xs font-bold bg-transparent text-slate-700 focus:outline-none cursor-pointer">
+              <option value="">Todas</option>
+            </select>
+          </div>
+
+          <!-- Filtro Año -->
+          <div class="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded-xl border border-slate-200">
+            <label for="filter-salida-year" class="text-[10px] font-extrabold text-slate-500 uppercase">Año:</label>
+            <select id="filter-salida-year" class="text-xs font-bold bg-transparent text-slate-700 focus:outline-none cursor-pointer">
+              <option value="">Todos</option>
+            </select>
+          </div>
+
+          <!-- Filtro Mes -->
+          <div class="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded-xl border border-slate-200">
+            <label for="filter-salida-month" class="text-[10px] font-extrabold text-slate-500 uppercase">Mes:</label>
+            <select id="filter-salida-month" class="text-xs font-bold bg-transparent text-slate-700 focus:outline-none cursor-pointer">
+              <option value="">Todos</option>
+              <option value="1">Enero</option>
+              <option value="2">Febrero</option>
+              <option value="3">Marzo</option>
+              <option value="4">Abril</option>
+              <option value="5">Mayo</option>
+              <option value="6">Junio</option>
+              <option value="7">Julio</option>
+              <option value="8">Agosto</option>
+              <option value="9">Septiembre</option>
+              <option value="10">Octubre</option>
+              <option value="11">Noviembre</option>
+              <option value="12">Diciembre</option>
+            </select>
+          </div>
+
+          <!-- Buscador -->
+          <div class="relative">
+            <input type="text" id="filter-salida-search" placeholder="🔍 Buscar..." class="w-36 sm:w-44 text-xs font-semibold px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-500 text-slate-700" />
+          </div>
+
+          <!-- Botón Exportar/Sincronizar JSON -->
+          <button type="button" id="btn-salidas-export-json" title="Descargar / Copiar archivo de órdenes registradas para sincronizar con el APP" class="px-2.5 py-1 text-xs font-extrabold rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition-all cursor-pointer flex items-center gap-1">
+            📤 Sincronizar
+          </button>
         </div>
       </div>
 
