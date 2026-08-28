@@ -1111,12 +1111,7 @@ document.addEventListener('DOMContentLoaded', () => {
           monthMatch = (m === Number(selectedGlobalMonth));
         }
 
-        let sucursalMatch = true;
-        if (sucursalSelect && sucursalSelect.value && sucursalSelect.value !== 'Todas') {
-          sucursalMatch = (item.ubicacion || '').trim().toUpperCase() === sucursalSelect.value.trim().toUpperCase();
-        }
-
-        return searchMatch && yearMatch && monthMatch && sucursalMatch;
+        return searchMatch && yearMatch && monthMatch;
       }
 
       if (currentTab === 'contable') {
