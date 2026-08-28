@@ -60,12 +60,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function loadData() {
     try {
+      const ts = Date.now();
+      const fetchOpts = { cache: 'no-store' };
       const [assetsResponse, celularesResponse, inventarioResponse, tercerosResponse, salidasResponse] = await Promise.all([
-        fetch('./activos.json'),
-        fetch('./celulares.json').catch(() => null),
-        fetch('./inventario_fisico.json').catch(() => null),
-        fetch('./bienes_terceros.json').catch(() => null),
-        fetch('./salidas.json').catch(() => null)
+        fetch(`./activos.json?t=${ts}`, fetchOpts),
+        fetch(`./celulares.json?t=${ts}`, fetchOpts).catch(() => null),
+        fetch(`./inventario_fisico.json?t=${ts}`, fetchOpts).catch(() => null),
+        fetch(`./bienes_terceros.json?t=${ts}`, fetchOpts).catch(() => null),
+        fetch(`./salidas.json?t=${ts}`, fetchOpts).catch(() => null)
       ]);
       
       if (!assetsResponse.ok) {
@@ -95,13 +97,20 @@ document.addEventListener('DOMContentLoaded', () => {
         salidas = await salidasResponse.json();
       } else {
         salidas = [];
-        try {
-          const localSaved = JSON.parse(localStorage.getItem('salidas_custom_history') || '[]');
-          if (Array.isArray(localSaved) && localSaved.length > 0) {
-            salidas = localSaved;
-          }
-        } catch (e) {}
       }
+
+      // Fusionar órdenes almacenadas en localStorage para no perder registros locales recientes
+      try {
+        const localSaved = JSON.parse(localStorage.getItem('salidas_custom_history') || '[]');
+        if (Array.isArray(localSaved) && localSaved.length > 0) {
+          localSaved.forEach(localItem => {
+            const exists = salidas.some(s => s.n_orden === localItem.n_orden || (s.id && localItem.id && s.id === localItem.id));
+            if (!exists) {
+              salidas.unshift(localItem);
+            }
+          });
+        }
+      } catch (e) {}
 
       // Normalizar formato de ordenes legacy OS-YYYY-XXX a XXX-YYYY (ej: OS-2026-035 -> 035-2026)
       salidas.forEach(s => {
