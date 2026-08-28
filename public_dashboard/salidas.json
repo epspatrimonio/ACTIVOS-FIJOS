@@ -1,6 +1,38 @@
 [
   {
     "fecha_orden": "2026-08-28",
+    "tipo_salida": "Mantenimiento",
+    "motivo": "IMPRESORA EN MAL ESTADO",
+    "responsable": "AQUINO TOSCANO GINA RAQUEL",
+    "cargo": "JEFE DE TESORERIA",
+    "ubicacion": "SEDE CENTRAL",
+    "resp_tecnico": "INFORMATICA",
+    "observaciones": "",
+    "estado_devolucion": "SALIDA",
+    "obs_devolucion": "",
+    "id": 42,
+    "n_orden": "038-2026",
+    "created_at": "2026-08-28T16:18:52.675385Z",
+    "updated_at": "2026-08-28T16:18:52.675385Z",
+    "bienes": [
+      {
+        "cod_patrimonial": "",
+        "denominacion": "IMPRESORA",
+        "color": "NEGRO",
+        "marca": "EPSON",
+        "modelo": "L3150",
+        "numero_serie": "S/S",
+        "estado_activo": "MALO",
+        "accesorios": "CABLE PODER Y USB",
+        "id": 124,
+        "id_salida": 42,
+        "created_at": "2026-08-28T16:18:52.675385Z",
+        "updated_at": "2026-08-28T16:18:52.675385Z"
+      }
+    ]
+  },
+  {
+    "fecha_orden": "2026-08-28",
     "tipo_salida": "Trabajo de campo",
     "motivo": "SUPERVISION DE OBRAS",
     "responsable": "GARCIA LOPEZ MARIO",
@@ -28,6 +60,38 @@
         "id_salida": 40,
         "created_at": "2026-08-28T16:12:53.090739Z",
         "updated_at": "2026-08-28T16:12:53.090739Z"
+      }
+    ]
+  },
+  {
+    "fecha_orden": "2026-08-27",
+    "tipo_salida": "Mantenimiento",
+    "motivo": "MONITOR EN MAL ESTADO",
+    "responsable": "CARDENAS RODRIGO VICTOR",
+    "cargo": "ALMACEN",
+    "ubicacion": "LA MERCED",
+    "resp_tecnico": "INFORMATICA",
+    "observaciones": "",
+    "estado_devolucion": "SALIDA",
+    "obs_devolucion": "",
+    "id": 41,
+    "n_orden": "037-2026",
+    "created_at": "2026-08-28T16:18:52.675385Z",
+    "updated_at": "2026-08-28T16:18:52.675385Z",
+    "bienes": [
+      {
+        "cod_patrimonial": "",
+        "denominacion": "MONITOR",
+        "color": "NEGRO",
+        "marca": "S/M",
+        "modelo": "S/M",
+        "numero_serie": "S/S",
+        "estado_activo": "MALO",
+        "accesorios": "CABLE PODER Y VGA",
+        "id": 123,
+        "id_salida": 41,
+        "created_at": "2026-08-28T16:18:52.675385Z",
+        "updated_at": "2026-08-28T16:18:52.675385Z"
       }
     ]
   },
