@@ -1753,10 +1753,475 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function initSalidaModule() {
+    const btnSubtabForm = document.getElementById('btn-salidas-subtab-form');
+    const btnSubtabHistory = document.getElementById('btn-salidas-subtab-history');
+    const formView = document.getElementById('salidas-form-view');
     const historyView = document.getElementById('salidas-history-view');
-    if (historyView) {
-      historyView.classList.remove('hidden');
+
+    const btnModoSistema = document.getElementById('btn-salida-modo-sistema');
+    const btnModoManual = document.getElementById('btn-salida-modo-manual');
+
+    const fechaInput = document.getElementById('salida-fecha');
+    if (fechaInput && !fechaInput.value) {
+      fechaInput.value = new Date().toISOString().split('T')[0];
     }
+
+    const ubicacionSelect = document.getElementById('salida-ubicacion');
+    if (ubicacionSelect && assets.length > 0 && ubicacionSelect.options.length <= 1) {
+      const sucursalesSet = new Set();
+      const EXCLUDED = new Set(['SELVA CENTRAL', 'EPS SELVA CENTRAL', 'SELVA CENTRAL S.A.', 'RETIRADAS', 'SIN ASIGNAR']);
+      assets.forEach(a => {
+        if (a.sucursal) sucursalesSet.add(a.sucursal.trim().toUpperCase());
+      });
+      Array.from(sucursalesSet).filter(s => s && !EXCLUDED.has(s)).sort().forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s;
+        opt.textContent = s;
+        ubicacionSelect.appendChild(opt);
+      });
+    }
+
+    // Subtab switching (Registro y Gestión vs Tablas y Consultas)
+    if (btnSubtabForm && btnSubtabHistory && formView && historyView) {
+      btnSubtabForm.addEventListener('click', () => {
+        btnSubtabForm.className = "text-xs font-extrabold pb-1 border-b-2 border-brand-500 text-brand-600 transition-all cursor-pointer bg-transparent border-t-0 border-x-0";
+        btnSubtabHistory.className = "text-xs font-bold pb-1 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all cursor-pointer bg-transparent border-t-0 border-x-0";
+        formView.classList.remove('hidden');
+        historyView.classList.add('hidden');
+      });
+      btnSubtabHistory.addEventListener('click', () => {
+        btnSubtabHistory.className = "text-xs font-extrabold pb-1 border-b-2 border-brand-500 text-brand-600 transition-all cursor-pointer bg-transparent border-t-0 border-x-0";
+        btnSubtabForm.className = "text-xs font-bold pb-1 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all cursor-pointer bg-transparent border-t-0 border-x-0";
+        historyView.classList.remove('hidden');
+        formView.classList.add('hidden');
+        applyFilters();
+      });
+    }
+
+    // Mode switching
+    if (btnModoSistema && btnModoManual) {
+      btnModoSistema.addEventListener('click', () => {
+        salidaModo = 'SISTEMA';
+        btnModoSistema.className = "px-3 py-1 text-xs font-bold rounded-lg transition-all border-none cursor-pointer bg-brand-500 text-white shadow-xs";
+        btnModoManual.className = "px-3 py-1 text-xs font-bold rounded-lg transition-all border-none cursor-pointer text-slate-600 hover:bg-white bg-transparent";
+        document.getElementById('salida-search-activo-wrapper')?.classList.remove('hidden');
+        document.getElementById('btn-salida-add-manual')?.classList.add('hidden');
+        document.getElementById('col-salida-chk')?.classList.remove('hidden');
+        salidaBienesSeleccionados = [];
+        renderSalidaBienesFormTable();
+      });
+
+      btnModoManual.addEventListener('click', () => {
+        salidaModo = 'MANUAL';
+        btnModoManual.className = "px-3 py-1 text-xs font-bold rounded-lg transition-all border-none cursor-pointer bg-brand-500 text-white shadow-xs";
+        btnModoSistema.className = "px-3 py-1 text-xs font-bold rounded-lg transition-all border-none cursor-pointer text-slate-600 hover:bg-white bg-transparent";
+        document.getElementById('salida-search-activo-wrapper')?.classList.add('hidden');
+        document.getElementById('btn-salida-add-manual')?.classList.remove('hidden');
+        document.getElementById('col-salida-chk')?.classList.add('hidden');
+        salidaBienesSeleccionados = [{ isManual: true, seleccionado: true, cod_patrimonial: '', denominacion: '', color: 'NEGRO', marca: 'S/M', modelo: 'S/M', numero_serie: 'S/S', estado_activo: 'BUENO' }];
+        renderSalidaBienesFormTable();
+      });
+    }
+
+    // Autocompletado Responsable
+    const respInput = document.getElementById('salida-responsable');
+    const respSug = document.getElementById('salida-resp-sug');
+    if (respInput && respSug) {
+      respInput.addEventListener('input', () => {
+        const q = respInput.value.trim().toUpperCase();
+        if (!q) { respSug.classList.add('hidden'); return; }
+        
+        const allPeople = [
+          ...assets.map(a => a.responsable),
+          ...celulares.map(c => c.responsable),
+          ...inventario.map(i => i.responsable),
+          ...terceros.map(t => t.responsable),
+          ...salidas.map(s => s.responsable)
+        ];
+        const personalSet = [...new Set(allPeople.map(p => (p || '').trim().toUpperCase()).filter(Boolean))].sort();
+        
+        const words = q.split(/\s+/).filter(Boolean);
+        const matches = personalSet.filter(p => words.every(w => p.includes(w))).slice(0, 10);
+        
+        if (matches.length === 0) { respSug.classList.add('hidden'); return; }
+        respSug.innerHTML = matches.map(m => `
+          <div class="p-2.5 hover:bg-brand-50 cursor-pointer text-xs font-bold text-slate-800 border-b border-slate-100 last:border-b-0" data-val="${m}">
+            ${m}
+          </div>
+        `).join('');
+        respSug.classList.remove('hidden');
+        respSug.querySelectorAll('div').forEach(el => {
+          el.addEventListener('click', () => {
+            const name = el.getAttribute('data-val');
+            respInput.value = name;
+            respSug.classList.add('hidden');
+            if (salidaModo === 'SISTEMA') {
+              const nameWords = name.split(/\s+/).filter(Boolean);
+              const assigned = assets.filter(a => {
+                const rName = (a.responsable || '').trim().toUpperCase();
+                return nameWords.every(w => rName.includes(w));
+              });
+              if (assigned.length > 0) {
+                salidaBienesSeleccionados = assigned.map(a => ({
+                  cod_patrimonial: a.cod_patrimonial || '',
+                  denominacion: a.denominacion || '',
+                  color: a.color || 'NEGRO',
+                  marca: a.marca || 'S/M',
+                  modelo: a.modelo || 'S/M',
+                  numero_serie: a.numero_serie || 'S/S',
+                  estado_activo: a.estado_activo || 'BUENO',
+                  accesorios: '',
+                  seleccionado: true
+                }));
+                const cargoInput = document.getElementById('salida-cargo');
+                if (cargoInput && assigned[0].puesto) cargoInput.value = assigned[0].puesto.toUpperCase();
+                if (ubicacionSelect && assigned[0].sucursal) ubicacionSelect.value = assigned[0].sucursal.toUpperCase();
+                renderSalidaBienesFormTable();
+              }
+            }
+          });
+        });
+      });
+    }
+
+    // Autocompletado Búsqueda Activo
+    const activoInput = document.getElementById('salida-search-activo');
+    const activoSug = document.getElementById('salida-activo-sug');
+    if (activoInput && activoSug) {
+      activoInput.addEventListener('input', () => {
+        const q = activoInput.value.trim().toUpperCase();
+        if (!q) { activoSug.classList.add('hidden'); return; }
+        const matches = assets.filter(a =>
+          (a.cod_patrimonial || '').toUpperCase().includes(q) ||
+          (a.denominacion || '').toUpperCase().includes(q)
+        ).slice(0, 8);
+        if (matches.length === 0) { activoSug.classList.add('hidden'); return; }
+        activoSug.innerHTML = matches.map(a => `
+          <div class="p-2.5 hover:bg-brand-50 cursor-pointer text-xs border-b border-slate-100 last:border-b-0" data-code="${a.cod_patrimonial}">
+            <div class="font-extrabold text-brand-600 font-mono">${a.cod_patrimonial}</div>
+            <div class="font-semibold text-slate-800 truncate">${a.denominacion}</div>
+          </div>
+        `).join('');
+        activoSug.classList.remove('hidden');
+        activoSug.querySelectorAll('div').forEach(el => {
+          el.addEventListener('click', () => {
+            const code = el.getAttribute('data-code');
+            const found = assets.find(a => a.cod_patrimonial === code);
+            if (found) {
+              if (!salidaBienesSeleccionados.some(b => b.cod_patrimonial === found.cod_patrimonial)) {
+                salidaBienesSeleccionados.push({
+                  cod_patrimonial: found.cod_patrimonial || '',
+                  denominacion: found.denominacion || '',
+                  color: found.color || 'NEGRO',
+                  marca: found.marca || 'S/M',
+                  modelo: found.modelo || 'S/M',
+                  numero_serie: found.numero_serie || 'S/S',
+                  estado_activo: found.estado_activo || 'BUENO',
+                  accesorios: '',
+                  seleccionado: true
+                });
+                renderSalidaBienesFormTable();
+              }
+            }
+            activoInput.value = '';
+            activoSug.classList.add('hidden');
+          });
+        });
+      });
+    }
+
+    // Agregar manual row
+    const btnAddManual = document.getElementById('btn-salida-add-manual');
+    if (btnAddManual) {
+      btnAddManual.addEventListener('click', () => {
+        salidaBienesSeleccionados.push({
+          cod_patrimonial: '',
+          denominacion: '',
+          color: 'NEGRO',
+          marca: 'S/M',
+          modelo: 'S/M',
+          numero_serie: 'S/S',
+          estado_activo: 'BUENO',
+          accesorios: '',
+          isManual: true,
+          seleccionado: true
+        });
+        renderSalidaBienesFormTable();
+      });
+    }
+
+  function generarProximoNumeroOrden(targetYear) {
+    const year = targetYear || new Date().getFullYear();
+    let maxNum = 0;
+    (salidas || []).forEach(s => {
+      if (!s || !s.n_orden) return;
+      const str = String(s.n_orden).trim();
+      const parts = str.split('-');
+      if (parts.length === 2 && !isNaN(parts[0])) {
+        const num = parseInt(parts[0], 10);
+        const y = parseInt(parts[1], 10);
+        if (y === Number(year) && num > maxNum) {
+          maxNum = num;
+        }
+      } else if (parts.length === 3 && !isNaN(parts[2])) {
+        const y = parseInt(parts[1], 10);
+        const num = parseInt(parts[2], 10);
+        if (y === Number(year) && num > maxNum) {
+          maxNum = num;
+        }
+      }
+    });
+    const nextNum = maxNum + 1;
+    return `${String(nextNum).padStart(3, '0')}-${year}`;
+  }
+
+  function updateSalidaCodigoBadge() {
+    const codigoBadge = document.getElementById('salida-codigo-badge');
+    if (codigoBadge) {
+      const fechaVal = document.getElementById('salida-fecha')?.value;
+      const year = fechaVal ? new Date(fechaVal).getFullYear() : new Date().getFullYear();
+      codigoBadge.textContent = generarProximoNumeroOrden(year);
+    }
+  }
+
+  // Actualizar Badge N° Orden Correlativo
+  updateSalidaCodigoBadge();
+
+  // Actualizar Badge cuando cambie la fecha
+  document.getElementById('salida-fecha')?.addEventListener('change', updateSalidaCodigoBadge);
+
+  // Limpiar Formulario
+  const btnLimpiar = document.getElementById('btn-salida-limpiar');
+  if (btnLimpiar) {
+    btnLimpiar.addEventListener('click', () => {
+      if (confirm('¿Desea limpiar todos los campos del formulario?')) {
+        if (document.getElementById('salida-motivo')) document.getElementById('salida-motivo').value = '';
+        if (document.getElementById('salida-responsable')) document.getElementById('salida-responsable').value = '';
+        if (document.getElementById('salida-cargo')) document.getElementById('salida-cargo').value = '';
+        if (document.getElementById('salida-observaciones')) document.getElementById('salida-observaciones').value = '';
+        salidaBienesSeleccionados = [];
+        renderSalidaBienesFormTable();
+      }
+    });
+  }
+
+  // Cerrar sugerencias al hacer clic fuera
+  document.addEventListener('click', (e) => {
+    if (respInput && e.target !== respInput && respSug) respSug.classList.add('hidden');
+    if (activoInput && e.target !== activoInput && activoSug) activoSug.classList.add('hidden');
+  });
+
+  // Submit / Generar PDF
+  const btnGenerarPDF = document.getElementById('btn-salida-generar-pdf');
+  if (btnGenerarPDF) {
+    btnGenerarPDF.addEventListener('click', async () => {
+      const fecha = document.getElementById('salida-fecha')?.value;
+      const tipoInput = document.querySelector('input[name="salida_tipo_public"]:checked');
+      const tipo = tipoInput ? tipoInput.value : 'Mantenimiento';
+      const motivo = document.getElementById('salida-motivo')?.value.trim();
+      const responsable = document.getElementById('salida-responsable')?.value.trim().toUpperCase();
+      const cargo = document.getElementById('salida-cargo')?.value.trim().toUpperCase();
+      const ubicacion = document.getElementById('salida-ubicacion')?.value.trim().toUpperCase();
+      const respTecnico = document.getElementById('salida-resp-tecnico')?.value.trim().toUpperCase() || 'ÁREA TÉCNICA';
+      const observaciones = document.getElementById('salida-observaciones')?.value.trim().toUpperCase();
+
+      if (!fecha || !responsable || !cargo || !ubicacion || !motivo) {
+        alert('Por favor complete todos los datos obligatorios del formulario (Fecha, Motivo, Responsable, Cargo y Ubicación).');
+        return;
+      }
+
+      const bienesAEnviar = salidaBienesSeleccionados.filter(b => b.seleccionado !== false);
+      if (bienesAEnviar.length === 0) {
+        alert('Por favor seleccione o agregue al menos un bien patrimonial para la orden de salida.');
+        return;
+      }
+
+      for (let i = 0; i < bienesAEnviar.length; i++) {
+        if (!bienesAEnviar[i].denominacion || !bienesAEnviar[i].denominacion.trim()) {
+          alert(`Por favor ingrese la denominación para el bien N° ${i + 1}.`);
+          return;
+        }
+      }
+
+      // Generar N° Orden correlativo oficial (ej: 035-2026)
+      const year = fecha ? new Date(fecha).getFullYear() : new Date().getFullYear();
+      const n_orden = generarProximoNumeroOrden(year);
+
+        const payload = {
+          n_orden: n_orden,
+          fecha_orden: fecha,
+          tipo_salida: tipo,
+          motivo: motivo,
+          responsable: responsable,
+          cargo: cargo,
+          ubicacion: ubicacion,
+          resp_tecnico: respTecnico,
+          observaciones: observaciones,
+          bienes: bienesAEnviar
+        };
+
+        // Generar y descargar PDF client-side con confirmación previa
+        const pdfOk = await generarOrdenSalidaPDF_Public(payload);
+        if (pdfOk === false) return;
+
+        // Registrar en memoria y localStorage para persistencia en la consulta estática de forma inmediata
+        const addAndSaveSalida = (newSalida) => {
+          if (!salidas.some(s => s.n_orden === newSalida.n_orden)) {
+            salidas.unshift(newSalida);
+          }
+          try {
+            const localSaved = JSON.parse(localStorage.getItem('salidas_custom_history') || '[]');
+            if (!localSaved.some(s => s.n_orden === newSalida.n_orden)) {
+              localSaved.unshift(newSalida);
+              localStorage.setItem('salidas_custom_history', JSON.stringify(localSaved));
+            }
+          } catch (e) {}
+          applyFilters();
+        };
+
+        // Guardar inmediatamente
+        addAndSaveSalida(payload);
+
+        // Si existe backend conectado, registrar en DB en segundo plano
+        try {
+          fetch('/api/activos/salidas', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          }).then(res => {
+            if (res.ok) {
+              return res.json().then(serverData => {
+                if (serverData && serverData.n_orden) {
+                  const idx = salidas.findIndex(s => s.n_orden === payload.n_orden || s.n_orden === serverData.n_orden);
+                  if (idx !== -1) salidas[idx] = serverData;
+                  else addAndSaveSalida(serverData);
+                  applyFilters();
+                }
+              });
+            }
+          }).catch(() => {});
+        } catch (e) {}
+
+        alert(`Orden de Salida ${n_orden} generada y descargada con éxito.`);
+
+        // Limpiar formulario
+        if (document.getElementById('salida-motivo')) document.getElementById('salida-motivo').value = '';
+        if (document.getElementById('salida-responsable')) document.getElementById('salida-responsable').value = '';
+        if (document.getElementById('salida-cargo')) document.getElementById('salida-cargo').value = '';
+        if (document.getElementById('salida-observaciones')) document.getElementById('salida-observaciones').value = '';
+        salidaBienesSeleccionados = [];
+        renderSalidaBienesFormTable();
+
+        // Actualizar N° Orden correlativo para el siguiente registro
+        updateSalidaCodigoBadge();
+
+        // Cambiar automáticamente a la subpestaña "Tablas y Consultas" para mostrar el nuevo registro inmediatamente
+        if (btnSubtabHistory) {
+          btnSubtabHistory.click();
+        }
+      });
+    }
+  }
+
+  function renderSalidaBienesFormTable() {
+    const tbody = document.getElementById('salida-bienes-form-tbody');
+    const headerCount = document.getElementById('salida-bienes-header');
+    if (!tbody) return;
+
+    if (headerCount) {
+      headerCount.textContent = `Descripción de los Bienes (${salidaBienesSeleccionados.length})`;
+    }
+
+    if (salidaBienesSeleccionados.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="10" class="p-6 text-center text-slate-400 font-medium">
+            No se han agregado bienes a la orden. Seleccione un responsable arriba o busque un bien.
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = salidaBienesSeleccionados.map((b, idx) => `
+      <tr class="hover:bg-slate-50 transition-colors align-middle">
+        ${salidaModo === 'SISTEMA' ? `
+          <td class="p-2.5 text-center">
+            <input type="checkbox" data-idx="${idx}" class="chk-salida-item w-4 h-4 text-brand-500 rounded border-slate-300 cursor-pointer" ${b.seleccionado !== false ? 'checked' : ''} />
+          </td>
+        ` : ''}
+        <td class="p-2.5 text-center font-bold text-slate-500 text-[11px]">${idx + 1}</td>
+        <td class="p-2.5 font-mono font-bold text-brand-600">
+          ${b.isManual ? `
+            <input type="text" data-field="cod_patrimonial" data-idx="${idx}" value="${b.cod_patrimonial || ''}" placeholder="Opcional" class="salida-input-cell w-full px-2 py-1 text-xs border border-slate-200 rounded font-mono" />
+          ` : (b.cod_patrimonial || '—')}
+        </td>
+        <td class="p-2.5">
+          ${b.isManual ? `
+            <input type="text" data-field="denominacion" data-idx="${idx}" value="${b.denominacion || ''}" placeholder="Ej: LAPTOP..." class="salida-input-cell w-full px-2 py-1 text-xs font-semibold border border-slate-200 rounded" required />
+          ` : `<span class="font-semibold text-slate-800">${b.denominacion}</span>`}
+        </td>
+        <td class="p-2.5">
+          <input type="text" data-field="color" data-idx="${idx}" value="${b.color || 'NEGRO'}" class="salida-input-cell w-full px-2 py-1 text-xs border border-slate-200 rounded" />
+        </td>
+        <td class="p-2.5">
+          <input type="text" data-field="marca" data-idx="${idx}" value="${b.marca || 'S/M'}" class="salida-input-cell w-full px-2 py-1 text-xs border border-slate-200 rounded" />
+        </td>
+        <td class="p-2.5">
+          <input type="text" data-field="modelo" data-idx="${idx}" value="${b.modelo || 'S/M'}" class="salida-input-cell w-full px-2 py-1 text-xs border border-slate-200 rounded" />
+        </td>
+        <td class="p-2.5">
+          <input type="text" data-field="numero_serie" data-idx="${idx}" value="${b.numero_serie || 'S/S'}" class="salida-input-cell w-full px-2 py-1 text-xs border border-slate-200 rounded" />
+        </td>
+        <td class="p-2.5 text-center">
+          <select data-field="estado_activo" data-idx="${idx}" class="salida-select-cell px-2 py-1 text-[11px] font-bold border border-slate-200 rounded">
+            <option value="BUENO" ${b.estado_activo === 'BUENO' ? 'selected' : ''}>BUENO</option>
+            <option value="REGULAR" ${b.estado_activo === 'REGULAR' ? 'selected' : ''}>REGULAR</option>
+            <option value="MALO" ${b.estado_activo === 'MALO' ? 'selected' : ''}>MALO</option>
+          </select>
+        </td>
+        <td class="p-2.5 text-center">
+          <button type="button" data-del="${idx}" class="btn-del-salida-row p-1 hover:bg-rose-50 text-rose-600 rounded cursor-pointer border-none font-bold">✕</button>
+        </td>
+      </tr>
+    `).join('');
+
+    tbody.querySelectorAll('.salida-input-cell').forEach(inp => {
+      inp.addEventListener('input', (e) => {
+        const idx = Number(e.target.getAttribute('data-idx'));
+        const field = e.target.getAttribute('data-field');
+        if (salidaBienesSeleccionados[idx]) {
+          salidaBienesSeleccionados[idx][field] = e.target.value;
+        }
+      });
+    });
+
+    tbody.querySelectorAll('.salida-select-cell').forEach(sel => {
+      sel.addEventListener('change', (e) => {
+        const idx = Number(e.target.getAttribute('data-idx'));
+        const field = e.target.getAttribute('data-field');
+        if (salidaBienesSeleccionados[idx]) {
+          salidaBienesSeleccionados[idx][field] = e.target.value;
+        }
+      });
+    });
+
+    tbody.querySelectorAll('.chk-salida-item').forEach(chk => {
+      chk.addEventListener('change', (e) => {
+        const idx = Number(e.target.getAttribute('data-idx'));
+        if (salidaBienesSeleccionados[idx]) {
+          salidaBienesSeleccionados[idx].seleccionado = e.target.checked;
+        }
+      });
+    });
+
+    tbody.querySelectorAll('.btn-del-salida-row').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const idx = Number(e.target.getAttribute('data-del'));
+        salidaBienesSeleccionados.splice(idx, 1);
+        renderSalidaBienesFormTable();
+      });
+    });
   }
 
   function renderSalidasRows(data) {
@@ -1810,118 +2275,23 @@ document.addEventListener('DOMContentLoaded', () => {
           <span class="bg-slate-100 px-2 py-0.5 rounded-lg text-[10px] font-extrabold border border-slate-200">${s.bienes ? s.bienes.length : 0}</span>
         </td>
         <td class="px-4 py-3 text-center">
-          <select data-idx="${idx}" class="btn-change-devolucion px-2 py-1 rounded-md text-[10px] font-bold border transition-colors cursor-pointer focus:outline-none ${estadoBadge(s.estado_devolucion || 'SALIDA')}">
-            <option value="SALIDA" ${(s.estado_devolucion || 'SALIDA') === 'SALIDA' ? 'selected' : ''}>🔴 SALIDA</option>
-            <option value="REGRESO" ${s.estado_devolucion === 'REGRESO' ? 'selected' : ''}>🟢 REGRESO</option>
-            <option value="OBSERVADO" ${s.estado_devolucion === 'OBSERVADO' ? 'selected' : ''}>🟠 OBSERVADO</option>
-          </select>
-          ${(s.estado_devolucion === 'OBSERVADO' || s.obs_devolucion) ? `
-            <div data-obs-idx="${idx}" title="${s.obs_devolucion ? 'Observación: ' + s.obs_devolucion : 'Clic para editar'}" class="btn-edit-obs text-[9px] text-amber-700 italic mt-1 max-w-[130px] truncate cursor-pointer font-medium hover:underline mx-auto">
-              ${s.obs_devolucion ? '💬 ' + s.obs_devolucion : '+ Agregar obs.'}
-            </div>
-          ` : ''}
+          <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-extrabold ${estadoBadge(s.estado_devolucion || 'SALIDA')}">
+            ${(s.estado_devolucion || 'SALIDA') === 'REGRESO' ? '🟢 REGRESO' : (s.estado_devolucion === 'OBSERVADO' ? '🟠 OBSERVADO' : '🔴 SALIDA')}
+          </span>
         </td>
         <td class="px-4 py-3 text-center">
-          <div class="flex items-center justify-center gap-1.5">
-            <button type="button" data-history-pdf="${idx}" class="btn-download-history-pdf px-2.5 py-1 bg-slate-900 hover:bg-slate-700 text-white font-extrabold rounded-lg text-[10px] transition-all cursor-pointer border-none shadow-xs" title="Descargar PDF">
-              📕 PDF
-            </button>
-            <button type="button" data-del-salida="${idx}" class="btn-delete-salida px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 font-extrabold rounded-lg text-[10px] transition-all cursor-pointer border border-rose-200 shadow-xs" title="Eliminar registro">
-              🗑️
-            </button>
-          </div>
+          <button type="button" data-history-pdf="${idx}" class="btn-download-history-pdf px-2.5 py-1 bg-slate-900 hover:bg-slate-700 text-white font-extrabold rounded-lg text-[10px] transition-all cursor-pointer border-none shadow-xs">
+            📕 PDF
+          </button>
         </td>
       </tr>
     `).join('');
 
     tbody.querySelectorAll('.btn-download-history-pdf').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        const idx = Number(e.currentTarget.getAttribute('data-history-pdf'));
+        const idx = Number(e.target.getAttribute('data-history-pdf'));
         if (data[idx]) {
           generarOrdenSalidaPDF_Public(data[idx]);
-        }
-      });
-    });
-
-    tbody.querySelectorAll('.btn-delete-salida').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        const idx = Number(e.currentTarget.getAttribute('data-del-salida'));
-        const targetSalida = data[idx];
-        if (!targetSalida) return;
-        if (confirm(`¿Está seguro de eliminar la orden de salida N° ${targetSalida.n_orden || ''}? Esta acción no se puede deshacer.`)) {
-          try {
-            const targetId = targetSalida.id || targetSalida.n_orden;
-            if (targetSalida.id) {
-              await fetch(`/api/activos/salidas/${targetId}`, { method: 'DELETE' });
-            }
-          } catch (err) {}
-          const sIdx = salidas.findIndex(s => s.n_orden === targetSalida.n_orden || (s.id && s.id === targetSalida.id));
-          if (sIdx !== -1) salidas.splice(sIdx, 1);
-          try {
-            const localSaved = JSON.parse(localStorage.getItem('salidas_custom_history') || '[]');
-            const filteredLocal = localSaved.filter(s => s.n_orden !== targetSalida.n_orden && (!s.id || s.id !== targetSalida.id));
-            localStorage.setItem('salidas_custom_history', JSON.stringify(filteredLocal));
-          } catch (err) {}
-          applyFilters();
-        }
-      });
-    });
-
-    tbody.querySelectorAll('.btn-change-devolucion').forEach(selectEl => {
-      selectEl.addEventListener('change', async (e) => {
-        const idx = Number(e.currentTarget.getAttribute('data-idx'));
-        const targetSalida = data[idx];
-        if (!targetSalida) return;
-        const newEstado = e.currentTarget.value;
-        let newObs = targetSalida.obs_devolucion || '';
-        if (newEstado === 'OBSERVADO') {
-          const userObs = prompt('Ingrese la observación del retorno:', targetSalida.obs_devolucion || '');
-          if (userObs !== null) newObs = userObs.trim();
-        } else {
-          newObs = '';
-        }
-        try {
-          const targetId = targetSalida.id || targetSalida.n_orden;
-          const res = await fetch(`/api/activos/salidas/${targetId}/devolucion`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ estado_devolucion: newEstado, obs_devolucion: newObs })
-          });
-          if (res.ok) {
-            targetSalida.estado_devolucion = newEstado;
-            targetSalida.obs_devolucion = newObs;
-            renderSalidasRows(data);
-          } else {
-            targetSalida.estado_devolucion = newEstado;
-            targetSalida.obs_devolucion = newObs;
-            renderSalidasRows(data);
-          }
-        } catch (err) {
-          targetSalida.estado_devolucion = newEstado;
-          targetSalida.obs_devolucion = newObs;
-          renderSalidasRows(data);
-        }
-      });
-    });
-
-    tbody.querySelectorAll('.btn-edit-obs').forEach(obsEl => {
-      obsEl.addEventListener('click', async (e) => {
-        const idx = Number(e.currentTarget.getAttribute('data-obs-idx'));
-        const targetSalida = data[idx];
-        if (!targetSalida) return;
-        const userObs = prompt('Editar observación de retorno:', targetSalida.obs_devolucion || '');
-        if (userObs !== null) {
-          const newObs = userObs.trim();
-          try {
-            const targetId = targetSalida.id || targetSalida.n_orden;
-            await fetch(`/api/activos/salidas/${targetId}/devolucion`, {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ estado_devolucion: targetSalida.estado_devolucion || 'OBSERVADO', obs_devolucion: newObs })
-            });
-          } catch (err) {}
-          targetSalida.obs_devolucion = newObs;
-          renderSalidasRows(data);
         }
       });
     });
