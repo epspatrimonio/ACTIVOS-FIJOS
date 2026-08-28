@@ -668,7 +668,7 @@
     "soat_vencimiento": "2026-09-30",
     "soat_dias_vigencia": 34,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": "soat_pdfs/410024001_soat.pdf"
   },
   {
     "cod_patrimonial": "410026004",
@@ -5548,7 +5548,7 @@
     "soat_vencimiento": "2026-09-30",
     "soat_dias_vigencia": 34,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": "soat_pdfs/410024000_soat.pdf"
   },
   {
     "cod_patrimonial": "410024004",
@@ -5609,7 +5609,7 @@
     "soat_vencimiento": "2027-03-04",
     "soat_dias_vigencia": 189,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": "soat_pdfs/410024004_soat.pdf"
   },
   {
     "cod_patrimonial": "410024003",
@@ -5731,7 +5731,7 @@
     "soat_vencimiento": "2026-07-16",
     "soat_dias_vigencia": -42,
     "soat_estado": "VENCIDO",
-    "pdf_soat_path": null
+    "pdf_soat_path": "soat_pdfs/410024002_soat.pdf"
   },
   {
     "cod_patrimonial": "410023003",
