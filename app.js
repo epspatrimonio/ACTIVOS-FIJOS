@@ -140,6 +140,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       } catch (e) {}
 
+      // Ordenar estrictamente las salidas de mayor a menor (más reciente a más antigua)
+      salidas = sortSalidasDesc(salidas);
+
       // Cargar tipografía en paralelo
       loadAgencyFont();
 
@@ -2316,11 +2319,60 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function parseSalidaOrder(item) {
+    if (!item) return { year: 0, num: 0, dateStr: '', id: 0 };
+    let year = 0;
+    let num = 0;
+    if (item.n_orden) {
+      const str = String(item.n_orden).trim();
+      const parts = str.split('-');
+      if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+        // Formato XXX-YYYY (ej: 038-2026)
+        num = parseInt(parts[0], 10);
+        year = parseInt(parts[1], 10);
+      } else if (parts.length === 3 && !isNaN(parts[1]) && !isNaN(parts[2])) {
+        // Formato OS-YYYY-XXX (ej: OS-2026-038)
+        year = parseInt(parts[1], 10);
+        num = parseInt(parts[2], 10);
+      }
+    }
+    const dateStr = item.fecha_orden || '';
+    return { year, num, dateStr, id: item.id || 0 };
+  }
+
+  function sortSalidasDesc(list) {
+    return [...(list || [])].sort((a, b) => {
+      const pA = parseSalidaOrder(a);
+      const pB = parseSalidaOrder(b);
+
+      // 1. Comparar Año del correlativo (mayor a menor)
+      if (pA.year !== pB.year && pA.year > 0 && pB.year > 0) {
+        return pB.year - pA.year;
+      }
+
+      // 2. Comparar Número de orden (mayor a menor: ej 038 > 037 > 036)
+      if (pA.num !== pB.num && pA.num > 0 && pB.num > 0) {
+        return pB.num - pA.num;
+      }
+
+      // 3. Comparar fecha_orden (más reciente a más antigua)
+      if (pA.dateStr !== pB.dateStr && pA.dateStr && pB.dateStr) {
+        return pB.dateStr.localeCompare(pA.dateStr);
+      }
+
+      // 4. Comparar ID (mayor a menor)
+      return pB.id - pA.id;
+    });
+  }
+
   function renderSalidasRows(data) {
     const tbody = document.getElementById('salidas-tbody');
     if (!tbody) return;
 
-    if (data.length === 0) {
+    // Ordenamiento estricto de mayor a menor (más actual a más antiguo)
+    const sortedData = sortSalidasDesc(data || []);
+
+    if (sortedData.length === 0) {
       tbody.innerHTML = `
         <tr>
           <td colspan="8" class="p-8 text-center text-slate-400 font-medium">
@@ -2349,7 +2401,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return map[est] || 'bg-slate-100 text-slate-600 border border-slate-200';
     };
 
-    tbody.innerHTML = data.map((s, idx) => `
+    tbody.innerHTML = sortedData.map((s, idx) => `
       <tr class="hover:bg-slate-50/70 transition-colors align-middle">
         <td class="px-4 py-3 font-black text-brand-600 font-mono text-sm">${s.n_orden || '—'}</td>
         <td class="px-4 py-3 text-slate-600 font-semibold">${(s.fecha_orden || '').split('-').reverse().join('/')}</td>
@@ -2381,9 +2433,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     tbody.querySelectorAll('.btn-download-history-pdf').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        const idx = Number(e.target.getAttribute('data-history-pdf'));
-        if (data[idx]) {
-          generarOrdenSalidaPDF_Public(data[idx]);
+        const idx = Number(e.currentTarget.getAttribute('data-history-pdf'));
+        if (sortedData[idx]) {
+          generarOrdenSalidaPDF_Public(sortedData[idx]);
         }
       });
     });
