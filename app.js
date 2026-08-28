@@ -2831,15 +2831,6 @@ document.addEventListener('DOMContentLoaded', () => {
           ${soatBadge}
         </td>
         
-        <!-- Documento SOAT PDF -->
-        <td class="px-3.5 py-3 whitespace-nowrap text-center">
-          ${item.pdf_soat_path ? `
-            <a href="${item.pdf_soat_path.startsWith('/') ? item.pdf_soat_path : `/${item.pdf_soat_path}`}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg shadow-2xs transition-all" title="Ver / Descargar PDF del SOAT">
-              📄 PDF SOAT
-            </a>
-          ` : '<span class="text-xs text-slate-400 font-semibold">—</span>'}
-        </td>
-        
         <!-- Revisión Técnica -->
         <td class="px-3.5 py-3 whitespace-nowrap text-center">
           ${revTecBadge}
@@ -2849,14 +2840,15 @@ document.addEventListener('DOMContentLoaded', () => {
         <td class="px-3.5 py-3 whitespace-nowrap text-[0.8125rem] font-bold text-slate-800">
           ${item.responsable || '—'}
         </td>
-        
-        <!-- GESTIÓN -->
+
+        <!-- Documento SOAT PDF (Al Final) -->
         <td class="px-3.5 py-3 whitespace-nowrap text-center">
           ${item.pdf_soat_path ? `
-            <a href="${item.pdf_soat_path.startsWith('/') ? item.pdf_soat_path : `/${item.pdf_soat_path}`}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center p-2 text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-all border border-emerald-200/80 shadow-2xs group cursor-pointer" title="Descargar SOAT (PDF)">
-              <svg class="w-4 h-4 text-rose-600 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            <a href="${getSoatPdfUrl(item.pdf_soat_path)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 hover:text-rose-900 border border-rose-200/80 rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer" title="Ver / Descargar PDF del SOAT" download="${item.cod_patrimonial}_soat.pdf">
+              <svg class="w-3.5 h-3.5 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
               </svg>
+              <span>PDF SOAT</span>
             </a>
           ` : '<span class="text-xs text-slate-400 font-semibold">—</span>'}
         </td>
@@ -2934,7 +2926,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="mt-1 flex flex-col items-start gap-1">
             ${soatBadge}
             ${item.pdf_soat_path ? `
-              <a href="${item.pdf_soat_path.startsWith('/') ? item.pdf_soat_path : `/${item.pdf_soat_path}`}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-md mt-1">
+              <a href="${getSoatPdfUrl(item.pdf_soat_path)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg mt-1 shadow-2xs" download="${item.cod_patrimonial}_soat.pdf">
                 📄 PDF SOAT
               </a>
             ` : ''}
@@ -3523,6 +3515,17 @@ document.addEventListener('DOMContentLoaded', () => {
         <span class="text-xs text-slate-600 font-semibold font-mono">${formatDate(vencimiento)}</span>
       </div>
     `;
+  }
+
+  function getSoatPdfUrl(path) {
+    if (!path) return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    let clean = path.replace(/^\.?\/+/, '');
+    if (clean.includes('/')) {
+      const parts = clean.split('/');
+      clean = parts[parts.length - 1];
+    }
+    return `soat_pdfs/${clean}`;
   }
 
   function getCelularVidaUtilBadgeHTML(estado, vencimiento, dias) {

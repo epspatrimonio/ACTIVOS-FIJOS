@@ -2559,7 +2559,7 @@
     "soat_vencimiento": "2027-06-04",
     "soat_dias_vigencia": 281,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": "soat_pdfs/339500001_soat.pdf"
   },
   {
     "cod_patrimonial": "339400001",
