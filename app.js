@@ -1657,7 +1657,7 @@ document.addEventListener('DOMContentLoaded', () => {
     doc.text('RESPONSABLE A CARGO DE SALIDA', 105, yLine + 4, { align: 'center' });
     doc.setFont('helvetica', 'normal'); doc.text(`(${cargoSalidaText})`, 105, yLine + 7.5, { align: 'center' });
     doc.setFont('helvetica', 'bold'); doc.text('CONTROL PATRIMONIAL', 170, yLine + 4, { align: 'center' });
-    if (selloImg) doc.addImage(selloImg, 'PNG', 147, yLine - 22, 45, 20);
+    if (selloImg) doc.addImage(selloImg, 'PNG', 143, yLine - 26, 54, 25);
 
     const sanitize = (salidaData.responsable || 'RESPONSABLE').replace(/\s+/g, '_').toUpperCase();
     doc.save(`Orden_Salida_${salidaData.n_orden || 'SN'}_${sanitize}.pdf`);
@@ -5527,9 +5527,9 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.setFontSize(7.5);
         doc.text("Vº Bº LOGÍSTICA", 257.5, yLine + 4, { align: 'center' });
 
-        // Sello Post Firma CP1 (Ubicado casi al ras de ENTREGUÉ CONFORME)
+        // Sello Post Firma CP1 (Ubicado a la altura de Control Patrimonial)
         if (selloImg) {
-          doc.addImage(selloImg, 'PNG', 108, yLine - 20, 44, 20);
+          doc.addImage(selloImg, 'PNG', 103, yLine - 25, 54, 25);
         }
 
         // 7. Número de Página (Ubicado en la parte superior derecha en gris oscuro)
