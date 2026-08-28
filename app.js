@@ -1840,20 +1840,24 @@ document.addEventListener('DOMContentLoaded', () => {
     // Subtab switching (Registro y Gestión vs Tablas y Consultas)
     if (btnSubtabForm && btnSubtabHistory && formView && historyView) {
       btnSubtabForm.addEventListener('click', () => {
-        btnSubtabForm.className = "text-xs font-extrabold pb-1 border-b-2 border-brand-500 text-brand-600 transition-all cursor-pointer bg-transparent border-t-0 border-x-0";
-        btnSubtabHistory.className = "text-xs font-bold pb-1 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all cursor-pointer bg-transparent border-t-0 border-x-0";
+        btnSubtabForm.className = "text-xs font-extrabold pb-0.5 border-b-2 border-brand-500 text-brand-600 transition-all cursor-pointer bg-transparent border-t-0 border-x-0 whitespace-nowrap";
+        btnSubtabHistory.className = "text-xs font-bold pb-0.5 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all cursor-pointer bg-transparent border-t-0 border-x-0 whitespace-nowrap";
         formView.classList.remove('hidden');
         historyView.classList.add('hidden');
-        document.getElementById('salidas-form-controls')?.classList.remove('hidden');
-        document.getElementById('salidas-history-filters')?.classList.add('hidden');
+        const formCtrl = document.getElementById('salidas-form-controls');
+        if (formCtrl) formCtrl.style.display = 'flex';
+        const histFilt = document.getElementById('salidas-history-filters');
+        if (histFilt) histFilt.style.display = 'none';
       });
       btnSubtabHistory.addEventListener('click', () => {
-        btnSubtabHistory.className = "text-xs font-extrabold pb-1 border-b-2 border-brand-500 text-brand-600 transition-all cursor-pointer bg-transparent border-t-0 border-x-0";
-        btnSubtabForm.className = "text-xs font-bold pb-1 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all cursor-pointer bg-transparent border-t-0 border-x-0";
+        btnSubtabHistory.className = "text-xs font-extrabold pb-0.5 border-b-2 border-brand-500 text-brand-600 transition-all cursor-pointer bg-transparent border-t-0 border-x-0 whitespace-nowrap";
+        btnSubtabForm.className = "text-xs font-bold pb-0.5 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all cursor-pointer bg-transparent border-t-0 border-x-0 whitespace-nowrap";
         historyView.classList.remove('hidden');
         formView.classList.add('hidden');
-        document.getElementById('salidas-form-controls')?.classList.add('hidden');
-        document.getElementById('salidas-history-filters')?.classList.remove('hidden');
+        const formCtrl = document.getElementById('salidas-form-controls');
+        if (formCtrl) formCtrl.style.display = 'none';
+        const histFilt = document.getElementById('salidas-history-filters');
+        if (histFilt) histFilt.style.display = 'flex';
         populateSalidasFilters();
         applyFilters();
       });
