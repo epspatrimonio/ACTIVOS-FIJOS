@@ -909,64 +909,59 @@
 
       <!-- Panel Derecho: Formulario y Vista Previa -->
       <div class="flex-1 bg-white border border-slate-200 rounded-xl p-5 flex flex-col shadow-sm min-h-0 overflow-y-auto">
-        <div class="border-b border-slate-100 pb-3 mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div class="border-b border-slate-100 pb-4 mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h3 class="text-base font-extrabold text-slate-800 uppercase tracking-tight">Acta de Asignación de Bienes</h3>
             <p class="text-xs text-slate-400 mt-0.5">Visualice y exporte las actas de asignación en formato oficial PDF.</p>
           </div>
+          <button 
+            id="btn-generar-acta-pdf" 
+            class="py-2.5 px-5 bg-[#00B0F0] hover:bg-[#009ad4] active:scale-[0.98] text-white font-extrabold text-xs sm:text-sm rounded-xl transition-all shadow-md shadow-brand-500/15 flex items-center justify-center gap-2 cursor-pointer border-none shrink-0"
+          >
+            📕 Generar Acta PDF
+          </button>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+        <input type="hidden" id="acta-nro" value="">
+        <input type="hidden" id="acta-fecha" value="">
+        <input type="hidden" id="acta-solicitante" value="">
+
+        <!-- Fila 1: Cajas estructuradas para N° Acta, Fecha y Solicitante -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           <div>
-            <label class="block text-[0.75rem] font-bold text-slate-500 mb-1 uppercase tracking-wide">Nro de Acta</label>
-            <input 
-              type="text" 
-              id="acta-nro" 
-              value="017-2026" 
-              class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all font-mono font-bold text-slate-700"
-            >
+            <label class="block text-[0.75rem] font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Nro de Acta</label>
+            <div class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg flex items-center shadow-2xs min-h-[38px]">
+              <span id="acta-display-nro" class="font-mono font-extrabold text-[#0088cc] text-sm truncate">—</span>
+            </div>
           </div>
           <div>
-            <label class="block text-[0.75rem] font-bold text-slate-500 mb-1 uppercase tracking-wide">Fecha de Alta / Asignación</label>
-            <input 
-              type="date" 
-              id="acta-fecha" 
-              class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-slate-700 font-semibold"
-            >
+            <label class="block text-[0.75rem] font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Fecha de Alta / Asignación</label>
+            <div class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg flex items-center shadow-2xs min-h-[38px]">
+              <span id="acta-display-fecha" class="font-semibold text-slate-700 text-sm truncate">—</span>
+            </div>
           </div>
-          <div>
-            <label class="block text-[0.75rem] font-bold text-slate-500 mb-1 uppercase tracking-wide">Solicitante (Requerimiento)</label>
-            <input 
-              type="text" 
-              id="acta-solicitante" 
-              placeholder="Nombre del solicitante" 
-              class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-slate-700 font-semibold"
-            >
-          </div>
-          <div class="flex items-end">
-            <button 
-              id="btn-generar-acta-pdf" 
-              class="w-full py-2.5 px-4 bg-[#00B0F0] hover:bg-[#009ad4] active:scale-[0.98] text-white font-extrabold text-sm rounded-lg transition-all shadow-md shadow-brand-500/10 flex items-center justify-center gap-2 cursor-pointer border-none"
-            >
-              📕 Generar Acta PDF
-            </button>
+          <div class="sm:col-span-2 md:col-span-2">
+            <label class="block text-[0.75rem] font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Solicitante (Requerimiento)</label>
+            <div class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg flex items-center shadow-2xs min-h-[38px]">
+              <span id="acta-display-solicitante" class="font-semibold text-slate-800 text-sm truncate block w-full" title="—">—</span>
+            </div>
           </div>
         </div>
 
-        <!-- Información del Responsable Seleccionado -->
-        <div class="bg-slate-50 border border-slate-200/60 rounded-xl p-4 mb-5">
+        <!-- Fila 2: Información del Responsable Seleccionado -->
+        <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-4 mb-5 shadow-2xs">
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <span class="block text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wide">Usuario Responsable</span>
-              <span id="acta-usuario-nombre" class="font-bold text-slate-800 text-sm">—</span>
+              <span id="acta-usuario-nombre" class="font-bold text-slate-800 text-sm block truncate" title="—">—</span>
             </div>
             <div>
               <span class="block text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wide">Puesto / Cargo</span>
-              <span id="acta-usuario-puesto" class="font-bold text-slate-800 text-sm">—</span>
+              <span id="acta-usuario-puesto" class="font-bold text-slate-800 text-sm block truncate" title="—">—</span>
             </div>
             <div>
               <span class="block text-[0.6875rem] font-bold text-slate-400 uppercase tracking-wide">Sucursal</span>
-              <span id="acta-usuario-sucursal" class="font-bold text-slate-800 text-sm">—</span>
+              <span id="acta-usuario-sucursal" class="font-bold text-slate-800 text-sm block truncate" title="—">—</span>
             </div>
           </div>
         </div>

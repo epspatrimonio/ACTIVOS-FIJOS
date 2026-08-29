@@ -2547,7 +2547,7 @@ document.addEventListener('DOMContentLoaded', () => {
             Ingreso: <span class="text-slate-500 font-normal">${formatDate(item.fecha_alta_factura || item.fecha_registro_contable)}</span>
           </div>
           <div class="text-slate-700 font-semibold leading-tight mt-0.5">
-            Alta: <span class="text-slate-500 font-normal">${formatDate(item.fecha_alta || item.fecha_asignacion)}</span>
+            Alta: <span class="text-slate-500 font-normal">${formatDate(item.fecha_asignacion || item.fecha_alta)}</span>
           </div>
         </td>
         <td class="px-2 py-2.5 whitespace-nowrap text-center">
@@ -2770,7 +2770,7 @@ document.addEventListener('DOMContentLoaded', () => {
             Ingreso: <span class="text-slate-500 font-normal">${formatDate(item.fecha_alta_factura || item.fecha_registro_contable)}</span>
           </div>
           <div class="text-slate-700 font-semibold leading-tight mt-0.5">
-            Alta: <span class="text-slate-500 font-normal">${formatDate(item.fecha_alta || item.fecha_asignacion)}</span>
+            Alta: <span class="text-slate-500 font-normal">${formatDate(item.fecha_asignacion || item.fecha_alta)}</span>
           </div>
         </td>
         <td class="px-2 py-2.5 whitespace-nowrap text-center">
@@ -5181,18 +5181,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputNro = document.getElementById('acta-nro');
     const inputFecha = document.getElementById('acta-fecha');
     const inputSolicitante = document.getElementById('acta-solicitante');
+    const displayNro = document.getElementById('acta-display-nro');
+    const displayFecha = document.getElementById('acta-display-fecha');
+    const displaySolicitante = document.getElementById('acta-display-solicitante');
+    const displayUsuario = document.getElementById('acta-usuario-nombre');
+    const displayPuesto = document.getElementById('acta-usuario-puesto');
+    const displaySucursal = document.getElementById('acta-usuario-sucursal');
     const tbody = document.getElementById('asignacion-tbody');
 
     tbody.innerHTML = '';
-    if (inputSolicitante) inputSolicitante.value = '';
 
     const data = actasMap[acta];
     if (!data) {
-      document.getElementById('acta-usuario-nombre').textContent = '—';
-      document.getElementById('acta-usuario-puesto').textContent = '—';
-      document.getElementById('acta-usuario-sucursal').textContent = '—';
+      if (displayUsuario) displayUsuario.textContent = '—';
+      if (displayPuesto) displayPuesto.textContent = '—';
+      if (displaySucursal) displaySucursal.textContent = '—';
+      if (displayNro) displayNro.textContent = '—';
+      if (displayFecha) displayFecha.textContent = '—';
+      if (displaySolicitante) displaySolicitante.textContent = '—';
       if (inputNro) inputNro.value = '';
       if (inputFecha) inputFecha.value = '';
+      if (inputSolicitante) inputSolicitante.value = '';
       tbody.innerHTML = '<tr><td colspan="11" class="text-center py-4 text-slate-400">Seleccione un acta para visualizar</td></tr>';
       return;
     }
@@ -5203,31 +5212,34 @@ document.addEventListener('DOMContentLoaded', () => {
         : String(b.cod_patrimonial).startsWith('339')
     );
 
-    document.getElementById('acta-usuario-nombre').textContent = data.responsable;
-    document.getElementById('acta-usuario-puesto').textContent = data.puesto;
-    document.getElementById('acta-usuario-sucursal').textContent = data.sucursal;
+    if (displayUsuario) displayUsuario.textContent = data.responsable || '—';
+    if (displayPuesto) displayPuesto.textContent = data.puesto || '—';
+    if (displaySucursal) displaySucursal.textContent = data.sucursal || '—';
+    if (displayNro) displayNro.textContent = data.n_acta || '—';
+    if (inputNro) inputNro.value = data.n_acta || '';
 
-    if (inputNro) {
-      inputNro.value = data.n_acta;
-      inputNro.readOnly = true; 
+    let formattedDate = '—';
+    let rawDate = '';
+    subtabBienes.forEach(b => {
+      const d = b.fecha_asignacion || b.fecha_alta || b.fecha_alta_factura || b.fecha_registro_contable;
+      if (d && (!rawDate || d < rawDate)) {
+        rawDate = d;
+      }
+    });
+    if (rawDate) {
+      formattedDate = formatDate(rawDate);
+      if (inputFecha) inputFecha.value = rawDate.split('T')[0];
+    } else {
+      if (inputFecha) inputFecha.value = '';
     }
-
-    if (inputFecha) {
-      let firstDate = null;
-      subtabBienes.forEach(b => {
-        const d = b.fecha_asignacion || b.fecha_alta_factura || b.fecha_registro_contable;
-        if (d && (!firstDate || d < firstDate)) {
-          firstDate = d;
-        }
-      });
-      inputFecha.value = firstDate ? firstDate.split('T')[0] : new Date().toISOString().split('T')[0];
-    }
+    if (displayFecha) displayFecha.textContent = formattedDate;
 
     let defaultSolicitante = '';
     const foundReq = subtabBienes.find(b => b.requerido_por && b.requerido_por.trim() && b.requerido_por !== '—');
     if (foundReq) {
       defaultSolicitante = foundReq.requerido_por;
     }
+    if (displaySolicitante) displaySolicitante.textContent = defaultSolicitante || '—';
     if (inputSolicitante) inputSolicitante.value = defaultSolicitante;
 
     renderPreviewBienes(subtabBienes);
