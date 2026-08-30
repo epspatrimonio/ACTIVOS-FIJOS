@@ -74,6 +74,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const optionsContainerSubcategoria = document.getElementById('options-container-subcategoria');
   const labelSelectSubcategoria = document.getElementById('label-select-subcategoria');
   const iconSubcategoria = document.getElementById('icon-subcategoria');
+
+  // Selector de Mes (Multiselección)
+  let selectedMonths = [];
+  const btnSelectMonth = document.getElementById('btn-select-month');
+  const dropdownMonth = document.getElementById('dropdown-month');
+  const chkAllMonth = document.getElementById('chk-all-month');
+  const optionsContainerMonth = document.getElementById('options-container-month');
+  const labelSelectMonth = document.getElementById('label-select-month');
+  const iconMonth = document.getElementById('icon-month');
   
   const statusContainer = document.getElementById('status-container');
   const statusLoading = document.getElementById('status-loading');
@@ -367,6 +376,7 @@ document.addEventListener('DOMContentLoaded', () => {
           e.stopPropagation();
           dropdownSubcategoria.classList.toggle('hidden');
           dropdownCategoria.classList.add('hidden'); // Cerrar el otro
+          if (dropdownMonth) dropdownMonth.classList.add('hidden');
           
           // Pivotear flechas
           if (dropdownSubcategoria.classList.contains('hidden')) {
@@ -375,6 +385,24 @@ document.addEventListener('DOMContentLoaded', () => {
             iconSubcategoria.style.transform = 'rotate(180deg)';
           }
           iconCategoria.style.transform = 'rotate(0deg)';
+          if (iconMonth) iconMonth.style.transform = 'rotate(0deg)';
+        });
+      }
+
+      if (btnSelectMonth && dropdownMonth) {
+        btnSelectMonth.addEventListener('click', (e) => {
+          e.stopPropagation();
+          dropdownMonth.classList.toggle('hidden');
+          if (dropdownCategoria) dropdownCategoria.classList.add('hidden');
+          if (dropdownSubcategoria) dropdownSubcategoria.classList.add('hidden');
+          
+          if (dropdownMonth.classList.contains('hidden')) {
+            if (iconMonth) iconMonth.style.transform = 'rotate(0deg)';
+          } else {
+            if (iconMonth) iconMonth.style.transform = 'rotate(180deg)';
+          }
+          if (iconCategoria) iconCategoria.style.transform = 'rotate(0deg)';
+          if (iconSubcategoria) iconSubcategoria.style.transform = 'rotate(0deg)';
         });
       }
 
@@ -384,6 +412,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (dropdownSubcategoria) {
         dropdownSubcategoria.addEventListener('click', (e) => e.stopPropagation());
+      }
+      if (dropdownMonth) {
+        dropdownMonth.addEventListener('click', (e) => e.stopPropagation());
       }
 
       // Cerrar dropdowns al hacer clic fuera de ellos
@@ -395,6 +426,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dropdownSubcategoria) {
           dropdownSubcategoria.classList.add('hidden');
           iconSubcategoria.style.transform = 'rotate(0deg)';
+        }
+        if (dropdownMonth) {
+          dropdownMonth.classList.add('hidden');
+          if (iconMonth) iconMonth.style.transform = 'rotate(0deg)';
         }
       });
 
@@ -460,7 +495,9 @@ document.addEventListener('DOMContentLoaded', () => {
           // Limpiar filtros de multiselección
           selectedCategories = [];
           selectedSubcategories = [];
+          selectedMonths = [];
           populateCategoryFilters();
+          populateMonthFilters();
           
           applyFilters();
         });
@@ -573,6 +610,99 @@ document.addEventListener('DOMContentLoaded', () => {
     
     updateCategoryState();
     populateSubcategoryFilters();
+    populateMonthFilters();
+  }
+
+  const MONTH_NAMES = [
+    { value: '1', label: 'Enero' },
+    { value: '2', label: 'Febrero' },
+    { value: '3', label: 'Marzo' },
+    { value: '4', label: 'Abril' },
+    { value: '5', label: 'Mayo' },
+    { value: '6', label: 'Junio' },
+    { value: '7', label: 'Julio' },
+    { value: '8', label: 'Agosto' },
+    { value: '9', label: 'Septiembre' },
+    { value: '10', label: 'Octubre' },
+    { value: '11', label: 'Noviembre' },
+    { value: '12', label: 'Diciembre' }
+  ];
+
+  function updateMonthState() {
+    if (!labelSelectMonth || !chkAllMonth) return;
+    const checkedCount = selectedMonths.length;
+    if (checkedCount === 0) {
+      labelSelectMonth.textContent = 'Todos';
+      chkAllMonth.checked = false;
+      chkAllMonth.indeterminate = false;
+    } else if (checkedCount === 12) {
+      labelSelectMonth.textContent = 'Todos (12)';
+      chkAllMonth.checked = true;
+      chkAllMonth.indeterminate = false;
+    } else if (checkedCount === 1) {
+      const found = MONTH_NAMES.find(m => m.value === selectedMonths[0]);
+      labelSelectMonth.textContent = found ? found.label : '1 Mes';
+      chkAllMonth.checked = false;
+      chkAllMonth.indeterminate = true;
+    } else if (checkedCount <= 2) {
+      labelSelectMonth.textContent = selectedMonths
+        .map(v => MONTH_NAMES.find(m => m.value === v)?.label.substring(0, 3))
+        .filter(Boolean)
+        .join(', ');
+      chkAllMonth.checked = false;
+      chkAllMonth.indeterminate = true;
+    } else {
+      labelSelectMonth.textContent = `${checkedCount} Meses`;
+      chkAllMonth.checked = false;
+      chkAllMonth.indeterminate = true;
+    }
+  }
+
+  function populateMonthFilters() {
+    if (!optionsContainerMonth) return;
+    optionsContainerMonth.innerHTML = '';
+    
+    if (chkAllMonth) {
+      chkAllMonth.onchange = () => {
+        const isChecked = chkAllMonth.checked;
+        const checkboxes = optionsContainerMonth.querySelectorAll('.chk-month-option');
+        selectedMonths = [];
+        checkboxes.forEach(chk => {
+          chk.checked = isChecked;
+          if (isChecked) {
+            selectedMonths.push(chk.value);
+          }
+        });
+        updateMonthState();
+        applyFilters();
+      };
+    }
+
+    MONTH_NAMES.forEach(m => {
+      const label = document.createElement('label');
+      label.className = 'flex items-center gap-1.5 p-1.5 hover:bg-slate-50 rounded-lg cursor-pointer text-xs text-slate-700';
+      const chk = document.createElement('input');
+      chk.type = 'checkbox';
+      chk.value = m.value;
+      chk.className = 'chk-month-option rounded border-slate-300 text-brand-500 focus:ring-brand-500 cursor-pointer';
+      if (selectedMonths.includes(m.value)) chk.checked = true;
+      chk.addEventListener('change', () => {
+        if (chk.checked) {
+          if (!selectedMonths.includes(m.value)) selectedMonths.push(m.value);
+        } else {
+          selectedMonths = selectedMonths.filter(v => v !== m.value);
+        }
+        updateMonthState();
+        applyFilters();
+      });
+      label.appendChild(chk);
+      const span = document.createElement('span');
+      span.textContent = m.label;
+      span.className = 'truncate';
+      label.appendChild(span);
+      optionsContainerMonth.appendChild(label);
+    });
+    updateMonthState();
   }
 
   function updateCategoryState() {
@@ -1090,6 +1220,7 @@ document.addEventListener('DOMContentLoaded', () => {
         (selectedSoatEstado && selectedSoatEstado !== '') ||
         selectedCategories.length > 0 ||
         selectedSubcategories.length > 0 ||
+        selectedMonths.length > 0 ||
         selectedGlobalYear || selectedGlobalMonth || selectedGlobalValor;
       if (hasActiveFilters) {
         btnClearFilters.classList.remove('hidden');
@@ -1228,9 +1359,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // Filtro de Mes de Registro Global
+      // Filtro de Mes de Registro Global (Multiselección)
       let monthMatch = true;
-      if (selectedGlobalMonth) {
+      if (selectedMonths.length > 0) {
+        const dateStr = item.fecha_alta_factura || item.fecha_alta || item.fecha_registro_contable || item.fecha_ingreso || item.fecha_asignacion;
+        if (!dateStr) {
+          monthMatch = false;
+        } else {
+          const m = String(new Date(dateStr).getMonth() + 1);
+          monthMatch = selectedMonths.includes(m);
+        }
+      } else if (selectedGlobalMonth) {
         const dateStr = item.fecha_alta_factura || item.fecha_alta || item.fecha_registro_contable || item.fecha_ingreso || item.fecha_asignacion;
         if (!dateStr) {
           monthMatch = false;
@@ -1418,6 +1557,25 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       mobileContainer.classList.add('hidden');
       renderAsignacionTab();
+      return;
+    }
+
+    if (currentTab === 'contable') {
+      emptyState.classList.add('hidden');
+      allContainers.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          if (id === 'contable-table-container') {
+            el.classList.remove('hidden');
+            el.classList.add('flex');
+          } else {
+            el.classList.add('hidden');
+            el.classList.remove('flex');
+          }
+        }
+      });
+      mobileContainer.classList.add('hidden');
+      renderContableRows(data);
       return;
     }
 
@@ -4834,35 +4992,49 @@ document.addEventListener('DOMContentLoaded', () => {
       '3311151101': 'TERRENOS COSTO COMUNES - ADQUIRIDO O CONSTRUÍDO CON RECURSOS PROPIOS',
       '3321111101': 'COSTO DE ADQUISICION O CONSTRUC EDIFC.',
       '3321111102': 'COSTO DE FINANCIAMIENTO EDIFICACIONES AD.',
-      '3321113101': 'OTASS-RENOV. Y REUB. LINEA ADUC. R1 AL R2',
+      '3321111103': 'EDIFICACIONES - LÍNEA DE CONDUCCIÓN',
+      '3321113101': 'OTASS - RENOV. Y REUB. LÍNEA ADUCCIÓN R1 AL R2',
       '3321121101': 'EDIFICACIONES COSTO ALC - ADQUIRIDO O CONSTRUÍDO CON RECURSOS PROPIOS',
+      '3321123101': 'EDIFICACIONES COSTO - REDES DE AGUAS RESIDUALES',
       '3322111101': 'ALMACENES',
       '3331111101': 'MAQUINARIAS Y EQUIPO DE BOMBEO AGUA POTABLE',
       '3331111102': 'MEDIDORES',
+      '3331111103': 'EQUIPOS DE DOSIFICACIÓN Y DESINFECCIÓN',
       '3341111101': 'COSTO VEHICULOS MOTORIZADOS',
+      '3341113101': 'VEHÍCULOS MOTORIZADOS - CAMIONES CISTERNAS',
       '3341151101': 'VEHÍCULOS MOTORIZADOS COSTO COMUNES - ADQUIRIDO O CONSTRUÍDO CON RECURSOS PROPIOS',
       '3341152101': 'VEHÍCULOS MOTORIZADOS COSTO COMUNES - RECIBIDO EN DONACIÓN',
+      '3351111101': 'MUEBLES Y ENSERES - OFICINA Y ALMACENAMIENTO',
+      '3351111102': 'MUEBLES Y ENSERES - ALMACENAMIENTO DE LÍQUIDOS Y COMBUSTIBLE',
       '3351151101': 'MUEBLES COSTO COMUNES - ADQUIRIDO O CONSTRUÍDO CON RECURSOS PROPIOS',
       '3361151101': 'EQUIPOS INFORMÁTICOS COSTO COMUNES - ADQUIRIDO O CONSTRUÍDO CON RECURSOS PROPIOS',
-      '3362181101': 'EQUIPO DE COMUNICACIÓN COSTO - ACTIVIDADES NO REGULADAS',
-      '3391010101': 'OBRAS EN CURSO - INICIAL / GENERAL'
+      '3361181101': 'EQUIPOS INFORMÁTICOS Y CÓMPUTO',
+      '3362181101': 'EQUIPOS DE COMUNICACIÓN Y TELECOMUNICACIONES',
+      '3369111101': 'EQUIPOS DE CONTROL DE CALIDAD E INSTRUMENTOS',
+      '3369151102': 'EQUIPOS DE OFICINA ELECTRÓNICOS Y SEGURIDAD',
+      '3369151103': 'EQUIPOS PARA TRABAJO DE CAMPO Y MEDICIÓN',
+      '3391010101': 'OBRAS EN CURSO - GENERAL',
+      '3392111152': 'OBRAS EN CURSO - PROYECTOS VARIOS'
     };
 
     function getAccountName(code, fullCode, category) {
       if (keyDescriptions[code]) return keyDescriptions[code];
-      if (keyDescriptions[fullCode]) return keyDescriptions[fullCode];
+      if (keyDescriptions[fullCode]) {
+        if (code.startsWith('68')) return `DEPRECIACIÓN ACUM. (${keyDescriptions[fullCode]})`;
+        return keyDescriptions[fullCode];
+      }
       
       if (digitMode === 3) {
         if (code.startsWith('33')) return generic3Digits[code] || `PROPIEDAD, PLANTA Y EQUIPO (${code})`;
         if (code.startsWith('68')) {
           const ref33 = '33' + code.charAt(2);
-          return `VALUACIÓN DE ${generic3Digits[ref33] || 'PROPIEDAD, PLANTA Y EQUIPO'}`;
+          return `DEPRECIACIÓN ACUM. (${generic3Digits[ref33] || 'PROPIEDAD, PLANTA Y EQUIPO'})`;
         }
       }
       if (code.startsWith('33')) {
         return category ? category.toUpperCase() : 'GENERAL';
       } else if (code.startsWith('68')) {
-        return 'DEPRECIACIÓN ACUMULADA';
+        return category ? `DEPRECIACIÓN ACUM. (${category.toUpperCase()})` : 'DEPRECIACIÓN ACUMULADA';
       }
       return `CUENTA CONTABLE (${code})`;
     }
