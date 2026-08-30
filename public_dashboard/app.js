@@ -285,11 +285,19 @@ document.addEventListener('DOMContentLoaded', () => {
       const contableLocalidadSelect = document.getElementById('contable-localidad-select');
       if (contableLocalidadSelect) {
         contableLocalidadSelect.innerHTML = '<option value="Todos">Todas las Localidades</option>';
+        const LOCALIDAD_ORDER_C = ['LA MERCED', 'SAN RAMON', 'SAN RAMÓN', 'PICHANAKI', 'OXAPAMPA', 'VILLA RICA', 'SATIPO'];
         const locsSet = new Set();
         assets.forEach(item => {
           if (item.localidad && item.localidad.trim()) locsSet.add(item.localidad.trim().toUpperCase());
         });
-        Array.from(locsSet).sort().forEach(loc => {
+        Array.from(locsSet).sort((a, b) => {
+          const ia = LOCALIDAD_ORDER_C.findIndex(o => o === a);
+          const ib = LOCALIDAD_ORDER_C.findIndex(o => o === b);
+          if (ia !== -1 && ib !== -1) return ia - ib;
+          if (ia !== -1) return -1;
+          if (ib !== -1) return 1;
+          return a.localeCompare(b);
+        }).forEach(loc => {
           const opt = document.createElement('option');
           opt.value = loc;
           opt.textContent = loc;
@@ -894,8 +902,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Poblar Localidades
     if (localidadSelect) {
+      const LOCALIDAD_ORDER = ['LA MERCED', 'SAN RAMON', 'SAN RAMÓN', 'PICHANAKI', 'OXAPAMPA', 'VILLA RICA', 'SATIPO'];
       const localidades = [...new Set(allItems.map(item => item.localidad).filter(Boolean))];
-      localidades.sort().forEach(loc => {
+      localidades.sort((a, b) => {
+        const ia = LOCALIDAD_ORDER.findIndex(o => o === a.toUpperCase());
+        const ib = LOCALIDAD_ORDER.findIndex(o => o === b.toUpperCase());
+        if (ia !== -1 && ib !== -1) return ia - ib;
+        if (ia !== -1) return -1;
+        if (ib !== -1) return 1;
+        return a.localeCompare(b);
+      }).forEach(loc => {
         const option = document.createElement('option');
         option.value = loc;
         option.textContent = loc;
