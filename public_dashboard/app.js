@@ -257,9 +257,10 @@ document.addEventListener('DOMContentLoaded', () => {
         contableYearSelect.innerHTML = '<option value="Todos">Todos</option>';
         const yearsSet = new Set();
         assets.forEach(item => {
-          const dateStr = item.fecha_alta_factura || item.fecha_registro_contable;
+          const dateStr = item.fecha_alta_factura || item.fecha_alta || item.fecha_registro_contable || item.fecha_ingreso || item.fecha_asignacion;
           if (dateStr) {
-            const y = new Date(dateStr).getFullYear();
+            const parts = String(dateStr).split('-');
+            const y = parts[0] ? Number(parts[0]) : new Date(dateStr).getFullYear();
             if (y && !isNaN(y)) yearsSet.add(y);
           }
         });
@@ -1179,13 +1180,13 @@ document.addEventListener('DOMContentLoaded', () => {
           if (itemLoc !== selectedLocalidad.trim().toUpperCase()) return false;
         }
 
-        const dateStr = item.fecha_alta_factura || item.fecha_registro_contable;
+        const dateStr = item.fecha_alta_factura || item.fecha_alta || item.fecha_registro_contable || item.fecha_ingreso || item.fecha_asignacion;
         
         if (!dateStr && (selectedYear !== 'Todos' || selectedMonth !== 'Todos')) return false;
         if (dateStr) {
-          const date = new Date(dateStr);
-          const y = date.getFullYear();
-          const m = date.getMonth() + 1;
+          const parts = String(dateStr).split('-');
+          const y = parts[0] ? Number(parts[0]) : new Date(dateStr).getFullYear();
+          const m = parts[1] ? Number(parts[1]) : (new Date(dateStr).getMonth() + 1);
           if (selectedYear !== 'Todos' && y !== Number(selectedYear)) return false;
           if (selectedMonth !== 'Todos' && m !== Number(selectedMonth)) return false;
         }
