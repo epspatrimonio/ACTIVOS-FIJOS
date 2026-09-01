@@ -229,6 +229,8 @@ document.addEventListener('DOMContentLoaded', () => {
               responsable: item.responsable || '—',
               puesto: item.puesto || item.unidad || '—',
               sucursal: item.sucursal || '—',
+              localidad: item.localidad || '—',
+              financiado: getFinanciadoText(item) || '—',
               bienes: []
             };
           }
@@ -237,6 +239,9 @@ document.addEventListener('DOMContentLoaded', () => {
           if (item.responsable) actasMap[acta].responsable = item.responsable;
           if (item.puesto || item.unidad) actasMap[acta].puesto = item.puesto || item.unidad;
           if (item.sucursal) actasMap[acta].sucursal = item.sucursal;
+          if (item.localidad && (!actasMap[acta].localidad || actasMap[acta].localidad === '—')) actasMap[acta].localidad = item.localidad;
+          const finActa = getFinanciadoText(item);
+          if (finActa && (!actasMap[acta].financiado || actasMap[acta].financiado === '—')) actasMap[acta].financiado = finActa;
         } else {
           bienesSinActa.push(item);
           const resp = item.responsable ? item.responsable.trim() : '';
@@ -246,10 +251,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 nombre: resp,
                 puesto: item.puesto || item.unidad || '—',
                 sucursal: item.sucursal || '—',
+                localidad: item.localidad || '—',
+                financiado: getFinanciadoText(item) || '—',
                 bienes: []
               };
             }
             responsablesSinActaMap[resp].bienes.push(item);
+            if (item.localidad && (!responsablesSinActaMap[resp].localidad || responsablesSinActaMap[resp].localidad === '—')) responsablesSinActaMap[resp].localidad = item.localidad;
+            const finResp = getFinanciadoText(item);
+            if (finResp && (!responsablesSinActaMap[resp].financiado || responsablesSinActaMap[resp].financiado === '—')) responsablesSinActaMap[resp].financiado = finResp;
           }
         }
       });
