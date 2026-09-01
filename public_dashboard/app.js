@@ -5446,7 +5446,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const displayPuesto = document.getElementById('acta-usuario-puesto');
     const displaySucursal = document.getElementById('acta-usuario-sucursal');
     const displayLocalidad = document.getElementById('acta-usuario-localidad');
-    const displayFinanciado = document.getElementById('acta-usuario-financiado');
     const displayTotalBienes = document.getElementById('acta-total-bienes');
     const tbody = document.getElementById('asignacion-tbody');
 
@@ -5458,7 +5457,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (displayPuesto) displayPuesto.textContent = '—';
       if (displaySucursal) displaySucursal.textContent = '—';
       if (displayLocalidad) { displayLocalidad.textContent = ''; displayLocalidad.classList.add('hidden'); }
-      if (displayFinanciado) displayFinanciado.textContent = '—';
       if (displayTotalBienes) displayTotalBienes.textContent = '0 bienes';
       if (displayNro) displayNro.textContent = '—';
       if (displayFecha) displayFecha.textContent = '—';
@@ -5479,20 +5477,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Ordenar primero por Orden de Compra y luego por Código Patrimonial (ambos de mayor a menor)
     subtabBienes.sort(compareBienesActa);
 
-    // Determinar Localidad y Financiado
+    // Determinar Localidad
     let foundLocalidad = '';
-    let foundFinanciado = '';
     for (const b of subtabBienes) {
       if (!foundLocalidad && b.localidad && b.localidad.trim() && b.localidad !== '—') {
         foundLocalidad = b.localidad.trim();
-      }
-      if (!foundFinanciado) {
-        const f = getFinanciadoText(b);
-        if (f) foundFinanciado = f;
+        break;
       }
     }
     if (!foundLocalidad && data.localidad && data.localidad !== '—') foundLocalidad = data.localidad;
-    if (!foundFinanciado && data.financiado && data.financiado !== '—') foundFinanciado = data.financiado;
 
     if (displayUsuario) displayUsuario.textContent = data.responsable || '—';
     if (displayPuesto) displayPuesto.textContent = data.puesto || '—';
@@ -5506,7 +5499,6 @@ document.addEventListener('DOMContentLoaded', () => {
         displayLocalidad.classList.add('hidden');
       }
     }
-    if (displayFinanciado) displayFinanciado.textContent = foundFinanciado || '—';
     if (displayTotalBienes) {
       displayTotalBienes.textContent = `${subtabBienes.length} ${subtabBienes.length === 1 ? 'bien' : 'bienes'}`;
     }
@@ -5794,7 +5786,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const sucursalPrefix = sucursal.toUpperCase().startsWith("UO ") ? sucursal.toUpperCase() : `UO ${sucursal.toUpperCase()}`;
         doc.text(sucursalPrefix, 38, 54);
 
-        // LOCALIDAD y FINANCIADO al costado de SUCURSAL
+        // LOCALIDAD al costado de SUCURSAL
         let currentX = 38 + doc.getTextWidth(sucursalPrefix) + 6;
         if (localidad && localidad !== '—' && localidad.toUpperCase() !== sucursal.toUpperCase()) {
           doc.setFont("helvetica", "bold");
@@ -5802,15 +5794,6 @@ document.addEventListener('DOMContentLoaded', () => {
           currentX += doc.getTextWidth("LOCALIDAD:") + 2;
           doc.setFont("helvetica", "normal");
           doc.text(localidad.toUpperCase(), currentX, 54);
-          currentX += doc.getTextWidth(localidad.toUpperCase()) + 6;
-        }
-
-        if (financiado && financiado !== '—') {
-          doc.setFont("helvetica", "bold");
-          doc.text("FINANCIADO:", currentX, 54);
-          currentX += doc.getTextWidth("FINANCIADO:") + 2;
-          doc.setFont("helvetica", "normal");
-          doc.text(financiado.toUpperCase(), currentX, 54);
         }
 
         // FECHA DE ALTA (Alineada a la derecha)
