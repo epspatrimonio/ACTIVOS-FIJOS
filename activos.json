@@ -2723,7 +2723,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-01-16",
-    "soat_dias_vigencia": 138,
+    "soat_dias_vigencia": 137,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -3095,7 +3095,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-02-18",
-    "soat_dias_vigencia": 171,
+    "soat_dias_vigencia": 170,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -3157,7 +3157,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-05-29",
-    "soat_dias_vigencia": 271,
+    "soat_dias_vigencia": 270,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -3777,7 +3777,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-11-24",
-    "soat_dias_vigencia": 85,
+    "soat_dias_vigencia": 84,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -3839,7 +3839,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-11-24",
-    "soat_dias_vigencia": 85,
+    "soat_dias_vigencia": 84,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -7435,7 +7435,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-10-26",
-    "soat_dias_vigencia": 56,
+    "soat_dias_vigencia": 55,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -7621,7 +7621,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-10-26",
-    "soat_dias_vigencia": 56,
+    "soat_dias_vigencia": 55,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -8117,7 +8117,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-10-22",
-    "soat_dias_vigencia": 52,
+    "soat_dias_vigencia": 51,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -9047,7 +9047,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-10-22",
-    "soat_dias_vigencia": 52,
+    "soat_dias_vigencia": 51,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -9791,7 +9791,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-11-04",
-    "soat_dias_vigencia": 65,
+    "soat_dias_vigencia": 64,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -11031,7 +11031,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-11-04",
-    "soat_dias_vigencia": 65,
+    "soat_dias_vigencia": 64,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -11899,7 +11899,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-05-28",
-    "soat_dias_vigencia": 270,
+    "soat_dias_vigencia": 269,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -12767,7 +12767,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-11-04",
-    "soat_dias_vigencia": 65,
+    "soat_dias_vigencia": 64,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -24051,7 +24051,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-09-05",
-    "soat_dias_vigencia": 5,
+    "soat_dias_vigencia": 4,
     "soat_estado": "POR_VENCER",
     "pdf_soat_path": null
   },
@@ -24113,7 +24113,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-07-16",
-    "soat_dias_vigencia": -46,
+    "soat_dias_vigencia": -47,
     "soat_estado": "VENCIDO",
     "pdf_soat_path": null
   },
@@ -24175,7 +24175,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-07-16",
-    "soat_dias_vigencia": -46,
+    "soat_dias_vigencia": -47,
     "soat_estado": "VENCIDO",
     "pdf_soat_path": null
   },
@@ -24237,7 +24237,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2025-03-12",
-    "soat_dias_vigencia": -537,
+    "soat_dias_vigencia": -538,
     "soat_estado": "VENCIDO",
     "pdf_soat_path": null
   },
@@ -24299,7 +24299,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2025-03-12",
-    "soat_dias_vigencia": -537,
+    "soat_dias_vigencia": -538,
     "soat_estado": "VENCIDO",
     "pdf_soat_path": null
   },
@@ -24361,7 +24361,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-09-05",
-    "soat_dias_vigencia": 5,
+    "soat_dias_vigencia": 4,
     "soat_estado": "POR_VENCER",
     "pdf_soat_path": null
   },
@@ -24423,7 +24423,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-05-29",
-    "soat_dias_vigencia": 271,
+    "soat_dias_vigencia": 270,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -24485,7 +24485,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-03-04",
-    "soat_dias_vigencia": 185,
+    "soat_dias_vigencia": 184,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": "soat_pdfs/410024004_soat.pdf"
   },
@@ -24542,12 +24542,12 @@
     "carroceria": "",
     "categoria_vehiculo": "L5",
     "vencimiento_rev_tec": "2026-08-25",
-    "dias_vigencia_rev_tec": -6,
+    "dias_vigencia_rev_tec": -7,
     "estado_rev_tec": "VENCIDO",
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-06-25",
-    "soat_dias_vigencia": 298,
+    "soat_dias_vigencia": 297,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -24604,12 +24604,12 @@
     "carroceria": "",
     "categoria_vehiculo": "L3",
     "vencimiento_rev_tec": "2020-03-25",
-    "dias_vigencia_rev_tec": -2350,
+    "dias_vigencia_rev_tec": -2351,
     "estado_rev_tec": "VENCIDO",
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2024-11-22",
-    "soat_dias_vigencia": -647,
+    "soat_dias_vigencia": -648,
     "soat_estado": "VENCIDO",
     "pdf_soat_path": null
   },
@@ -24671,7 +24671,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2024-11-22",
-    "soat_dias_vigencia": -647,
+    "soat_dias_vigencia": -648,
     "soat_estado": "VENCIDO",
     "pdf_soat_path": null
   },
@@ -24728,12 +24728,12 @@
     "carroceria": "",
     "categoria_vehiculo": "L5",
     "vencimiento_rev_tec": "2026-08-18",
-    "dias_vigencia_rev_tec": -13,
+    "dias_vigencia_rev_tec": -14,
     "estado_rev_tec": "VENCIDO",
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-06-04",
-    "soat_dias_vigencia": 277,
+    "soat_dias_vigencia": 276,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -24795,7 +24795,7 @@
     "soat_poliza": "POL-999888",
     "soat_compania": "La Positiva",
     "soat_vencimiento": "2027-06-17",
-    "soat_dias_vigencia": 290,
+    "soat_dias_vigencia": 289,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": "soat_pdfs/410024003_soat.pdf"
   },
@@ -24857,7 +24857,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2023-09-12",
-    "soat_dias_vigencia": -1084,
+    "soat_dias_vigencia": -1085,
     "soat_estado": "VENCIDO",
     "pdf_soat_path": null
   },
@@ -24914,12 +24914,12 @@
     "carroceria": "",
     "categoria_vehiculo": "L5",
     "vencimiento_rev_tec": "2022-11-29",
-    "dias_vigencia_rev_tec": -1371,
+    "dias_vigencia_rev_tec": -1372,
     "estado_rev_tec": "VENCIDO",
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-06-22",
-    "soat_dias_vigencia": 295,
+    "soat_dias_vigencia": 294,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -24981,7 +24981,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-07-16",
-    "soat_dias_vigencia": -46,
+    "soat_dias_vigencia": -47,
     "soat_estado": "VENCIDO",
     "pdf_soat_path": "soat_pdfs/410024002_soat.pdf"
   },
@@ -25043,7 +25043,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-09-05",
-    "soat_dias_vigencia": 5,
+    "soat_dias_vigencia": 4,
     "soat_estado": "POR_VENCER",
     "pdf_soat_path": null
   },
@@ -25105,7 +25105,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-05-29",
-    "soat_dias_vigencia": 271,
+    "soat_dias_vigencia": 270,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -25167,7 +25167,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2022-08-27",
-    "soat_dias_vigencia": -1465,
+    "soat_dias_vigencia": -1466,
     "soat_estado": "VENCIDO",
     "pdf_soat_path": null
   },
@@ -25229,7 +25229,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-09-30",
-    "soat_dias_vigencia": 30,
+    "soat_dias_vigencia": 29,
     "soat_estado": "POR_VENCER",
     "pdf_soat_path": "soat_pdfs/410024001_soat.pdf"
   },
@@ -25291,7 +25291,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-05-29",
-    "soat_dias_vigencia": 271,
+    "soat_dias_vigencia": 270,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -25353,7 +25353,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-09-05",
-    "soat_dias_vigencia": 5,
+    "soat_dias_vigencia": 4,
     "soat_estado": "POR_VENCER",
     "pdf_soat_path": null
   },
@@ -25410,12 +25410,12 @@
     "carroceria": "",
     "categoria_vehiculo": "L3",
     "vencimiento_rev_tec": "2026-08-18",
-    "dias_vigencia_rev_tec": -13,
+    "dias_vigencia_rev_tec": -14,
     "estado_rev_tec": "VENCIDO",
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-06-04",
-    "soat_dias_vigencia": 277,
+    "soat_dias_vigencia": 276,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -25477,7 +25477,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-07-16",
-    "soat_dias_vigencia": -46,
+    "soat_dias_vigencia": -47,
     "soat_estado": "VENCIDO",
     "pdf_soat_path": null
   },
@@ -25534,12 +25534,12 @@
     "carroceria": "",
     "categoria_vehiculo": "L3",
     "vencimiento_rev_tec": "2023-02-08",
-    "dias_vigencia_rev_tec": -1300,
+    "dias_vigencia_rev_tec": -1301,
     "estado_rev_tec": "VENCIDO",
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-06-04",
-    "soat_dias_vigencia": 277,
+    "soat_dias_vigencia": 276,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -25601,7 +25601,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-09-30",
-    "soat_dias_vigencia": 30,
+    "soat_dias_vigencia": 29,
     "soat_estado": "POR_VENCER",
     "pdf_soat_path": "soat_pdfs/410024000_soat.pdf"
   },
@@ -25663,7 +25663,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2023-09-15",
-    "soat_dias_vigencia": -1081,
+    "soat_dias_vigencia": -1082,
     "soat_estado": "VENCIDO",
     "pdf_soat_path": null
   },
@@ -25725,7 +25725,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-05-29",
-    "soat_dias_vigencia": 271,
+    "soat_dias_vigencia": 270,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -25782,12 +25782,12 @@
     "carroceria": "",
     "categoria_vehiculo": "N1",
     "vencimiento_rev_tec": "2027-02-16",
-    "dias_vigencia_rev_tec": 169,
+    "dias_vigencia_rev_tec": 168,
     "estado_rev_tec": "VIGENTE",
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-02-25",
-    "soat_dias_vigencia": 178,
+    "soat_dias_vigencia": 177,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -25844,12 +25844,12 @@
     "carroceria": "",
     "categoria_vehiculo": "",
     "vencimiento_rev_tec": "2023-05-10",
-    "dias_vigencia_rev_tec": -1209,
+    "dias_vigencia_rev_tec": -1210,
     "estado_rev_tec": "VENCIDO",
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2024-09-20",
-    "soat_dias_vigencia": -710,
+    "soat_dias_vigencia": -711,
     "soat_estado": "VENCIDO",
     "pdf_soat_path": null
   },
@@ -25911,7 +25911,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2024-12-01",
-    "soat_dias_vigencia": -638,
+    "soat_dias_vigencia": -639,
     "soat_estado": "VENCIDO",
     "pdf_soat_path": null
   },
@@ -25973,7 +25973,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-05-29",
-    "soat_dias_vigencia": 271,
+    "soat_dias_vigencia": 270,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -26035,7 +26035,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-09-05",
-    "soat_dias_vigencia": 5,
+    "soat_dias_vigencia": 4,
     "soat_estado": "POR_VENCER",
     "pdf_soat_path": null
   },
@@ -26097,7 +26097,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-06-04",
-    "soat_dias_vigencia": 277,
+    "soat_dias_vigencia": 276,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": "soat_pdfs/339500001_soat.pdf"
   },
@@ -26221,7 +26221,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-10-26",
-    "soat_dias_vigencia": 56,
+    "soat_dias_vigencia": 55,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -26283,7 +26283,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-11-04",
-    "soat_dias_vigencia": 65,
+    "soat_dias_vigencia": 64,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -26345,7 +26345,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-05-28",
-    "soat_dias_vigencia": 270,
+    "soat_dias_vigencia": 269,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -26407,7 +26407,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-05-28",
-    "soat_dias_vigencia": 270,
+    "soat_dias_vigencia": 269,
     "soat_estado": "VIGENTE",
     "pdf_soat_path": null
   },
@@ -26469,7 +26469,7 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-07-16",
-    "soat_dias_vigencia": -46,
+    "soat_dias_vigencia": -47,
     "soat_estado": "VENCIDO",
     "pdf_soat_path": null
   }
