@@ -1484,21 +1484,16 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Ordenar jerárquicamente activos y obras: 1° Código Patrimonial DESC > 2° O/C DESC > 3° Fecha DESC
+    // Ordenar jerárquicamente activos y obras: 1° Fecha de Ingreso DESC > 2° O/C DESC > 3° Código Patrimonial DESC
     if (currentTab === 'activos' || currentTab === 'obras') {
       filtered.sort((a, b) => {
-        const codA = String(a.cod_patrimonial || '').trim();
-        const codB = String(b.cod_patrimonial || '').trim();
-        const numCodA = Number(codA);
-        const numCodB = Number(codB);
-        let compCod = 0;
-        if (!isNaN(numCodA) && !isNaN(numCodB) && codA !== '' && codB !== '') {
-          compCod = numCodB - numCodA;
-        } else {
-          compCod = codB.localeCompare(codA, undefined, { numeric: true, sensitivity: 'base' });
-        }
-        if (compCod !== 0) return compCod;
+        // 1. Fecha de Ingreso (más reciente primero)
+        const dA = a.fecha_alta || a.fecha_alta_factura || a.fecha_registro_contable || a.fecha_asignacion || '0000-00-00';
+        const dB = b.fecha_alta || b.fecha_alta_factura || b.fecha_registro_contable || b.fecha_asignacion || '0000-00-00';
+        const compDate = String(dB).localeCompare(String(dA));
+        if (compDate !== 0) return compDate;
 
+        // 2. Orden de Compra (mayor a menor)
         const ocA = String(a.n_doc_compra || a.n_doc || '').trim();
         const ocB = String(b.n_doc_compra || b.n_doc || '').trim();
         const numOcA = Number(ocA);
@@ -1511,9 +1506,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (compOc !== 0) return compOc;
 
-        const dA = a.fecha_alta || a.fecha_alta_factura || a.fecha_registro_contable || a.fecha_asignacion || '0000-00-00';
-        const dB = b.fecha_alta || b.fecha_alta_factura || b.fecha_registro_contable || b.fecha_asignacion || '0000-00-00';
-        return String(dB).localeCompare(String(dA));
+        // 3. Código Patrimonial (mayor a menor)
+        const codA = String(a.cod_patrimonial || '').trim();
+        const codB = String(b.cod_patrimonial || '').trim();
+        const numCodA = Number(codA);
+        const numCodB = Number(codB);
+        let compCod = 0;
+        if (!isNaN(numCodA) && !isNaN(numCodB) && codA !== '' && codB !== '') {
+          compCod = numCodB - numCodA;
+        } else {
+          compCod = codB.localeCompare(codA, undefined, { numeric: true, sensitivity: 'base' });
+        }
+        return compCod;
       });
     }
 
