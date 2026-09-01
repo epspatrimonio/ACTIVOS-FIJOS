@@ -1484,12 +1484,36 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Ordenar activos y obras por fecha de ingreso (más reciente primero)
+    // Ordenar jerárquicamente activos y obras: 1° Código Patrimonial DESC > 2° O/C DESC > 3° Fecha DESC
     if (currentTab === 'activos' || currentTab === 'obras') {
       filtered.sort((a, b) => {
+        const codA = String(a.cod_patrimonial || '').trim();
+        const codB = String(b.cod_patrimonial || '').trim();
+        const numCodA = Number(codA);
+        const numCodB = Number(codB);
+        let compCod = 0;
+        if (!isNaN(numCodA) && !isNaN(numCodB) && codA !== '' && codB !== '') {
+          compCod = numCodB - numCodA;
+        } else {
+          compCod = codB.localeCompare(codA, undefined, { numeric: true, sensitivity: 'base' });
+        }
+        if (compCod !== 0) return compCod;
+
+        const ocA = String(a.n_doc_compra || a.n_doc || '').trim();
+        const ocB = String(b.n_doc_compra || b.n_doc || '').trim();
+        const numOcA = Number(ocA);
+        const numOcB = Number(ocB);
+        let compOc = 0;
+        if (!isNaN(numOcA) && !isNaN(numOcB) && ocA !== '' && ocB !== '') {
+          compOc = numOcB - numOcA;
+        } else {
+          compOc = ocB.localeCompare(ocA, undefined, { numeric: true, sensitivity: 'base' });
+        }
+        if (compOc !== 0) return compOc;
+
         const dA = a.fecha_alta || a.fecha_alta_factura || a.fecha_registro_contable || a.fecha_asignacion || '0000-00-00';
         const dB = b.fecha_alta || b.fecha_alta_factura || b.fecha_registro_contable || b.fecha_asignacion || '0000-00-00';
-        return dB.localeCompare(dA);
+        return String(dB).localeCompare(String(dA));
       });
     }
 
