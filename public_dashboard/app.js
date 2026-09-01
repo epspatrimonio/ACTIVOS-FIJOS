@@ -2026,6 +2026,40 @@ document.addEventListener('DOMContentLoaded', () => {
     doc.setFont("helvetica", "bold"); doc.text("Responsable:", marginX, posY);
     doc.setFont("helvetica", "normal"); doc.text(activo.responsable || '—', marginX + 22, posY);
 
+    const imagesToDraw = [];
+    if (activo.imagen_1_path && activo.imagen_1_path.trim()) imagesToDraw.push(activo.imagen_1_path.trim());
+    if (activo.imagen_2_path && activo.imagen_2_path.trim()) imagesToDraw.push(activo.imagen_2_path.trim());
+    if (activo.imagen_3_path && activo.imagen_3_path.trim()) imagesToDraw.push(activo.imagen_3_path.trim());
+
+    if (imagesToDraw.length > 0) {
+      if (posY + 55 > 280) {
+        doc.addPage();
+        posY = 20;
+      } else {
+        posY += 8;
+        doc.line(marginX, posY, 196, posY);
+        posY += 5;
+      }
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.text("Imágenes del Activo:", marginX, posY);
+      posY += 4;
+
+      const imgWidth = 55;
+      const imgHeight = 40;
+      const spacing = 6;
+
+      for (let i = 0; i < imagesToDraw.length; i++) {
+        const rawPath = imagesToDraw[i];
+        const cleanPath = rawPath.startsWith('/') ? rawPath : `/${rawPath}`;
+        const fullUrl = `.${cleanPath}`;
+        const imgElement = await loadImage(fullUrl).catch(() => null);
+        if (imgElement) {
+          doc.addImage(imgElement, 'JPEG', marginX + i * (imgWidth + spacing), posY, imgWidth, imgHeight);
+        }
+      }
+    }
+
     doc.save(`Ficha_Activo_${activo.cod_patrimonial || 'SN'}.pdf`);
   }
 
@@ -2849,12 +2883,22 @@ document.addEventListener('DOMContentLoaded', () => {
           ${item.puesto ? `<div class="text-[0.65rem] text-slate-500 italic font-medium uppercase mt-0.5">${item.puesto}</div>` : ''}
         </td>
         <td class="px-1 py-2 whitespace-nowrap text-center">
-          <button type="button" data-ficha-code="${item.cod_patrimonial}" class="btn-download-ficha-pdf inline-flex items-center justify-center gap-1 px-1.5 py-1 text-emerald-800 bg-emerald-50 hover:bg-emerald-100 hover:text-emerald-950 border border-emerald-300 rounded-lg shadow-2xs transition-all active:scale-95 cursor-pointer" title="Descargar Ficha Digital del Activo (PDF)">
-            <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-            </svg>
-            <span class="text-[9px] font-extrabold leading-tight text-center">FICHA<br/>DIGITAL</span>
-          </button>
+          <div class="inline-flex items-center justify-center gap-1">
+            <button type="button" data-ficha-code="${item.cod_patrimonial}" class="btn-download-ficha-pdf inline-flex items-center justify-center gap-1 px-1.5 py-1 text-emerald-800 bg-emerald-50 hover:bg-emerald-100 hover:text-emerald-950 border border-emerald-300 rounded-lg shadow-2xs transition-all active:scale-95 cursor-pointer" title="Descargar Ficha Digital del Activo (PDF)">
+              <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <span class="text-[9px] font-extrabold leading-tight text-center">FICHA<br/>DIGITAL</span>
+            </button>
+            ${item.pdf_expediente_path ? `
+              <a href=".${item.pdf_expediente_path.startsWith('/') ? item.pdf_expediente_path : '/' + item.pdf_expediente_path}" target="_blank" download="Expediente_${item.cod_patrimonial}.pdf" class="inline-flex items-center justify-center gap-1 px-1.5 py-1 text-amber-800 bg-amber-50 hover:bg-amber-100 hover:text-amber-950 border border-amber-300 rounded-lg shadow-2xs transition-all active:scale-95 cursor-pointer" title="Descargar Expediente del Activo (PDF)">
+                <svg class="w-3.5 h-3.5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                </svg>
+                <span class="text-[9px] font-extrabold leading-tight text-center">EXPEDIENTE<br/>PDF</span>
+              </a>
+            ` : ''}
+          </div>
         </td>
       `;
       tbody.appendChild(row);
