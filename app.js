@@ -5407,6 +5407,34 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function compareBienesActa(a, b) {
+    // 1. Orden de Compra (mayor a menor / DESC)
+    const ocA = String(a.n_doc_compra || a.n_doc || '').trim();
+    const ocB = String(b.n_doc_compra || b.n_doc || '').trim();
+    const numOcA = Number(ocA);
+    const numOcB = Number(ocB);
+    let compOc = 0;
+    if (!isNaN(numOcA) && !isNaN(numOcB) && ocA !== '' && ocB !== '') {
+      compOc = numOcB - numOcA;
+    } else {
+      compOc = ocB.localeCompare(ocA, undefined, { numeric: true, sensitivity: 'base' });
+    }
+    if (compOc !== 0) return compOc;
+
+    // 2. Código Patrimonial (mayor a menor / DESC)
+    const codA = String(a.cod_patrimonial || '').trim();
+    const codB = String(b.cod_patrimonial || '').trim();
+    const numCodA = Number(codA);
+    const numCodB = Number(codB);
+    let compCod = 0;
+    if (!isNaN(numCodA) && !isNaN(numCodB) && codA !== '' && codB !== '') {
+      compCod = numCodB - numCodA;
+    } else {
+      compCod = codB.localeCompare(codA, undefined, { numeric: true, sensitivity: 'base' });
+    }
+    return compCod;
+  }
+
   function selectActa(acta) {
     const inputNro = document.getElementById('acta-nro');
     const inputFecha = document.getElementById('acta-fecha');
@@ -5417,6 +5445,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const displayUsuario = document.getElementById('acta-usuario-nombre');
     const displayPuesto = document.getElementById('acta-usuario-puesto');
     const displaySucursal = document.getElementById('acta-usuario-sucursal');
+    const displayLocalidad = document.getElementById('acta-usuario-localidad');
+    const displayFinanciado = document.getElementById('acta-usuario-financiado');
+    const displayTotalBienes = document.getElementById('acta-total-bienes');
     const tbody = document.getElementById('asignacion-tbody');
 
     tbody.innerHTML = '';
@@ -5426,6 +5457,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (displayUsuario) displayUsuario.textContent = '—';
       if (displayPuesto) displayPuesto.textContent = '—';
       if (displaySucursal) displaySucursal.textContent = '—';
+      if (displayLocalidad) { displayLocalidad.textContent = ''; displayLocalidad.classList.add('hidden'); }
+      if (displayFinanciado) displayFinanciado.textContent = '—';
+      if (displayTotalBienes) displayTotalBienes.textContent = '0 bienes';
       if (displayNro) displayNro.textContent = '—';
       if (displayFecha) displayFecha.textContent = '—';
       if (displaySolicitante) displaySolicitante.textContent = '—';
@@ -5442,9 +5476,40 @@ document.addEventListener('DOMContentLoaded', () => {
         : String(b.cod_patrimonial).startsWith('339')
     );
 
+    // Ordenar primero por Orden de Compra y luego por Código Patrimonial (ambos de mayor a menor)
+    subtabBienes.sort(compareBienesActa);
+
+    // Determinar Localidad y Financiado
+    let foundLocalidad = '';
+    let foundFinanciado = '';
+    for (const b of subtabBienes) {
+      if (!foundLocalidad && b.localidad && b.localidad.trim() && b.localidad !== '—') {
+        foundLocalidad = b.localidad.trim();
+      }
+      if (!foundFinanciado) {
+        const f = getFinanciadoText(b);
+        if (f) foundFinanciado = f;
+      }
+    }
+    if (!foundLocalidad && data.localidad && data.localidad !== '—') foundLocalidad = data.localidad;
+    if (!foundFinanciado && data.financiado && data.financiado !== '—') foundFinanciado = data.financiado;
+
     if (displayUsuario) displayUsuario.textContent = data.responsable || '—';
     if (displayPuesto) displayPuesto.textContent = data.puesto || '—';
     if (displaySucursal) displaySucursal.textContent = data.sucursal || '—';
+    if (displayLocalidad) {
+      if (foundLocalidad && foundLocalidad.toUpperCase() !== (data.sucursal || '').toUpperCase()) {
+        displayLocalidad.textContent = foundLocalidad;
+        displayLocalidad.classList.remove('hidden');
+      } else {
+        displayLocalidad.textContent = '';
+        displayLocalidad.classList.add('hidden');
+      }
+    }
+    if (displayFinanciado) displayFinanciado.textContent = foundFinanciado || '—';
+    if (displayTotalBienes) {
+      displayTotalBienes.textContent = `${subtabBienes.length} ${subtabBienes.length === 1 ? 'bien' : 'bienes'}`;
+    }
     if (displayNro) displayNro.textContent = data.n_acta || '—';
     if (inputNro) inputNro.value = data.n_acta || '';
 
@@ -5514,6 +5579,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let bienes = [];
     let puesto = '—';
     let sucursal = '—';
+    let localidad = '—';
+    let financiado = '—';
 
     const inputNro = document.getElementById('acta-nro');
     const actaNroVal = inputNro ? inputNro.value.trim() : '015-2026';
@@ -5532,6 +5599,8 @@ document.addEventListener('DOMContentLoaded', () => {
       respName = respData.nombre;
       puesto = respData.puesto;
       sucursal = respData.sucursal;
+      localidad = respData.localidad;
+      financiado = respData.financiado;
       bienes = respData.bienes.filter(b => 
         currentActaSubtab === 'activos' 
           ? !String(b.cod_patrimonial).startsWith('339')
@@ -5559,6 +5628,20 @@ document.addEventListener('DOMContentLoaded', () => {
       bienes = subtabBienes;
       puesto = data.puesto;
       sucursal = data.sucursal;
+      localidad = data.localidad;
+      financiado = data.financiado;
+    }
+
+    // Ordenar primero por Orden de Compra (DESC) y luego por Código Patrimonial (DESC)
+    bienes.sort(compareBienesActa);
+
+    // Extraer localidad y financiado si no están presentes
+    for (const b of bienes) {
+      if ((!localidad || localidad === '—') && b.localidad && b.localidad.trim()) localidad = b.localidad.trim();
+      if ((!financiado || financiado === '—')) {
+        const f = getFinanciadoText(b);
+        if (f) financiado = f;
+      }
     }
 
     const pdfBtn = document.getElementById('btn-generar-acta-pdf');
@@ -5696,7 +5779,7 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.setFontSize(7);
         doc.text("AUTORIZADO POR LA GERENCIA DE ADMINISTRACIÓN Y FINANZAS, JEFATURA DE PLANIFICACIÓN Y DESARROLLO EMPRESARIAL, JEFATURA DEL DEPARTAMENTO DE LOGÍSTICA Y CONTROL PATRIMONIAL.", 148.5, 32, { align: 'center' });
 
-        // 4. Datos del Responsable y Solicitante (Y desplazado para espaciado de 7mm con respecto al subtítulo a Y=32)
+        // 4. Datos del Responsable y Solicitante
         doc.setFont("helvetica", "bold");
         doc.setFontSize(8.5);
         doc.text("SOLICITANTE:", 14, 39);
@@ -5711,6 +5794,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const sucursalPrefix = sucursal.toUpperCase().startsWith("UO ") ? sucursal.toUpperCase() : `UO ${sucursal.toUpperCase()}`;
         doc.text(sucursalPrefix, 38, 54);
 
+        // LOCALIDAD y FINANCIADO al costado de SUCURSAL
+        let currentX = 38 + doc.getTextWidth(sucursalPrefix) + 6;
+        if (localidad && localidad !== '—' && localidad.toUpperCase() !== sucursal.toUpperCase()) {
+          doc.setFont("helvetica", "bold");
+          doc.text("LOCALIDAD:", currentX, 54);
+          currentX += doc.getTextWidth("LOCALIDAD:") + 2;
+          doc.setFont("helvetica", "normal");
+          doc.text(localidad.toUpperCase(), currentX, 54);
+          currentX += doc.getTextWidth(localidad.toUpperCase()) + 6;
+        }
+
+        if (financiado && financiado !== '—') {
+          doc.setFont("helvetica", "bold");
+          doc.text("FINANCIADO:", currentX, 54);
+          currentX += doc.getTextWidth("FINANCIADO:") + 2;
+          doc.setFont("helvetica", "normal");
+          doc.text(financiado.toUpperCase(), currentX, 54);
+        }
+
         // FECHA DE ALTA (Alineada a la derecha)
         doc.setFont("helvetica", "normal");
         doc.setFontSize(8.5);
@@ -5719,6 +5821,14 @@ document.addEventListener('DOMContentLoaded', () => {
         
         doc.setFont("helvetica", "bold");
         doc.text("FECHA DE ALTA:", 283 - dateWidth - 2, 39, { align: 'right' });
+
+        // TOTAL BIENES (Alineado a la derecha debajo de fecha de alta)
+        const totalText = `${bienes.length} ${bienes.length === 1 ? 'BIEN' : 'BIENES'}`;
+        const totalTextWidth = doc.getTextWidth(totalText);
+        doc.setFont("helvetica", "normal");
+        doc.text(totalText, 283, 44, { align: 'right' });
+        doc.setFont("helvetica", "bold");
+        doc.text("TOTAL REGISTRADOS:", 283 - totalTextWidth - 2, 44, { align: 'right' });
 
         // 5. Nota legal de responsabilidad (Ubicada arriba, bajo los datos del responsable - Usando helvetica por legibilidad)
         doc.setFont("helvetica", "bold");
