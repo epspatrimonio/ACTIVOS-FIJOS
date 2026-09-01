@@ -285,10 +285,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const contableLocalidadSelect = document.getElementById('contable-localidad-select');
       if (contableLocalidadSelect) {
         contableLocalidadSelect.innerHTML = '<option value="Todos">Todas las Localidades</option>';
+        const EXCLUDED_LOCALIDADES = new Set(['SEDE CENTRAL', 'SELVA CENTRAL', 'EPS SELVA CENTRAL', 'RETIRADAS', 'SIN ASIGNAR', 'TODAS', '']);
         const LOCALIDAD_ORDER_C = ['LA MERCED', 'SAN RAMON', 'SAN RAMÓN', 'PICHANAKI', 'OXAPAMPA', 'VILLA RICA', 'SATIPO'];
         const locsSet = new Set();
         assets.forEach(item => {
-          if (item.localidad && item.localidad.trim()) locsSet.add(item.localidad.trim().toUpperCase());
+          const locUpper = (item.localidad || '').trim().toUpperCase();
+          if (locUpper && !EXCLUDED_LOCALIDADES.has(locUpper)) locsSet.add(locUpper);
         });
         Array.from(locsSet).sort((a, b) => {
           const ia = LOCALIDAD_ORDER_C.findIndex(o => o === a);
