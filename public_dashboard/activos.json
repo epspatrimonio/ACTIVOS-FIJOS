@@ -1942,7 +1942,7 @@
     "numero_factura": null,
     "fecha_alta_factura": "2026-06-18",
     "fecha_registro_contable": "2026-06-26",
-    "fecha_asignacion": null,
+    "fecha_asignacion": "2026-06-18",
     "fecha_alta": "2026-06-18",
     "valor_en_libros": "1512.0000",
     "igv": "0.0000",
