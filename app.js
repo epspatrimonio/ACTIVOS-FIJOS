@@ -1494,29 +1494,35 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Ordenar jerárquicamente activos y obras: 1° Fecha de Ingreso DESC > 2° O/C DESC > 3° Código Patrimonial DESC
-    if (currentTab === 'activos' || currentTab === 'obras') {
+    // Ordenar jerárquicamente: 1° Actas DESC > 2° Código Patrimonial DESC > 3° Fecha de Ingreso DESC > 4° O/C DESC
+    if (currentTab === 'activos' || currentTab === 'obras' || currentTab === 'vehiculos') {
       filtered.sort((a, b) => {
-        // 1. Fecha de Ingreso (más reciente primero)
-        const dA = a.fecha_alta || a.fecha_alta_factura || a.fecha_registro_contable || a.fecha_asignacion || '0000-00-00';
-        const dB = b.fecha_alta || b.fecha_alta_factura || b.fecha_registro_contable || b.fecha_asignacion || '0000-00-00';
-        const compDate = String(dB).localeCompare(String(dA));
-        if (compDate !== 0) return compDate;
+        // 1. Actas (de mayor a menor) para los activos que tengan Acta
+        const actaA = (a.n_acta_entrega || a.n_acta || '').trim();
+        const actaB = (b.n_acta_entrega || b.n_acta || '').trim();
+        const hasActaA = actaA && actaA !== '—' && actaA !== '-' && actaA.toUpperCase() !== 'SIN ACTA';
+        const hasActaB = actaB && actaB !== '—' && actaB !== '-' && actaB.toUpperCase() !== 'SIN ACTA';
 
-        // 2. Orden de Compra (mayor a menor)
-        const ocA = String(a.n_doc_compra || a.n_doc || '').trim();
-        const ocB = String(b.n_doc_compra || b.n_doc || '').trim();
-        const numOcA = Number(ocA);
-        const numOcB = Number(ocB);
-        let compOc = 0;
-        if (!isNaN(numOcA) && !isNaN(numOcB) && ocA !== '' && ocB !== '') {
-          compOc = numOcB - numOcA;
-        } else {
-          compOc = ocB.localeCompare(ocA, undefined, { numeric: true, sensitivity: 'base' });
+        if (hasActaA && hasActaB) {
+          const matchA = actaA.match(/(\d+)\s*[-/]\s*(\d{4})/);
+          const matchB = actaB.match(/(\d+)\s*[-/]\s*(\d{4})/);
+          if (matchA && matchB) {
+            const yrA = parseInt(matchA[2], 10);
+            const yrB = parseInt(matchB[2], 10);
+            if (yrA !== yrB) return yrB - yrA;
+            const numA = parseInt(matchA[1], 10);
+            const numB = parseInt(matchB[1], 10);
+            if (numA !== numB) return numB - numA;
+          }
+          const compActa = actaB.localeCompare(actaA, undefined, { numeric: true, sensitivity: 'base' });
+          if (compActa !== 0) return compActa;
+        } else if (hasActaA && !hasActaB) {
+          return -1;
+        } else if (!hasActaA && hasActaB) {
+          return 1;
         }
-        if (compOc !== 0) return compOc;
 
-        // 3. Código Patrimonial (mayor a menor)
+        // 2. Código Patrimonial (mayor a menor)
         const codA = String(a.cod_patrimonial || '').trim();
         const codB = String(b.cod_patrimonial || '').trim();
         const numCodA = Number(codA);
@@ -1527,7 +1533,26 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
           compCod = codB.localeCompare(codA, undefined, { numeric: true, sensitivity: 'base' });
         }
-        return compCod;
+        if (compCod !== 0) return compCod;
+
+        // 3. Fecha de Ingreso (más reciente primero)
+        const dA = a.fecha_alta || a.fecha_alta_factura || a.fecha_registro_contable || a.fecha_asignacion || '0000-00-00';
+        const dB = b.fecha_alta || b.fecha_alta_factura || b.fecha_registro_contable || b.fecha_asignacion || '0000-00-00';
+        const compDate = String(dB).localeCompare(String(dA));
+        if (compDate !== 0) return compDate;
+
+        // 4. Orden de Compra (mayor a menor)
+        const ocA = String(a.n_doc_compra || a.n_doc || '').trim();
+        const ocB = String(b.n_doc_compra || b.n_doc || '').trim();
+        const numOcA = Number(ocA);
+        const numOcB = Number(ocB);
+        let compOc = 0;
+        if (!isNaN(numOcA) && !isNaN(numOcB) && ocA !== '' && ocB !== '') {
+          compOc = numOcB - numOcA;
+        } else {
+          compOc = ocB.localeCompare(ocA, undefined, { numeric: true, sensitivity: 'base' });
+        }
+        return compOc;
       });
     }
 
