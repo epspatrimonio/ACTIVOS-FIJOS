@@ -23180,8 +23180,8 @@
     "soat_vencimiento": "2027-06-17",
     "soat_dias_vigencia": 282,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": "soat_pdfs/410024003_soat.pdf",
-    "pdf_tive_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": "tive_pdfs/410024003_tive.pdf"
   },
   {
     "cod_patrimonial": "410024002",
