@@ -23243,7 +23243,7 @@
     "soat_vencimiento": "2026-07-16",
     "soat_dias_vigencia": -54,
     "soat_estado": "VENCIDO",
-    "pdf_soat_path": null,
+    "pdf_soat_path": "soat_pdfs/410024002_soat.pdf",
     "pdf_tive_path": "tive_pdfs/410024002_tive.pdf"
   },
   {
