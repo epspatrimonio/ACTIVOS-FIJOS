@@ -3383,6 +3383,18 @@ document.addEventListener('DOMContentLoaded', () => {
             </a>
           ` : '<span class="text-xs text-slate-400 font-semibold">—</span>'}
         </td>
+
+        <!-- Documento TIVE PDF -->
+        <td class="px-1 py-2 whitespace-nowrap text-center">
+          ${item.pdf_tive_path ? `
+            <a href="${getTivePdfUrl(item.pdf_tive_path)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-1 px-1.5 py-1 text-sky-700 bg-sky-50 hover:bg-sky-100 hover:text-sky-900 border border-sky-200 rounded-lg shadow-2xs transition-all active:scale-95 cursor-pointer" title="Ver / Descargar PDF del TIVE" download="${item.cod_patrimonial}_tive.pdf">
+              <svg class="w-3.5 h-3.5 text-sky-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <span class="text-[9px] font-extrabold leading-tight text-center">PDF<br/>TIVE</span>
+            </a>
+          ` : '<span class="text-xs text-slate-400 font-semibold">—</span>'}
+        </td>
       `;
       tbody.appendChild(row);
       renderVehiculosMobileCard(item, soatBadge, revTecBadge);
@@ -3464,8 +3476,13 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         </div>
         <div>
-          <h4 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wide">Rev. Técnica</h4>
+          <h4 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wide">Rev. Técnica / TIVE</h4>
           <div class="mt-1">${revTecBadge}</div>
+          ${item.pdf_tive_path ? `
+            <a href="${getTivePdfUrl(item.pdf_tive_path)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded-lg mt-1.5 shadow-2xs" download="${item.cod_patrimonial}_tive.pdf">
+              📄 PDF TIVE
+            </a>
+          ` : ''}
         </div>
       </div>
 
@@ -4057,6 +4074,17 @@ document.addEventListener('DOMContentLoaded', () => {
       clean = parts[parts.length - 1];
     }
     return `soat_pdfs/${clean}`;
+  }
+
+  function getTivePdfUrl(path) {
+    if (!path) return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    let clean = path.replace(/^\.?\/+/, '');
+    if (clean.includes('/')) {
+      const parts = clean.split('/');
+      clean = parts[parts.length - 1];
+    }
+    return `tive_pdfs/${clean}`;
   }
 
   function getCelularVidaUtilBadgeHTML(estado, vencimiento, dias) {

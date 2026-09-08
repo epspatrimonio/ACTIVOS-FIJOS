@@ -57,9 +57,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-05-28",
-    "soat_dias_vigencia": 263,
+    "soat_dias_vigencia": 262,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410011006",
@@ -119,9 +120,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-02-18",
-    "soat_dias_vigencia": 164,
+    "soat_dias_vigencia": 163,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410011005",
@@ -181,9 +183,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-11-24",
-    "soat_dias_vigencia": 78,
+    "soat_dias_vigencia": 77,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410011004",
@@ -243,9 +246,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-11-24",
-    "soat_dias_vigencia": 78,
+    "soat_dias_vigencia": 77,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013075",
@@ -307,7 +311,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013074",
@@ -369,7 +374,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013073",
@@ -431,7 +437,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013072",
@@ -493,7 +500,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013071",
@@ -555,7 +563,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630014025",
@@ -617,7 +626,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630014024",
@@ -679,7 +689,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630015022",
@@ -741,7 +752,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630015021",
@@ -803,7 +815,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620033037",
@@ -865,7 +878,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620034016",
@@ -927,7 +941,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620034015",
@@ -989,7 +1004,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620034014",
@@ -1051,7 +1067,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011249",
@@ -1113,7 +1130,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013070",
@@ -1175,7 +1193,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013069",
@@ -1237,7 +1256,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013068",
@@ -1299,7 +1319,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013067",
@@ -1361,7 +1382,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013066",
@@ -1423,7 +1445,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013065",
@@ -1485,7 +1508,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013064",
@@ -1547,7 +1571,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013063",
@@ -1609,7 +1634,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630014023",
@@ -1671,7 +1697,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630014022",
@@ -1733,7 +1760,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630015020",
@@ -1795,7 +1823,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630015019",
@@ -1857,7 +1886,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630016035",
@@ -1919,7 +1949,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "320014014",
@@ -1981,7 +2012,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "320014013",
@@ -2043,7 +2075,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620033026",
@@ -2105,7 +2138,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011248",
@@ -2167,7 +2201,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011247",
@@ -2229,7 +2264,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011246",
@@ -2291,7 +2327,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620041073",
@@ -2353,7 +2390,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620044033",
@@ -2415,7 +2453,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011245",
@@ -2477,7 +2516,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031184",
@@ -2539,7 +2579,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011244",
@@ -2601,7 +2642,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630016034",
@@ -2663,7 +2705,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630016033",
@@ -2725,7 +2768,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630016032",
@@ -2787,7 +2831,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630016031",
@@ -2849,7 +2894,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "339104002",
@@ -2911,7 +2957,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "339104001",
@@ -2973,7 +3020,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "339101003",
@@ -3035,7 +3083,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "339105003",
@@ -3097,7 +3146,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "339101002",
@@ -3159,7 +3209,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "339101001",
@@ -3221,7 +3272,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "339105002",
@@ -3283,7 +3335,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "339105001",
@@ -3345,7 +3398,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630016030",
@@ -3407,7 +3461,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630016029",
@@ -3469,7 +3524,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630016028",
@@ -3531,7 +3587,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630016027",
@@ -3593,7 +3650,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630016026",
@@ -3655,7 +3713,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630015018",
@@ -3717,7 +3776,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630015017",
@@ -3779,7 +3839,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630015016",
@@ -3841,7 +3902,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630015015",
@@ -3903,7 +3965,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630014021",
@@ -3965,7 +4028,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630014020",
@@ -4027,7 +4091,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630014019",
@@ -4089,7 +4154,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013062",
@@ -4151,7 +4217,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013061",
@@ -4213,7 +4280,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013060",
@@ -4275,7 +4343,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013059",
@@ -4337,7 +4406,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013058",
@@ -4399,7 +4469,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013057",
@@ -4461,7 +4532,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013056",
@@ -4523,7 +4595,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013055",
@@ -4585,7 +4658,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013054",
@@ -4647,7 +4721,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013053",
@@ -4709,7 +4784,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013052",
@@ -4771,7 +4847,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013051",
@@ -4833,7 +4910,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013050",
@@ -4895,7 +4973,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013049",
@@ -4957,7 +5036,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013048",
@@ -5019,7 +5099,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013047",
@@ -5081,7 +5162,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013046",
@@ -5143,7 +5225,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630013045",
@@ -5205,7 +5288,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630012025",
@@ -5267,7 +5351,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630012024",
@@ -5329,7 +5414,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630012023",
@@ -5391,7 +5477,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630012022",
@@ -5453,7 +5540,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630012021",
@@ -5515,7 +5603,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630012020",
@@ -5577,7 +5666,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011243",
@@ -5639,7 +5729,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011242",
@@ -5701,7 +5792,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011241",
@@ -5763,7 +5855,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011240",
@@ -5825,7 +5918,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011239",
@@ -5887,7 +5981,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011238",
@@ -5949,7 +6044,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011237",
@@ -6011,7 +6107,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011236",
@@ -6073,7 +6170,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011235",
@@ -6135,7 +6233,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011234",
@@ -6197,7 +6296,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011233",
@@ -6259,7 +6359,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011232",
@@ -6321,7 +6422,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011231",
@@ -6383,7 +6485,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011230",
@@ -6445,7 +6548,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011229",
@@ -6507,7 +6611,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011228",
@@ -6569,7 +6674,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011227",
@@ -6631,7 +6737,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011226",
@@ -6693,7 +6800,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011225",
@@ -6755,7 +6863,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011224",
@@ -6817,7 +6926,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011223",
@@ -6879,7 +6989,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011222",
@@ -6941,7 +7052,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011221",
@@ -7003,7 +7115,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011220",
@@ -7065,7 +7178,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011219",
@@ -7127,7 +7241,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011218",
@@ -7189,7 +7304,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011217",
@@ -7251,7 +7367,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011216",
@@ -7313,7 +7430,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "630011215",
@@ -7375,7 +7493,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620066012",
@@ -7437,7 +7556,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620066011",
@@ -7499,7 +7619,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620065010",
@@ -7561,7 +7682,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620065009",
@@ -7623,7 +7745,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620065008",
@@ -7685,7 +7808,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620065007",
@@ -7747,7 +7871,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620065006",
@@ -7809,7 +7934,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620064017",
@@ -7871,7 +7997,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620064016",
@@ -7933,7 +8060,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620064015",
@@ -7995,7 +8123,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620064014",
@@ -8057,7 +8186,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620064013",
@@ -8119,7 +8249,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620064012",
@@ -8181,7 +8312,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620064011",
@@ -8243,7 +8375,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620063010",
@@ -8305,7 +8438,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620061040",
@@ -8367,7 +8501,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620053001",
@@ -8429,7 +8564,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620046021",
@@ -8491,7 +8627,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620046020",
@@ -8553,7 +8690,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620046019",
@@ -8615,7 +8753,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620046018",
@@ -8677,7 +8816,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620046017",
@@ -8739,7 +8879,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620046016",
@@ -8801,7 +8942,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620046015",
@@ -8863,7 +9005,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620046014",
@@ -8925,7 +9068,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620046013",
@@ -8987,7 +9131,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620045031",
@@ -9049,7 +9194,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620045030",
@@ -9111,7 +9257,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620045029",
@@ -9173,7 +9320,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620045028",
@@ -9235,7 +9383,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620045027",
@@ -9297,7 +9446,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620045026",
@@ -9359,7 +9509,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620045025",
@@ -9421,7 +9572,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620045024",
@@ -9483,7 +9635,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620045023",
@@ -9545,7 +9698,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620045022",
@@ -9607,7 +9761,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620045021",
@@ -9669,7 +9824,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620045020",
@@ -9731,7 +9887,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620045019",
@@ -9793,7 +9950,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620044032",
@@ -9855,7 +10013,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620044031",
@@ -9917,7 +10076,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620044030",
@@ -9979,7 +10139,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620044029",
@@ -10041,7 +10202,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620044028",
@@ -10103,7 +10265,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620044027",
@@ -10165,7 +10328,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620043037",
@@ -10195,8 +10359,8 @@
     "informe_conformidad": null,
     "n_acta": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "1027.58",
-    "valor_neto": "10182.4200",
+    "depreciacion_acumulada": "1121.00",
+    "valor_neto": "10089.0000",
     "estado_activo": "BUENO",
     "cuenta_contable": "3369151103",
     "centro_costo": "90360001",
@@ -10227,7 +10391,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620043036",
@@ -10289,7 +10454,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620043035",
@@ -10351,7 +10517,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620043034",
@@ -10413,7 +10580,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620043033",
@@ -10475,7 +10643,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620043032",
@@ -10537,7 +10706,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620043031",
@@ -10599,7 +10769,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620043030",
@@ -10661,7 +10832,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620043029",
@@ -10723,7 +10895,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620042034",
@@ -10785,7 +10958,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620042033",
@@ -10847,7 +11021,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620042032",
@@ -10909,7 +11084,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620042031",
@@ -10971,7 +11147,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620042030",
@@ -11033,7 +11210,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620042029",
@@ -11095,7 +11273,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620042028",
@@ -11157,7 +11336,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620042027",
@@ -11219,7 +11399,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620041072",
@@ -11281,7 +11462,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620041071",
@@ -11311,8 +11493,8 @@
     "informe_conformidad": null,
     "n_acta": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "1214.42",
-    "valor_neto": "9995.5800",
+    "depreciacion_acumulada": "1307.83",
+    "valor_neto": "9902.1700",
     "estado_activo": "BUENO",
     "cuenta_contable": "3369151103",
     "centro_costo": "90136305",
@@ -11343,7 +11525,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620041070",
@@ -11405,7 +11588,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620041069",
@@ -11467,7 +11651,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620041068",
@@ -11529,7 +11714,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620041067",
@@ -11591,7 +11777,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620041066",
@@ -11653,7 +11840,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620041065",
@@ -11715,7 +11903,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620041064",
@@ -11777,7 +11966,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620041063",
@@ -11839,7 +12029,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620041062",
@@ -11901,7 +12092,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620041061",
@@ -11963,7 +12155,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620036017",
@@ -12025,7 +12218,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620036016",
@@ -12087,7 +12281,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620036015",
@@ -12149,7 +12344,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620036014",
@@ -12211,7 +12407,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620036013",
@@ -12273,7 +12470,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620035011",
@@ -12335,7 +12533,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620035010",
@@ -12397,7 +12596,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620035009",
@@ -12459,7 +12659,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620035008",
@@ -12521,7 +12722,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620035007",
@@ -12583,7 +12785,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620034013",
@@ -12613,8 +12816,8 @@
     "informe_conformidad": null,
     "n_acta": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "25.00",
-    "valor_neto": "725.0000",
+    "depreciacion_acumulada": "31.25",
+    "valor_neto": "718.7500",
     "estado_activo": "BUENO",
     "cuenta_contable": "3369111101",
     "centro_costo": "90460001",
@@ -12645,7 +12848,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620034012",
@@ -12707,7 +12911,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620034011",
@@ -12769,7 +12974,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620034010",
@@ -12831,7 +13037,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620034009",
@@ -12893,7 +13100,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620034008",
@@ -12955,7 +13163,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620034007",
@@ -13017,7 +13226,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620033025",
@@ -13047,8 +13257,8 @@
     "informe_conformidad": null,
     "n_acta": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "25.00",
-    "valor_neto": "725.0000",
+    "depreciacion_acumulada": "31.25",
+    "valor_neto": "718.7500",
     "estado_activo": "BUENO",
     "cuenta_contable": "3369111101",
     "centro_costo": "90360001",
@@ -13079,7 +13289,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620033024",
@@ -13141,7 +13352,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620033023",
@@ -13203,7 +13415,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620033022",
@@ -13265,7 +13478,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620033021",
@@ -13327,7 +13541,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620033020",
@@ -13389,7 +13604,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620033019",
@@ -13451,7 +13667,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620033018",
@@ -13513,7 +13730,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620033017",
@@ -13575,7 +13793,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620032015",
@@ -13637,7 +13856,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620032014",
@@ -13699,7 +13919,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620032013",
@@ -13761,7 +13982,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620032012",
@@ -13823,7 +14045,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620032011",
@@ -13885,7 +14108,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620032010",
@@ -13947,7 +14171,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620032009",
@@ -14009,7 +14234,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620032008",
@@ -14071,7 +14297,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620031017",
@@ -14133,7 +14360,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620031016",
@@ -14195,7 +14423,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620031015",
@@ -14257,7 +14486,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620031014",
@@ -14319,7 +14549,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620031013",
@@ -14381,7 +14612,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620031012",
@@ -14443,7 +14675,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620021002",
@@ -14505,7 +14738,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620021001",
@@ -14567,7 +14801,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620020001",
@@ -14629,7 +14864,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620016005",
@@ -14691,7 +14927,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620016004",
@@ -14753,7 +14990,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620016003",
@@ -14815,7 +15053,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620016002",
@@ -14877,7 +15116,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620014005",
@@ -14939,7 +15179,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620014004",
@@ -15001,7 +15242,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620013004",
@@ -15063,7 +15305,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620013003",
@@ -15125,7 +15368,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620012002",
@@ -15187,7 +15431,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620012001",
@@ -15249,7 +15494,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620011018",
@@ -15311,7 +15557,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620011017",
@@ -15373,7 +15620,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620011016",
@@ -15435,7 +15683,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620011015",
@@ -15497,7 +15746,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620011014",
@@ -15559,7 +15809,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620011013",
@@ -15621,7 +15872,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620010012",
@@ -15683,7 +15935,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "620010001",
@@ -15745,7 +15998,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610061004",
@@ -15807,7 +16061,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610061003",
@@ -15869,7 +16124,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610061002",
@@ -15931,7 +16187,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610061001",
@@ -15993,7 +16250,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610060064",
@@ -16055,7 +16313,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610060063",
@@ -16117,7 +16376,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610060062",
@@ -16179,7 +16439,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610060002",
@@ -16241,7 +16502,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610060001",
@@ -16303,7 +16565,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610056004",
@@ -16365,7 +16628,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610055010",
@@ -16427,7 +16691,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610054005",
@@ -16489,7 +16754,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610053011",
@@ -16551,7 +16817,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610053010",
@@ -16613,7 +16880,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610053009",
@@ -16675,7 +16943,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610052009",
@@ -16737,7 +17006,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610052008",
@@ -16799,7 +17069,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610052007",
@@ -16861,7 +17132,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610051059",
@@ -16923,7 +17195,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610051058",
@@ -16985,7 +17258,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610051057",
@@ -17047,7 +17321,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610051056",
@@ -17109,7 +17384,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610051055",
@@ -17171,7 +17447,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610051054",
@@ -17233,7 +17510,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610051053",
@@ -17295,7 +17573,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610051052",
@@ -17357,7 +17636,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610051051",
@@ -17419,7 +17699,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "610040001",
@@ -17481,7 +17762,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500036008",
@@ -17543,7 +17825,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500036007",
@@ -17605,7 +17888,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500036006",
@@ -17667,7 +17951,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500036005",
@@ -17729,7 +18014,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500036004",
@@ -17791,7 +18077,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500035006",
@@ -17853,7 +18140,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500035005",
@@ -17915,7 +18203,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500035004",
@@ -17977,7 +18266,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500034011",
@@ -18039,7 +18329,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500034010",
@@ -18101,7 +18392,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500034009",
@@ -18163,7 +18455,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500034008",
@@ -18225,7 +18518,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500034007",
@@ -18287,7 +18581,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500034006",
@@ -18349,7 +18644,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500034005",
@@ -18411,7 +18707,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500034004",
@@ -18473,7 +18770,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500034003",
@@ -18535,7 +18833,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500034002",
@@ -18597,7 +18896,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500034001",
@@ -18659,7 +18959,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500033026",
@@ -18721,7 +19022,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500033025",
@@ -18783,7 +19085,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500033024",
@@ -18845,7 +19148,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500033023",
@@ -18907,7 +19211,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500033022",
@@ -18969,7 +19274,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500033021",
@@ -19031,7 +19337,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500033020",
@@ -19093,7 +19400,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500033019",
@@ -19155,7 +19463,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500033018",
@@ -19217,7 +19526,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500033017",
@@ -19279,7 +19589,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500032011",
@@ -19341,7 +19652,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031183",
@@ -19403,7 +19715,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031182",
@@ -19465,7 +19778,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031181",
@@ -19527,7 +19841,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031180",
@@ -19589,7 +19904,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031179",
@@ -19651,7 +19967,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031178",
@@ -19713,7 +20030,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031177",
@@ -19775,7 +20093,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031176",
@@ -19805,8 +20124,8 @@
     "informe_conformidad": null,
     "n_acta": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "115.63",
-    "valor_neto": "439.3700",
+    "depreciacion_acumulada": "120.25",
+    "valor_neto": "434.7500",
     "estado_activo": "BUENO",
     "cuenta_contable": "3351111101",
     "centro_costo": "90121103",
@@ -19837,7 +20156,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031175",
@@ -19899,7 +20219,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031174",
@@ -19961,7 +20282,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031173",
@@ -20023,7 +20345,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031172",
@@ -20085,7 +20408,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031171",
@@ -20147,7 +20471,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031170",
@@ -20209,7 +20534,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031169",
@@ -20271,7 +20597,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031168",
@@ -20301,8 +20628,8 @@
     "informe_conformidad": null,
     "n_acta": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "154.00",
-    "valor_neto": "406.0000",
+    "depreciacion_acumulada": "158.67",
+    "valor_neto": "401.3300",
     "estado_activo": "BUENO",
     "cuenta_contable": "3351111101",
     "centro_costo": "90122201",
@@ -20333,7 +20660,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031167",
@@ -20395,7 +20723,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031166",
@@ -20457,7 +20786,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031165",
@@ -20519,7 +20849,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031164",
@@ -20581,7 +20912,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031163",
@@ -20643,7 +20975,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031162",
@@ -20705,7 +21038,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031161",
@@ -20767,7 +21101,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031160",
@@ -20829,7 +21164,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031159",
@@ -20891,7 +21227,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031158",
@@ -20953,7 +21290,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031157",
@@ -21015,7 +21353,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031156",
@@ -21077,7 +21416,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031155",
@@ -21139,7 +21479,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031154",
@@ -21201,7 +21542,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031153",
@@ -21263,7 +21605,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031152",
@@ -21325,7 +21668,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031151",
@@ -21387,7 +21731,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031150",
@@ -21449,7 +21794,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031149",
@@ -21511,7 +21857,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031148",
@@ -21573,7 +21920,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500031147",
@@ -21635,7 +21983,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500013001",
@@ -21697,7 +22046,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500011019",
@@ -21759,7 +22109,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "500010001",
@@ -21821,7 +22172,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410031000",
@@ -21883,7 +22235,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410026006",
@@ -21945,7 +22298,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410026005",
@@ -22007,7 +22361,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410026003",
@@ -22067,9 +22422,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-09-05",
-    "soat_dias_vigencia": -2,
+    "soat_dias_vigencia": -3,
     "soat_estado": "VENCIDO",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410026002",
@@ -22129,9 +22485,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-09-05",
-    "soat_dias_vigencia": -2,
+    "soat_dias_vigencia": -3,
     "soat_estado": "VENCIDO",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410026001",
@@ -22191,9 +22548,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-09-05",
-    "soat_dias_vigencia": -2,
+    "soat_dias_vigencia": -3,
     "soat_estado": "VENCIDO",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410026000",
@@ -22253,9 +22611,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-09-05",
-    "soat_dias_vigencia": -2,
+    "soat_dias_vigencia": -3,
     "soat_estado": "VENCIDO",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410025006",
@@ -22315,9 +22674,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-05-29",
-    "soat_dias_vigencia": 264,
+    "soat_dias_vigencia": 263,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410025005",
@@ -22377,9 +22737,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-10-22",
-    "soat_dias_vigencia": 45,
+    "soat_dias_vigencia": 44,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410025004",
@@ -22439,9 +22800,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-10-22",
-    "soat_dias_vigencia": 45,
+    "soat_dias_vigencia": 44,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410025003",
@@ -22501,9 +22863,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-05-29",
-    "soat_dias_vigencia": 264,
+    "soat_dias_vigencia": 263,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410025002",
@@ -22563,9 +22926,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-05-29",
-    "soat_dias_vigencia": 264,
+    "soat_dias_vigencia": 263,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410025001",
@@ -22625,9 +22989,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-05-29",
-    "soat_dias_vigencia": 264,
+    "soat_dias_vigencia": 263,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410025000",
@@ -22687,9 +23052,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-05-29",
-    "soat_dias_vigencia": 264,
+    "soat_dias_vigencia": 263,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410024004",
@@ -22749,9 +23115,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-03-04",
-    "soat_dias_vigencia": 178,
+    "soat_dias_vigencia": 177,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": "soat_pdfs/410024004_soat.pdf"
+    "pdf_soat_path": "soat_pdfs/410024004_soat.pdf",
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410024003",
@@ -22811,9 +23178,10 @@
     "soat_poliza": "POL-999888",
     "soat_compania": "La Positiva",
     "soat_vencimiento": "2027-06-17",
-    "soat_dias_vigencia": 283,
+    "soat_dias_vigencia": 282,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": "soat_pdfs/410024003_soat.pdf"
+    "pdf_soat_path": "soat_pdfs/410024003_soat.pdf",
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410024002",
@@ -22873,9 +23241,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-07-16",
-    "soat_dias_vigencia": -53,
+    "soat_dias_vigencia": -54,
     "soat_estado": "VENCIDO",
-    "pdf_soat_path": "soat_pdfs/410024002_soat.pdf"
+    "pdf_soat_path": "soat_pdfs/410024002_soat.pdf",
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410024001",
@@ -22935,9 +23304,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-09-30",
-    "soat_dias_vigencia": 23,
+    "soat_dias_vigencia": 22,
     "soat_estado": "POR_VENCER",
-    "pdf_soat_path": "soat_pdfs/410024001_soat.pdf"
+    "pdf_soat_path": "soat_pdfs/410024001_soat.pdf",
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410024000",
@@ -22997,9 +23367,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-09-30",
-    "soat_dias_vigencia": 23,
+    "soat_dias_vigencia": 22,
     "soat_estado": "POR_VENCER",
-    "pdf_soat_path": "soat_pdfs/410024000_soat.pdf"
+    "pdf_soat_path": "soat_pdfs/410024000_soat.pdf",
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410023012",
@@ -23061,7 +23432,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410023011",
@@ -23123,7 +23495,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410023010",
@@ -23185,7 +23558,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410023009",
@@ -23247,7 +23621,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410023008",
@@ -23307,9 +23682,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-07-16",
-    "soat_dias_vigencia": -53,
+    "soat_dias_vigencia": -54,
     "soat_estado": "VENCIDO",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410023007",
@@ -23369,9 +23745,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-07-16",
-    "soat_dias_vigencia": -53,
+    "soat_dias_vigencia": -54,
     "soat_estado": "VENCIDO",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410023006",
@@ -23431,9 +23808,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2025-03-12",
-    "soat_dias_vigencia": -544,
+    "soat_dias_vigencia": -545,
     "soat_estado": "VENCIDO",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410023005",
@@ -23493,9 +23871,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2025-03-12",
-    "soat_dias_vigencia": -544,
+    "soat_dias_vigencia": -545,
     "soat_estado": "VENCIDO",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410023004",
@@ -23555,9 +23934,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2023-09-12",
-    "soat_dias_vigencia": -1091,
+    "soat_dias_vigencia": -1092,
     "soat_estado": "VENCIDO",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410023003",
@@ -23617,9 +23997,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2022-08-27",
-    "soat_dias_vigencia": -1472,
+    "soat_dias_vigencia": -1473,
     "soat_estado": "VENCIDO",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410023002",
@@ -23679,9 +24060,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-07-16",
-    "soat_dias_vigencia": -53,
+    "soat_dias_vigencia": -54,
     "soat_estado": "VENCIDO",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410022006",
@@ -23741,9 +24123,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-11-04",
-    "soat_dias_vigencia": 58,
+    "soat_dias_vigencia": 57,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410022005",
@@ -23803,9 +24186,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-11-04",
-    "soat_dias_vigencia": 58,
+    "soat_dias_vigencia": 57,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410022004",
@@ -23865,9 +24249,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-11-04",
-    "soat_dias_vigencia": 58,
+    "soat_dias_vigencia": 57,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410022003",
@@ -23922,14 +24307,15 @@
     "carroceria": "",
     "categoria_vehiculo": "L5",
     "vencimiento_rev_tec": "2026-08-25",
-    "dias_vigencia_rev_tec": -13,
+    "dias_vigencia_rev_tec": -14,
     "estado_rev_tec": "VENCIDO",
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-06-25",
-    "soat_dias_vigencia": 291,
+    "soat_dias_vigencia": 290,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410022002",
@@ -23984,14 +24370,15 @@
     "carroceria": "",
     "categoria_vehiculo": "L5",
     "vencimiento_rev_tec": "2026-08-18",
-    "dias_vigencia_rev_tec": -20,
+    "dias_vigencia_rev_tec": -21,
     "estado_rev_tec": "VENCIDO",
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-06-04",
-    "soat_dias_vigencia": 270,
+    "soat_dias_vigencia": 269,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410022001",
@@ -24046,14 +24433,15 @@
     "carroceria": "",
     "categoria_vehiculo": "L3",
     "vencimiento_rev_tec": "2026-08-18",
-    "dias_vigencia_rev_tec": -20,
+    "dias_vigencia_rev_tec": -21,
     "estado_rev_tec": "VENCIDO",
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-06-04",
-    "soat_dias_vigencia": 270,
+    "soat_dias_vigencia": 269,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410022000",
@@ -24113,9 +24501,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2023-09-15",
-    "soat_dias_vigencia": -1088,
+    "soat_dias_vigencia": -1089,
     "soat_estado": "VENCIDO",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410021010",
@@ -24175,9 +24564,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-10-26",
-    "soat_dias_vigencia": 49,
+    "soat_dias_vigencia": 48,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410021009",
@@ -24237,9 +24627,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-10-26",
-    "soat_dias_vigencia": 49,
+    "soat_dias_vigencia": 48,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410021008",
@@ -24294,14 +24685,15 @@
     "carroceria": "",
     "categoria_vehiculo": "L3",
     "vencimiento_rev_tec": "2020-03-25",
-    "dias_vigencia_rev_tec": -2357,
+    "dias_vigencia_rev_tec": -2358,
     "estado_rev_tec": "VENCIDO",
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2024-11-22",
-    "soat_dias_vigencia": -654,
+    "soat_dias_vigencia": -655,
     "soat_estado": "VENCIDO",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410021007",
@@ -24361,9 +24753,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2024-11-22",
-    "soat_dias_vigencia": -654,
+    "soat_dias_vigencia": -655,
     "soat_estado": "VENCIDO",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410021006",
@@ -24418,14 +24811,15 @@
     "carroceria": "",
     "categoria_vehiculo": "L5",
     "vencimiento_rev_tec": "2022-11-29",
-    "dias_vigencia_rev_tec": -1378,
+    "dias_vigencia_rev_tec": -1379,
     "estado_rev_tec": "VENCIDO",
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-06-22",
-    "soat_dias_vigencia": 288,
+    "soat_dias_vigencia": 287,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410021005",
@@ -24485,9 +24879,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-05-29",
-    "soat_dias_vigencia": 264,
+    "soat_dias_vigencia": 263,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410021004",
@@ -24547,9 +24942,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-09-05",
-    "soat_dias_vigencia": -2,
+    "soat_dias_vigencia": -3,
     "soat_estado": "VENCIDO",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410021003",
@@ -24604,14 +25000,15 @@
     "carroceria": "",
     "categoria_vehiculo": "L3",
     "vencimiento_rev_tec": "2023-02-08",
-    "dias_vigencia_rev_tec": -1307,
+    "dias_vigencia_rev_tec": -1308,
     "estado_rev_tec": "VENCIDO",
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-06-04",
-    "soat_dias_vigencia": 270,
+    "soat_dias_vigencia": 269,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410011007",
@@ -24671,9 +25068,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-01-16",
-    "soat_dias_vigencia": 131,
+    "soat_dias_vigencia": 130,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410011003",
@@ -24728,14 +25126,15 @@
     "carroceria": "",
     "categoria_vehiculo": "N1",
     "vencimiento_rev_tec": "2027-02-16",
-    "dias_vigencia_rev_tec": 162,
+    "dias_vigencia_rev_tec": 161,
     "estado_rev_tec": "VIGENTE",
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-02-25",
-    "soat_dias_vigencia": 171,
+    "soat_dias_vigencia": 170,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410011002",
@@ -24790,14 +25189,15 @@
     "carroceria": "",
     "categoria_vehiculo": "",
     "vencimiento_rev_tec": "2023-05-10",
-    "dias_vigencia_rev_tec": -1216,
+    "dias_vigencia_rev_tec": -1217,
     "estado_rev_tec": "VENCIDO",
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2024-09-20",
-    "soat_dias_vigencia": -717,
+    "soat_dias_vigencia": -718,
     "soat_estado": "VENCIDO",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "410011000",
@@ -24857,9 +25257,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2024-12-01",
-    "soat_dias_vigencia": -645,
+    "soat_dias_vigencia": -646,
     "soat_estado": "VENCIDO",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "339600002",
@@ -24919,9 +25320,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-05-28",
-    "soat_dias_vigencia": 263,
+    "soat_dias_vigencia": 262,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "339600001",
@@ -24981,9 +25383,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-05-28",
-    "soat_dias_vigencia": 263,
+    "soat_dias_vigencia": 262,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "339500001",
@@ -25043,9 +25446,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2027-06-04",
-    "soat_dias_vigencia": 270,
+    "soat_dias_vigencia": 269,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": "soat_pdfs/339500001_soat.pdf"
+    "pdf_soat_path": "soat_pdfs/339500001_soat.pdf",
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "339400002",
@@ -25107,7 +25511,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "339400001",
@@ -25167,9 +25572,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-07-16",
-    "soat_dias_vigencia": -53,
+    "soat_dias_vigencia": -54,
     "soat_estado": "VENCIDO",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "339200001",
@@ -25229,9 +25635,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-11-04",
-    "soat_dias_vigencia": 58,
+    "soat_dias_vigencia": 57,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "339100001",
@@ -25291,9 +25698,10 @@
     "soat_poliza": "S/N",
     "soat_compania": "Por definir",
     "soat_vencimiento": "2026-10-26",
-    "soat_dias_vigencia": 49,
+    "soat_dias_vigencia": 48,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "320016019",
@@ -25355,7 +25763,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "320016018",
@@ -25417,7 +25826,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "320016017",
@@ -25479,7 +25889,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "320016016",
@@ -25541,7 +25952,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "320014012",
@@ -25603,7 +26015,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "320014011",
@@ -25665,7 +26078,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "320013028",
@@ -25695,8 +26109,8 @@
     "informe_conformidad": null,
     "n_acta": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "5.33",
-    "valor_neto": "154.6700",
+    "depreciacion_acumulada": "6.67",
+    "valor_neto": "153.3300",
     "estado_activo": "BUENO",
     "cuenta_contable": "3369111101",
     "centro_costo": "90360001",
@@ -25727,7 +26141,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "320013027",
@@ -25789,7 +26204,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "320013026",
@@ -25851,7 +26267,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "320013025",
@@ -25913,7 +26330,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "320012010",
@@ -25975,7 +26393,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "320012009",
@@ -26037,7 +26456,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "320011035",
@@ -26099,7 +26519,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310055001",
@@ -26161,7 +26582,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310051011",
@@ -26223,7 +26645,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310051010",
@@ -26285,7 +26708,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310050054",
@@ -26347,7 +26771,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310050053",
@@ -26409,7 +26834,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310050052",
@@ -26471,7 +26897,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310050002",
@@ -26533,7 +26960,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310050001",
@@ -26595,7 +27023,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310046001",
@@ -26657,7 +27086,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310042004",
@@ -26719,7 +27149,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310042003",
@@ -26781,7 +27212,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310042002",
@@ -26843,7 +27275,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310041009",
@@ -26905,7 +27338,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310041008",
@@ -26967,7 +27401,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310041007",
@@ -27029,7 +27464,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310041006",
@@ -27091,7 +27527,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310040044",
@@ -27153,7 +27590,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310040043",
@@ -27215,7 +27653,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310040042",
@@ -27277,7 +27716,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310040001",
@@ -27307,8 +27747,8 @@
     "informe_conformidad": "OBSERVADO COD",
     "n_acta": null,
     "n_acta_entrega": null,
-    "depreciacion_acumulada": "1516.67",
-    "valor_neto": "12483.3300",
+    "depreciacion_acumulada": "1633.33",
+    "valor_neto": "12366.6700",
     "estado_activo": "BUENO",
     "cuenta_contable": "3369151103",
     "centro_costo": "90460001",
@@ -27339,7 +27779,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310031000",
@@ -27401,7 +27842,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310021001",
@@ -27463,7 +27905,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310013003",
@@ -27525,7 +27968,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310013002",
@@ -27587,7 +28031,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310013001",
@@ -27649,7 +28094,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310011014",
@@ -27711,7 +28157,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310011013",
@@ -27773,7 +28220,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "310011012",
@@ -27835,7 +28283,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "200083017",
@@ -27897,7 +28346,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "200083016",
@@ -27959,7 +28409,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "200081040",
@@ -28021,7 +28472,8 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   },
   {
     "cod_patrimonial": "200021005",
@@ -28083,6 +28535,7 @@
     "soat_vencimiento": null,
     "soat_dias_vigencia": null,
     "soat_estado": null,
-    "pdf_soat_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": null
   }
 ]
