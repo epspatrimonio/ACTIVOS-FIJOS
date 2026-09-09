@@ -5274,6 +5274,16 @@ document.addEventListener('DOMContentLoaded', () => {
       else if (item.codigo.startsWith('68')) sumDep += item.monto;
     });
 
+    const valNeto = sumCost - sumDep;
+
+    // Actualizar KPI Cards en cabecera
+    const kpiCostoEl = document.getElementById('contable-kpi-costo');
+    const kpiDepEl = document.getElementById('contable-kpi-dep');
+    const kpiNetoEl = document.getElementById('contable-kpi-neto');
+    if (kpiCostoEl) kpiCostoEl.textContent = formatMoney(sumCost);
+    if (kpiDepEl) kpiDepEl.textContent = formatMoney(sumDep);
+    if (kpiNetoEl) kpiNetoEl.textContent = formatMoney(valNeto);
+
     // Filtrar por Tipo de Elemento
     const filteredLedgerList = ledgerList.filter(item => {
       if (selectedType === 'Todos') return true;
@@ -5285,12 +5295,23 @@ document.addEventListener('DOMContentLoaded', () => {
     currentFilteredData = filteredLedgerList;
     resultsCount.textContent = `Registros: ${filteredLedgerList.length}`;
 
+    const mobileCardsContainer = document.getElementById('contable-mobile-cards');
+    if (mobileCardsContainer) mobileCardsContainer.innerHTML = '';
+
     if (filteredLedgerList.length === 0) {
       tbody.innerHTML = `<tr><td colspan="4" class="px-5 py-6 text-center text-slate-400">No hay saldos en este período</td></tr>`;
+      if (mobileCardsContainer) {
+        mobileCardsContainer.innerHTML = `
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center text-slate-400 text-xs font-semibold">
+            No se encontraron saldos registrados para los filtros seleccionados.
+          </div>
+        `;
+      }
       return;
     }
 
     filteredLedgerList.forEach(item => {
+      // 1. Fila de tabla para escritorio
       const row = document.createElement('tr');
       row.className = 'hover:bg-slate-50 text-slate-700 transition-colors border-b border-slate-150';
 
@@ -5307,6 +5328,33 @@ document.addEventListener('DOMContentLoaded', () => {
         <td class="px-5 py-3 whitespace-nowrap text-xs font-mono font-bold text-slate-900 text-right">${formatMoney(item.monto)}</td>
       `;
       tbody.appendChild(row);
+
+      // 2. Tarjeta optimizada para celular
+      if (mobileCardsContainer) {
+        const card = document.createElement('div');
+        card.className = 'bg-white border border-slate-200 rounded-xl p-3.5 shadow-xs flex flex-col gap-2 hover:border-slate-300 transition-all';
+        card.innerHTML = `
+          <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
+            <div class="flex items-center gap-1.5">
+              <span class="text-[0.6875rem] font-extrabold uppercase text-slate-400">Cuenta:</span>
+              <span class="font-mono font-extrabold text-xs text-slate-900 bg-slate-100 px-2 py-0.5 rounded">${item.codigo}</span>
+            </div>
+            <span class="px-2 py-0.5 text-[10px] font-bold border rounded-full ${
+              item.codigo.startsWith('33') ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-rose-50 text-rose-700 border-rose-200'
+            }">
+              ${item.tipo}
+            </span>
+          </div>
+          <div>
+            <span class="text-xs font-semibold text-slate-800 leading-snug block">${item.descripcion}</span>
+          </div>
+          <div class="flex items-center justify-between pt-1 border-t border-dashed border-slate-100 mt-0.5">
+            <span class="text-[0.6875rem] font-bold text-slate-500 uppercase">Saldo Registrado:</span>
+            <span class="font-mono font-extrabold text-xs text-slate-900">${formatMoney(item.monto)}</span>
+          </div>
+        `;
+        mobileCardsContainer.appendChild(card);
+      }
     });
 
     const totalRow = document.createElement('tr');
