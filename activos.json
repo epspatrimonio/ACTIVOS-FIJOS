@@ -25186,8 +25186,8 @@
     "nro_motor": "627225",
     "nro_chasis": "JALFFVR13HR3600035",
     "nro_tarjeta_prop": "2014-665188",
-    "carroceria": null,
-    "categoria_vehiculo": null,
+    "carroceria": "",
+    "categoria_vehiculo": "",
     "vencimiento_rev_tec": "2023-05-10",
     "dias_vigencia_rev_tec": -1218,
     "estado_rev_tec": "VENCIDO",
@@ -25196,8 +25196,8 @@
     "soat_vencimiento": "2024-09-20",
     "soat_dias_vigencia": -719,
     "soat_estado": "VENCIDO",
-    "pdf_soat_path": "soat_pdfs/410011002_soat.pdf",
-    "pdf_tive_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": "tive_pdfs/410011002_tive.pdf"
   },
   {
     "cod_patrimonial": "410011000",

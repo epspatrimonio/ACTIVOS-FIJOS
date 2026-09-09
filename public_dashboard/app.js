@@ -567,8 +567,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // Filtrar vehículos del listado consolidado de activos
   function getVehicles() {
     return assets.filter(item => 
-      (item.placa && item.placa !== '') || 
-      (item.cod_categoria && String(item.cod_categoria).startsWith('4'))
+      (item.categoria && item.categoria.toLowerCase().includes('vehiculo')) ||
+      (item.subcategoria && item.subcategoria.toLowerCase().includes('vehiculo')) ||
+      (item.cod_categoria && String(item.cod_categoria).startsWith('4')) ||
+      (item.placa && item.placa !== '') ||
+      (item.cuenta_contable && String(item.cuenta_contable).startsWith('334'))
     );
   }
 
@@ -585,7 +588,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (currentTab === 'vehiculos') {
       dataset = getVehicles();
     } else if (currentTab === 'soat') {
-      dataset = getVehicles().filter(item => item.estado_activo !== 'PARA BAJA' && item.estado_activo !== 'BAJA');
+      dataset = getVehicles();
     } else if (currentTab === 'inventario') {
       dataset = inventario;
     } else {
@@ -766,7 +769,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (currentTab === 'vehiculos') {
       dataset = getVehicles();
     } else if (currentTab === 'soat') {
-      dataset = getVehicles().filter(item => item.estado_activo !== 'PARA BAJA' && item.estado_activo !== 'BAJA');
+      dataset = getVehicles();
     } else if (currentTab === 'inventario') {
       dataset = inventario;
     } else {
@@ -881,7 +884,7 @@ document.addEventListener('DOMContentLoaded', () => {
       dataset = getVehicles();
       stateOptions = ['BUENO', 'REGULAR', 'MALO', 'PARA BAJA', 'BAJA'];
     } else if (currentTab === 'soat') {
-      dataset = getVehicles().filter(item => item.estado_activo !== 'PARA BAJA' && item.estado_activo !== 'BAJA');
+      dataset = getVehicles();
       stateOptions = ['BUENO', 'REGULAR', 'MALO', 'PARA BAJA', 'BAJA'];
     } else if (currentTab === 'celulares') {
       dataset = celulares;
@@ -1266,7 +1269,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (currentTab === 'vehiculos') {
       baseData = getVehicles();
     } else if (currentTab === 'soat') {
-      baseData = getVehicles().filter(item => item.estado_activo !== 'PARA BAJA' && item.estado_activo !== 'BAJA');
+      baseData = getVehicles();
     } else if (currentTab === 'celulares') {
       baseData = celulares;
     } else if (currentTab === 'inventario') {
@@ -1365,11 +1368,15 @@ document.addEventListener('DOMContentLoaded', () => {
          ((currentTab === 'inventario' || currentTab === 'terceros') ? item.tipo === selectedEstado : item.estado_activo === selectedEstado));
 
       // Filtro de Estado del SOAT (para VEHICULOS y SOAT & RT)
-      const isBaja = item.estado_activo === 'PARA BAJA' || item.estado_activo === 'BAJA';
-      const soatEstadoMatch = !selectedSoatEstado || (
-        (item.soat_estado === selectedSoatEstado || item.estado_soat === selectedSoatEstado) &&
-        (selectedSoatEstado !== 'VENCIDO' || !isBaja)
-      );
+      const isBaja = item.estado_activo === 'PARA BAJA' || item.estado_activo === 'BAJA' || item.estado_soat === 'NO_REQUIERE' || item.soat_estado === 'NO_REQUIERE';
+      let soatEstadoMatch = true;
+      if (selectedSoatEstado) {
+        if (selectedSoatEstado === 'NO_REQUIERE' || selectedSoatEstado === 'PARA_BAJA') {
+          soatEstadoMatch = isBaja;
+        } else {
+          soatEstadoMatch = !isBaja && (item.soat_estado === selectedSoatEstado || item.estado_soat === selectedSoatEstado);
+        }
+      }
 
       // Filtro de Categoría y Subcategoría (si aplica)
       const hasCategories = currentTab === 'activos' || currentTab === 'obras' || currentTab === 'inventario';
@@ -3500,8 +3507,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const row = document.createElement('tr');
       row.className = 'hover:bg-slate-50 text-slate-700 transition-colors border-b border-slate-150';
       
-      const soatBadge = getSoatBadgeHTML(item.soat_estado, item.soat_vencimiento, item.soat_dias_vigencia);
-      const revTecBadge = getRevTecBadgeHTML(item.estado_rev_tec, item.vencimiento_rev_tec, item.dias_vigencia_rev_tec);
+      const isBaja = item.estado_activo === 'PARA BAJA' || item.estado_activo === 'BAJA';
+      const soatBadge = isBaja ? 
+        '<span class="px-2.5 py-1 inline-flex text-[11px] leading-4 font-bold rounded-lg bg-slate-100 text-slate-400 border border-slate-200">No requiere (Baja)</span>' : 
+        getSoatBadgeHTML(item.soat_estado, item.soat_vencimiento, item.soat_dias_vigencia);
+      const revTecBadge = isBaja ? 
+        '<span class="px-2.5 py-1 inline-flex text-[11px] leading-4 font-bold rounded-lg bg-slate-100 text-slate-400 border border-slate-200">No requiere (Baja)</span>' : 
+        getRevTecBadgeHTML(item.estado_rev_tec, item.vencimiento_rev_tec, item.dias_vigencia_rev_tec);
       
       row.innerHTML = `
         <!-- Placa -->
@@ -4255,12 +4267,12 @@ document.addEventListener('DOMContentLoaded', () => {
         "Estado Físico": item.estado_activo,
         "SOAT Póliza": item.soat_poliza || "",
         "SOAT Aseguradora": item.soat_compania || "",
-        "SOAT Vencimiento": item.soat_vencimiento || "",
-        "SOAT Estado": item.soat_estado || "",
-        "SOAT Días Vigencia": item.soat_dias_vigencia !== undefined ? item.soat_dias_vigencia : "",
-        "Rev. Técnica Vencimiento": item.vencimiento_rev_tec || "",
-        "Rev. Técnica Estado": item.estado_rev_tec || "",
-        "Rev. Técnica Días Vigencia": item.dias_vigencia_rev_tec !== undefined ? item.dias_vigencia_rev_tec : "",
+        "SOAT Vencimiento": (item.estado_activo === 'PARA BAJA' || item.estado_activo === 'BAJA') ? "" : (item.soat_vencimiento || ""),
+        "SOAT Estado": (item.estado_activo === 'PARA BAJA' || item.estado_activo === 'BAJA') ? "NO REQUIERE (BAJA)" : (item.soat_estado || ""),
+        "SOAT Días Vigencia": (item.estado_activo === 'PARA BAJA' || item.estado_activo === 'BAJA') ? "" : (item.soat_dias_vigencia !== undefined ? item.soat_dias_vigencia : ""),
+        "Rev. Técnica Vencimiento": (item.estado_activo === 'PARA BAJA' || item.estado_activo === 'BAJA') ? "" : (item.vencimiento_rev_tec || ""),
+        "Rev. Técnica Estado": (item.estado_activo === 'PARA BAJA' || item.estado_activo === 'BAJA') ? "NO REQUIERE (BAJA)" : (item.estado_rev_tec || ""),
+        "Rev. Técnica Días Vigencia": (item.estado_activo === 'PARA BAJA' || item.estado_activo === 'BAJA') ? "" : (item.dias_vigencia_rev_tec !== undefined ? item.dias_vigencia_rev_tec : ""),
         "Sucursal": item.sucursal,
         "Localidad": item.localidad || "",
         "Responsable": item.responsable || "Sin Asignar"
@@ -4278,12 +4290,12 @@ document.addEventListener('DOMContentLoaded', () => {
         "Estado Físico": item.estado_activo,
         "SOAT Póliza": item.soat_poliza || "",
         "SOAT Aseguradora": item.soat_compania || "",
-        "SOAT Vencimiento": item.soat_vencimiento || "",
-        "SOAT Estado": item.soat_estado || "",
-        "SOAT Días Vigencia": item.soat_dias_vigencia !== undefined ? item.soat_dias_vigencia : "",
-        "Rev. Técnica Vencimiento": item.vencimiento_rev_tec || "",
-        "Rev. Técnica Estado": item.estado_rev_tec || "",
-        "Rev. Técnica Días Vigencia": item.dias_vigencia_rev_tec !== undefined ? item.dias_vigencia_rev_tec : "",
+        "SOAT Vencimiento": (item.estado_activo === 'PARA BAJA' || item.estado_activo === 'BAJA') ? "" : (item.soat_vencimiento || ""),
+        "SOAT Estado": (item.estado_activo === 'PARA BAJA' || item.estado_activo === 'BAJA') ? "NO REQUIERE (BAJA)" : (item.soat_estado || ""),
+        "SOAT Días Vigencia": (item.estado_activo === 'PARA BAJA' || item.estado_activo === 'BAJA') ? "" : (item.soat_dias_vigencia !== undefined ? item.soat_dias_vigencia : ""),
+        "Rev. Técnica Vencimiento": (item.estado_activo === 'PARA BAJA' || item.estado_activo === 'BAJA') ? "" : (item.vencimiento_rev_tec || ""),
+        "Rev. Técnica Estado": (item.estado_activo === 'PARA BAJA' || item.estado_activo === 'BAJA') ? "NO REQUIERE (BAJA)" : (item.estado_rev_tec || ""),
+        "Rev. Técnica Días Vigencia": (item.estado_activo === 'PARA BAJA' || item.estado_activo === 'BAJA') ? "" : (item.dias_vigencia_rev_tec !== undefined ? item.dias_vigencia_rev_tec : ""),
         "Sucursal": item.sucursal,
         "Localidad": item.localidad || "",
         "Responsable": item.responsable || "Sin Asignar"
@@ -4585,17 +4597,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const sortedVehiculos = [...currentFilteredData].sort((a, b) => 
           (a.denominacion || '').localeCompare(b.denominacion || '', 'es', { sensitivity: 'base' })
         );
-        data = sortedVehiculos.map(item => [
-          item.placa || '—',
-          item.cod_patrimonial || '—',
-          getUbicacionFinanciado(item),
-          `${item.denominacion || ''}${item.vehiculo_anio ? `\nAño: ${item.vehiculo_anio}` : ''}`,
-          `Color: ${item.color || '—'}\nMarca: ${item.marca || '—'}\nModelo: ${item.modelo || '—'}\nMotor: ${item.nro_motor || '—'}\nChasis: ${item.nro_chasis || '—'}\nCombustible: ${item.combustible || '—'}`,
-          item.estado_activo || '—',
-          item.soat_estado ? `${item.soat_estado}\nVence: ${item.soat_vencimiento ? formatDate(item.soat_vencimiento) : '—'}` : 'No Registrado',
-          item.vencimiento_rev_tec ? `${item.estado_rev_tec}\nVence: ${formatDate(item.vencimiento_rev_tec)}` : 'No registrado',
-          item.responsable || "Sin Asignar"
-        ]);
+        data = sortedVehiculos.map(item => {
+          const isBaja = item.estado_activo === 'PARA BAJA' || item.estado_activo === 'BAJA';
+          return [
+            item.placa || '—',
+            item.cod_patrimonial || '—',
+            getUbicacionFinanciado(item),
+            `${item.denominacion || ''}${item.vehiculo_anio ? `\nAño: ${item.vehiculo_anio}` : ''}`,
+            `Color: ${item.color || '—'}\nMarca: ${item.marca || '—'}\nModelo: ${item.modelo || '—'}\nMotor: ${item.nro_motor || '—'}\nChasis: ${item.nro_chasis || '—'}\nCombustible: ${item.combustible || '—'}`,
+            item.estado_activo || '—',
+            isBaja ? 'No requiere\n(Baja)' : (item.soat_estado ? `${item.soat_estado}\nVence: ${item.soat_vencimiento ? formatDate(item.soat_vencimiento) : '—'}` : 'No Registrado'),
+            isBaja ? 'No requiere\n(Baja)' : (item.vencimiento_rev_tec ? `${item.estado_rev_tec}\nVence: ${formatDate(item.vencimiento_rev_tec)}` : 'No registrado'),
+            item.responsable || "Sin Asignar"
+          ];
+        });
         columnStyles = {
           0: { cellWidth: 20, fontStyle: 'bold', halign: 'center' },
           1: { cellWidth: 26, fontStyle: 'bold', halign: 'center' },
@@ -4655,17 +4670,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const sortedVehiculos = [...currentFilteredData].sort((a, b) => 
           (a.denominacion || '').localeCompare(b.denominacion || '', 'es', { sensitivity: 'base' })
         );
-        data = sortedVehiculos.map(item => [
-          item.placa || '—',
-          item.cod_patrimonial || '—',
-          getUbicacionFinanciado(item),
-          `${item.denominacion || ''}${item.vehiculo_anio ? `\nAño: ${item.vehiculo_anio}` : ''}`,
-          `Color: ${item.color || '—'}\nMarca: ${item.marca || '—'}\nModelo: ${item.modelo || '—'}\nMotor: ${item.nro_motor || item.numero_motor || '—'}\nChasis: ${item.nro_chasis || item.numero_chasis || item.numero_serie || '—'}\nCombustible: ${item.combustible || '—'}`,
-          item.estado_activo || 'BUENO',
-          item.soat_vencimiento || item.fecha_vencimiento ? `${item.soat_estado || item.estado_soat || 'VIGENTE'}\nVence: ${formatDate(item.soat_vencimiento || item.fecha_vencimiento)}` : 'No registrado',
-          item.vencimiento_rev_tec ? `${item.estado_rev_tec || 'VIGENTE'}\nVence: ${formatDate(item.vencimiento_rev_tec)}` : 'No registrado',
-          item.responsable || "Sin Asignar"
-        ]);
+        data = sortedVehiculos.map(item => {
+          const isBaja = item.estado_activo === 'PARA BAJA' || item.estado_activo === 'BAJA';
+          return [
+            item.placa || '—',
+            item.cod_patrimonial || '—',
+            getUbicacionFinanciado(item),
+            `${item.denominacion || ''}${item.vehiculo_anio ? `\nAño: ${item.vehiculo_anio}` : ''}`,
+            `Color: ${item.color || '—'}\nMarca: ${item.marca || '—'}\nModelo: ${item.modelo || '—'}\nMotor: ${item.nro_motor || item.numero_motor || '—'}\nChasis: ${item.nro_chasis || item.numero_chasis || item.numero_serie || '—'}\nCombustible: ${item.combustible || '—'}`,
+            item.estado_activo || 'BUENO',
+            isBaja ? 'No requiere\n(Baja)' : (item.soat_vencimiento || item.fecha_vencimiento ? `${item.soat_estado || item.estado_soat || 'VIGENTE'}\nVence: ${formatDate(item.soat_vencimiento || item.fecha_vencimiento)}` : 'No registrado'),
+            isBaja ? 'No requiere\n(Baja)' : (item.vencimiento_rev_tec ? `${item.estado_rev_tec || 'VIGENTE'}\nVence: ${formatDate(item.vencimiento_rev_tec)}` : 'No registrado'),
+            item.responsable || "Sin Asignar"
+          ];
+        });
         columnStyles = {
           0: { cellWidth: 20, fontStyle: 'bold', halign: 'center' },
           1: { cellWidth: 26, fontStyle: 'bold', halign: 'center' },
