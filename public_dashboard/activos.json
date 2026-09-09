@@ -25700,8 +25700,8 @@
     "soat_vencimiento": "2026-10-26",
     "soat_dias_vigencia": 47,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": "soat_pdfs/339100001_soat.pdf",
-    "pdf_tive_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": "tive_pdfs/339100001_tive.pdf"
   },
   {
     "cod_patrimonial": "320016019",
