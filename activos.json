@@ -24629,8 +24629,8 @@
     "soat_vencimiento": "2026-10-26",
     "soat_dias_vigencia": 47,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": "soat_pdfs/410021009_soat.pdf",
-    "pdf_tive_path": null
+    "pdf_soat_path": null,
+    "pdf_tive_path": "tive_pdfs/410021009_tive.pdf"
   },
   {
     "cod_patrimonial": "410021008",
