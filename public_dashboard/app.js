@@ -2142,11 +2142,47 @@ document.addEventListener('DOMContentLoaded', () => {
     if (activo.imagen_1_path && activo.imagen_1_path.trim()) imagesToDraw.push(activo.imagen_1_path.trim());
     if (activo.imagen_2_path && activo.imagen_2_path.trim()) imagesToDraw.push(activo.imagen_2_path.trim());
     if (activo.imagen_3_path && activo.imagen_3_path.trim()) imagesToDraw.push(activo.imagen_3_path.trim());
+    if (activo.imagen_4_path && activo.imagen_4_path.trim()) imagesToDraw.push(activo.imagen_4_path.trim());
 
     if (imagesToDraw.length > 0) {
-      if (posY + 55 > 280) {
+      const contentWidth = 182; // 196 - 14
+      const numImgs = imagesToDraw.length;
+      let cols = 1;
+      let imgWidth = 110;
+      let imgHeight = 68;
+      let gapX = 8;
+      let gapY = 6;
+      let neededHeight = 75;
+
+      if (numImgs === 1) {
+        cols = 1;
+        imgWidth = 120;
+        imgHeight = 72;
+        neededHeight = 85;
+      } else if (numImgs === 2) {
+        cols = 2;
+        gapX = 8;
+        imgWidth = (contentWidth - gapX) / 2; // 87mm
+        imgHeight = 60;
+        neededHeight = 75;
+      } else if (numImgs === 3) {
+        cols = 3;
+        gapX = 6;
+        imgWidth = (contentWidth - gapX * 2) / 3; // 56.6mm
+        imgHeight = 46;
+        neededHeight = 60;
+      } else { // 4 imágenes: cuadrícula 2x2
+        cols = 2;
+        gapX = 8;
+        gapY = 6;
+        imgWidth = (contentWidth - gapX) / 2; // 87mm
+        imgHeight = 52;
+        neededHeight = 52 * 2 + gapY + 15;
+      }
+
+      if (posY + neededHeight > 284) {
         doc.addPage();
-        posY = 20;
+        posY = 18;
       } else {
         posY += 8;
         doc.line(marginX, posY, 196, posY);
@@ -2157,15 +2193,25 @@ document.addEventListener('DOMContentLoaded', () => {
       doc.text("Imágenes del Activo:", marginX, posY);
       posY += 4;
 
-      const imgWidth = 55;
-      const imgHeight = 40;
-      const spacing = 6;
-
       for (let i = 0; i < imagesToDraw.length; i++) {
         const rawPath = imagesToDraw[i];
         const base64Data = await loadImgAsBase64(rawPath);
         if (base64Data) {
-          doc.addImage(base64Data, 'JPEG', marginX + i * (imgWidth + spacing), posY, imgWidth, imgHeight);
+          let posX = marginX;
+          let currentY = posY;
+          if (numImgs === 1) {
+            posX = marginX + (contentWidth - imgWidth) / 2;
+            currentY = posY;
+          } else if (cols === 2) {
+            const col = i % 2;
+            const row = Math.floor(i / 2);
+            posX = marginX + col * (imgWidth + gapX);
+            currentY = posY + row * (imgHeight + gapY);
+          } else { // cols === 3
+            posX = marginX + i * (imgWidth + gapX);
+            currentY = posY;
+          }
+          doc.addImage(base64Data, 'JPEG', posX, currentY, imgWidth, imgHeight);
         }
       }
     }
@@ -6295,7 +6341,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const imgContainer = document.getElementById('ficha-images-container');
       const imgWrapper = document.getElementById('ficha-images-wrapper');
       imgContainer.innerHTML = '';
-      const imgPaths = [activo.imagen_1_path, activo.imagen_2_path, activo.imagen_3_path].filter(Boolean);
+      const imgPaths = [activo.imagen_1_path, activo.imagen_2_path, activo.imagen_3_path, activo.imagen_4_path].filter(Boolean);
       if (imgPaths.length > 0) {
         imgPaths.forEach((path, idx) => {
           const div = document.createElement('div');
@@ -6548,23 +6594,74 @@ document.addEventListener('DOMContentLoaded', () => {
           if (selectedFichaActivo.imagen_1_path) imagesToDraw.push(selectedFichaActivo.imagen_1_path);
           if (selectedFichaActivo.imagen_2_path) imagesToDraw.push(selectedFichaActivo.imagen_2_path);
           if (selectedFichaActivo.imagen_3_path) imagesToDraw.push(selectedFichaActivo.imagen_3_path);
+          if (selectedFichaActivo.imagen_4_path) imagesToDraw.push(selectedFichaActivo.imagen_4_path);
           
           if (imagesToDraw.length > 0) {
-            posY += 10;
-            doc.line(marginX, posY, 196, posY);
-            posY += 6;
+            const contentWidth = 182; // 196 - 14
+            const numImgs = imagesToDraw.length;
+            let cols = 1;
+            let imgWidth = 110;
+            let imgHeight = 68;
+            let gapX = 8;
+            let gapY = 6;
+            let neededHeight = 75;
+
+            if (numImgs === 1) {
+              cols = 1;
+              imgWidth = 120;
+              imgHeight = 72;
+              neededHeight = 85;
+            } else if (numImgs === 2) {
+              cols = 2;
+              gapX = 8;
+              imgWidth = (contentWidth - gapX) / 2; // 87mm
+              imgHeight = 60;
+              neededHeight = 75;
+            } else if (numImgs === 3) {
+              cols = 3;
+              gapX = 6;
+              imgWidth = (contentWidth - gapX * 2) / 3; // 56.6mm
+              imgHeight = 46;
+              neededHeight = 60;
+            } else { // 4 imágenes: cuadrícula 2x2
+              cols = 2;
+              gapX = 8;
+              gapY = 6;
+              imgWidth = (contentWidth - gapX) / 2; // 87mm
+              imgHeight = 52;
+              neededHeight = 52 * 2 + gapY + 15;
+            }
+
+            if (posY + neededHeight > 284) {
+              doc.addPage();
+              posY = 18;
+            } else {
+              posY += 10;
+              doc.line(marginX, posY, 196, posY);
+              posY += 6;
+            }
             doc.setFont("helvetica", "bold");
             doc.text("Imágenes del Activo:", marginX, posY);
             posY += 4;
             
-            const imgWidth = 55;
-            const imgHeight = 40;
-            const spacing = 6;
-            
             for (let i = 0; i < imagesToDraw.length; i++) {
               const base64Data = await loadImgAsBase64(imagesToDraw[i]);
               if (base64Data) {
-                doc.addImage(base64Data, 'JPEG', marginX + i * (imgWidth + spacing), posY, imgWidth, imgHeight);
+                let posX = marginX;
+                let currentY = posY;
+                if (numImgs === 1) {
+                  posX = marginX + (contentWidth - imgWidth) / 2;
+                  currentY = posY;
+                } else if (cols === 2) {
+                  const col = i % 2;
+                  const row = Math.floor(i / 2);
+                  posX = marginX + col * (imgWidth + gapX);
+                  currentY = posY + row * (imgHeight + gapY);
+                } else { // cols === 3
+                  posX = marginX + i * (imgWidth + gapX);
+                  currentY = posY;
+                }
+                doc.addImage(base64Data, 'JPEG', posX, currentY, imgWidth, imgHeight);
               }
             }
           }
