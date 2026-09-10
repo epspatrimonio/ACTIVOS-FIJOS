@@ -5339,6 +5339,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderContableRows(filteredAssets) {
+    const thead = document.querySelector('#contable-table-container thead');
+    if (thead) {
+      thead.style.setProperty('background-color', '#00B0F0', 'important');
+      thead.classList.remove('bg-[#004C96]');
+      thead.classList.add('bg-[#00B0F0]');
+      thead.querySelectorAll('tr, th').forEach(el => {
+        el.style.setProperty('background-color', '#00B0F0', 'important');
+        el.style.setProperty('color', '#ffffff', 'important');
+      });
+    }
+
     const digitSelect = document.getElementById('contable-digit-select');
     const typeSelect = document.getElementById('contable-type-select');
     const yearSelect = document.getElementById('contable-year-select');
