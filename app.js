@@ -2156,28 +2156,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (numImgs === 1) {
         cols = 1;
-        imgWidth = 120;
-        imgHeight = 72;
-        neededHeight = 85;
+        imgWidth = 130;
+        imgHeight = 95;
+        neededHeight = 115;
       } else if (numImgs === 2) {
         cols = 2;
         gapX = 8;
         imgWidth = (contentWidth - gapX) / 2; // 87mm
-        imgHeight = 60;
-        neededHeight = 75;
+        imgHeight = 82;
+        neededHeight = 105;
       } else if (numImgs === 3) {
-        cols = 3;
-        gapX = 6;
-        imgWidth = (contentWidth - gapX * 2) / 3; // 56.6mm
-        imgHeight = 46;
-        neededHeight = 60;
+        cols = 2;
+        gapX = 8;
+        gapY = 6;
+        imgWidth = (contentWidth - gapX) / 2; // 87mm
+        imgHeight = 82;
+        neededHeight = 82 * 2 + gapY + 15;
       } else { // 4 imágenes: cuadrícula 2x2
         cols = 2;
         gapX = 8;
         gapY = 6;
         imgWidth = (contentWidth - gapX) / 2; // 87mm
-        imgHeight = 52;
-        neededHeight = 52 * 2 + gapY + 15;
+        imgHeight = 82; // Alargado de 52mm a 82mm para conservar nitidez y legibilidad del texto
+        neededHeight = 82 * 2 + gapY + 15;
       }
 
       if (posY + neededHeight > 284) {
@@ -2202,14 +2203,14 @@ document.addEventListener('DOMContentLoaded', () => {
           if (numImgs === 1) {
             posX = marginX + (contentWidth - imgWidth) / 2;
             currentY = posY;
+          } else if (numImgs === 3 && i === 2) {
+            posX = marginX + (contentWidth - imgWidth) / 2;
+            currentY = posY + (imgHeight + gapY);
           } else if (cols === 2) {
             const col = i % 2;
             const row = Math.floor(i / 2);
             posX = marginX + col * (imgWidth + gapX);
             currentY = posY + row * (imgHeight + gapY);
-          } else { // cols === 3
-            posX = marginX + i * (imgWidth + gapX);
-            currentY = posY;
           }
           doc.addImage(base64Data, 'JPEG', posX, currentY, imgWidth, imgHeight);
         }
@@ -6608,28 +6609,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (numImgs === 1) {
               cols = 1;
-              imgWidth = 120;
-              imgHeight = 72;
-              neededHeight = 85;
+              imgWidth = 130;
+              imgHeight = 95;
+              neededHeight = 115;
             } else if (numImgs === 2) {
               cols = 2;
               gapX = 8;
               imgWidth = (contentWidth - gapX) / 2; // 87mm
-              imgHeight = 60;
-              neededHeight = 75;
+              imgHeight = 82;
+              neededHeight = 105;
             } else if (numImgs === 3) {
-              cols = 3;
-              gapX = 6;
-              imgWidth = (contentWidth - gapX * 2) / 3; // 56.6mm
-              imgHeight = 46;
-              neededHeight = 60;
+              cols = 2;
+              gapX = 8;
+              gapY = 6;
+              imgWidth = (contentWidth - gapX) / 2; // 87mm
+              imgHeight = 82;
+              neededHeight = 82 * 2 + gapY + 15;
             } else { // 4 imágenes: cuadrícula 2x2
               cols = 2;
               gapX = 8;
               gapY = 6;
               imgWidth = (contentWidth - gapX) / 2; // 87mm
-              imgHeight = 52;
-              neededHeight = 52 * 2 + gapY + 15;
+              imgHeight = 82; // Alargado de 52mm a 82mm para conservar nitidez y legibilidad del texto
+              neededHeight = 82 * 2 + gapY + 15;
             }
 
             if (posY + neededHeight > 284) {
@@ -6652,14 +6654,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (numImgs === 1) {
                   posX = marginX + (contentWidth - imgWidth) / 2;
                   currentY = posY;
+                } else if (numImgs === 3 && i === 2) {
+                  posX = marginX + (contentWidth - imgWidth) / 2;
+                  currentY = posY + (imgHeight + gapY);
                 } else if (cols === 2) {
                   const col = i % 2;
                   const row = Math.floor(i / 2);
                   posX = marginX + col * (imgWidth + gapX);
                   currentY = posY + row * (imgHeight + gapY);
-                } else { // cols === 3
-                  posX = marginX + i * (imgWidth + gapX);
-                  currentY = posY;
                 }
                 doc.addImage(base64Data, 'JPEG', posX, currentY, imgWidth, imgHeight);
               }
