@@ -295,7 +295,7 @@
     "certificacion_presupuestal": "1726",
     "pdf_expediente_path": "/uploads/620033028_expediente.pdf",
     "imagen_1_path": "/uploads/620033028_img1.jpg",
-    "imagen_2_path": "/uploads/620033028_img2.jpg",
+    "imagen_2_path": null,
     "imagen_3_path": null,
     "imagen_4_path": null,
     "placa": null,
