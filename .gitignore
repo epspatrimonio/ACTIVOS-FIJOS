@@ -4,7 +4,9 @@
 backend/
 frontend/
 backups/
-uploads/
+uploads/soat_pdfs/
+uploads/tive_pdfs/
+public_dashboard/uploads/
 salidabienes/
 __pycache__/
 *.pyc

@@ -1742,10 +1742,90 @@ document.addEventListener('DOMContentLoaded', () => {
   function loadImage(url) {
     return new Promise((resolve) => {
       const img = new Image();
+      img.crossOrigin = 'Anonymous';
       img.onload = () => resolve(img);
       img.onerror = () => resolve(null);
       img.src = url;
     });
+  }
+
+  async function loadImgAsBase64(rawPath) {
+    if (!rawPath) return null;
+    const clean = rawPath.replace(/^\.?\/+/, '');
+    const fileName = clean.split('/').pop();
+    
+    // Candidate URLs in priority order
+    const candidateUrls = [];
+    if (window.location.protocol.startsWith('http')) {
+      let base = window.location.pathname;
+      if (!base.endsWith('/')) {
+        base = base.substring(0, base.lastIndexOf('/') + 1);
+      }
+      candidateUrls.push(`${window.location.origin}${base}${clean}`);
+      candidateUrls.push(`${window.location.origin}/${clean}`);
+      candidateUrls.push(`${window.location.origin}/public/${clean}`);
+    }
+    candidateUrls.push(`/${clean}`);
+    candidateUrls.push(`./${clean}`);
+    candidateUrls.push(clean);
+    candidateUrls.push(`uploads/${fileName}`);
+    candidateUrls.push(`./uploads/${fileName}`);
+    candidateUrls.push(`../uploads/${fileName}`);
+    
+    const uniqueUrls = [...new Set(candidateUrls.filter(Boolean))];
+
+    for (const url of uniqueUrls) {
+      // 1. Try fetch as blob (purest and prevents canvas taint)
+      try {
+        const res = await fetch(url);
+        if (res.ok) {
+          const blob = await res.blob();
+          if (blob && blob.size > 0) {
+            const dataUrl = await new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result);
+              reader.onerror = () => resolve(null);
+              reader.readAsDataURL(blob);
+            });
+            if (dataUrl && typeof dataUrl === 'string' && dataUrl.startsWith('data:image')) {
+              return dataUrl;
+            }
+          }
+        }
+      } catch (fetchErr) {
+        // Fetch failed (e.g. file:// restriction), continue to Image element
+      }
+
+      // 2. Try Image with canvas (fallback for file:// protocol)
+      try {
+        const dataUrlFromImg = await new Promise((resolve) => {
+          const img = new Image();
+          img.crossOrigin = 'Anonymous';
+          img.onload = () => {
+            try {
+              const canvas = document.createElement('canvas');
+              canvas.width = img.naturalWidth || img.width || 400;
+              canvas.height = img.naturalHeight || img.height || 300;
+              const ctx = canvas.getContext('2d');
+              ctx.fillStyle = '#FFFFFF';
+              ctx.fillRect(0, 0, canvas.width, canvas.height);
+              ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+              resolve(canvas.toDataURL('image/jpeg', 0.92));
+            } catch (canvasErr) {
+              resolve(null);
+            }
+          };
+          img.onerror = () => resolve(null);
+          img.src = url;
+        });
+        if (dataUrlFromImg && typeof dataUrlFromImg === 'string' && dataUrlFromImg.startsWith('data:image')) {
+          return dataUrlFromImg;
+        }
+      } catch (imgErr) {
+        // continue
+      }
+    }
+    return null;
   }
 
   async function generarOrdenSalidaPDF_Public(salidaData, skipConfirm = false) {
@@ -2083,11 +2163,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       for (let i = 0; i < imagesToDraw.length; i++) {
         const rawPath = imagesToDraw[i];
-        const cleanPath = rawPath.startsWith('/') ? rawPath : `/${rawPath}`;
-        const fullUrl = `.${cleanPath}`;
-        const imgElement = await loadImage(fullUrl).catch(() => null);
-        if (imgElement) {
-          doc.addImage(imgElement, 'JPEG', marginX + i * (imgWidth + spacing), posY, imgWidth, imgHeight);
+        const base64Data = await loadImgAsBase64(rawPath);
+        if (base64Data) {
+          doc.addImage(base64Data, 'JPEG', marginX + i * (imgWidth + spacing), posY, imgWidth, imgHeight);
         }
       }
     }
@@ -2923,7 +3001,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <span class="text-[9px] font-extrabold leading-tight text-center">FICHA<br/>DIGITAL</span>
             </button>
             ${item.pdf_expediente_path ? `
-              <a href=".${item.pdf_expediente_path.startsWith('/') ? item.pdf_expediente_path : '/' + item.pdf_expediente_path}" target="_blank" download="Expediente_${item.cod_patrimonial}.pdf" class="inline-flex items-center justify-center gap-1 px-1.5 py-1 text-amber-800 bg-amber-50 hover:bg-amber-100 hover:text-amber-950 border border-amber-300 rounded-lg shadow-2xs transition-all active:scale-95 cursor-pointer" title="Descargar Expediente del Activo (PDF)">
+              <a href="${getExpedientePdfUrl(item.pdf_expediente_path)}" target="_blank" rel="noopener noreferrer" download="Expediente_${item.cod_patrimonial}.pdf" class="inline-flex items-center justify-center gap-1 px-1.5 py-1 text-amber-800 bg-amber-50 hover:bg-amber-100 hover:text-amber-950 border border-amber-300 rounded-lg shadow-2xs transition-all active:scale-95 cursor-pointer" title="Descargar Expediente del Activo (PDF)">
                 <svg class="w-3.5 h-3.5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                 </svg>
@@ -3018,13 +3096,21 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="mt-1"><span class="font-semibold text-slate-400">Responsable:</span> ${item.responsable || 'Sin asignar'}</div>
       </div>
 
-      <div class="mt-3 pt-2.5 border-t border-slate-100 flex justify-end">
+      <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-end gap-2 flex-wrap">
         <button type="button" data-ficha-code="${item.cod_patrimonial}" class="btn-download-ficha-pdf inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 hover:text-emerald-950 border border-emerald-300/80 rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer" title="Descargar Ficha Digital del Activo (PDF)">
           <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
           </svg>
           <span>FICHA DIGITAL</span>
         </button>
+        ${item.pdf_expediente_path ? `
+          <a href="${getExpedientePdfUrl(item.pdf_expediente_path)}" target="_blank" rel="noopener noreferrer" download="Expediente_${item.cod_patrimonial}.pdf" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 hover:text-amber-950 border border-amber-300/80 rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer" title="Descargar Expediente del Activo (PDF)">
+            <svg class="w-3.5 h-3.5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+            </svg>
+            <span>EXPEDIENTE PDF</span>
+          </a>
+        ` : ''}
       </div>
     `;
     mobileContainer.appendChild(mobileCard);
@@ -4097,6 +4183,20 @@ document.addEventListener('DOMContentLoaded', () => {
       clean = parts[parts.length - 1];
     }
     return `tive_pdfs/${clean}`;
+  }
+
+  function getExpedientePdfUrl(path) {
+    if (!path) return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    const clean = path.replace(/^\.?\/+/, '');
+    if (window.location.protocol.startsWith('http')) {
+      let base = window.location.pathname;
+      if (!base.endsWith('/')) {
+        base = base.substring(0, base.lastIndexOf('/') + 1);
+      }
+      return `${window.location.origin}${base}${clean}`;
+    }
+    return `./${clean}`;
   }
 
   function getCelularVidaUtilBadgeHTML(estado, vencimiento, dias) {
@@ -6462,10 +6562,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const spacing = 6;
             
             for (let i = 0; i < imagesToDraw.length; i++) {
-              const fullUrl = `.${imagesToDraw[i]}`;
-              const imgElement = await loadImage(fullUrl).catch(() => null);
-              if (imgElement) {
-                doc.addImage(imgElement, 'JPEG', marginX + i * (imgWidth + spacing), posY, imgWidth, imgHeight);
+              const base64Data = await loadImgAsBase64(imagesToDraw[i]);
+              if (base64Data) {
+                doc.addImage(base64Data, 'JPEG', marginX + i * (imgWidth + spacing), posY, imgWidth, imgHeight);
               }
             }
           }
