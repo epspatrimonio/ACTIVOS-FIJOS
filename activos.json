@@ -24042,7 +24042,7 @@
     "imagen_2_path": null,
     "imagen_3_path": null,
     "imagen_4_path": null,
-    "placa": "SP-025",
+    "placa": "9438-YW",
     "vehiculo_anio": 2025,
     "tipo_vehiculo": "MOTOKAR",
     "combustible": "GASOLINA",
@@ -24061,7 +24061,7 @@
     "soat_dias_vigencia": null,
     "soat_estado": null,
     "pdf_soat_path": null,
-    "pdf_tive_path": null
+    "pdf_tive_path": ""
   },
   {
     "cod_patrimonial": "410023008",
