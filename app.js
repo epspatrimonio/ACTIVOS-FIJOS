@@ -1100,6 +1100,8 @@ document.addEventListener('DOMContentLoaded', () => {
           filtersContentContainer.classList.add('hidden');
           filtersContentContainer.classList.remove('md:flex');
         }
+        const btnClearFilters = document.getElementById('btn-clear-filters');
+        if (btnClearFilters) btnClearFilters.classList.add('hidden');
       } else {
         searchWrapper.classList.remove('hidden');
         estadoWrapper.classList.remove('hidden');
@@ -1243,7 +1245,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Show/hide Clear Filters button
     const btnClearFilters = document.getElementById('btn-clear-filters');
-    if (btnClearFilters) {
+    const filtersContentContainer = document.getElementById('filters-content');
+    if (currentTab === 'contable' || currentTab === 'asignacion' || currentTab === 'ficha' || currentTab === 'salidas') {
+      if (filtersContentContainer) {
+        filtersContentContainer.classList.add('hidden');
+        filtersContentContainer.classList.remove('md:flex');
+      }
+      if (btnClearFilters) {
+        btnClearFilters.classList.add('hidden');
+      }
+    } else if (btnClearFilters) {
       const hasActiveFilters = 
         searchInput.value.trim() !== '' || 
         (selectedSucursal && selectedSucursal !== '') || 
@@ -4285,7 +4296,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function formatMoney(value) {
     return new Intl.NumberFormat('es-PE', {
-      minimumFractionDigits: 2
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     }).format(Number(value) || 0);
   }
 
@@ -4510,6 +4522,20 @@ document.addEventListener('DOMContentLoaded', () => {
         "Tipo Elemento": item.tipo,
         "Saldo Total (S/.)": Number(item.monto.toFixed(4))
       }));
+
+      let sumCost = 0;
+      let sumDep = 0;
+      currentFilteredData.forEach(item => {
+        if (item.codigo.startsWith('33') || item.tipo === 'ACTIVO') sumCost += item.monto;
+        else if (item.codigo.startsWith('68') || item.tipo === 'DEPRECIACIÓN') sumDep += item.monto;
+      });
+      const valNeto = sumCost - sumDep;
+
+      exportData.push(
+        { "Código PCGE": "", "Descripción de la Cuenta": "TOTAL COSTO HISTÓRICO (CLASE 33)", "Tipo Elemento": "ACTIVO", "Saldo Total (S/.)": Number(sumCost.toFixed(4)) },
+        { "Código PCGE": "", "Descripción de la Cuenta": "TOTAL DEPRECIACIÓN ACUMULADA (CLASE 68)", "Tipo Elemento": "DETERIORO", "Saldo Total (S/.)": Number(sumDep.toFixed(4)) },
+        { "Código PCGE": "", "Descripción de la Cuenta": "VALOR RESIDUAL NETO CONTABLE", "Tipo Elemento": "NETO", "Saldo Total (S/.)": Number(valNeto.toFixed(4)) }
+      );
     }
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
@@ -4978,10 +5004,45 @@ document.addEventListener('DOMContentLoaded', () => {
         };
       }
 
+      let foot = undefined;
+      let footStyles = undefined;
+      if (currentTab === 'contable') {
+        let sumCost = 0;
+        let sumDep = 0;
+        currentFilteredData.forEach(item => {
+          if (item.codigo.startsWith('33') || item.tipo === 'ACTIVO') sumCost += item.monto;
+          else if (item.codigo.startsWith('68') || item.tipo === 'DEPRECIACIÓN') sumDep += item.monto;
+        });
+        const valNeto = sumCost - sumDep;
+        foot = [
+          [
+            { content: 'TOTAL COSTO HISTÓRICO (CLASE 33)', colSpan: 2, styles: { halign: 'right', fontStyle: 'bold', fillColor: [239, 246, 255], textColor: [29, 78, 216] } },
+            { content: 'ACTIVO', styles: { halign: 'center', fontStyle: 'bold', fillColor: [239, 246, 255], textColor: [29, 78, 216] } },
+            { content: `S/. ${formatMoney(sumCost)}`, styles: { halign: 'right', fontStyle: 'bold', fillColor: [239, 246, 255], textColor: [29, 78, 216] } }
+          ],
+          [
+            { content: 'TOTAL DEPRECIACIÓN ACUMULADA (CLASE 68)', colSpan: 2, styles: { halign: 'right', fontStyle: 'bold', fillColor: [255, 241, 242], textColor: [190, 18, 60] } },
+            { content: 'DETERIORO', styles: { halign: 'center', fontStyle: 'bold', fillColor: [255, 241, 242], textColor: [190, 18, 60] } },
+            { content: `S/. ${formatMoney(sumDep)}`, styles: { halign: 'right', fontStyle: 'bold', fillColor: [255, 241, 242], textColor: [190, 18, 60] } }
+          ],
+          [
+            { content: 'VALOR RESIDUAL NETO CONTABLE', colSpan: 2, styles: { halign: 'right', fontStyle: 'bold', fillColor: [236, 253, 245], textColor: [4, 120, 87] } },
+            { content: 'NETO', styles: { halign: 'center', fontStyle: 'bold', fillColor: [236, 253, 245], textColor: [4, 120, 87] } },
+            { content: `S/. ${formatMoney(valNeto)}`, styles: { halign: 'right', fontStyle: 'bold', fillColor: [236, 253, 245], textColor: [4, 120, 87] } }
+          ]
+        ];
+        footStyles = {
+          fontSize: 8,
+          cellPadding: 3
+        };
+      }
+
       // Renderizar la tabla principal
       doc.autoTable({
         head: headers,
         body: data,
+        foot: foot,
+        footStyles: footStyles,
         startY: 30,
         theme: 'grid',
         pageBreak: 'auto',
@@ -5449,11 +5510,25 @@ document.addEventListener('DOMContentLoaded', () => {
     if (kpiDepEl) kpiDepEl.textContent = formatMoney(sumDep);
     if (kpiNetoEl) kpiNetoEl.textContent = formatMoney(valNeto);
 
-    // Filtrar por Tipo de Elemento
+    // Conectar buscador en tiempo real de cuentas contables
+    const contableSearchInput = document.getElementById('contable-search-input');
+    const searchQuery = contableSearchInput ? contableSearchInput.value.toLowerCase().trim() : '';
+    if (contableSearchInput && !contableSearchInput.dataset.listenerRegistered) {
+      contableSearchInput.addEventListener('input', applyFilters);
+      contableSearchInput.dataset.listenerRegistered = 'true';
+    }
+
+    // Filtrar por Tipo de Elemento y Búsqueda
     const filteredLedgerList = ledgerList.filter(item => {
-      if (selectedType === 'Todos') return true;
-      if (selectedType === 'ACTIVO') return item.tipo === 'ACTIVO';
-      if (selectedType === 'DEPRECIACION') return item.tipo === 'DEPRECIACIÓN';
+      if (selectedType !== 'Todos') {
+        if (selectedType === 'ACTIVO' && item.tipo !== 'ACTIVO') return false;
+        if (selectedType === 'DEPRECIACION' && item.tipo !== 'DEPRECIACIÓN') return false;
+      }
+      if (searchQuery) {
+        const matchCod = (item.codigo || '').toLowerCase().includes(searchQuery);
+        const matchDesc = (item.descripcion || '').toLowerCase().includes(searchQuery);
+        if (!matchCod && !matchDesc) return false;
+      }
       return true;
     });
 
@@ -5463,8 +5538,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileCardsContainer = document.getElementById('contable-mobile-cards');
     if (mobileCardsContainer) mobileCardsContainer.innerHTML = '';
 
+    const tfoot = document.getElementById('contable-tfoot');
+    if (tfoot) {
+      tfoot.innerHTML = `
+        <tr class="bg-blue-50/80 text-blue-900 border-t-2 border-blue-200">
+          <td colspan="2" class="px-5 py-2.5 text-xs font-extrabold uppercase text-right tracking-wider">Total Costo Histórico (Clase 33)</td>
+          <td class="px-5 py-2.5 text-center">
+            <span class="px-2.5 py-0.5 text-[10px] font-extrabold bg-blue-100 text-blue-800 rounded-full border border-blue-200">ACTIVO</span>
+          </td>
+          <td class="px-5 py-2.5 text-right font-mono font-black text-xs text-blue-900 tabular-nums">S/. ${formatMoney(sumCost)}</td>
+        </tr>
+        <tr class="bg-rose-50/80 text-rose-900 border-t border-rose-200">
+          <td colspan="2" class="px-5 py-2.5 text-xs font-extrabold uppercase text-right tracking-wider">Total Depreciación Acumulada (Clase 68)</td>
+          <td class="px-5 py-2.5 text-center">
+            <span class="px-2.5 py-0.5 text-[10px] font-extrabold bg-rose-100 text-rose-800 rounded-full border border-rose-200">DETERIORO</span>
+          </td>
+          <td class="px-5 py-2.5 text-right font-mono font-black text-xs text-rose-900 tabular-nums">S/. ${formatMoney(sumDep)}</td>
+        </tr>
+        <tr class="bg-emerald-50 text-emerald-950 border-t-2 border-emerald-300">
+          <td colspan="2" class="px-5 py-3 text-xs font-black uppercase text-right tracking-wider">Valor Residual Neto Contable</td>
+          <td class="px-5 py-3 text-center">
+            <span class="px-2.5 py-0.5 text-[10px] font-extrabold bg-emerald-100 text-emerald-800 rounded-full border border-emerald-200">NETO</span>
+          </td>
+          <td class="px-5 py-3 text-right font-mono font-black text-sm text-emerald-800 tabular-nums">S/. ${formatMoney(valNeto)}</td>
+        </tr>
+      `;
+    }
+
     if (filteredLedgerList.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="4" class="px-5 py-6 text-center text-slate-400">No hay saldos en este período</td></tr>`;
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="4" class="px-5 py-12 text-center text-slate-400">
+            <div class="flex flex-col items-center justify-center gap-2">
+              <span class="text-3xl">📋</span>
+              <p class="text-sm font-semibold text-slate-600">No se encontraron cuentas contables registradas</p>
+              <p class="text-xs text-slate-400">Intente modificar los filtros o el término de búsqueda.</p>
+            </div>
+          </td>
+        </tr>
+      `;
       if (mobileCardsContainer) {
         mobileCardsContainer.innerHTML = `
           <div class="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center text-slate-400 text-xs font-semibold">
@@ -5478,19 +5590,23 @@ document.addEventListener('DOMContentLoaded', () => {
     filteredLedgerList.forEach(item => {
       // 1. Fila de tabla para escritorio
       const row = document.createElement('tr');
-      row.className = 'hover:bg-slate-50 text-slate-700 transition-colors border-b border-slate-150';
+      row.className = 'hover:bg-sky-50/60 even:bg-slate-50/40 text-slate-800 transition-colors border-b border-slate-150 align-middle';
 
       row.innerHTML = `
-        <td class="px-5 py-3 whitespace-nowrap text-xs font-mono font-bold text-slate-800">${item.codigo}</td>
-        <td class="px-5 py-3 text-xs font-medium text-slate-700">${item.descripcion}</td>
-        <td class="px-5 py-3 whitespace-nowrap">
-          <span class="px-2 py-0.5 text-[10px] font-bold border rounded-full ${
-            item.codigo.startsWith('33') ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-rose-50 text-rose-700 border-rose-200'
+        <td class="px-5 py-2.5 whitespace-nowrap">
+          <span class="px-2.5 py-1 text-xs font-mono font-black rounded-lg border shadow-2xs ${
+            item.codigo.startsWith('33') ? 'bg-blue-50 text-blue-800 border-blue-200' : 'bg-rose-50 text-rose-800 border-rose-200'
+          }">${item.codigo}</span>
+        </td>
+        <td class="px-5 py-2.5 text-xs font-semibold text-slate-800 leading-snug">${item.descripcion}</td>
+        <td class="px-5 py-2.5 whitespace-nowrap text-center">
+          <span class="px-2.5 py-0.5 text-[10px] font-extrabold border rounded-full shadow-2xs ${
+            item.codigo.startsWith('33') ? 'bg-blue-100/70 text-blue-800 border-blue-200' : 'bg-rose-100/70 text-rose-800 border-rose-200'
           }">
             ${item.tipo}
           </span>
         </td>
-        <td class="px-5 py-3 whitespace-nowrap text-xs font-mono font-bold text-slate-900 text-right">${formatMoney(item.monto)}</td>
+        <td class="px-5 py-2.5 whitespace-nowrap text-xs font-mono font-black text-slate-900 text-right tabular-nums">S/. ${formatMoney(item.monto)}</td>
       `;
       tbody.appendChild(row);
 
@@ -5502,7 +5618,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
             <div class="flex items-center gap-1.5">
               <span class="text-[0.6875rem] font-extrabold uppercase text-slate-400">Cuenta:</span>
-              <span class="font-mono font-extrabold text-xs text-slate-900 bg-slate-100 px-2 py-0.5 rounded">${item.codigo}</span>
+              <span class="font-mono font-black text-xs text-slate-900 bg-slate-100 px-2 py-0.5 rounded">${item.codigo}</span>
             </div>
             <span class="px-2 py-0.5 text-[10px] font-bold border rounded-full ${
               item.codigo.startsWith('33') ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-rose-50 text-rose-700 border-rose-200'
@@ -5515,7 +5631,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <div class="flex items-center justify-between pt-1 border-t border-dashed border-slate-100 mt-0.5">
             <span class="text-[0.6875rem] font-bold text-slate-500 uppercase">Saldo Registrado:</span>
-            <span class="font-mono font-extrabold text-xs text-slate-900">${formatMoney(item.monto)}</span>
+            <span class="font-mono font-black text-xs text-slate-900">S/. ${formatMoney(item.monto)}</span>
           </div>
         `;
         mobileCardsContainer.appendChild(card);
