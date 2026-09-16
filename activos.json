@@ -24777,7 +24777,7 @@
     "color": "AZUL",
     "marca": "KAMAX",
     "modelo": "KA300K",
-    "numero_serie": "LC4HDHZ199GA93426",
+    "numero_serie": "LC4HDHZ19G0A93426",
     "caracteristicas_accesorios": null,
     "vida_util_anios": 5,
     "sucursal": "SAN RAMON",
@@ -24892,7 +24892,7 @@
     "soat_vencimiento": "2027-06-04",
     "soat_dias_vigencia": 261,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": "soat_pdfs/410022001_soat.pdf",
+    "pdf_soat_path": null,
     "pdf_tive_path": "tive_pdfs/410022001_tive.pdf"
   },
   {
