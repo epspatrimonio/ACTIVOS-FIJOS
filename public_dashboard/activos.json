@@ -24764,8 +24764,8 @@
     "soat_vencimiento": "2027-06-25",
     "soat_dias_vigencia": 282,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null,
-    "pdf_tive_path": null
+    "pdf_soat_path": "soat_pdfs/410022003_soat.pdf",
+    "pdf_tive_path": "tive_pdfs/410022003_tive.pdf"
   },
   {
     "cod_patrimonial": "410022002",
@@ -25596,7 +25596,7 @@
     "soat_vencimiento": "2027-02-25",
     "soat_dias_vigencia": 162,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": null,
+    "pdf_soat_path": "soat_pdfs/410011003_soat.pdf",
     "pdf_tive_path": "tive_pdfs/410011003_tive.pdf"
   },
   {
