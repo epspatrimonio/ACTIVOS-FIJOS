@@ -24828,7 +24828,7 @@
     "soat_vencimiento": "2027-06-04",
     "soat_dias_vigencia": 261,
     "soat_estado": "VIGENTE",
-    "pdf_soat_path": "soat_pdfs/410022002_soat.pdf",
+    "pdf_soat_path": null,
     "pdf_tive_path": "tive_pdfs/410022002_tive.pdf"
   },
   {
