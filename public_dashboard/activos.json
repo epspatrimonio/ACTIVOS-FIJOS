@@ -23901,7 +23901,7 @@
     "n_acta_entrega": null,
     "depreciacion_acumulada": "2166.67",
     "valor_neto": "4333.3300",
-    "estado_activo": "BUENO",
+    "estado_activo": "REGULAR",
     "cuenta_contable": "3341151101",
     "centro_costo": "90360001",
     "requerido_por": null,
@@ -23997,7 +23997,7 @@
     "soat_dias_vigencia": null,
     "soat_estado": null,
     "pdf_soat_path": null,
-    "pdf_tive_path": null
+    "pdf_tive_path": ""
   },
   {
     "cod_patrimonial": "410023009",
