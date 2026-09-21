@@ -23933,7 +23933,7 @@
     "soat_dias_vigencia": null,
     "soat_estado": null,
     "pdf_soat_path": null,
-    "pdf_tive_path": null
+    "pdf_tive_path": ""
   },
   {
     "cod_patrimonial": "410023010",
@@ -26013,9 +26013,9 @@
     "n_acta_entrega": null,
     "depreciacion_acumulada": "0",
     "valor_neto": "0.0000",
-    "estado_activo": "BUENO",
+    "estado_activo": "REGULAR",
     "cuenta_contable": "3391010101",
-    "centro_costo": "00000000",
+    "centro_costo": null,
     "requerido_por": null,
     "fuente": "RECURSOS ORDINARIOS",
     "fuente_origen": null,
@@ -26045,7 +26045,7 @@
     "soat_dias_vigencia": -67,
     "soat_estado": "VENCIDO",
     "pdf_soat_path": null,
-    "pdf_tive_path": null
+    "pdf_tive_path": ""
   },
   {
     "cod_patrimonial": "339200001",
