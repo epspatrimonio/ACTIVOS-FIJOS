@@ -38,6 +38,32 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Helper robusto para descomponer fechas YYYY-MM-DD sin desfasar por huso horario UTC (evita desfase UTC-5)
+  function parseDateParts(dateVal) {
+    if (!dateVal || dateVal === '—') return { year: null, month: null };
+    const dateStr = String(dateVal).trim();
+    if (!dateStr || dateStr === 'null' || dateStr === 'undefined') return { year: null, month: null };
+    const clean = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr;
+    if (clean.includes('-')) {
+      const parts = clean.split('-');
+      if (parts.length >= 2) {
+        if (parts[0].length === 4) return { year: Number(parts[0]), month: parseInt(parts[1], 10) };
+        if (parts[2] && parts[2].length === 4) return { year: Number(parts[2]), month: parseInt(parts[1], 10) };
+      }
+    } else if (clean.includes('/')) {
+      const parts = clean.split('/');
+      if (parts.length >= 3) {
+        if (parts[2].length === 4) return { year: Number(parts[2]), month: parseInt(parts[1], 10) };
+        if (parts[0].length === 4) return { year: Number(parts[0]), month: parseInt(parts[1], 10) };
+      }
+    }
+    const d = new Date(clean);
+    if (!isNaN(d.getTime())) {
+      return { year: d.getUTCFullYear(), month: d.getUTCMonth() + 1 };
+    }
+    return { year: null, month: null };
+  }
+
   // Estructuras de datos para la pestaña de Asignación (Acta-céntrica)
   let actasMap = {};
   let selectedActaKey = null;
@@ -270,16 +296,15 @@ document.addEventListener('DOMContentLoaded', () => {
       initTabs();
       populateFilters();
 
-      // Poblar años en reporte contable
+      // Poblar años en reporte contable a partir de la fecha de registro contable
       const contableYearSelect = document.getElementById('contable-year-select');
       if (contableYearSelect) {
         contableYearSelect.innerHTML = '<option value="Todos">Todos</option>';
         const yearsSet = new Set();
         assets.forEach(item => {
-          const dateStr = item.fecha_alta_factura || item.fecha_alta || item.fecha_registro_contable || item.fecha_ingreso || item.fecha_asignacion;
+          const dateStr = item.fecha_registro_contable || item.fecha_alta_factura || item.fecha_alta;
           if (dateStr) {
-            const parts = String(dateStr).split('-');
-            const y = parts[0] ? Number(parts[0]) : new Date(dateStr).getFullYear();
+            const { year: y } = parseDateParts(dateStr);
             if (y && !isNaN(y)) yearsSet.add(y);
           }
         });
@@ -317,15 +342,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
 
-      // Poblar años en filtro global
+      // Poblar años en filtro global (Prioridad Fecha de Registro Contable)
       const globalYearSelect = document.getElementById('filter-global-year');
       if (globalYearSelect) {
         globalYearSelect.innerHTML = '<option value="">Todos</option>';
         const yearsSet = new Set();
         assets.forEach(item => {
-          const dateStr = item.fecha_alta_factura || item.fecha_alta || item.fecha_registro_contable || item.fecha_ingreso || item.fecha_asignacion;
+          const dateStr = item.fecha_registro_contable || item.fecha_alta_factura || item.fecha_alta || item.fecha_ingreso || item.fecha_asignacion;
           if (dateStr) {
-            const y = new Date(dateStr).getFullYear();
+            const { year: y } = parseDateParts(dateStr);
             if (y && !isNaN(y)) yearsSet.add(y);
           }
         });
@@ -1354,13 +1379,13 @@ document.addEventListener('DOMContentLoaded', () => {
           if (itemLoc !== selectedLocalidad.trim().toUpperCase()) return false;
         }
 
-        const dateStr = item.fecha_alta_factura || item.fecha_alta || item.fecha_registro_contable || item.fecha_ingreso || item.fecha_asignacion;
+        // Prioridad estricta Fecha de Registro Contable
+        const dateStr = item.fecha_registro_contable || item.fecha_alta_factura || item.fecha_alta;
         
         if (!dateStr && (selectedYear !== 'Todos' || selectedMonth !== 'Todos')) return false;
         if (dateStr) {
-          const parts = String(dateStr).split('-');
-          const y = parts[0] ? Number(parts[0]) : new Date(dateStr).getFullYear();
-          const m = parts[1] ? Number(parts[1]) : (new Date(dateStr).getMonth() + 1);
+          const { year: y, month: m } = parseDateParts(dateStr);
+          if (!y && (selectedYear !== 'Todos' || selectedMonth !== 'Todos')) return false;
           if (selectedYear !== 'Todos' && y !== Number(selectedYear)) return false;
           if (selectedMonth !== 'Todos' && m !== Number(selectedMonth)) return false;
         }
@@ -1394,14 +1419,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const categoriaMatch = !hasCategories || selectedCategories.length === 0 || selectedCategories.includes(item.categoria);
       const subcategoriaMatch = !hasCategories || selectedSubcategories.length === 0 || selectedSubcategories.includes(item.subcategoria);
 
-      // Filtro de Año de Registro Global
+      // Filtro de Año de Registro Global (Prioridad Fecha de Registro Contable)
       let yearMatch = true;
       if (selectedGlobalYear) {
-        const dateStr = item.fecha_alta_factura || item.fecha_alta || item.fecha_registro_contable || item.fecha_ingreso || item.fecha_asignacion;
+        const dateStr = item.fecha_registro_contable || item.fecha_alta_factura || item.fecha_alta || item.fecha_ingreso || item.fecha_asignacion;
         if (!dateStr) {
           yearMatch = false;
         } else {
-          const y = new Date(dateStr).getFullYear();
+          const { year: y } = parseDateParts(dateStr);
           yearMatch = (y === Number(selectedGlobalYear));
         }
       }
@@ -1409,19 +1434,19 @@ document.addEventListener('DOMContentLoaded', () => {
       // Filtro de Mes de Registro Global (Multiselección)
       let monthMatch = true;
       if (selectedMonths.length > 0) {
-        const dateStr = item.fecha_alta_factura || item.fecha_alta || item.fecha_registro_contable || item.fecha_ingreso || item.fecha_asignacion;
+        const dateStr = item.fecha_registro_contable || item.fecha_alta_factura || item.fecha_alta || item.fecha_ingreso || item.fecha_asignacion;
         if (!dateStr) {
           monthMatch = false;
         } else {
-          const m = String(new Date(dateStr).getMonth() + 1);
-          monthMatch = selectedMonths.includes(m);
+          const { month: m } = parseDateParts(dateStr);
+          monthMatch = m ? selectedMonths.includes(String(m)) : false;
         }
       } else if (selectedGlobalMonth) {
-        const dateStr = item.fecha_alta_factura || item.fecha_alta || item.fecha_registro_contable || item.fecha_ingreso || item.fecha_asignacion;
+        const dateStr = item.fecha_registro_contable || item.fecha_alta_factura || item.fecha_alta || item.fecha_ingreso || item.fecha_asignacion;
         if (!dateStr) {
           monthMatch = false;
         } else {
-          const m = new Date(dateStr).getMonth() + 1;
+          const { month: m } = parseDateParts(dateStr);
           monthMatch = (m === Number(selectedGlobalMonth));
         }
       }
@@ -5445,24 +5470,24 @@ document.addEventListener('DOMContentLoaded', () => {
       const cost = Number(item.valor_en_libros) || 0;
       let dep = Number(item.depreciacion_acumulada) || 0;
 
-      // Si no existe depreciación almacenada o hay filtro de período, calcularla dinámicamente según fecha de alta
+      // Si no existe depreciación almacenada o hay filtro de período, calcularla dinámicamente según fecha de registro contable
       if (dep <= 0 && cost > 0) {
         const ccStr = item.cuenta_contable || '';
         if (!ccStr.startsWith('331') && !ccStr.startsWith('339')) {
           const lifeY = Number(item.vida_util_anios) || 0;
-          const sStr = item.fecha_alta_factura || item.fecha_alta || item.fecha_registro_contable;
+          const sStr = item.fecha_registro_contable || item.fecha_alta_factura || item.fecha_alta;
           if (lifeY > 0 && sStr) {
-            const sDate = new Date(sStr);
-            const sYear = sDate.getFullYear();
-            const sMonth = sDate.getMonth() + 1;
-            const now = new Date();
-            const eYear = yearVal !== 'Todos' ? Number(yearVal) : now.getFullYear();
-            const eMonth = monthVal !== 'Todos' ? Number(monthVal) : 12;
-            const totalM = lifeY * 12;
-            const mRate = cost / totalM;
-            const elM = (eYear - sYear) * 12 + (eMonth - sMonth) + 1;
-            if (elM > 0) {
-              dep = elM >= totalM ? cost : Math.min(cost, mRate * elM);
+            const { year: sYear, month: sMonth } = parseDateParts(sStr);
+            if (sYear && sMonth) {
+              const now = new Date();
+              const eYear = yearVal !== 'Todos' ? Number(yearVal) : now.getFullYear();
+              const eMonth = monthVal !== 'Todos' ? Number(monthVal) : 12;
+              const totalM = lifeY * 12;
+              const mRate = cost / totalM;
+              const elM = (eYear - sYear) * 12 + (eMonth - sMonth) + 1;
+              if (elM > 0) {
+                dep = elM >= totalM ? cost : Math.min(cost, mRate * elM);
+              }
             }
           }
         }
