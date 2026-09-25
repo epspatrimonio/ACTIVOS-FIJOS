@@ -25112,7 +25112,7 @@
     "estado_regulatorio": 1,
     "entidad_4": null,
     "entidad_5": null,
-    "placa": "SIN PLACA",
+    "placa": "1458-1J",
     "vehiculo_anio": 2024,
     "tipo_vehiculo": "MOTOCICLETAS",
     "combustible": "GASOLINA",
@@ -25196,13 +25196,13 @@
     "vencimiento_rev_tec": null,
     "dias_vigencia_rev_tec": null,
     "estado_rev_tec": null,
-    "soat_poliza": null,
-    "soat_compania": null,
-    "soat_vencimiento": null,
-    "soat_dias_vigencia": null,
-    "soat_estado": null,
+    "soat_poliza": "",
+    "soat_compania": "",
+    "soat_vencimiento": "2026-09-26",
+    "soat_dias_vigencia": 1,
+    "soat_estado": "POR_VENCER",
     "pdf_soat_path": null,
-    "pdf_tive_path": null
+    "pdf_tive_path": "tive_pdfs/410026005_tive.pdf"
   },
   {
     "cod_patrimonial": "410026003",
