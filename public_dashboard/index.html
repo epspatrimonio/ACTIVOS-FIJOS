@@ -276,7 +276,7 @@
           🚗 Vehículos - SOAT & RT
         </button>
         <button id="tab-inventario" class="px-2.5 py-1.5 text-[0.7rem] sm:text-xs font-bold rounded-lg transition-all border-none cursor-pointer flex items-center justify-center gap-1 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap shrink-0 flex-1 text-center">
-          🔍 Sobrantes/Faltantes
+          📋 Inventario
         </button>
         <button id="tab-terceros" class="px-2.5 py-1.5 text-[0.7rem] sm:text-xs font-bold rounded-lg transition-all border-none cursor-pointer flex items-center justify-center gap-1 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap shrink-0 flex-1 text-center">
           🤝 Bienes de Terceros
@@ -421,6 +421,9 @@
             <option value="MALO">MALO</option>
             <option value="PARA BAJA">PARA BAJA</option>
             <option value="BAJA">BAJA</option>
+            <option value="FALTANTE">FALTANTE</option>
+            <option value="SOBRANTE">SOBRANTE</option>
+            <option value="TERCEROS">TERCEROS</option>
           </select>
         </div>
 
@@ -637,21 +640,105 @@
         </table>
       </div>
     </div>
-    <!-- Tabla: Inventario Físico -->
+    <!-- Tabla: Inventario General -->
     <div id="inventario-table-container" class="hidden md:flex flex-col flex-1 min-h-0 rounded-xl shadow-sm border border-slate-200 bg-white overflow-hidden">
+      <!-- KPI Summary Cards de Inventario General -->
+      <div id="inventario-kpi-container" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 p-2.5 bg-gradient-to-b from-slate-50/80 to-white border-b border-slate-200 shrink-0">
+        <div class="p-2 bg-blue-50/80 border border-blue-200/80 rounded-xl flex flex-col justify-between shadow-2xs">
+          <div class="flex items-center justify-between gap-1">
+            <span class="text-[0.625rem] font-extrabold text-blue-800 uppercase tracking-wider truncate">Total Inventario</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-600 shrink-0"></span>
+          </div>
+          <div class="flex items-baseline gap-1 mt-0.5">
+            <span id="inventario-kpi-total" class="text-base sm:text-lg font-black text-slate-900 font-mono tracking-tight tabular-nums">0</span>
+            <span class="text-[0.6rem] font-bold text-slate-500">bienes</span>
+          </div>
+        </div>
+
+        <div class="p-2 bg-emerald-50/80 border border-emerald-200/80 rounded-xl flex flex-col justify-between shadow-2xs">
+          <div class="flex items-center justify-between gap-1">
+            <span class="text-[0.625rem] font-extrabold text-emerald-800 uppercase tracking-wider truncate">Activos Fijos</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 shrink-0"></span>
+          </div>
+          <div class="flex items-baseline gap-1 mt-0.5">
+            <span id="inventario-kpi-activos" class="text-base sm:text-lg font-black text-emerald-900 font-mono tracking-tight tabular-nums">0</span>
+            <span class="text-[0.6rem] font-bold text-slate-500">items</span>
+          </div>
+        </div>
+
+        <div class="p-2 bg-amber-50/80 border border-amber-200/80 rounded-xl flex flex-col justify-between shadow-2xs">
+          <div class="flex items-center justify-between gap-1">
+            <span class="text-[0.625rem] font-extrabold text-amber-800 uppercase tracking-wider truncate">Obras en Curso</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-600 shrink-0"></span>
+          </div>
+          <div class="flex items-baseline gap-1 mt-0.5">
+            <span id="inventario-kpi-obras" class="text-base sm:text-lg font-black text-amber-900 font-mono tracking-tight tabular-nums">0</span>
+            <span class="text-[0.6rem] font-bold text-slate-500">items</span>
+          </div>
+        </div>
+
+        <div class="p-2 bg-indigo-50/80 border border-indigo-200/80 rounded-xl flex flex-col justify-between shadow-2xs">
+          <div class="flex items-center justify-between gap-1">
+            <span class="text-[0.625rem] font-extrabold text-indigo-800 uppercase tracking-wider truncate">Bienes Terceros</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-indigo-600 shrink-0"></span>
+          </div>
+          <div class="flex items-baseline gap-1 mt-0.5">
+            <span id="inventario-kpi-terceros" class="text-base sm:text-lg font-black text-indigo-900 font-mono tracking-tight tabular-nums">0</span>
+            <span class="text-[0.6rem] font-bold text-slate-500">items</span>
+          </div>
+        </div>
+
+        <div class="p-2 bg-purple-50/80 border border-purple-200/80 rounded-xl flex flex-col justify-between shadow-2xs">
+          <div class="flex items-center justify-between gap-1">
+            <span class="text-[0.625rem] font-extrabold text-purple-800 uppercase tracking-wider truncate">Sobrantes</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-purple-600 shrink-0"></span>
+          </div>
+          <div class="flex items-baseline gap-1 mt-0.5">
+            <span id="inventario-kpi-sobrantes" class="text-base sm:text-lg font-black text-purple-900 font-mono tracking-tight tabular-nums">0</span>
+            <span class="text-[0.6rem] font-bold text-slate-500">items</span>
+          </div>
+        </div>
+
+        <div class="p-2 bg-rose-50/80 border border-rose-200/80 rounded-xl flex flex-col justify-between shadow-2xs">
+          <div class="flex items-center justify-between gap-1">
+            <span class="text-[0.625rem] font-extrabold text-rose-800 uppercase tracking-wider truncate">Faltantes</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-rose-600 shrink-0"></span>
+          </div>
+          <div class="flex items-baseline gap-1 mt-0.5">
+            <span id="inventario-kpi-faltantes" class="text-base sm:text-lg font-black text-rose-900 font-mono tracking-tight tabular-nums">0</span>
+            <span class="text-[0.6rem] font-bold text-slate-500">items</span>
+          </div>
+        </div>
+
+        <div class="p-2 bg-teal-50/80 border border-teal-200/80 rounded-xl flex flex-col justify-between shadow-2xs col-span-2 sm:col-span-1">
+          <div class="flex items-center justify-between gap-1">
+            <span class="text-[0.625rem] font-extrabold text-teal-800 uppercase tracking-wider truncate">Valor Inventario</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-teal-600 shrink-0"></span>
+          </div>
+          <div class="flex items-baseline gap-1 mt-0.5">
+            <span class="text-[0.65rem] font-bold text-teal-700 font-mono">S/.</span>
+            <span id="inventario-kpi-inversion" class="text-sm sm:text-base font-black text-slate-900 font-mono tracking-tight tabular-nums">0.00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla de Datos: Modelo Activos Fijos -->
       <div class="overflow-x-auto overflow-y-auto smooth-scroll w-full flex-1 min-h-0">
-        <table class="min-w-[1350px] w-full divide-y divide-slate-200 border-collapse">
-          <thead class="sticky top-0 bg-[#00B0F0] text-white z-20 shadow-md">
+        <table class="min-w-[1240px] w-full divide-y divide-slate-200 border-collapse">
+          <thead class="sticky top-0 bg-[#00B0F0] text-white z-20 shadow-xs">
             <tr>
-              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Cód. Patrimonial</th>
-              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Tipo</th>
-              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Categoría / Subcategoría</th>
-              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">UBICACIÓN<br/>LOCALIDAD</th>
-              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Denominación del Activo</th>
-              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Especificaciones</th>
-              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Características / Accesorios</th>
-              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Observaciones</th>
-              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Fecha Registro</th>
+              <th scope="col" class="px-1.5 py-1 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[95px]">Cód. Patrimonial</th>
+              <th scope="col" class="px-1.5 py-1 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[110px]">DOCUMENTO<br/>C. CONTABLE<br/>C. COSTO</th>
+              <th scope="col" class="px-1.5 py-1 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[95px]">Fecha de Ingreso</th>
+              <th scope="col" class="px-1.5 py-1 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[115px]">UBICACIÓN<br/>LOCALIDAD<br/>FINANCIADO</th>
+              <th scope="col" class="px-1.5 py-1 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[170px]">DENOMINACIÓN<br/>SUB CATEGORIA<br/>N° ACTA</th>
+              <th scope="col" class="px-1.5 py-1 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[130px]">CARACTERÍSTICAS</th>
+              <th scope="col" class="px-1.5 py-1 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[160px]">ESPECIFICACIONES</th>
+              <th scope="col" class="px-1.5 py-1 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[75px]">Estado</th>
+              <th scope="col" class="px-1.5 py-1 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[75px]">Valor Libros</th>
+              <th scope="col" class="px-1.5 py-1 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[75px]">Valor Neto</th>
+              <th scope="col" class="px-1.5 py-1 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[135px]">RESPONSABLE<br/>PUESTO</th>
+              <th scope="col" class="px-1 py-1 text-center text-[0.625rem] font-bold text-white uppercase tracking-wide leading-tight w-[85px]">FICHA<br/>DIGITAL</th>
             </tr>
           </thead>
           <tbody id="inventario-tbody" class="bg-white divide-y divide-slate-100">
@@ -1448,7 +1535,7 @@
           🚗 Vehículos - SOAT & RT
         </button>
         <button data-tab="inventario" class="mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left">
-          🔍 Sobrantes/Faltantes
+          📋 Inventario
         </button>
         <button data-tab="terceros" class="mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left">
           🤝 Bienes de Terceros
