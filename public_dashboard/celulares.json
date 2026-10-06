@@ -19,7 +19,7 @@
     "puesto": "RESERVORIO",
     "responsable": "MARRON MARTINEZ FAVIO EDGAR",
     "fecha_renovacion": "2025-08-12",
-    "dias_para_renovar": -419,
+    "dias_para_renovar": -420,
     "vida_util_estado": "VENCIDA",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-10-05T15:15:06.079918Z"
@@ -44,7 +44,7 @@
     "puesto": "SECRETARÍA DE GERENCIA GENERAL",
     "responsable": "SALAZAR REATEGUI JHENNIFER PAOLA",
     "fecha_renovacion": "2029-04-30",
-    "dias_para_renovar": 938,
+    "dias_para_renovar": 937,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:52:41.960449Z"
@@ -69,7 +69,7 @@
     "puesto": "JEFE DE INFORMÁTICA",
     "responsable": "SOVERO CONTRERAS ELVIA YALINA",
     "fecha_renovacion": "2029-04-30",
-    "dias_para_renovar": 938,
+    "dias_para_renovar": 937,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:15:21.839344Z"
@@ -94,7 +94,7 @@
     "puesto": "GAF",
     "responsable": "ESPINOZA PUCA MARIA LUZ",
     "fecha_renovacion": "2029-04-30",
-    "dias_para_renovar": 938,
+    "dias_para_renovar": 937,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:15:10.321343Z"
@@ -119,7 +119,7 @@
     "puesto": "GERENTE OPERACIONAL",
     "responsable": "ARROYO TAKIGAWA JHONNY MANUEL",
     "fecha_renovacion": "2029-04-30",
-    "dias_para_renovar": 938,
+    "dias_para_renovar": 937,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:14:36.542504Z"
@@ -144,7 +144,7 @@
     "puesto": "GERENTE COMERCIAL",
     "responsable": "MITMA MENDOZA RAFAEL ALONSO",
     "fecha_renovacion": "2024-12-01",
-    "dias_para_renovar": -673,
+    "dias_para_renovar": -674,
     "vida_util_estado": "VENCIDA",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:14:22.363510Z"
@@ -169,7 +169,7 @@
     "puesto": "ALMACÉN CENTRAL",
     "responsable": "LANAZCA HUAMAN JHONY KARSON",
     "fecha_renovacion": "2029-04-30",
-    "dias_para_renovar": 938,
+    "dias_para_renovar": 937,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:14:08.231102Z"
@@ -194,7 +194,7 @@
     "puesto": "PTA BOMBEO",
     "responsable": "SANCHEZ EGOAVIL ARMANDO GREGORIO",
     "fecha_renovacion": "2025-08-12",
-    "dias_para_renovar": -419,
+    "dias_para_renovar": -420,
     "vida_util_estado": "VENCIDA",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-10-05T20:21:37.340642Z"
@@ -219,7 +219,7 @@
     "puesto": "PTAP",
     "responsable": "ARAUCO VELIZ OVIDIO CAYO",
     "fecha_renovacion": "2025-08-12",
-    "dias_para_renovar": -419,
+    "dias_para_renovar": -420,
     "vida_util_estado": "VENCIDA",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-10-05T15:14:50.758056Z"
@@ -244,7 +244,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "RAMIREZ PASSUNI ERICK HANS",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:22:52.215334Z"
@@ -269,7 +269,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "RAMIREZ PASSUNI ERICK HANS",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:22:37.075828Z"
@@ -294,7 +294,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "RAMIREZ PASSUNI ERICK HANS",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:22:20.758700Z"
@@ -319,7 +319,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "RAMIREZ PASSUNI ERICK HANS",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:21:35.798678Z"
@@ -344,7 +344,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "RAMIREZ PASSUNI ERICK HANS",
     "fecha_renovacion": "2025-08-12",
-    "dias_para_renovar": -419,
+    "dias_para_renovar": -420,
     "vida_util_estado": "VENCIDA",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-10-05T15:14:42.486997Z"
@@ -369,7 +369,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "RAMIREZ PASSUNI ERICK HANS",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:20:43.247043Z"
@@ -394,7 +394,7 @@
     "puesto": "SECRETARÍA JEFE UO",
     "responsable": "RAMIREZ PASSUNI ERICK HANS",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:20:09.234312Z"
@@ -419,7 +419,7 @@
     "puesto": "SECRETARÍA JEFE UO",
     "responsable": "RAMIREZ PASSUNI ERICK HANS",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:19:50.046789Z"
@@ -444,7 +444,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "RAMIREZ PASSUNI ERICK HANS",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:19:20.962417Z"
@@ -469,7 +469,7 @@
     "puesto": "JEFE DE RRHH",
     "responsable": "PAULET BONIFAZ BRAYAN AUGUSTO",
     "fecha_renovacion": "2024-12-01",
-    "dias_para_renovar": -673,
+    "dias_para_renovar": -674,
     "vida_util_estado": "VENCIDA",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:13:54.735334Z"
@@ -494,7 +494,7 @@
     "puesto": "JEFE DE AT. AL CLIENTE Y COBRANZA",
     "responsable": "GUIA GASTELU LIDA FILOMENA",
     "fecha_renovacion": "2027-04-01",
-    "dias_para_renovar": 178,
+    "dias_para_renovar": 177,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:13:41.958434Z"
@@ -519,7 +519,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "ROMERO CHANG NORA MIRTHA",
     "fecha_renovacion": "2024-12-01",
-    "dias_para_renovar": -673,
+    "dias_para_renovar": -674,
     "vida_util_estado": "VENCIDA",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:38:47.677523Z"
@@ -544,7 +544,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "ROMERO CHANG NORA MIRTHA",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:38:12.375661Z"
@@ -569,7 +569,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "ROMERO CHANG NORA MIRTHA",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:37:32.702192Z"
@@ -594,7 +594,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "ROMERO CHANG NORA MIRTHA",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:37:20.524704Z"
@@ -619,7 +619,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "ROMERO CHANG NORA MIRTHA",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:37:08.758230Z"
@@ -644,7 +644,7 @@
     "puesto": "ATENCIÓN AL CLIENTE",
     "responsable": "PHILIPPS CAMACHO EDGARDO CHARLES",
     "fecha_renovacion": "2025-08-12",
-    "dias_para_renovar": -419,
+    "dias_para_renovar": -420,
     "vida_util_estado": "VENCIDA",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-10-05T16:16:48.958888Z"
@@ -669,7 +669,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "RODRIGUEZ FLORES LENNY YEISON",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:34:29.079491Z"
@@ -694,7 +694,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "RODRIGUEZ FLORES LENNY YEISON",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:34:16.694996Z"
@@ -719,7 +719,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "RODRIGUEZ FLORES LENNY YEISON",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:34:04.126725Z"
@@ -744,7 +744,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "RODRIGUEZ FLORES LENNY YEISON",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:33:51.164648Z"
@@ -769,7 +769,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "RODRIGUEZ FLORES LENNY YEISON",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:33:37.598443Z"
@@ -794,7 +794,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "RODRIGUEZ FLORES LENNY YEISON",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:33:23.033376Z"
@@ -819,7 +819,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "RODRIGUEZ FLORES LENNY YEISON",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:33:08.982384Z"
@@ -844,7 +844,7 @@
     "puesto": "ATENCIÓN AL CLIENTE",
     "responsable": "ALCALDE RODRIGUEZ NAOMI YULIZA",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:32:43.334994Z"
@@ -869,7 +869,7 @@
     "puesto": null,
     "responsable": null,
     "fecha_renovacion": "2025-08-12",
-    "dias_para_renovar": -419,
+    "dias_para_renovar": -420,
     "vida_util_estado": "VENCIDA",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-10-05T20:20:57.113557Z"
@@ -894,7 +894,7 @@
     "puesto": null,
     "responsable": null,
     "fecha_renovacion": "2025-08-12",
-    "dias_para_renovar": -419,
+    "dias_para_renovar": -420,
     "vida_util_estado": "VENCIDA",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-10-05T20:20:48.751908Z"
@@ -919,7 +919,7 @@
     "puesto": null,
     "responsable": null,
     "fecha_renovacion": "2025-08-12",
-    "dias_para_renovar": -419,
+    "dias_para_renovar": -420,
     "vida_util_estado": "VENCIDA",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-10-05T20:21:03.374194Z"
@@ -944,7 +944,7 @@
     "puesto": "ATENCIÓN AL CLIENTE",
     "responsable": "SOSA GOSME STEPFANIE KARLA",
     "fecha_renovacion": "2025-08-12",
-    "dias_para_renovar": -419,
+    "dias_para_renovar": -420,
     "vida_util_estado": "VENCIDA",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-10-05T15:09:48.077993Z"
@@ -969,7 +969,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "SORIA VALDIVIA E. DAVID",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:24:43.613066Z"
@@ -994,7 +994,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "SORIA VALDIVIA E. DAVID",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:24:34.550177Z"
@@ -1019,7 +1019,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "SORIA VALDIVIA E. DAVID",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:24:26.837733Z"
@@ -1044,7 +1044,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "SORIA VALDIVIA E. DAVID",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:24:17.462211Z"
@@ -1069,7 +1069,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "SORIA VALDIVIA E. DAVID",
     "fecha_renovacion": "2027-04-23",
-    "dias_para_renovar": 200,
+    "dias_para_renovar": 199,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:24:05.330167Z"
@@ -1094,7 +1094,7 @@
     "puesto": "ATENCIÓN AL CLIENTE",
     "responsable": "VILLENA ZEHNDER YORKA BETZI",
     "fecha_renovacion": "2025-08-12",
-    "dias_para_renovar": -419,
+    "dias_para_renovar": -420,
     "vida_util_estado": "VENCIDA",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-10-05T16:16:18.366871Z"
@@ -1119,7 +1119,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "FERNANDEZ ARELLANO REMIGIO DAVID",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:41:01.381630Z"
@@ -1144,7 +1144,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "FERNANDEZ ARELLANO REMIGIO DAVID",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:40:49.800139Z"
@@ -1169,7 +1169,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "FERNANDEZ ARELLANO REMIGIO DAVID",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:40:37.254087Z"
@@ -1194,7 +1194,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "FERNANDEZ ARELLANO REMIGIO DAVID",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:40:00.447894Z"
@@ -1219,7 +1219,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "FERNANDEZ ARELLANO REMIGIO DAVID",
     "fecha_renovacion": "2025-08-12",
-    "dias_para_renovar": -419,
+    "dias_para_renovar": -420,
     "vida_util_estado": "VENCIDA",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-10-05T16:15:50.280578Z"
@@ -1244,7 +1244,7 @@
     "puesto": "PTAP",
     "responsable": "WESTREICHER SOTO LUIS ALBERTO.",
     "fecha_renovacion": "2025-08-12",
-    "dias_para_renovar": -419,
+    "dias_para_renovar": -420,
     "vida_util_estado": "VENCIDA",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-10-05T16:15:38.374727Z"
@@ -1269,7 +1269,7 @@
     "puesto": "ATENCIÓN AL CLIENTE",
     "responsable": "ZUÑIGA INGA SADITH",
     "fecha_renovacion": "2025-08-12",
-    "dias_para_renovar": -419,
+    "dias_para_renovar": -420,
     "vida_util_estado": "VENCIDA",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-10-05T16:15:29.404725Z"
@@ -1294,7 +1294,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "RAMIREZ BALTODANO TITO EDEN",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:12:56.742034Z"
@@ -1319,7 +1319,7 @@
     "puesto": "ATENCIÓN AL CLIENTE",
     "responsable": "COLONIO QUIÑONEZ KELVA KELY",
     "fecha_renovacion": "2025-05-18",
-    "dias_para_renovar": -505,
+    "dias_para_renovar": -506,
     "vida_util_estado": "VENCIDA",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-10-05T14:21:59.415105Z"
@@ -1344,7 +1344,7 @@
     "puesto": "CATASTRO COMERCIAL",
     "responsable": "DURAND DE LA O FLOR DE MARIA",
     "fecha_renovacion": "2025-05-18",
-    "dias_para_renovar": -505,
+    "dias_para_renovar": -506,
     "vida_util_estado": "VENCIDA",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-10-05T14:21:42.327313Z"
@@ -1369,7 +1369,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "RAMIREZ BALTODANO TITO EDEN",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:12:48.158460Z"
@@ -1394,7 +1394,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "RAMIREZ BALTODANO TITO EDEN",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:12:36.078136Z"
@@ -1419,7 +1419,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "RAMIREZ BALTODANO TITO EDEN",
     "fecha_renovacion": "2028-02-25",
-    "dias_para_renovar": 508,
+    "dias_para_renovar": 507,
     "vida_util_estado": "VIGENTE",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-06-25T14:12:15.389949Z"
@@ -1444,7 +1444,7 @@
     "puesto": "JEFATURA UO",
     "responsable": "RAMIREZ BALTODANO TITO EDEN",
     "fecha_renovacion": "2025-05-18",
-    "dias_para_renovar": -505,
+    "dias_para_renovar": -506,
     "vida_util_estado": "VENCIDA",
     "created_at": "2026-06-24T20:59:12.439715Z",
     "updated_at": "2026-10-05T14:21:51.945920Z"
