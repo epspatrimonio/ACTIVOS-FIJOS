@@ -2116,7 +2116,7 @@ document.addEventListener('DOMContentLoaded', () => {
       body: [
         [{ content: 'RESPONSABLE:', styles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold', cellWidth: 42 } }, (salidaData.responsable || '').toUpperCase()],
         [{ content: 'CARGO:', styles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold', cellWidth: 42 } }, (salidaData.cargo || '').toUpperCase()],
-        [{ content: 'UBICACIÓN-DEPENDENCIA:', styles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold', cellWidth: 42 } }, (salidaData.ubicacion || '').toUpperCase()],
+        [{ content: 'SUCURSAL-DEPENDENCIA:', styles: { fillColor: [0, 176, 240], textColor: [255, 255, 255], fontStyle: 'bold', cellWidth: 42 } }, (salidaData.ubicacion || '').toUpperCase()],
       ],
       startY: posY, theme: 'grid',
       styles: { fontSize: 8, cellPadding: 2, valign: 'middle' },
@@ -2776,7 +2776,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const observaciones = document.getElementById('salida-observaciones')?.value.trim().toUpperCase();
 
       if (!fecha || !responsable || !cargo || !ubicacion || !motivo) {
-        alert('Por favor complete todos los datos obligatorios del formulario (Fecha, Motivo, Responsable, Cargo y Ubicación).');
+        alert('Por favor complete todos los datos obligatorios del formulario (Fecha, Motivo, Responsable, Cargo y Sucursal).');
         return;
       }
 
@@ -4299,7 +4299,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
       <div class="mt-2.5 grid grid-cols-2 gap-2 text-[10px] text-slate-600 bg-slate-50/80 p-2 rounded-lg border border-slate-150">
         <div>
-          <span class="font-bold text-slate-400 block text-[9px] uppercase">Ubicación</span>
+          <span class="font-bold text-slate-400 block text-[9px] uppercase">Sucursal</span>
           <span class="font-semibold text-slate-800">${item.sucursal || '—'}</span>
           ${item.localidad ? `<span class="block text-slate-500 text-[9px]">(${item.localidad})</span>` : ''}
         </div>
@@ -4891,7 +4891,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "Cód. Patrimonial",
             "Documento\nCta Contable",
             "Fecha Ingreso",
-            "Ubicación\nFinanciado",
+            "Sucursal\nFinanciado",
             "Denominación del Activo\nCategoría del Activo",
             "Características\nEspecificaciones",
             "Estado",
@@ -5009,7 +5009,7 @@ document.addEventListener('DOMContentLoaded', () => {
           [
             "Placa",
             "Cód. Patrimonial",
-            "Ubicación\nFinanciado",
+            "Sucursal\nFinanciado",
             "Denominación",
             "Especificaciones Técnicas",
             "Estado",
@@ -5094,7 +5094,7 @@ document.addEventListener('DOMContentLoaded', () => {
           [
             "Placa",
             "Cód. Patrimonial",
-            "Ubicación\nFinanciado",
+            "Sucursal\nFinanciado",
             "Denominación",
             "Especificaciones Técnicas",
             "Estado",
@@ -5210,7 +5210,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "Origen / Doc",
             "Denominación / Subcategoría",
             "Características",
-            "Ubicación",
+            "Sucursal",
             "Estado",
             "Valor Libros",
             "Responsable / Puesto"
@@ -5247,7 +5247,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "Tipo",
             "Denominación",
             "Marca/Modelo/Serie/Color",
-            "Ubicación",
+            "Sucursal",
             "Propietario del Bien",
             "F. Ingreso",
             "F. Salida"
