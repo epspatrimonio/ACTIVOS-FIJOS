@@ -404,8 +404,14 @@ document.addEventListener('DOMContentLoaded', () => {
       initSalidaModule();
       applyFilters();
       
-      // Adjuntar event listeners
-      searchInput.addEventListener('input', applyFilters);
+      // Adjuntar event listeners (búsqueda con debounce de 150ms para respuesta fluida)
+      let searchDebounceTimer = null;
+      searchInput.addEventListener('input', () => {
+        if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(() => {
+          applyFilters();
+        }, 150);
+      });
       sucursalSelect.addEventListener('change', applyFilters);
       if (localidadSelect) {
         localidadSelect.addEventListener('change', applyFilters);
@@ -714,7 +720,7 @@ document.addEventListener('DOMContentLoaded', () => {
           cod_patrimonial: cod || '—',
           denominacion: reg.denominacion || 'BIEN SOBRANTE',
           tipo_origen: 'SOBRANTE',
-          estado_activo: 'SOBRANTE',
+          estado_activo: reg.estado_activo || 'REGULAR',
           documento_tipo: 'SOBRANTE',
           n_doc: cod || 'SOBRANTE',
           cuenta_contable: '—',
@@ -743,7 +749,7 @@ document.addEventListener('DOMContentLoaded', () => {
           cod_patrimonial: cod || '—',
           denominacion: reg.denominacion || (isTer ? 'BIEN DE TERCEROS' : 'BIEN DE CONTROL'),
           tipo_origen: isTer ? 'BIEN DE TERCEROS' : 'BIEN DE CONTROL',
-          estado_activo: isTer ? 'TERCEROS' : (reg.estado_activo || 'BUENO'),
+          estado_activo: reg.estado_activo || 'BUENO',
           documento_tipo: isTer ? 'TERCEROS' : 'CONTROL',
           n_doc: cod || '—',
           cuenta_contable: '—',
@@ -779,7 +785,7 @@ document.addEventListener('DOMContentLoaded', () => {
         cod_patrimonial: cod || '—',
         denominacion: ter.denominacion || 'BIEN DE TERCEROS',
         tipo_origen: hasOwner ? 'BIEN DE TERCEROS' : 'SOBRANTE',
-        estado_activo: hasOwner ? 'TERCEROS' : 'SOBRANTE',
+        estado_activo: ter.estado_activo || 'REGULAR',
         documento_tipo: 'TERCEROS',
         n_doc: cod || '—',
         cuenta_contable: '—',
@@ -813,7 +819,7 @@ document.addEventListener('DOMContentLoaded', () => {
         cod_patrimonial: sobCod || '—',
         denominacion: sob.denominacion || 'BIEN SOBRANTE',
         tipo_origen: 'SOBRANTE',
-        estado_activo: 'SOBRANTE',
+        estado_activo: sob.estado_activo || 'REGULAR',
         documento_tipo: 'SOBRANTE',
         n_doc: sobCod || '—',
         cuenta_contable: '—',
@@ -1201,7 +1207,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } else if (currentTab === 'inventario') {
       dataset = getInventarioUnificado();
-      stateOptions = ['BUENO', 'REGULAR', 'MALO', 'PARA BAJA', 'BAJA', 'FALTANTE', 'SOBRANTE', 'TERCEROS'];
+      stateOptions = ['BUENO', 'REGULAR', 'MALO', 'PARA BAJA', 'BAJA', 'FALTANTE'];
     } else if (currentTab === 'terceros') {
       dataset = regularizacion.length > 0 ? regularizacion : terceros;
       stateOptions = ['CONCILIACION', 'SOBRANTE', 'FALTANTE', 'TERCERO', 'CONTROL'];
@@ -1598,11 +1604,11 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (inventarioSubFilter === 'CONCILIACION') {
         baseData = baseData.filter(i => i.tipo_origen === 'CONCILIACIÓN');
       } else if (inventarioSubFilter === 'TERCEROS') {
-        baseData = baseData.filter(i => i.estado_activo === 'TERCEROS');
+        baseData = baseData.filter(i => i.tipo_origen === 'BIEN DE TERCEROS');
       } else if (inventarioSubFilter === 'SOBRANTE') {
-        baseData = baseData.filter(i => i.estado_activo === 'SOBRANTE');
+        baseData = baseData.filter(i => i.tipo_origen === 'SOBRANTE');
       } else if (inventarioSubFilter === 'FALTANTE') {
-        baseData = baseData.filter(i => i.estado_activo === 'FALTANTE');
+        baseData = baseData.filter(i => i.tipo_origen === 'FALTANTE' || i.estado_activo === 'FALTANTE');
       }
     } else if (currentTab === 'terceros') {
       baseData = regularizacion.length > 0 ? regularizacion : terceros;
@@ -3378,7 +3384,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="font-bold text-slate-800 text-[0.72rem]">
             ${item.responsable || 'Sin Asignar'}
           </div>
-          ${item.puesto ? `<div class="text-[0.625rem] text-slate-500 italic font-medium uppercase mt-0.5">${item.puesto}</div>` : ''}
+          ${(item.puesto || item.unidad) ? `<div class="text-[0.625rem] text-slate-500 italic font-medium uppercase mt-0.5">${item.puesto || item.unidad}</div>` : ''}
         </td>
         <td class="px-1 py-1 whitespace-nowrap text-center">
           <div class="inline-flex items-center justify-center gap-1">
@@ -3619,7 +3625,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="font-bold text-slate-800 text-[0.72rem]">
             ${item.responsable || 'Sin Asignar'}
           </div>
-          ${item.puesto ? `<div class="text-[0.625rem] text-slate-500 italic font-medium uppercase mt-0.5">${item.puesto}</div>` : ''}
+          ${(item.puesto || item.unidad) ? `<div class="text-[0.625rem] text-slate-500 italic font-medium uppercase mt-0.5">${item.puesto || item.unidad}</div>` : ''}
         </td>
         <td class="px-1 py-1 whitespace-nowrap text-center">
           <button type="button" data-ficha-code="${item.cod_patrimonial}" class="btn-download-ficha-pdf inline-flex items-center justify-center gap-1 px-1.5 py-1 text-emerald-800 bg-emerald-50 hover:bg-emerald-100 hover:text-emerald-950 border border-emerald-300 rounded-lg shadow-2xs transition-all active:scale-95 cursor-pointer" title="Descargar Ficha Digital de Obra (PDF)">
@@ -4268,9 +4274,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const kpiActivos = allInventario.filter(i => i.tipo_origen === 'ACTIVO FIJO' || i.tipo_origen === 'INCORPORACIÓN').length;
     const kpiObras = allInventario.filter(i => i.tipo_origen === 'OBRA EN CURSO').length;
     const kpiConciliacion = allInventario.filter(i => i.tipo_origen === 'CONCILIACIÓN').length;
-    const kpiTerceros = allInventario.filter(i => i.estado_activo === 'TERCEROS').length;
-    const kpiSobrantes = allInventario.filter(i => i.estado_activo === 'SOBRANTE').length;
-    const kpiFaltantes = allInventario.filter(i => i.estado_activo === 'FALTANTE').length;
+    const kpiTerceros = allInventario.filter(i => i.tipo_origen === 'BIEN DE TERCEROS').length;
+    const kpiSobrantes = allInventario.filter(i => i.tipo_origen === 'SOBRANTE').length;
+    const kpiFaltantes = allInventario.filter(i => i.tipo_origen === 'FALTANTE' || i.estado_activo === 'FALTANTE').length;
     const kpiInversion = allInventario.reduce((acc, i) => acc + (Number(i.valor_en_libros) || 0), 0);
 
     const elTotal = document.getElementById('inventario-kpi-total');
@@ -4308,6 +4314,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
+    const frag = document.createDocumentFragment();
+    const isMobileViewport = window.innerWidth < 768;
     data.forEach(item => {
       const row = document.createElement('tr');
       row.className = 'hover:bg-blue-50/75 text-slate-700 transition-colors border-b border-slate-150';
@@ -4325,12 +4333,14 @@ document.addEventListener('DOMContentLoaded', () => {
         origenBadge = '<span class="inline-block mt-0.5 px-1 py-0.2 text-[8px] font-bold text-sky-700 bg-sky-50 border border-sky-200 rounded">CONCILIACIÓN</span>';
       } else if (item.tipo_origen === 'INCORPORACIÓN') {
         origenBadge = '<span class="inline-block mt-0.5 px-1 py-0.2 text-[8px] font-bold text-purple-700 bg-purple-50 border border-purple-200 rounded">INCORP.</span>';
-      } else if (item.estado_activo === 'TERCEROS') {
+      } else if (item.tipo_origen === 'BIEN DE TERCEROS') {
         origenBadge = '<span class="inline-block mt-0.5 px-1 py-0.2 text-[8px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded">TERCERO</span>';
-      } else if (item.estado_activo === 'SOBRANTE') {
+      } else if (item.tipo_origen === 'SOBRANTE') {
         origenBadge = '<span class="inline-block mt-0.5 px-1 py-0.2 text-[8px] font-bold text-purple-700 bg-purple-50 border border-purple-200 rounded">SOBRANTE</span>';
-      } else if (item.estado_activo === 'FALTANTE') {
+      } else if (item.tipo_origen === 'FALTANTE' || item.estado_activo === 'FALTANTE') {
         origenBadge = '<span class="inline-block mt-0.5 px-1 py-0.2 text-[8px] font-bold text-rose-700 bg-rose-50 border border-rose-200 rounded">FALTANTE</span>';
+      } else if (item.tipo_origen === 'BIEN DE CONTROL') {
+        origenBadge = '<span class="inline-block mt-0.5 px-1 py-0.2 text-[8px] font-bold text-slate-700 bg-slate-100 border border-slate-300 rounded">CONTROL</span>';
       } else {
         origenBadge = '<span class="inline-block mt-0.5 px-1 py-0.2 text-[8px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded">ACTIVO FIJO</span>';
       }
@@ -4420,7 +4430,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="font-bold text-slate-800 text-[10px] leading-tight">
             ${item.responsable || 'Sin Asignar'}
           </div>
-          ${item.puesto ? `<div class="text-[8.5px] text-slate-500 italic uppercase mt-0.5">${item.puesto}</div>` : ''}
+          ${(item.puesto || item.unidad) ? `<div class="text-[8.5px] text-slate-500 italic uppercase mt-0.5">${item.puesto || item.unidad}</div>` : ''}
         </td>
         <td class="px-1 py-1 whitespace-nowrap text-center align-middle">
           ${item.cod_patrimonial && !item.is_sobrante_origin && !item.is_faltante_origin ? `
@@ -4430,9 +4440,10 @@ document.addEventListener('DOMContentLoaded', () => {
           ` : '<span class="text-slate-300 text-xs">—</span>'}
         </td>
       `;
-      tbody.appendChild(row);
-      renderInventarioMobileCard(item);
+      frag.appendChild(row);
+      if (isMobileViewport) renderInventarioMobileCard(item);
     });
+    tbody.appendChild(frag);
   }
 
   function renderInventarioMobileCard(item) {
@@ -4464,7 +4475,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div>
           <span class="font-bold text-slate-400 block text-[9px] uppercase">Responsable</span>
           <span class="font-semibold text-slate-800">${item.responsable || 'Sin Asignar'}</span>
-          ${item.puesto ? `<span class="block text-slate-500 text-[9px] truncate">${item.puesto}</span>` : ''}
+          ${(item.puesto || item.unidad) ? `<span class="block text-slate-500 text-[9px] truncate">${item.puesto || item.unidad}</span>` : ''}
         </div>
         <div>
           <span class="font-bold text-slate-400 block text-[9px] uppercase">Valor Libros</span>
@@ -4847,7 +4858,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "Sucursal": item.sucursal,
         "Localidad": item.localidad || "",
         "Unidad Orgánica": item.unidad || "",
-        "Puesto": item.puesto || "",
+        "Puesto": item.puesto || item.unidad || "",
         "Responsable": item.responsable || "Sin Asignar",
         "N° Factura": item.numero_factura || "",
         "Fecha Alta": item.fecha_alta_factura || "",
@@ -4875,7 +4886,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "Sucursal": item.sucursal,
         "Localidad": item.localidad || "",
         "Unidad Orgánica": item.unidad || "",
-        "Puesto": item.puesto || "",
+        "Puesto": item.puesto || item.unidad || "",
         "Responsable": item.responsable || "Sin Asignar",
         "N° Factura": item.numero_factura || "",
         "Fecha Alta": item.fecha_alta_factura || "",
@@ -4948,7 +4959,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "IMEI": item.imei || "",
         "Operador": item.operador || "",
         "Sucursal": item.sucursal,
-        "Puesto": item.puesto || "",
+        "Puesto": item.puesto || item.unidad || "",
         "Responsable": item.responsable || "Sin Asignar",
         "Fecha Ingreso": item.fecha_ingreso || "",
         "Fecha Asignación": item.fecha_asignacion || "",
