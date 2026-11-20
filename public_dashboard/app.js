@@ -3,8 +3,12 @@ document.addEventListener('DOMContentLoaded', () => {
   let celulares = [];
   let inventario = [];
   let terceros = [];
+  let regularizacion = [];
+  let vehiculosCompleto = [];
   let salidas = [];
-  let currentTab = 'activos'; // activos | vehiculos | celulares | inventario | terceros | soat | asignacion | salidas
+  let currentTab = 'activos'; // activos | vehiculos | celulares | inventario | terceros (regularizacion) | soat | asignacion | salidas
+  let inventarioSubFilter = 'ALL'; // ALL | ACTIVOS | OBRAS | CONCILIACION | TERCEROS | SOBRANTE | FALTANTE
+  let regularizacionSubTab = 'ALL'; // ALL | CONCILIACION | SOBRANTE | FALTANTE | TERCERO | CONTROL
   let currentFilteredData = [];
   let responsablesMap = {};
   let selectedResponsableKey = null;
@@ -127,12 +131,14 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const ts = Date.now();
       const fetchOpts = { cache: 'no-store' };
-      const [assetsResponse, celularesResponse, inventarioResponse, tercerosResponse, salidasResponse] = await Promise.all([
+      const [assetsResponse, celularesResponse, inventarioResponse, tercerosResponse, salidasResponse, regResponse, vehCompResponse] = await Promise.all([
         fetch(`./activos.json?t=${ts}`, fetchOpts),
         fetch(`./celulares.json?t=${ts}`, fetchOpts).catch(() => null),
         fetch(`./inventario_fisico.json?t=${ts}`, fetchOpts).catch(() => null),
         fetch(`./bienes_terceros.json?t=${ts}`, fetchOpts).catch(() => null),
-        fetch(`./salidas.json?t=${ts}`, fetchOpts).catch(() => null)
+        fetch(`./salidas.json?t=${ts}`, fetchOpts).catch(() => null),
+        fetch(`./regularizacion.json?t=${ts}`, fetchOpts).catch(() => null),
+        fetch(`./vehiculos_completo.json?t=${ts}`, fetchOpts).catch(() => null)
       ]);
       
       if (!assetsResponse.ok) {
@@ -162,6 +168,18 @@ document.addEventListener('DOMContentLoaded', () => {
         salidas = await salidasResponse.json();
       } else {
         salidas = [];
+      }
+
+      if (regResponse && regResponse.ok) {
+        regularizacion = await regResponse.json();
+      } else {
+        regularizacion = [];
+      }
+
+      if (vehCompResponse && vehCompResponse.ok) {
+        vehiculosCompleto = await vehCompResponse.json();
+      } else {
+        vehiculosCompleto = [];
       }
 
       // Fusionar órdenes almacenadas en localStorage para no perder registros locales recientes
@@ -589,8 +607,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Filtrar vehículos del listado consolidado de activos
+  // Filtrar vehículos unificados (Activos Fijos + Conciliación con SOAT & RT íntegros)
   function getVehicles() {
+    if (Array.isArray(vehiculosCompleto) && vehiculosCompleto.length > 0) {
+      return vehiculosCompleto;
+    }
     return assets.filter(item => 
       (item.categoria && item.categoria.toLowerCase().includes('vehiculo')) ||
       (item.subcategoria && item.subcategoria.toLowerCase().includes('vehiculo')) ||
@@ -600,24 +621,33 @@ document.addEventListener('DOMContentLoaded', () => {
     );
   }
 
-  // Obtener Inventario General Unificado (Activos Fijos, Obras, Incorporaciones, Bienes de Terceros y Sobrantes/Faltantes)
+  // Obtener Inventario General Unificado (Activos Fijos, Obras, Conciliación, Sobrantes, Faltantes, Terceros y Control)
   function getInventarioUnificado() {
     const faltantesMap = new Map();
-    const sobrantesList = [];
+    const sobrantesLegacy = [];
+
+    (regularizacion || []).forEach(reg => {
+      if (String(reg.sub_modulo || '').toUpperCase() === 'FALTANTE') {
+        faltantesMap.set(String(reg.cod_patrimonial || '').trim(), reg);
+      }
+    });
     (inventario || []).forEach(inv => {
       const tipoUpper = String(inv.tipo || '').toUpperCase().trim();
-      if (tipoUpper === 'FALTANTE') {
-        faltantesMap.set(String(inv.cod_patrimonial || '').trim(), inv);
+      const cod = String(inv.cod_patrimonial || '').trim();
+      if (tipoUpper === 'FALTANTE' && !faltantesMap.has(cod)) {
+        faltantesMap.set(cod, inv);
       } else if (tipoUpper === 'SOBRANTE') {
-        sobrantesList.push(inv);
+        sobrantesLegacy.push(inv);
       }
     });
 
     const unifiedList = [];
+    const seenCodes = new Set();
 
     // 1. Activos Fijos, Obras en Curso e Incorporaciones
     (assets || []).forEach(act => {
       const cod = String(act.cod_patrimonial || '').trim();
+      if (cod) seenCodes.add(cod);
       const isFaltante = faltantesMap.has(cod);
       const faltanteInfo = isFaltante ? faltantesMap.get(cod) : null;
 
@@ -630,7 +660,6 @@ document.addEventListener('DOMContentLoaded', () => {
         tipo_origen = 'INCORPORACIÓN';
       }
 
-      // Si fue reportado como faltante, su estado pasa a FALTANTE
       const estadoFinal = isFaltante ? 'FALTANTE' : (act.estado_activo || 'BUENO');
 
       unifiedList.push({
@@ -642,95 +671,178 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // 2. Bienes de Terceros
-    // Regla: Los bienes de terceros pueden tener o no propietario.
-    // Si tiene propietario -> Estado: TERCEROS
-    // Si no tiene propietario -> Estado: SOBRANTE (evalúa para su incorporación a la tabla)
-    (terceros || []).forEach(ter => {
-      const propManual = (ter.propietario_manual && String(ter.propietario_manual).trim()) ? String(ter.propietario_manual).trim() : '';
-      const respVal = (ter.responsable && String(ter.responsable).trim() && ter.responsable !== 'Sin Asignar' && ter.responsable !== '—') ? String(ter.responsable).trim() : '';
-      const propFinal = propManual || respVal;
-      const hasOwner = Boolean(propFinal);
+    // 2. Registros del módulo Regularización (CONCILIACION, SOBRANTE, TERCERO, CONTROL)
+    (regularizacion || []).forEach(reg => {
+      const sub = String(reg.sub_modulo || '').toUpperCase().trim();
+      const cod = String(reg.cod_patrimonial || '').trim();
+      if (sub === 'FALTANTE') return;
+      if (cod && seenCodes.has(cod)) return;
+      if (cod) seenCodes.add(cod);
+      const unidadOrg = reg.puesto || reg.unidad || '';
 
-      const estadoActivo = hasOwner ? 'TERCEROS' : 'SOBRANTE';
-      const tipoOrigen = hasOwner ? 'BIEN DE TERCEROS' : 'SOBRANTE (TERCEROS)';
-
-      unifiedList.push({
-        cod_patrimonial: ter.cod_patrimonial || '—',
-        denominacion: ter.denominacion || 'BIEN DE TERCEROS',
-        tipo_origen: tipoOrigen,
-        estado_activo: estadoActivo,
-        documento_tipo: 'TERCEROS',
-        n_doc: ter.cod_patrimonial || '—',
-        cuenta_contable: '—',
-        centro_costo: '—',
-        fecha_alta_factura: ter.fecha_ingreso || (ter.created_at ? ter.created_at.split('T')[0] : ''),
-        fecha_registro_contable: ter.fecha_ingreso || '',
-        fecha_asignacion: ter.fecha_ingreso || '',
-        sucursal: ter.sucursal || 'SEDE CENTRAL',
-        localidad: ter.localidad || 'SEDE CENTRAL',
-        fuente: hasOwner ? 'Bienes de Terceros' : 'Sobrante en Custodia',
-        categoria: 'BIENES DE TERCEROS',
-        subcategoria: ter.subcategoria || (hasOwner ? 'Custodia / Terceros' : 'Sobrante sin Dueño'),
-        marca: ter.marca || '',
-        modelo: ter.modelo || '',
-        numero_serie: ter.numero_serie || '',
-        color: ter.color || '',
-        especificaciones: ter.caracteristicas_accesorios || ter.especificaciones || (hasOwner ? 'Bien perteneciente a terceros' : 'Evaluación para su incorporación'),
-        caracteristicas_accesorios: ter.caracteristicas_accesorios || '',
-        valor_en_libros: 0,
-        valor_neto: 0,
-        depreciacion_acumulada: 0,
-        responsable: hasOwner ? propFinal : 'SIN PROPIETARIO (EVALUAR INCORPORACIÓN)',
-        puesto: hasOwner ? (ter.puesto || 'Propietario / Tercero') : 'En Custodia Temporal',
-        observaciones: ter.observaciones || (hasOwner ? 'Propiedad de Terceros' : 'Sobrante detectado - En evaluación para su incorporación'),
-        is_terceros_origin: true,
-        raw_tercero: ter
-      });
-    });
-
-    // 3. Sobrantes de Inventario Físico (que no estén repetidos)
-    sobrantesList.forEach(sob => {
-      const sobCod = String(sob.cod_patrimonial || '').trim();
-      if (!unifiedList.some(item => String(item.cod_patrimonial || '').trim() === sobCod)) {
+      if (sub === 'CONCILIACION') {
         unifiedList.push({
-          cod_patrimonial: sob.cod_patrimonial || '—',
-          denominacion: sob.denominacion || 'BIEN SOBRANTE',
+          ...reg,
+          cod_patrimonial: cod || '—',
+          denominacion: reg.denominacion || 'BIEN EN CONCILIACIÓN',
+          tipo_origen: 'CONCILIACIÓN',
+          estado_activo: reg.estado_activo || 'REGULAR',
+          documento_tipo: 'CONCILIACION',
+          n_doc: 'CONCILIACIÓN',
+          cuenta_contable: reg.cuenta_contable || '—',
+          centro_costo: reg.centro_costo || '—',
+          fecha_alta_factura: reg.fecha_alta_factura || reg.fecha_ingreso || '',
+          fecha_registro_contable: reg.fecha_registro_contable || reg.fecha_alta_factura || '',
+          fecha_asignacion: reg.fecha_asignacion || '',
+          sucursal: reg.sucursal || '—',
+          localidad: reg.localidad || '—',
+          fuente: 'CONCILIACIÓN',
+          categoria: reg.categoria || 'CONCILIACIÓN',
+          subcategoria: reg.subcategoria || reg.categoria || 'Pendiente O/C',
+          especificaciones: reg.caracteristicas_accesorios || reg.observaciones || '',
+          valor_en_libros: Number(reg.valor_en_libros) || 0,
+          valor_neto: Number(reg.valor_en_libros) || 0,
+          depreciacion_acumulada: 0,
+          responsable: reg.responsable || 'Sin Asignar',
+          puesto: unidadOrg,
+          observaciones: reg.observaciones || reg.observaciones_calidad || '',
+          is_conciliacion_origin: true
+        });
+      } else if (sub === 'SOBRANTE') {
+        unifiedList.push({
+          ...reg,
+          cod_patrimonial: cod || '—',
+          denominacion: reg.denominacion || 'BIEN SOBRANTE',
           tipo_origen: 'SOBRANTE',
           estado_activo: 'SOBRANTE',
           documento_tipo: 'SOBRANTE',
-          n_doc: sob.cod_patrimonial || '—',
+          n_doc: cod || 'SOBRANTE',
           cuenta_contable: '—',
           centro_costo: '—',
-          fecha_alta_factura: sob.created_at ? sob.created_at.split('T')[0] : '',
-          fecha_registro_contable: '',
-          fecha_asignacion: '',
-          sucursal: sob.sucursal || 'SEDE CENTRAL',
-          localidad: sob.localidad || 'LA MERCED',
-          fuente: 'Inventario Físico',
-          categoria: sob.categoria || 'SOBRANTES',
-          subcategoria: sob.subcategoria || 'Sobrante de Inventario',
-          marca: sob.marca || '',
-          modelo: sob.modelo || '',
-          numero_serie: sob.numero_serie || '',
-          color: sob.color || '',
-          especificaciones: sob.caracteristicas_accesorios || sob.observaciones || 'Sobrante físico - Evaluar incorporación',
-          caracteristicas_accesorios: sob.caracteristicas_accesorios || '',
-          valor_en_libros: 0,
-          valor_neto: 0,
+          fecha_alta_factura: reg.fecha_ingreso || (reg.created_at ? String(reg.created_at).split('T')[0] : ''),
+          fecha_registro_contable: reg.fecha_ingreso || '',
+          fecha_asignacion: reg.fecha_asignacion || '',
+          sucursal: reg.sucursal || '—',
+          localidad: reg.localidad || '—',
+          fuente: 'SOBRANTE',
+          categoria: reg.categoria || 'SOBRANTES',
+          subcategoria: reg.subcategoria || reg.categoria || 'Sobrante de Inventario',
+          especificaciones: reg.caracteristicas_accesorios || reg.observaciones || '',
+          valor_en_libros: Number(reg.valor_en_libros) || 0,
+          valor_neto: Number(reg.valor_en_libros) || 0,
           depreciacion_acumulada: 0,
-          responsable: 'SIN ASIGNAR (EVALUAR INCORPORACIÓN)',
-          puesto: 'En Custodia Patrimonial',
-          observaciones: sob.observaciones || 'Detectado en inventario físico - Evaluar incorporación',
-          is_sobrante_origin: true,
-          raw_sobrante: sob
+          responsable: reg.responsable || 'Sin Asignar',
+          puesto: unidadOrg,
+          observaciones: reg.observaciones || '',
+          is_sobrante_origin: true
+        });
+      } else if (sub === 'TERCERO' || sub === 'CONTROL') {
+        const isTer = sub === 'TERCERO';
+        unifiedList.push({
+          ...reg,
+          cod_patrimonial: cod || '—',
+          denominacion: reg.denominacion || (isTer ? 'BIEN DE TERCEROS' : 'BIEN DE CONTROL'),
+          tipo_origen: isTer ? 'BIEN DE TERCEROS' : 'BIEN DE CONTROL',
+          estado_activo: isTer ? 'TERCEROS' : (reg.estado_activo || 'BUENO'),
+          documento_tipo: isTer ? 'TERCEROS' : 'CONTROL',
+          n_doc: cod || '—',
+          cuenta_contable: '—',
+          centro_costo: '—',
+          fecha_alta_factura: reg.fecha_ingreso || '',
+          fecha_registro_contable: reg.fecha_ingreso || '',
+          fecha_asignacion: reg.fecha_asignacion || reg.fecha_ingreso || '',
+          sucursal: reg.sucursal || 'SEDE CENTRAL',
+          localidad: reg.localidad || 'LA MERCED',
+          fuente: isTer ? 'Bienes de Terceros' : 'Bien de Control',
+          categoria: reg.categoria || (isTer ? 'BIENES DE TERCEROS' : 'CONTROL'),
+          subcategoria: reg.subcategoria || (isTer ? 'Custodia / Terceros' : 'Control Interno'),
+          especificaciones: reg.caracteristicas_accesorios || '',
+          valor_en_libros: Number(reg.valor_en_libros) || 0,
+          valor_neto: Number(reg.valor_en_libros) || 0,
+          depreciacion_acumulada: 0,
+          responsable: isTer ? (reg.propietario_manual || reg.responsable || 'Tercero') : (reg.responsable || 'Sin Asignar'),
+          puesto: unidadOrg || (isTer ? 'Propietario / Tercero' : ''),
+          observaciones: reg.observaciones || '',
+          is_terceros_origin: isTer
         });
       }
     });
 
-    // 4. Faltantes de Inventario Físico que no hayan hecho match con ningún activo
+    // 3. Fallback legacy Terceros / Sobrantes (sin duplicar códigos)
+    (terceros || []).forEach(ter => {
+      const cod = String(ter.cod_patrimonial || '').trim();
+      if (cod && seenCodes.has(cod)) return;
+      if (cod) seenCodes.add(cod);
+      const propFinal = String(ter.propietario_manual || ter.responsable || '').trim();
+      const hasOwner = Boolean(propFinal && propFinal !== 'Sin Asignar' && propFinal !== '—');
+      unifiedList.push({
+        cod_patrimonial: cod || '—',
+        denominacion: ter.denominacion || 'BIEN DE TERCEROS',
+        tipo_origen: hasOwner ? 'BIEN DE TERCEROS' : 'SOBRANTE',
+        estado_activo: hasOwner ? 'TERCEROS' : 'SOBRANTE',
+        documento_tipo: 'TERCEROS',
+        n_doc: cod || '—',
+        cuenta_contable: '—',
+        centro_costo: '—',
+        fecha_alta_factura: ter.fecha_ingreso || '',
+        sucursal: ter.sucursal || 'SEDE CENTRAL',
+        localidad: ter.localidad || 'LA MERCED',
+        fuente: hasOwner ? 'Bienes de Terceros' : 'SOBRANTE',
+        categoria: 'BIENES DE TERCEROS',
+        subcategoria: ter.subcategoria || 'Custodia / Terceros',
+        marca: ter.marca || '',
+        modelo: ter.modelo || '',
+        numero_serie: ter.numero_serie || '',
+        color: ter.color || '',
+        especificaciones: ter.caracteristicas_accesorios || '',
+        valor_en_libros: 0,
+        valor_neto: 0,
+        depreciacion_acumulada: 0,
+        responsable: hasOwner ? propFinal : 'Sin Asignar',
+        puesto: ter.puesto || '',
+        observaciones: ter.observaciones || '',
+        is_terceros_origin: true
+      });
+    });
+
+    sobrantesLegacy.forEach(sob => {
+      const sobCod = String(sob.cod_patrimonial || '').trim();
+      if (sobCod && seenCodes.has(sobCod)) return;
+      if (sobCod) seenCodes.add(sobCod);
+      unifiedList.push({
+        cod_patrimonial: sobCod || '—',
+        denominacion: sob.denominacion || 'BIEN SOBRANTE',
+        tipo_origen: 'SOBRANTE',
+        estado_activo: 'SOBRANTE',
+        documento_tipo: 'SOBRANTE',
+        n_doc: sobCod || '—',
+        cuenta_contable: '—',
+        centro_costo: '—',
+        fecha_alta_factura: sob.created_at ? sob.created_at.split('T')[0] : '',
+        sucursal: sob.sucursal || 'SEDE CENTRAL',
+        localidad: sob.localidad || 'LA MERCED',
+        fuente: 'SOBRANTE',
+        categoria: sob.categoria || 'SOBRANTES',
+        subcategoria: sob.subcategoria || 'Sobrante de Inventario',
+        marca: sob.marca || '',
+        modelo: sob.modelo || '',
+        numero_serie: sob.numero_serie || '',
+        color: sob.color || '',
+        especificaciones: sob.caracteristicas_accesorios || sob.observaciones || '',
+        valor_en_libros: 0,
+        valor_neto: 0,
+        depreciacion_acumulada: 0,
+        responsable: 'Sin Asignar',
+        puesto: '',
+        observaciones: sob.observaciones || '',
+        is_sobrante_origin: true
+      });
+    });
+
+    // 4. Faltantes sin coincidencia en Activos Fijos
     faltantesMap.forEach((falt, cod) => {
-      if (!unifiedList.some(item => String(item.cod_patrimonial || '').trim() === cod)) {
+      if (!seenCodes.has(cod)) {
+        seenCodes.add(cod);
         unifiedList.push({
           cod_patrimonial: cod,
           denominacion: falt.denominacion || 'BIEN FALTANTE',
@@ -738,30 +850,26 @@ document.addEventListener('DOMContentLoaded', () => {
           estado_activo: 'FALTANTE',
           documento_tipo: 'FALTANTE',
           n_doc: cod,
-          cuenta_contable: '—',
-          centro_costo: '—',
-          fecha_alta_factura: falt.created_at ? falt.created_at.split('T')[0] : '',
-          fecha_registro_contable: '',
-          fecha_asignacion: '',
+          cuenta_contable: falt.cuenta_contable || '—',
+          centro_costo: falt.centro_costo || '—',
+          fecha_alta_factura: falt.fecha_ingreso || (falt.created_at ? String(falt.created_at).split('T')[0] : ''),
           sucursal: falt.sucursal || '—',
           localidad: falt.localidad || '—',
-          fuente: 'Inventario Físico',
+          fuente: 'FALTANTE',
           categoria: falt.categoria || 'FALTANTES',
           subcategoria: falt.subcategoria || 'Faltante de Inventario',
           marca: falt.marca || '',
           modelo: falt.modelo || '',
           numero_serie: falt.numero_serie || '',
           color: falt.color || '',
-          especificaciones: falt.caracteristicas_accesorios || falt.observaciones || 'No ubicado en inventario físico',
-          caracteristicas_accesorios: falt.caracteristicas_accesorios || '',
-          valor_en_libros: 0,
+          especificaciones: falt.caracteristicas_accesorios || falt.observaciones || '',
+          valor_en_libros: Number(falt.valor_en_libros) || 0,
           valor_neto: 0,
           depreciacion_acumulada: 0,
-          responsable: 'PENDIENTE DE UBICACIÓN',
-          puesto: 'Faltante de Inventario',
-          observaciones: falt.observaciones || 'No habido en relevamiento físico',
-          is_faltante_origin: true,
-          raw_faltante: falt
+          responsable: falt.responsable || 'PENDIENTE DE UBICACIÓN',
+          puesto: falt.puesto || falt.unidad || '',
+          observaciones: falt.observaciones || '',
+          is_faltante_origin: true
         });
       }
     });
@@ -785,6 +893,8 @@ document.addEventListener('DOMContentLoaded', () => {
       dataset = getVehicles();
     } else if (currentTab === 'inventario') {
       dataset = getInventarioUnificado();
+    } else if (currentTab === 'terceros') {
+      dataset = regularizacion.length > 0 ? regularizacion : terceros;
     } else {
       updateCategoryState();
       populateSubcategoryFilters();
@@ -966,6 +1076,8 @@ document.addEventListener('DOMContentLoaded', () => {
       dataset = getVehicles();
     } else if (currentTab === 'inventario') {
       dataset = getInventarioUnificado();
+    } else if (currentTab === 'terceros') {
+      dataset = regularizacion.length > 0 ? regularizacion : terceros;
     } else {
       updateSubcategoryState();
       return;
@@ -1055,7 +1167,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const isTipo = currentTab === 'terceros';
     const isVehiculo = currentTab === 'vehiculos' || currentTab === 'soat';
     if (label) {
-      label.textContent = isTipo ? 'Tipo' : (isVehiculo ? 'ESTADO VEH.' : 'Estado');
+      label.textContent = isTipo ? 'Sub-Módulo' : (isVehiculo ? 'ESTADO VEH.' : 'Estado');
     }
     
     // Limpiar opciones manteniendo la primera por defecto
@@ -1091,13 +1203,13 @@ document.addEventListener('DOMContentLoaded', () => {
       dataset = getInventarioUnificado();
       stateOptions = ['BUENO', 'REGULAR', 'MALO', 'PARA BAJA', 'BAJA', 'FALTANTE', 'SOBRANTE', 'TERCEROS'];
     } else if (currentTab === 'terceros') {
-      dataset = terceros;
-      stateOptions = ['TERCERO', 'CONTROL'];
+      dataset = regularizacion.length > 0 ? regularizacion : terceros;
+      stateOptions = ['CONCILIACION', 'SOBRANTE', 'FALTANTE', 'TERCERO', 'CONTROL'];
     }
     
     // Poblar Sucursales con SEDE CENTRAL primero
     // Consolidar de todos los datasets para mantener la lista completa y consistente en todas las pestañas
-    const allItems = [...assets, ...celulares, ...inventario, ...terceros];
+    const allItems = [...assets, ...celulares, ...inventario, ...terceros, ...regularizacion, ...vehiculosCompleto];
     const sucursalNames = sortSucursales(allItems.map(item => item.sucursal));
     sucursalNames.forEach(suc => {
       const option = document.createElement('option');
@@ -1219,7 +1331,7 @@ document.addEventListener('DOMContentLoaded', () => {
         moduleTitle.textContent = 'INVENTARIO GENERAL DE ACTIVOS Y BIENES';
       } else if (currentTab === 'terceros') {
         activeBtn = tabTerceros;
-        moduleTitle.textContent = 'BIENES DE TERCEROS';
+        moduleTitle.textContent = 'REGULARIZACIÓN PATRIMONIAL (NIIF / NIC 16)';
       } else if (currentTab === 'asignacion') {
         activeBtn = tabAsignacion;
         moduleTitle.textContent = 'ACTA DE BIENES';
@@ -1479,8 +1591,24 @@ document.addEventListener('DOMContentLoaded', () => {
       baseData = celulares;
     } else if (currentTab === 'inventario') {
       baseData = getInventarioUnificado();
+      if (inventarioSubFilter === 'ACTIVOS') {
+        baseData = baseData.filter(i => i.tipo_origen === 'ACTIVO FIJO' || i.tipo_origen === 'INCORPORACIÓN');
+      } else if (inventarioSubFilter === 'OBRAS') {
+        baseData = baseData.filter(i => i.tipo_origen === 'OBRA EN CURSO');
+      } else if (inventarioSubFilter === 'CONCILIACION') {
+        baseData = baseData.filter(i => i.tipo_origen === 'CONCILIACIÓN');
+      } else if (inventarioSubFilter === 'TERCEROS') {
+        baseData = baseData.filter(i => i.estado_activo === 'TERCEROS');
+      } else if (inventarioSubFilter === 'SOBRANTE') {
+        baseData = baseData.filter(i => i.estado_activo === 'SOBRANTE');
+      } else if (inventarioSubFilter === 'FALTANTE') {
+        baseData = baseData.filter(i => i.estado_activo === 'FALTANTE');
+      }
     } else if (currentTab === 'terceros') {
-      baseData = terceros;
+      baseData = regularizacion.length > 0 ? regularizacion : terceros;
+      if (regularizacionSubTab && regularizacionSubTab !== 'ALL') {
+        baseData = baseData.filter(i => String(i.sub_modulo || i.tipo || '').toUpperCase() === regularizacionSubTab);
+      }
     } else if (currentTab === 'salida-tabla' || currentTab === 'salidas') {
       baseData = salidas;
     } else if (currentTab === 'contable') {
@@ -1567,10 +1695,10 @@ document.addEventListener('DOMContentLoaded', () => {
       // Filtro de Localidad
       const localidadMatch = !selectedLocalidad || item.localidad === selectedLocalidad;
 
-      // Filtro de Estado del Activo
+      // Filtro de Estado del Activo / Sub-Módulo
       const estadoMatch = !selectedEstado || 
         (currentTab === 'celulares' ? item.estado === selectedEstado : 
-         (currentTab === 'terceros' ? item.tipo === selectedEstado : item.estado_activo === selectedEstado));
+         (currentTab === 'terceros' ? String(item.sub_modulo || item.tipo || '').toUpperCase() === selectedEstado : item.estado_activo === selectedEstado));
 
       // Filtro de Estado del SOAT (para VEHICULOS y SOAT & RT)
       const isBaja = item.estado_activo === 'PARA BAJA' || item.estado_activo === 'BAJA' || item.estado_soat === 'NO_REQUIERE' || item.soat_estado === 'NO_REQUIERE';
@@ -1668,15 +1796,23 @@ document.addEventListener('DOMContentLoaded', () => {
             (item.marca && item.marca.toLowerCase().includes(query)) ||
             (item.modelo && item.modelo.toLowerCase().includes(query)) ||
             (item.numero_serie && item.numero_serie.toLowerCase().includes(query)) ||
+            (item.placa && item.placa.toLowerCase().includes(query)) ||
+            (item.responsable && item.responsable.toLowerCase().includes(query)) ||
+            (item.puesto && item.puesto.toLowerCase().includes(query)) ||
             (item.categoria && item.categoria.toLowerCase().includes(query)) ||
             (item.subcategoria && item.subcategoria.toLowerCase().includes(query));
         } else if (currentTab === 'terceros') {
           textMatch = 
             (item.cod_patrimonial && item.cod_patrimonial.toLowerCase().includes(query)) ||
             (item.denominacion && item.denominacion.toLowerCase().includes(query)) ||
+            (item.subcategoria && item.subcategoria.toLowerCase().includes(query)) ||
             (item.marca && item.marca.toLowerCase().includes(query)) ||
             (item.modelo && item.modelo.toLowerCase().includes(query)) ||
             (item.numero_serie && item.numero_serie.toLowerCase().includes(query)) ||
+            (item.placa && item.placa.toLowerCase().includes(query)) ||
+            (item.puesto && item.puesto.toLowerCase().includes(query)) ||
+            (item.unidad && item.unidad.toLowerCase().includes(query)) ||
+            (item.propietario_manual && item.propietario_manual.toLowerCase().includes(query)) ||
             (item.responsable && item.responsable.toLowerCase().includes(query));
         } else {
           // Activos
@@ -4131,6 +4267,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const kpiTotal = allInventario.length;
     const kpiActivos = allInventario.filter(i => i.tipo_origen === 'ACTIVO FIJO' || i.tipo_origen === 'INCORPORACIÓN').length;
     const kpiObras = allInventario.filter(i => i.tipo_origen === 'OBRA EN CURSO').length;
+    const kpiConciliacion = allInventario.filter(i => i.tipo_origen === 'CONCILIACIÓN').length;
     const kpiTerceros = allInventario.filter(i => i.estado_activo === 'TERCEROS').length;
     const kpiSobrantes = allInventario.filter(i => i.estado_activo === 'SOBRANTE').length;
     const kpiFaltantes = allInventario.filter(i => i.estado_activo === 'FALTANTE').length;
@@ -4139,6 +4276,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const elTotal = document.getElementById('inventario-kpi-total');
     const elActivos = document.getElementById('inventario-kpi-activos');
     const elObras = document.getElementById('inventario-kpi-obras');
+    const elConc = document.getElementById('inventario-kpi-conciliacion');
     const elTerceros = document.getElementById('inventario-kpi-terceros');
     const elSobrantes = document.getElementById('inventario-kpi-sobrantes');
     const elFaltantes = document.getElementById('inventario-kpi-faltantes');
@@ -4147,10 +4285,28 @@ document.addEventListener('DOMContentLoaded', () => {
     if (elTotal) elTotal.textContent = kpiTotal;
     if (elActivos) elActivos.textContent = kpiActivos;
     if (elObras) elObras.textContent = kpiObras;
+    if (elConc) elConc.textContent = kpiConciliacion;
     if (elTerceros) elTerceros.textContent = kpiTerceros;
     if (elSobrantes) elSobrantes.textContent = kpiSobrantes;
     if (elFaltantes) elFaltantes.textContent = kpiFaltantes;
     if (elInversion) elInversion.textContent = formatMoney(kpiInversion);
+
+    // Resaltar y vincular KPI cards clicables
+    document.querySelectorAll('.inv-kpi-card').forEach(card => {
+      const fKey = card.getAttribute('data-inv-filter');
+      if (fKey === inventarioSubFilter) {
+        card.classList.add('ring-2', 'ring-brand-500');
+      } else {
+        card.classList.remove('ring-2', 'ring-brand-500');
+      }
+      if (!card.dataset.boundClick) {
+        card.dataset.boundClick = '1';
+        card.addEventListener('click', () => {
+          inventarioSubFilter = fKey || 'ALL';
+          applyFilters();
+        });
+      }
+    });
 
     data.forEach(item => {
       const row = document.createElement('tr');
@@ -4165,6 +4321,8 @@ document.addEventListener('DOMContentLoaded', () => {
       let origenBadge = '';
       if (item.tipo_origen === 'OBRA EN CURSO') {
         origenBadge = '<span class="inline-block mt-0.5 px-1 py-0.2 text-[8px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded">OBRA</span>';
+      } else if (item.tipo_origen === 'CONCILIACIÓN') {
+        origenBadge = '<span class="inline-block mt-0.5 px-1 py-0.2 text-[8px] font-bold text-sky-700 bg-sky-50 border border-sky-200 rounded">CONCILIACIÓN</span>';
       } else if (item.tipo_origen === 'INCORPORACIÓN') {
         origenBadge = '<span class="inline-block mt-0.5 px-1 py-0.2 text-[8px] font-bold text-purple-700 bg-purple-50 border border-purple-200 rounded">INCORP.</span>';
       } else if (item.estado_activo === 'TERCEROS') {
@@ -4321,48 +4479,86 @@ document.addEventListener('DOMContentLoaded', () => {
     mobileContainer.appendChild(mobileCard);
   }
 
-  // ── Renders del Módulo: Bienes de Terceros ──────────────────────────────────
+  // ── Renders del Módulo: Regularización Patrimonial ─────────────────────────
   function renderTercerosRows(data) {
     const tbody = document.getElementById('terceros-tbody');
+    tbody.innerHTML = '';
+
+    // Actualizar contadores de sub-pestañas de Regularización
+    const srcReg = regularizacion.length > 0 ? regularizacion : terceros;
+    const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    setTxt('reg-cnt-all', srcReg.length);
+    setTxt('reg-cnt-conc', srcReg.filter(x => String(x.sub_modulo || '').toUpperCase() === 'CONCILIACION').length);
+    setTxt('reg-cnt-sob', srcReg.filter(x => String(x.sub_modulo || '').toUpperCase() === 'SOBRANTE').length);
+    setTxt('reg-cnt-fal', srcReg.filter(x => String(x.sub_modulo || '').toUpperCase() === 'FALTANTE').length);
+    setTxt('reg-cnt-ter', srcReg.filter(x => String(x.sub_modulo || x.tipo || '').toUpperCase() === 'TERCERO').length);
+    setTxt('reg-cnt-ctrl', srcReg.filter(x => String(x.sub_modulo || x.tipo || '').toUpperCase() === 'CONTROL').length);
+
+    document.querySelectorAll('.reg-subtab-btn').forEach(btn => {
+      const st = btn.getAttribute('data-reg-subtab');
+      if (st === regularizacionSubTab) {
+        btn.className = 'reg-subtab-btn px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-[#00509d] text-white border border-[#00509d] cursor-pointer';
+      } else {
+        btn.className = 'reg-subtab-btn px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-slate-700 border border-slate-200 hover:border-sky-400 cursor-pointer';
+      }
+      if (!btn.dataset.boundClick) {
+        btn.dataset.boundClick = '1';
+        btn.addEventListener('click', () => {
+          regularizacionSubTab = st || 'ALL';
+          applyFilters();
+        });
+      }
+    });
+
+    const subBadgeMap = {
+      CONCILIACION: 'bg-sky-50 text-sky-800 border-sky-200',
+      SOBRANTE: 'bg-purple-50 text-purple-800 border-purple-200',
+      FALTANTE: 'bg-rose-50 text-rose-800 border-rose-200',
+      TERCERO: 'bg-indigo-50 text-indigo-800 border-indigo-200',
+      CONTROL: 'bg-slate-100 text-slate-800 border-slate-300',
+    };
+
     data.forEach(item => {
       const row = document.createElement('tr');
-      row.className = 'hover:bg-slate-50 text-slate-700 transition-colors border-b border-slate-150';
-      
+      row.className = 'hover:bg-blue-50/60 text-slate-700 transition-colors border-b border-slate-150 text-xs';
+      const subMod = String(item.sub_modulo || item.tipo || 'CONCILIACION').toUpperCase();
+      const badgeCls = subBadgeMap[subMod] || 'bg-slate-100 text-slate-700 border-slate-200';
+      const unidadOrg = item.puesto || item.unidad || '';
+      const especHtml = item.placa
+        ? `<div><span class="font-mono font-extrabold text-slate-900 bg-amber-100/90 px-1 rounded">Placa: ${item.placa}</span></div>
+           <div class="text-[10px] text-slate-500 font-mono">Mot: ${item.nro_motor || '—'} · Chas: ${item.nro_chasis || '—'}</div>`
+        : `<div class="text-[10.5px] text-slate-600 line-clamp-2">${item.caracteristicas_accesorios || item.observaciones || '—'}</div>`;
+
       row.innerHTML = `
-        <td class="px-5 py-4 whitespace-nowrap text-[0.875rem] font-mono font-bold text-slate-800">
-          ${item.cod_patrimonial || '—'}
+        <td class="px-2 py-1.5 text-center whitespace-nowrap">
+          <span class="inline-block px-1.5 py-0.5 rounded font-mono font-bold text-[10.5px] bg-blue-50 text-[#00509d] border border-blue-200">${item.cod_patrimonial || '—'}</span>
         </td>
-        <td class="px-5 py-4 whitespace-nowrap">
-          ${getTipoBadgeHTML(item.tipo)}
+        <td class="px-2 py-1.5 text-center whitespace-nowrap">
+          <span class="inline-block px-2 py-0.5 rounded-full text-[9.5px] font-extrabold border ${badgeCls}">${subMod}</span>
         </td>
-        <td class="px-5 py-4 whitespace-nowrap">
-          <div class="font-bold text-slate-800 text-[0.8125rem]">
-            ${item.sucursal || '—'}
-          </div>
-          <div class="text-[0.6875rem] text-brand-500 font-bold uppercase tracking-wide mt-0.5">
-            ${item.localidad || '—'}
-          </div>
+        <td class="px-2 py-1.5 text-center whitespace-nowrap">
+          <div class="font-bold text-slate-800 text-[10.5px]">${item.sucursal || '—'}</div>
+          ${item.localidad ? `<div class="text-[9px] text-slate-500">(${item.localidad})</div>` : ''}
         </td>
-        <td class="px-5 py-4 min-w-[200px] text-[0.875rem] font-bold text-slate-800 leading-snug">
-          ${item.denominacion || ''}
+        <td class="px-2 py-1.5 min-w-[180px]">
+          <div class="font-bold text-slate-900 text-[11px] leading-tight">${item.denominacion || ''}</div>
+          <div class="text-[9px] text-[#0077b6] font-bold italic uppercase mt-0.5">${item.subcategoria || item.categoria || '—'}</div>
         </td>
-        <td class="px-5 py-4 text-[0.8125rem] min-w-[200px] text-slate-500 leading-relaxed">
-          <div><span class="font-medium text-slate-400">Marca:</span> ${item.marca || 'S/M'}</div>
-          <div><span class="font-medium text-slate-400">Modelo:</span> ${item.modelo || 'S/M'}</div>
-          <div><span class="font-medium text-slate-400">Serie:</span> ${item.numero_serie || 'S/S'}</div>
-          ${item.color ? `<div><span class="font-medium text-slate-400">Color:</span> ${item.color}</div>` : ''}
+        <td class="px-2 py-1.5 text-[10px] text-slate-600 leading-tight">
+          <div><span class="text-slate-400 font-semibold">Marca:</span> ${item.marca || 'S/M'}</div>
+          <div><span class="text-slate-400 font-semibold">Mod:</span> ${item.modelo || '—'}</div>
+          <div class="font-mono"><span class="text-slate-400 font-sans font-semibold">Serie:</span> ${item.numero_serie || 'S/S'}${item.color ? ` · ${item.color}` : ''}</div>
         </td>
-        <td class="px-5 py-4 text-[0.8125rem] min-w-[200px] text-slate-500 leading-relaxed">
-          ${item.caracteristicas_accesorios || '—'}
+        <td class="px-2 py-1.5">${especHtml}</td>
+        <td class="px-2 py-1.5 text-center whitespace-nowrap">
+          ${getEstadoBadgeHTML(item.estado_activo || 'REGULAR')}
         </td>
-        <td class="px-5 py-4 whitespace-nowrap text-[0.8125rem] font-semibold text-slate-600">
-          ${item.responsable || '—'}
+        <td class="px-2 py-1.5 text-right whitespace-nowrap font-mono font-bold text-[10.5px] text-slate-800">
+          S/. ${formatMoney(item.valor_en_libros || 0)}
         </td>
-        <td class="px-5 py-4 text-[0.8125rem] min-w-[200px] text-slate-500 leading-relaxed">
-          ${item.observaciones || '—'}
-        </td>
-        <td class="px-5 py-4 whitespace-nowrap text-xs text-slate-500 font-medium font-mono">
-          ${formatDate(item.created_at)}
+        <td class="px-2 py-1.5">
+          <div class="font-bold text-slate-800 text-[10.5px] truncate max-w-[175px]">${item.responsable || item.propietario_manual || 'Sin Asignar'}</div>
+          ${unidadOrg ? `<div class="text-[9px] text-slate-500 uppercase truncate max-w-[175px]">${unidadOrg}</div>` : ''}
         </td>
       `;
       tbody.appendChild(row);
@@ -4766,7 +4962,7 @@ document.addEventListener('DOMContentLoaded', () => {
       sheetName = "Inventario_General";
       exportData = currentFilteredData.map(item => ({
         "Código Patrimonial": item.cod_patrimonial,
-        "Origen / Tipo": item.tipo_origen || "ACTIVO FIJO",
+        "Origen / Situación": item.tipo_origen || "ACTIVO FIJO",
         "Documento": item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'INCORPORACION' ? `INC-${item.n_doc}` : item.n_doc) : "",
         "Cuenta Contable": item.cuenta_contable || "",
         "Centro de Costo": item.centro_costo || "",
@@ -4774,7 +4970,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "Fecha Alta": item.fecha_asignacion || item.fecha_alta || "",
         "Sucursal": item.sucursal || "",
         "Localidad": item.localidad || "",
-        "Financiado": getFinanciadoText(item) || item.fuente || "",
+        "Financiado / Fuente": getFinanciadoText(item) || item.fuente || "",
         "Categoría": item.categoria || "",
         "Subcategoría": item.subcategoria || "",
         "Denominación": item.denominacion || "",
@@ -4785,28 +4981,33 @@ document.addEventListener('DOMContentLoaded', () => {
         "Color": item.color || "",
         "Especificaciones / Placa": item.placa || item.especificaciones || item.caracteristicas_accesorios || "",
         "Estado": item.estado_activo || "",
-        "Valor en Libros (S/.)": Number(item.valor_en_libros) || 0,
+        "Valor en Libros / Ref. (S/.)": Number(item.valor_en_libros) || 0,
         "Valor Neto (S/.)": getNetValue(item) || 0,
         "Responsable": item.responsable || "Sin Asignar",
-        "Puesto": item.puesto || "",
+        "Unidad Orgánica": item.puesto || item.unidad || "",
         "Observaciones": item.observaciones || item.observaciones_inventario || ""
       }));
     } else if (currentTab === 'terceros') {
-      sheetName = "Bienes_Terceros";
+      sheetName = "Regularizacion";
       exportData = currentFilteredData.map(item => ({
-        "Código Patrimonial": item.cod_patrimonial,
-        "Tipo": item.tipo,
+        "Sub-Módulo": item.sub_modulo || item.tipo || "",
+        "Código Patrimonial": item.cod_patrimonial || "",
         "Sucursal": item.sucursal || "",
         "Localidad": item.localidad || "",
-        "Denominación": item.denominacion,
+        "Unidad Orgánica": item.puesto || item.unidad || "",
+        "Categoría": item.categoria || "",
+        "Subcategoría": item.subcategoria || "",
+        "Denominación": item.denominacion || "",
         "Marca": item.marca || "S/M",
         "Modelo": item.modelo || "S/M",
         "N° Serie": item.numero_serie || "S/S",
         "Color": item.color || "",
-        "Características / Accesorios": item.caracteristicas_accesorios || "",
-        "Responsable": item.responsable || "Sin Asignar",
-        "Observaciones": item.observaciones || "",
-        "Fecha Registro": item.created_at || ""
+        "Placa": item.placa || "",
+        "Especificaciones": item.caracteristicas_accesorios || "",
+        "Estado": item.estado_activo || "",
+        "Valor (S/.)": Number(item.valor_en_libros) || 0,
+        "Responsable / Propietario": item.responsable || item.propietario_manual || "Sin Asignar",
+        "Observaciones": item.observaciones || ""
       }));
     } else if (currentTab === 'contable') {
       sheetName = "Reporte_Contable";
@@ -5209,23 +5410,24 @@ document.addEventListener('DOMContentLoaded', () => {
             "Cód. Patrimonial",
             "Origen / Doc",
             "Denominación / Subcategoría",
-            "Características",
+            "Características / Placa",
             "Sucursal",
             "Estado",
             "Valor Libros",
-            "Responsable / Puesto"
+            "Responsable / Unidad Org."
           ]
         ];
         data = currentFilteredData.map(item => {
           const cod = item.cod_patrimonial || '—';
           const doc = item.n_doc ? (item.documento_tipo === 'COMPRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'OBRA' ? `OC-${item.n_doc}` : item.documento_tipo === 'INCORPORACION' ? `INC-${item.n_doc}` : item.n_doc) : '—';
-          const origenDoc = `${item.tipo_origen || 'ACTIVO'}\n${doc}`;
+          const origenDoc = doc === item.tipo_origen ? `${item.tipo_origen || 'ACTIVO'}` : `${item.tipo_origen || 'ACTIVO'}\n${doc}`;
           const denom = `${item.denominacion || '—'}\n[${item.subcategoria || item.categoria || '—'}]`;
-          const especs = `Marca: ${item.marca || 'S/M'}\nModelo: ${item.modelo || 'S/M'}\nSerie: ${item.numero_serie || 'S/S'}${item.color ? `\nCol: ${item.color}` : ''}`;
+          const especs = `${item.placa ? `Placa: ${item.placa}\n` : ''}Marca: ${item.marca || 'S/M'}\nModelo: ${item.modelo || 'S/M'}\nSerie: ${item.numero_serie || 'S/S'}${item.color ? `\nCol: ${item.color}` : ''}`;
           const ubi = `${item.sucursal || '—'}${item.localidad ? `\n(${item.localidad})` : ''}`;
           const estado = item.estado_activo || '—';
           const valLibros = `S/. ${formatMoney(item.valor_en_libros || 0)}`;
-          const resp = `${item.responsable || 'Sin Asignar'}${item.puesto ? `\n(${item.puesto})` : ''}`;
+          const unidadTxt = item.puesto || item.unidad || '';
+          const resp = `${item.responsable || 'Sin Asignar'}${unidadTxt ? `\n(${unidadTxt})` : ''}`;
 
           return [cod, origenDoc, denom, especs, ubi, estado, valLibros, resp];
         });
@@ -5244,37 +5446,36 @@ document.addEventListener('DOMContentLoaded', () => {
         headers = [
           [
             "Código",
-            "Tipo",
-            "Denominación",
-            "Marca/Modelo/Serie/Color",
+            "Sub-Módulo",
             "Sucursal",
-            "Propietario del Bien",
-            "F. Ingreso",
-            "F. Salida"
+            "Denominación / Subcategoría",
+            "Características / Placa",
+            "Estado",
+            "Valor (S/.)",
+            "Responsable / Unidad Org."
           ]
         ];
         data = currentFilteredData.map(item => {
           const cod = item.cod_patrimonial || '—';
-          const tipo = item.tipo || 'TERCERO';
-          const denom = item.denominacion || '—';
-          const especs = `Marca: ${item.marca || 'S/M'}\nModelo: ${item.modelo || 'S/M'}\nSerie: ${item.numero_serie || 'S/S'}${item.color ? `\nColor: ${item.color}` : ''}`;
-          const ubi = `${item.sucursal || '—'}${item.localidad ? ` (${item.localidad})` : ''}`;
-          const propietario = `${item.responsable || item.propietario_manual || 'Sin Asignar'}${item.puesto ? `\n${item.puesto}` : ''}`;
-          const fIngreso = formatDate(item.fecha_ingreso || item.created_at);
-          const fSalida = item.fecha_salida ? formatDate(item.fecha_salida) : 'Pendiente';
-
-          return [cod, tipo, denom, especs, ubi, propietario, fIngreso, fSalida];
+          const sub = item.sub_modulo || item.tipo || 'CONCILIACION';
+          const suc = `${item.sucursal || '—'}${item.localidad ? `\n(${item.localidad})` : ''}`;
+          const denom = `${item.denominacion || '—'}\n[${item.subcategoria || item.categoria || '—'}]`;
+          const especs = `${item.placa ? `Placa: ${item.placa}\n` : ''}Marca: ${item.marca || 'S/M'}\nMod: ${item.modelo || '—'}\nSerie: ${item.numero_serie || 'S/S'}`;
+          const est = item.estado_activo || '—';
+          const val = `S/. ${formatMoney(item.valor_en_libros || 0)}`;
+          const unidadTxt = item.puesto || item.unidad || '';
+          const resp = `${item.responsable || item.propietario_manual || 'Sin Asignar'}${unidadTxt ? `\n(${unidadTxt})` : ''}`;
+          return [cod, sub, suc, denom, especs, est, val, resp];
         });
-
         columnStyles = {
           0: { cellWidth: 26, fontStyle: 'bold', halign: 'center' },
-          1: { cellWidth: 22, halign: 'center' },
-          2: { cellWidth: 45 },
-          3: { cellWidth: 50 },
-          4: { cellWidth: 35, halign: 'center' },
-          5: { cellWidth: 46 },
-          6: { cellWidth: 24, halign: 'center' },
-          7: { cellWidth: 21, halign: 'center' }
+          1: { cellWidth: 24, halign: 'center', fontStyle: 'bold' },
+          2: { cellWidth: 28, halign: 'center' },
+          3: { cellWidth: 52 },
+          4: { cellWidth: 46 },
+          5: { cellWidth: 20, halign: 'center' },
+          6: { cellWidth: 24, halign: 'right' },
+          7: { cellWidth: 48 }
         };
       } else if (currentTab === 'contable') {
         headers = [
@@ -5495,8 +5696,8 @@ document.addEventListener('DOMContentLoaded', () => {
       else if (currentTab === 'vehiculos') subtitle = "Inventario de Vehículos";
       else if (currentTab === 'soat') subtitle = "REPORTE DE SOAT & REVISIÓN TÉCNICA VEHICULAR";
       else if (currentTab === 'celulares') subtitle = "CONTROL DE EQUIPOS MÓVILES - CELULARES";
-      else if (currentTab === 'inventario') subtitle = "INVENTARIO GENERAL DE ACTIVOS Y BIENES";
-      else if (currentTab === 'terceros') subtitle = "BIENES DE TERCEROS Y CONTROL INTERNO";
+      else if (currentTab === 'inventario') subtitle = `INVENTARIO GENERAL DE ACTIVOS Y BIENES${inventarioSubFilter && inventarioSubFilter !== 'ALL' ? ` — ${inventarioSubFilter}` : ''}`;
+      else if (currentTab === 'terceros') subtitle = `REGULARIZACIÓN PATRIMONIAL${regularizacionSubTab && regularizacionSubTab !== 'ALL' ? ` — ${regularizacionSubTab}` : ''}`;
       else if (currentTab === 'contable') {
         const contableLoc = document.getElementById('contable-localidad-select')?.value;
         subtitle = `Reporte Contable Agrupado${contableLoc && contableLoc !== 'Todos' ? ` - Localidad: ${contableLoc}` : ''}`;

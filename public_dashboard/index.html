@@ -278,7 +278,7 @@
           📋 Inventario
         </button>
         <button id="tab-terceros" class="px-2.5 py-1.5 text-[0.7rem] sm:text-xs font-bold rounded-lg transition-all border-none cursor-pointer flex items-center justify-center gap-1 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap shrink-0 flex-1 text-center">
-          🤝 Bienes de Terceros
+          ⚖️ Regularización
         </button>
         <button id="tab-celulares" class="px-2.5 py-1.5 text-[0.7rem] sm:text-xs font-bold rounded-lg transition-all border-none cursor-pointer flex items-center justify-center gap-1 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap shrink-0 flex-1 text-center">
           📱 Celulares
@@ -641,9 +641,9 @@
     </div>
     <!-- Tabla: Inventario General -->
     <div id="inventario-table-container" class="hidden md:flex flex-col flex-1 min-h-0 rounded-xl shadow-sm border border-slate-200 bg-white overflow-hidden">
-      <!-- KPI Summary Cards de Inventario General -->
-      <div id="inventario-kpi-container" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 p-2.5 bg-gradient-to-b from-slate-50/80 to-white border-b border-slate-200 shrink-0">
-        <div class="p-2 bg-blue-50/80 border border-blue-200/80 rounded-xl flex flex-col justify-between shadow-2xs">
+      <!-- KPI Summary Cards de Inventario General (clicables para filtrar) -->
+      <div id="inventario-kpi-container" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 p-2.5 bg-gradient-to-b from-slate-50/80 to-white border-b border-slate-200 shrink-0">
+        <div data-inv-filter="ALL" class="inv-kpi-card cursor-pointer p-2 bg-blue-50/80 border border-blue-200/80 rounded-xl flex flex-col justify-between shadow-2xs hover:border-blue-400 transition-all">
           <div class="flex items-center justify-between gap-1">
             <span class="text-[0.625rem] font-extrabold text-blue-800 uppercase tracking-wider truncate">Total Inventario</span>
             <span class="w-1.5 h-1.5 rounded-full bg-blue-600 shrink-0"></span>
@@ -654,7 +654,7 @@
           </div>
         </div>
 
-        <div class="p-2 bg-emerald-50/80 border border-emerald-200/80 rounded-xl flex flex-col justify-between shadow-2xs">
+        <div data-inv-filter="ACTIVOS" class="inv-kpi-card cursor-pointer p-2 bg-emerald-50/80 border border-emerald-200/80 rounded-xl flex flex-col justify-between shadow-2xs hover:border-emerald-400 transition-all">
           <div class="flex items-center justify-between gap-1">
             <span class="text-[0.625rem] font-extrabold text-emerald-800 uppercase tracking-wider truncate">Activos Fijos</span>
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 shrink-0"></span>
@@ -665,7 +665,7 @@
           </div>
         </div>
 
-        <div class="p-2 bg-amber-50/80 border border-amber-200/80 rounded-xl flex flex-col justify-between shadow-2xs">
+        <div data-inv-filter="OBRAS" class="inv-kpi-card cursor-pointer p-2 bg-amber-50/80 border border-amber-200/80 rounded-xl flex flex-col justify-between shadow-2xs hover:border-amber-400 transition-all">
           <div class="flex items-center justify-between gap-1">
             <span class="text-[0.625rem] font-extrabold text-amber-800 uppercase tracking-wider truncate">Obras en Curso</span>
             <span class="w-1.5 h-1.5 rounded-full bg-amber-600 shrink-0"></span>
@@ -676,7 +676,18 @@
           </div>
         </div>
 
-        <div class="p-2 bg-indigo-50/80 border border-indigo-200/80 rounded-xl flex flex-col justify-between shadow-2xs">
+        <div data-inv-filter="CONCILIACION" class="inv-kpi-card cursor-pointer p-2 bg-sky-50/80 border border-sky-200/80 rounded-xl flex flex-col justify-between shadow-2xs hover:border-sky-400 transition-all">
+          <div class="flex items-center justify-between gap-1">
+            <span class="text-[0.625rem] font-extrabold text-sky-800 uppercase tracking-wider truncate">Conciliación</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-sky-600 shrink-0"></span>
+          </div>
+          <div class="flex items-baseline gap-1 mt-0.5">
+            <span id="inventario-kpi-conciliacion" class="text-base sm:text-lg font-black text-sky-900 font-mono tracking-tight tabular-nums">0</span>
+            <span class="text-[0.6rem] font-bold text-slate-500">items</span>
+          </div>
+        </div>
+
+        <div data-inv-filter="TERCEROS" class="inv-kpi-card cursor-pointer p-2 bg-indigo-50/80 border border-indigo-200/80 rounded-xl flex flex-col justify-between shadow-2xs hover:border-indigo-400 transition-all">
           <div class="flex items-center justify-between gap-1">
             <span class="text-[0.625rem] font-extrabold text-indigo-800 uppercase tracking-wider truncate">Bienes Terceros</span>
             <span class="w-1.5 h-1.5 rounded-full bg-indigo-600 shrink-0"></span>
@@ -687,7 +698,7 @@
           </div>
         </div>
 
-        <div class="p-2 bg-purple-50/80 border border-purple-200/80 rounded-xl flex flex-col justify-between shadow-2xs">
+        <div data-inv-filter="SOBRANTE" class="inv-kpi-card cursor-pointer p-2 bg-purple-50/80 border border-purple-200/80 rounded-xl flex flex-col justify-between shadow-2xs hover:border-purple-400 transition-all">
           <div class="flex items-center justify-between gap-1">
             <span class="text-[0.625rem] font-extrabold text-purple-800 uppercase tracking-wider truncate">Sobrantes</span>
             <span class="w-1.5 h-1.5 rounded-full bg-purple-600 shrink-0"></span>
@@ -698,7 +709,7 @@
           </div>
         </div>
 
-        <div class="p-2 bg-rose-50/80 border border-rose-200/80 rounded-xl flex flex-col justify-between shadow-2xs">
+        <div data-inv-filter="FALTANTE" class="inv-kpi-card cursor-pointer p-2 bg-rose-50/80 border border-rose-200/80 rounded-xl flex flex-col justify-between shadow-2xs hover:border-rose-400 transition-all">
           <div class="flex items-center justify-between gap-1">
             <span class="text-[0.625rem] font-extrabold text-rose-800 uppercase tracking-wider truncate">Faltantes</span>
             <span class="w-1.5 h-1.5 rounded-full bg-rose-600 shrink-0"></span>
@@ -747,21 +758,29 @@
       </div>
     </div>
 
-    <!-- Tabla: Bienes de Terceros -->
+    <!-- Tabla: Regularización Patrimonial (Conciliación, Sobrantes, Faltantes, Terceros, Control) -->
     <div id="terceros-table-container" class="hidden md:flex flex-col flex-1 min-h-0 rounded-xl shadow-sm border border-slate-200 bg-white overflow-hidden">
+      <div id="reg-subtabs-bar" class="flex flex-wrap items-center gap-1.5 p-2 bg-slate-50 border-b border-slate-200 shrink-0">
+        <button type="button" data-reg-subtab="ALL" class="reg-subtab-btn px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-[#00509d] text-white border border-[#00509d] cursor-pointer">Todos (<span id="reg-cnt-all">0</span>)</button>
+        <button type="button" data-reg-subtab="CONCILIACION" class="reg-subtab-btn px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-slate-700 border border-slate-200 hover:border-sky-400 cursor-pointer">Conciliación (<span id="reg-cnt-conc">0</span>)</button>
+        <button type="button" data-reg-subtab="SOBRANTE" class="reg-subtab-btn px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-slate-700 border border-slate-200 hover:border-purple-400 cursor-pointer">Sobrantes (<span id="reg-cnt-sob">0</span>)</button>
+        <button type="button" data-reg-subtab="FALTANTE" class="reg-subtab-btn px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-slate-700 border border-slate-200 hover:border-rose-400 cursor-pointer">Faltantes (<span id="reg-cnt-fal">0</span>)</button>
+        <button type="button" data-reg-subtab="TERCERO" class="reg-subtab-btn px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-slate-700 border border-slate-200 hover:border-indigo-400 cursor-pointer">Terceros (<span id="reg-cnt-ter">0</span>)</button>
+        <button type="button" data-reg-subtab="CONTROL" class="reg-subtab-btn px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-slate-700 border border-slate-200 hover:border-slate-400 cursor-pointer">Control (<span id="reg-cnt-ctrl">0</span>)</button>
+      </div>
       <div class="overflow-x-auto overflow-y-auto smooth-scroll w-full flex-1 min-h-0">
-        <table class="min-w-[1350px] w-full divide-y divide-slate-200 border-collapse">
+        <table class="min-w-[1280px] w-full divide-y divide-slate-200 border-collapse">
           <thead class="sticky top-0 bg-[#00B0F0] text-white z-20 shadow-md">
             <tr>
-              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Cód. Patrimonial</th>
-              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Tipo</th>
-              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">SUCURSAL<br/>LOCALIDAD</th>
-              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Denominación</th>
-              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Especificaciones</th>
-              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Características / Accesorios</th>
-              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Responsable</th>
-              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Observaciones</th>
-              <th scope="col" class="px-3.5 py-3 text-center text-[0.6875rem] font-extrabold text-white uppercase tracking-wide">Fecha Registro</th>
+              <th scope="col" class="px-2 py-2 text-center text-[0.625rem] font-extrabold text-white uppercase tracking-wide w-28">Cód. Patrimonial</th>
+              <th scope="col" class="px-2 py-2 text-center text-[0.625rem] font-extrabold text-white uppercase tracking-wide w-28">Sub-Módulo</th>
+              <th scope="col" class="px-2 py-2 text-center text-[0.625rem] font-extrabold text-white uppercase tracking-wide w-32">SUCURSAL<br/>LOCALIDAD</th>
+              <th scope="col" class="px-2 py-2 text-left text-[0.625rem] font-extrabold text-white uppercase tracking-wide min-w-[180px]">Denominación<br/>Subcategoría</th>
+              <th scope="col" class="px-2 py-2 text-left text-[0.625rem] font-extrabold text-white uppercase tracking-wide w-44">Características</th>
+              <th scope="col" class="px-2 py-2 text-left text-[0.625rem] font-extrabold text-white uppercase tracking-wide w-48">Especificaciones / Placa</th>
+              <th scope="col" class="px-2 py-2 text-center text-[0.625rem] font-extrabold text-white uppercase tracking-wide w-24">Estado</th>
+              <th scope="col" class="px-2 py-2 text-right text-[0.625rem] font-extrabold text-white uppercase tracking-wide w-28">Valor Libros<br/>/ Ref. (S/.)</th>
+              <th scope="col" class="px-2 py-2 text-left text-[0.625rem] font-extrabold text-white uppercase tracking-wide w-44">Responsable<br/>Unidad Org.</th>
             </tr>
           </thead>
           <tbody id="terceros-tbody" class="bg-white divide-y divide-slate-100">
@@ -1537,7 +1556,7 @@
           📋 Inventario
         </button>
         <button data-tab="terceros" class="mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left">
-          🤝 Bienes de Terceros
+          ⚖️ Regularización
         </button>
         <button data-tab="celulares" class="mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left">
           📱 Celulares
