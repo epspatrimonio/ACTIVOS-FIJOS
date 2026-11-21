@@ -10,6 +10,12 @@ document.addEventListener('DOMContentLoaded', () => {
   let inventarioSubFilter = 'ALL'; // ALL | ACTIVOS | OBRAS | CONCILIACION | TERCEROS | SOBRANTE | FALTANTE
   let regularizacionSubTab = 'ALL'; // ALL | CONCILIACION | SOBRANTE | FALTANTE | TERCERO | CONTROL
   let currentFilteredData = [];
+  let colFilters = {}; // { colKey: [val1, val2, ...] }
+  let colSort = { key: null, direction: null }; // { key, direction: 'asc'|'desc'|null }
+  let lastBaseFilteredForCols = [];
+  let lastInventarioKpiBase = [];
+  let lastRegSubTabBase = [];
+  let activeColPopoverKey = null;
   let responsablesMap = {};
   let selectedResponsableKey = null;
 
@@ -365,7 +371,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (globalYearSelect) {
         globalYearSelect.innerHTML = '<option value="">Todos</option>';
         const yearsSet = new Set();
-        assets.forEach(item => {
+        [...assets, ...regularizacion, ...vehiculosCompleto].forEach(item => {
           const dateStr = item.fecha_registro_contable || item.fecha_alta_factura || item.fecha_alta || item.fecha_ingreso || item.fecha_asignacion;
           if (dateStr) {
             const { year: y } = parseDateParts(dateStr);
@@ -402,6 +408,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (contableLocalidadSelect) contableLocalidadSelect.addEventListener('change', applyFilters);
 
       initSalidaModule();
+      initExcelHeaderFilters();
       applyFilters();
       
       // Adjuntar event listeners (búsqueda con debounce de 150ms para respuesta fluida)
@@ -561,10 +568,13 @@ document.addEventListener('DOMContentLoaded', () => {
           if (globalValorSelect) globalValorSelect.value = '';
 
           
-          // Limpiar filtros de multiselección
+          // Limpiar filtros de multiselección y filtros de columna
           selectedCategories = [];
           selectedSubcategories = [];
           selectedMonths = [];
+          colFilters = {};
+          colSort = { key: null, direction: null };
+          closeColFilterPopover();
           populateCategoryFilters();
           populateMonthFilters();
           
@@ -1210,7 +1220,7 @@ document.addEventListener('DOMContentLoaded', () => {
       stateOptions = ['BUENO', 'REGULAR', 'MALO', 'PARA BAJA', 'BAJA', 'FALTANTE'];
     } else if (currentTab === 'terceros') {
       dataset = regularizacion.length > 0 ? regularizacion : terceros;
-      stateOptions = ['CONCILIACION', 'SOBRANTE', 'FALTANTE', 'TERCERO', 'CONTROL'];
+      stateOptions = ['BUENO', 'REGULAR', 'MALO', 'PARA BAJA', 'BAJA'];
     }
     
     // Poblar Sucursales con SEDE CENTRAL primero
@@ -1288,9 +1298,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function switchTab(newTab) {
       currentTab = newTab;
       
-      // Resetear filtros de categoría y subcategoría al cambiar de pestaña
+      // Resetear filtros de categoría, subcategoría y columnas al cambiar de pestaña
       selectedCategories = [];
       selectedSubcategories = [];
+      colFilters = {};
+      colSort = { key: null, direction: null };
+      closeColFilterPopover();
       
       // Resetear clases de pestañas
       [tabActivos, tabFicha, tabObras, tabVehiculos, tabSalidas, tabSoat, tabCelulares, tabInventario, tabTerceros, tabAsignacion, tabContable].forEach(btn => {
@@ -1375,7 +1388,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Mostrar/Ocultar el filtro de Categoría y Subcategoría (sólo si aplica)
       const categoriaWrapper = document.getElementById('categoria-filter-wrapper');
       const subcategoriaWrapper = document.getElementById('subcategoria-filter-wrapper');
-      const hasCategories = currentTab === 'activos' || currentTab === 'obras' || currentTab === 'inventario';
+      const hasCategories = currentTab === 'activos' || currentTab === 'obras' || currentTab === 'inventario' || currentTab === 'terceros';
       if (hasCategories && currentTab !== 'contable' && currentTab !== 'asignacion' && currentTab !== 'ficha') {
         if (categoriaWrapper) categoriaWrapper.classList.remove('hidden');
         if (subcategoriaWrapper) subcategoriaWrapper.classList.remove('hidden');
@@ -1576,6 +1589,8 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedCategories.length > 0 ||
         selectedSubcategories.length > 0 ||
         selectedMonths.length > 0 ||
+        Object.keys(colFilters).length > 0 ||
+        Boolean(colSort.key) ||
         selectedGlobalYear || selectedGlobalMonth || selectedGlobalValor;
       if (hasActiveFilters) {
         btnClearFilters.classList.remove('hidden');
@@ -1597,24 +1612,8 @@ document.addEventListener('DOMContentLoaded', () => {
       baseData = celulares;
     } else if (currentTab === 'inventario') {
       baseData = getInventarioUnificado();
-      if (inventarioSubFilter === 'ACTIVOS') {
-        baseData = baseData.filter(i => i.tipo_origen === 'ACTIVO FIJO' || i.tipo_origen === 'INCORPORACIÓN');
-      } else if (inventarioSubFilter === 'OBRAS') {
-        baseData = baseData.filter(i => i.tipo_origen === 'OBRA EN CURSO');
-      } else if (inventarioSubFilter === 'CONCILIACION') {
-        baseData = baseData.filter(i => i.tipo_origen === 'CONCILIACIÓN');
-      } else if (inventarioSubFilter === 'TERCEROS') {
-        baseData = baseData.filter(i => i.tipo_origen === 'BIEN DE TERCEROS');
-      } else if (inventarioSubFilter === 'SOBRANTE') {
-        baseData = baseData.filter(i => i.tipo_origen === 'SOBRANTE');
-      } else if (inventarioSubFilter === 'FALTANTE') {
-        baseData = baseData.filter(i => i.tipo_origen === 'FALTANTE' || i.estado_activo === 'FALTANTE');
-      }
     } else if (currentTab === 'terceros') {
       baseData = regularizacion.length > 0 ? regularizacion : terceros;
-      if (regularizacionSubTab && regularizacionSubTab !== 'ALL') {
-        baseData = baseData.filter(i => String(i.sub_modulo || i.tipo || '').toUpperCase() === regularizacionSubTab);
-      }
     } else if (currentTab === 'salida-tabla' || currentTab === 'salidas') {
       baseData = salidas;
     } else if (currentTab === 'contable') {
@@ -1695,16 +1694,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return true;
       }
 
-      // Filtro de Sucursal
-      const sucursalMatch = !selectedSucursal || item.sucursal === selectedSucursal;
+      // Filtro de Sucursal (insensible a mayúsculas/espacios)
+      const sucursalMatch = !selectedSucursal || (item.sucursal || '').trim().toUpperCase() === selectedSucursal.trim().toUpperCase();
 
-      // Filtro de Localidad
-      const localidadMatch = !selectedLocalidad || item.localidad === selectedLocalidad;
+      // Filtro de Localidad (insensible a mayúsculas/espacios)
+      const localidadMatch = !selectedLocalidad || (item.localidad || '').trim().toUpperCase() === selectedLocalidad.trim().toUpperCase();
 
-      // Filtro de Estado del Activo / Sub-Módulo
+      // Filtro de Estado Físico del Activo (o estado de celular)
       const estadoMatch = !selectedEstado || 
-        (currentTab === 'celulares' ? item.estado === selectedEstado : 
-         (currentTab === 'terceros' ? String(item.sub_modulo || item.tipo || '').toUpperCase() === selectedEstado : item.estado_activo === selectedEstado));
+        (currentTab === 'celulares'
+          ? (item.estado || '').trim().toUpperCase() === selectedEstado.trim().toUpperCase()
+          : (item.estado_activo || '').trim().toUpperCase() === selectedEstado.trim().toUpperCase());
 
       // Filtro de Estado del SOAT (para VEHICULOS y SOAT & RT)
       const isBaja = item.estado_activo === 'PARA BAJA' || item.estado_activo === 'BAJA' || item.estado_soat === 'NO_REQUIERE' || item.soat_estado === 'NO_REQUIERE';
@@ -1718,7 +1718,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // Filtro de Categoría y Subcategoría (si aplica)
-      const hasCategories = currentTab === 'activos' || currentTab === 'obras' || currentTab === 'inventario';
+      const hasCategories = currentTab === 'activos' || currentTab === 'obras' || currentTab === 'inventario' || currentTab === 'terceros';
       const categoriaMatch = !hasCategories || selectedCategories.length === 0 || selectedCategories.includes(item.categoria);
       const subcategoriaMatch = !hasCategories || selectedSubcategories.length === 0 || selectedSubcategories.includes(item.subcategoria);
 
@@ -1803,8 +1803,10 @@ document.addEventListener('DOMContentLoaded', () => {
             (item.modelo && item.modelo.toLowerCase().includes(query)) ||
             (item.numero_serie && item.numero_serie.toLowerCase().includes(query)) ||
             (item.placa && item.placa.toLowerCase().includes(query)) ||
+            (item.n_doc && String(item.n_doc).toLowerCase().includes(query)) ||
             (item.responsable && item.responsable.toLowerCase().includes(query)) ||
             (item.puesto && item.puesto.toLowerCase().includes(query)) ||
+            (item.unidad && item.unidad.toLowerCase().includes(query)) ||
             (item.categoria && item.categoria.toLowerCase().includes(query)) ||
             (item.subcategoria && item.subcategoria.toLowerCase().includes(query));
         } else if (currentTab === 'terceros') {
@@ -1821,13 +1823,17 @@ document.addEventListener('DOMContentLoaded', () => {
             (item.propietario_manual && item.propietario_manual.toLowerCase().includes(query)) ||
             (item.responsable && item.responsable.toLowerCase().includes(query));
         } else {
-          // Activos
+          // Activos / Obras
           textMatch = 
             (item.cod_patrimonial && item.cod_patrimonial.toLowerCase().includes(query)) ||
             (item.denominacion && item.denominacion.toLowerCase().includes(query)) ||
             (item.marca && item.marca.toLowerCase().includes(query)) ||
             (item.modelo && item.modelo.toLowerCase().includes(query)) ||
+            (item.numero_serie && item.numero_serie.toLowerCase().includes(query)) ||
+            (item.n_doc && String(item.n_doc).toLowerCase().includes(query)) ||
             (item.responsable && item.responsable.toLowerCase().includes(query)) ||
+            (item.puesto && item.puesto.toLowerCase().includes(query)) ||
+            (item.unidad && item.unidad.toLowerCase().includes(query)) ||
             (item.subcategoria && item.subcategoria.toLowerCase().includes(query));
         }
       }
@@ -1835,8 +1841,37 @@ document.addEventListener('DOMContentLoaded', () => {
       return sucursalMatch && localidadMatch && estadoMatch && soatEstadoMatch && categoriaMatch && subcategoriaMatch && textMatch && yearMatch && monthMatch && valorMatch;
     });
 
-    if (currentTab === 'vehiculos' || currentTab === 'soat') {
-      filtered.sort((a, b) => {
+    // Guardar bases dinámicas para KPIs de Inventario y contadores de Regularización
+    let workingFiltered = filtered;
+    if (currentTab === 'inventario') {
+      lastInventarioKpiBase = filtered;
+      if (inventarioSubFilter === 'ACTIVOS') {
+        workingFiltered = filtered.filter(i => i.tipo_origen === 'ACTIVO FIJO' || i.tipo_origen === 'INCORPORACIÓN');
+      } else if (inventarioSubFilter === 'OBRAS') {
+        workingFiltered = filtered.filter(i => i.tipo_origen === 'OBRA EN CURSO');
+      } else if (inventarioSubFilter === 'CONCILIACION') {
+        workingFiltered = filtered.filter(i => i.tipo_origen === 'CONCILIACIÓN');
+      } else if (inventarioSubFilter === 'TERCEROS') {
+        workingFiltered = filtered.filter(i => i.tipo_origen === 'BIEN DE TERCEROS');
+      } else if (inventarioSubFilter === 'SOBRANTE') {
+        workingFiltered = filtered.filter(i => i.tipo_origen === 'SOBRANTE');
+      } else if (inventarioSubFilter === 'FALTANTE') {
+        workingFiltered = filtered.filter(i => i.tipo_origen === 'FALTANTE' || i.estado_activo === 'FALTANTE');
+      }
+    } else if (currentTab === 'terceros') {
+      lastRegSubTabBase = filtered;
+      if (regularizacionSubTab && regularizacionSubTab !== 'ALL') {
+        workingFiltered = filtered.filter(i => String(i.sub_modulo || i.tipo || '').toUpperCase() === regularizacionSubTab);
+      }
+    }
+
+    lastBaseFilteredForCols = workingFiltered;
+
+    // Aplicar filtros de columna tipo Excel (cascada) y ordenamiento si están activos
+    let finalData = applyColFiltersAndSort(workingFiltered);
+
+    if (!colSort.key && (currentTab === 'vehiculos' || currentTab === 'soat')) {
+      finalData.sort((a, b) => {
         const sucA = (a.sucursal || '').trim();
         const sucB = (b.sucursal || '').trim();
         const compSuc = sucA.localeCompare(sucB, 'es', { sensitivity: 'base' });
@@ -1848,9 +1883,9 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Ordenar jerárquicamente: 1° Actas DESC > 2° Código Patrimonial DESC > 3° Fecha de Ingreso DESC > 4° O/C DESC
-    if (currentTab === 'activos' || currentTab === 'obras' || currentTab === 'vehiculos') {
-      filtered.sort((a, b) => {
+    // Ordenar jerárquicamente por defecto: 1° Actas DESC > 2° Código Patrimonial DESC > 3° Fecha de Ingreso DESC > 4° O/C DESC
+    if (!colSort.key && (currentTab === 'activos' || currentTab === 'obras' || currentTab === 'vehiculos')) {
+      finalData.sort((a, b) => {
         // 1. Actas (de mayor a menor) para los activos que tengan Acta
         const actaA = (a.n_acta_entrega || a.n_acta || '').trim();
         const actaB = (b.n_acta_entrega || b.n_acta || '').trim();
@@ -1910,7 +1945,376 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    renderData(filtered);
+    updateColFilterIndicators();
+    renderData(finalData);
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════════
+  // MOTOR UNIVERSAL DE FILTROS DE COLUMNA TIPO EXCEL (MULTISELECCIÓN + ORDEN)
+  // ══════════════════════════════════════════════════════════════════════════════
+  function getColFilterValue(item, key) {
+    if (!item) return '';
+    switch (key) {
+      case 'cod_patrimonial': return String(item.cod_patrimonial || '').trim();
+      case 'n_doc': {
+        if (!item.n_doc) return '';
+        if (item.documento_tipo === 'COMPRA' || item.documento_tipo === 'OBRA') return `OC-${item.n_doc}`;
+        if (item.documento_tipo === 'INCORPORACION') return `INC-${item.n_doc}`;
+        return String(item.n_doc).trim();
+      }
+      case 'cuenta_contable': return String(item.cuenta_contable || '').trim();
+      case 'centro_costo': return String(item.centro_costo || '').trim();
+      case 'fecha_ingreso': return formatDate(item.fecha_alta_factura || item.fecha_registro_contable || item.fecha_ingreso || item.fecha_alta || '');
+      case 'fecha_asignacion': return formatDate(item.fecha_asignacion || '');
+      case 'sucursal': return String(item.sucursal || '').trim();
+      case 'localidad': return String(item.localidad || '').trim();
+      case 'fuente': return String(getFinanciadoText(item) || item.fuente || '').trim();
+      case 'denominacion': return String(item.denominacion || '').trim();
+      case 'subcategoria': return String(item.subcategoria || item.categoria || '').trim();
+      case 'n_acta': return String(item.n_acta || item.n_acta_entrega || '').trim();
+      case 'marca': return String(item.marca || '').trim();
+      case 'modelo': return String(item.modelo || '').trim();
+      case 'especificaciones': return String(item.placa || item.especificaciones || item.caracteristicas_accesorios || '').trim();
+      case 'estado_activo': return String(item.estado_activo || '').trim();
+      case 'valor_en_libros': return formatMoney(item.valor_en_libros || 0);
+      case 'valor_neto': return formatMoney(getNetValue(item));
+      case 'responsable': return String(item.responsable || item.propietario_manual || 'Sin Asignar').trim();
+      case 'puesto': return String(item.puesto || item.unidad || '').trim();
+      case 'placa': return String(item.placa || '').trim();
+      case 'tipo_vehiculo': return String(item.tipo_vehiculo || item.combustible || '').trim();
+      case 'soat_estado': {
+        const isBaja = item.estado_activo === 'PARA BAJA' || item.estado_activo === 'BAJA';
+        return isBaja ? 'NO REQUIERE' : String(item.soat_estado || item.estado_soat || 'SIN REGISTRO').trim();
+      }
+      case 'estado_rev_tec': {
+        const isBaja = item.estado_activo === 'PARA BAJA' || item.estado_activo === 'BAJA';
+        return isBaja ? 'NO REQUIERE' : String(item.estado_rev_tec || 'SIN REGISTRO').trim();
+      }
+      case 'cod_control': return String(item.cod_control || '').trim();
+      case 'numero_linea': return String(item.numero_linea || '').trim();
+      case 'operador': return String(item.operador || '').trim();
+      case 'estado_cel': return String(item.estado || '').trim();
+      case 'sub_modulo': return String(item.sub_modulo || item.tipo || '').trim().toUpperCase();
+      default: return String(item[key] || '').trim();
+    }
+  }
+
+  function applyColFiltersAndSort(list) {
+    const activeKeys = Object.keys(colFilters).filter(k => Array.isArray(colFilters[k]) && colFilters[k].length > 0);
+    let out = activeKeys.length === 0
+      ? [...list]
+      : list.filter(item =>
+          activeKeys.every(k => colFilters[k].includes(getColFilterValue(item, k)))
+        );
+
+    if (colSort.key && colSort.direction) {
+      const dir = colSort.direction === 'asc' ? 1 : -1;
+      const k = colSort.key;
+      out.sort((a, b) => {
+        if (k === 'valor_en_libros') {
+          return ((Number(a.valor_en_libros) || 0) - (Number(b.valor_en_libros) || 0)) * dir;
+        }
+        if (k === 'valor_neto') {
+          return (getNetValue(a) - getNetValue(b)) * dir;
+        }
+        const va = getColFilterValue(a, k);
+        const vb = getColFilterValue(b, k);
+        return va.localeCompare(vb, 'es', { numeric: true, sensitivity: 'base' }) * dir;
+      });
+    }
+    return out;
+  }
+
+  function getCascadingDataForCol(excludeKey) {
+    const otherKeys = Object.keys(colFilters).filter(k => k !== excludeKey && colFilters[k]?.length > 0);
+    if (otherKeys.length === 0) return lastBaseFilteredForCols;
+    return lastBaseFilteredForCols.filter(item =>
+      otherKeys.every(k => colFilters[k].includes(getColFilterValue(item, k)))
+    );
+  }
+
+  function closeColFilterPopover() {
+    const pop = document.getElementById('excel-col-filter-popover');
+    if (pop) pop.classList.add('hidden');
+    activeColPopoverKey = null;
+  }
+
+  function updateColFilterIndicators() {
+    const activeCount = Object.keys(colFilters).filter(k => colFilters[k]?.length > 0).length + (colSort.key ? 1 : 0);
+    const clearBtn = document.getElementById('btn-clear-col-filters');
+    const countSpan = document.getElementById('col-filters-count');
+    if (clearBtn && countSpan) {
+      countSpan.textContent = activeCount;
+      if (activeCount > 0 && currentTab !== 'contable' && currentTab !== 'asignacion' && currentTab !== 'ficha' && currentTab !== 'salidas') {
+        clearBtn.classList.remove('hidden');
+        clearBtn.classList.add('inline-flex');
+      } else {
+        clearBtn.classList.add('hidden');
+        clearBtn.classList.remove('inline-flex');
+      }
+    }
+
+    document.querySelectorAll('.excel-col-trigger').forEach(btn => {
+      const k = btn.getAttribute('data-col-key');
+      const selected = colFilters[k] || [];
+      const isSorted = colSort.key === k;
+      const badge = btn.querySelector('.excel-col-badge');
+      const icon = btn.querySelector('.excel-col-icon');
+      if (selected.length > 0 || isSorted) {
+        btn.classList.add('bg-amber-400/25', 'text-amber-100', 'ring-1', 'ring-amber-200/70');
+        btn.classList.remove('hover:bg-white/15');
+      } else {
+        btn.classList.remove('bg-amber-400/25', 'text-amber-100', 'ring-1', 'ring-amber-200/70');
+        btn.classList.add('hover:bg-white/15');
+      }
+      if (badge) {
+        if (selected.length > 0) {
+          badge.textContent = selected.length;
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
+      }
+      if (icon) {
+        if (isSorted) {
+          icon.textContent = colSort.direction === 'asc' ? '↑' : '↓';
+        } else if (selected.length > 0) {
+          icon.textContent = '⧨';
+        } else {
+          icon.textContent = '▾';
+        }
+      }
+    });
+  }
+
+  function openColFilterPopover(colKey, labelText, triggerEl) {
+    const pop = document.getElementById('excel-col-filter-popover');
+    if (!pop) return;
+    if (activeColPopoverKey === colKey && !pop.classList.contains('hidden')) {
+      closeColFilterPopover();
+      return;
+    }
+    activeColPopoverKey = colKey;
+
+    const cascadeData = getCascadingDataForCol(colKey);
+    const valueCounts = new Map();
+    cascadeData.forEach(item => {
+      const v = getColFilterValue(item, colKey);
+      valueCounts.set(v, (valueCounts.get(v) || 0) + 1);
+    });
+    const allUniqueVals = Array.from(valueCounts.keys()).sort((a, b) =>
+      a.localeCompare(b, 'es', { numeric: true, sensitivity: 'base' })
+    );
+
+    let draftSelected = new Set(
+      colFilters[colKey] && colFilters[colKey].length > 0 ? colFilters[colKey] : allUniqueVals
+    );
+    let searchQ = '';
+
+    pop.innerHTML = `
+      <div class="px-3 py-2 bg-[#004C96] text-white flex items-center justify-between">
+        <span class="font-extrabold text-[11px] uppercase tracking-wider truncate">${labelText}</span>
+        <button type="button" id="ecf-close" class="text-white/80 hover:text-white font-bold text-xs px-1 cursor-pointer bg-transparent border-none">✕</button>
+      </div>
+      <div class="p-2 border-b border-slate-100 flex items-center gap-1.5 bg-slate-50">
+        <button type="button" id="ecf-sort-asc" class="flex-1 py-1 px-2 rounded-lg border text-[10.5px] font-bold cursor-pointer transition-all ${colSort.key === colKey && colSort.direction === 'asc' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'}">↑ A → Z</button>
+        <button type="button" id="ecf-sort-desc" class="flex-1 py-1 px-2 rounded-lg border text-[10.5px] font-bold cursor-pointer transition-all ${colSort.key === colKey && colSort.direction === 'desc' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'}">↓ Z → A</button>
+      </div>
+      <div class="p-2 border-b border-slate-100">
+        <input type="text" id="ecf-search" placeholder="Buscar valor..." class="w-full h-7 px-2 text-[11px] bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-brand-500" />
+      </div>
+      <div class="px-2.5 py-1.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+        <label class="flex items-center gap-1.5 cursor-pointer text-[11px] font-bold text-slate-700">
+          <input type="checkbox" id="ecf-select-all" class="rounded border-slate-300 text-brand-600 cursor-pointer" />
+          <span>(Seleccionar todo)</span>
+        </label>
+        <span id="ecf-count-lbl" class="text-[10px] font-mono text-slate-500"></span>
+      </div>
+      <div id="ecf-list" class="max-h-52 overflow-y-auto p-1.5 space-y-0.5"></div>
+      <div class="p-2 border-t border-slate-100 bg-slate-50 flex items-center justify-between gap-2">
+        <button type="button" id="ecf-clear" class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-600 font-bold text-[11px] cursor-pointer">Limpiar</button>
+        <button type="button" id="ecf-apply" class="px-3.5 py-1 rounded-lg bg-[#00509d] hover:bg-[#003f7e] text-white font-extrabold text-[11px] cursor-pointer border-none">Aceptar</button>
+      </div>
+    `;
+
+    const listEl = pop.querySelector('#ecf-list');
+    const searchEl = pop.querySelector('#ecf-search');
+    const selectAllEl = pop.querySelector('#ecf-select-all');
+    const countLbl = pop.querySelector('#ecf-count-lbl');
+
+    function renderValList() {
+      const q = searchQ.trim().toLowerCase();
+      const visible = q
+        ? allUniqueVals.filter(v => (v || '(Vacío)').toLowerCase().includes(q))
+        : allUniqueVals;
+
+      const frag = document.createDocumentFragment();
+      visible.slice(0, 400).forEach(val => {
+        const lbl = document.createElement('label');
+        lbl.className = 'flex items-center justify-between gap-1.5 px-1.5 py-1 rounded hover:bg-blue-50/70 cursor-pointer text-[11px]';
+        const left = document.createElement('div');
+        left.className = 'flex items-center gap-1.5 min-w-0';
+        const chk = document.createElement('input');
+        chk.type = 'checkbox';
+        chk.className = 'rounded border-slate-300 text-brand-600 cursor-pointer shrink-0';
+        chk.checked = draftSelected.has(val);
+        chk.addEventListener('change', () => {
+          if (chk.checked) draftSelected.add(val);
+          else draftSelected.delete(val);
+          syncMasterChk();
+        });
+        const txt = document.createElement('span');
+        txt.className = val ? 'truncate text-slate-700' : 'truncate italic text-slate-400';
+        txt.textContent = val || '(Vacío)';
+        txt.title = val || '(Vacío)';
+        left.appendChild(chk);
+        left.appendChild(txt);
+
+        const cnt = document.createElement('span');
+        cnt.className = 'text-[9.5px] font-mono text-slate-400 shrink-0';
+        cnt.textContent = valueCounts.get(val) || 0;
+
+        lbl.appendChild(left);
+        lbl.appendChild(cnt);
+        frag.appendChild(lbl);
+      });
+      if (visible.length > 400) {
+        const note = document.createElement('div');
+        note.className = 'px-2 py-1 text-[10px] text-amber-700 bg-amber-50 rounded text-center';
+        note.textContent = `Mostrando 400 de ${visible.length}. Usa el buscador para acotar.`;
+        frag.appendChild(note);
+      }
+      listEl.innerHTML = '';
+      listEl.appendChild(frag);
+      syncMasterChk();
+    }
+
+    function syncMasterChk() {
+      const q = searchQ.trim().toLowerCase();
+      const visible = q
+        ? allUniqueVals.filter(v => (v || '(Vacío)').toLowerCase().includes(q))
+        : allUniqueVals;
+      const selVisible = visible.filter(v => draftSelected.has(v)).length;
+      selectAllEl.checked = visible.length > 0 && selVisible === visible.length;
+      selectAllEl.indeterminate = selVisible > 0 && selVisible < visible.length;
+      countLbl.textContent = `${draftSelected.size}/${allUniqueVals.length}`;
+    }
+
+    selectAllEl.addEventListener('change', () => {
+      const q = searchQ.trim().toLowerCase();
+      const visible = q
+        ? allUniqueVals.filter(v => (v || '(Vacío)').toLowerCase().includes(q))
+        : allUniqueVals;
+      if (selectAllEl.checked) {
+        visible.forEach(v => draftSelected.add(v));
+      } else {
+        visible.forEach(v => draftSelected.delete(v));
+      }
+      renderValList();
+    });
+
+    searchEl.addEventListener('input', () => {
+      searchQ = searchEl.value;
+      renderValList();
+    });
+
+    pop.querySelector('#ecf-sort-asc').addEventListener('click', () => {
+      colSort = (colSort.key === colKey && colSort.direction === 'asc') ? { key: null, direction: null } : { key: colKey, direction: 'asc' };
+      closeColFilterPopover();
+      applyFilters();
+    });
+    pop.querySelector('#ecf-sort-desc').addEventListener('click', () => {
+      colSort = (colSort.key === colKey && colSort.direction === 'desc') ? { key: null, direction: null } : { key: colKey, direction: 'desc' };
+      closeColFilterPopover();
+      applyFilters();
+    });
+    pop.querySelector('#ecf-close').addEventListener('click', closeColFilterPopover);
+    pop.querySelector('#ecf-clear').addEventListener('click', () => {
+      delete colFilters[colKey];
+      if (colSort.key === colKey) colSort = { key: null, direction: null };
+      closeColFilterPopover();
+      applyFilters();
+    });
+    pop.querySelector('#ecf-apply').addEventListener('click', () => {
+      if (draftSelected.size === 0 || draftSelected.size === allUniqueVals.length) {
+        delete colFilters[colKey];
+      } else {
+        colFilters[colKey] = Array.from(draftSelected);
+      }
+      closeColFilterPopover();
+      applyFilters();
+    });
+
+    renderValList();
+
+    // Posicionar flotante dentro del viewport
+    pop.classList.remove('hidden');
+    const rect = triggerEl.getBoundingClientRect();
+    const popW = 256;
+    const popH = Math.min(pop.offsetHeight || 360, 400);
+    let left = rect.left;
+    if (left + popW > window.innerWidth - 10) left = Math.max(8, window.innerWidth - popW - 10);
+    let top = rect.bottom + 4;
+    if (top + popH > window.innerHeight - 10) top = Math.max(8, rect.top - popH - 4);
+    pop.style.left = `${left}px`;
+    pop.style.top = `${top}px`;
+    searchEl.focus();
+  }
+
+  function initExcelHeaderFilters() {
+    document.querySelectorAll('th[data-col-filter]').forEach(th => {
+      if (th.dataset.ecfBound) return;
+      th.dataset.ecfBound = '1';
+      const keys = th.getAttribute('data-col-filter').split('|').map(s => s.trim()).filter(Boolean);
+      const rawLabels = th.getAttribute('data-col-labels')
+        ? th.getAttribute('data-col-labels').split('|').map(s => s.trim())
+        : [th.textContent.trim()];
+
+      th.innerHTML = '';
+      const wrap = document.createElement('div');
+      wrap.className = keys.length > 1 ? 'inline-flex flex-col items-stretch gap-0.5 w-full' : 'inline-flex items-center justify-center w-full';
+
+      keys.forEach((k, idx) => {
+        const lbl = rawLabels[idx] || k;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.setAttribute('data-col-key', k);
+        btn.className = 'excel-col-trigger inline-flex items-center justify-between gap-1 px-1 py-0.5 rounded text-[0.6rem] font-extrabold text-white uppercase tracking-wide hover:bg-white/15 transition-colors cursor-pointer bg-transparent border-none w-full';
+        btn.title = `Filtrar / Ordenar por ${lbl}`;
+        btn.innerHTML = `
+          <span class="truncate">${lbl}</span>
+          <span class="inline-flex items-center gap-0.5 shrink-0">
+            <span class="excel-col-badge hidden px-1 rounded-full bg-amber-300 text-slate-900 text-[8.5px] font-black leading-tight"></span>
+            <span class="excel-col-icon text-[9px] opacity-85 leading-none">▾</span>
+          </span>
+        `;
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openColFilterPopover(k, lbl, btn);
+        });
+        wrap.appendChild(btn);
+      });
+      th.appendChild(wrap);
+    });
+
+    const clearColBtn = document.getElementById('btn-clear-col-filters');
+    if (clearColBtn && !clearColBtn.dataset.bound) {
+      clearColBtn.dataset.bound = '1';
+      clearColBtn.addEventListener('click', () => {
+        colFilters = {};
+        colSort = { key: null, direction: null };
+        closeColFilterPopover();
+        applyFilters();
+      });
+    }
+
+    const pop = document.getElementById('excel-col-filter-popover');
+    if (pop && !pop.dataset.bound) {
+      pop.dataset.bound = '1';
+      pop.addEventListener('click', (e) => e.stopPropagation());
+      document.addEventListener('click', closeColFilterPopover);
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeColFilterPopover(); });
+    }
   }
 
   // Renderizado dinámico de datos y contenedores
@@ -2015,7 +2419,13 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    if (data.length === 0) {
+    const keepTableForControls = window.innerWidth >= 768 && (
+      currentTab === 'inventario' ||
+      currentTab === 'terceros' ||
+      Object.keys(colFilters).length > 0
+    );
+
+    if (data.length === 0 && !keepTableForControls) {
       emptyState.classList.remove('hidden');
       allContainers.forEach(id => {
         const el = document.getElementById(id);
@@ -2056,7 +2466,22 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Inyectar datos específicos
+    // Inyectar datos específicos (con fila vacía amigable si un filtro de columna deja 0 resultados)
+    if (data.length === 0 && currentTab !== 'inventario' && currentTab !== 'terceros') {
+      const emptyMap = {
+        activos: ['assets-tbody', 12],
+        obras: ['obras-tbody', 12],
+        vehiculos: ['vehiculos-tbody', 11],
+        celulares: ['celulares-tbody', 10],
+      };
+      if (emptyMap[currentTab]) {
+        const [tbId, cols] = emptyMap[currentTab];
+        const tb = document.getElementById(tbId);
+        if (tb) tb.innerHTML = `<tr><td colspan="${cols}" class="py-10 text-center text-slate-400 text-xs font-semibold">No hay registros que coincidan con los filtros de columna activos.</td></tr>`;
+        return;
+      }
+    }
+
     if (currentTab === 'activos') {
       renderActivosRows(data);
     } else if (currentTab === 'obras') {
@@ -4268,8 +4693,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileContainer = document.getElementById('assets-mobile-container');
     if (currentTab === 'inventario') mobileContainer.innerHTML = '';
 
-    // Actualizar Indicadores Superiores (KPIs)
-    const allInventario = getInventarioUnificado();
+    // Actualizar Indicadores Superiores (KPIs) respetando los filtros activos
+    const allInventario = lastInventarioKpiBase.length > 0 || searchInput.value.trim() || sucursalSelect.value || (localidadSelect && localidadSelect.value) || estadoSelect.value || selectedCategories.length > 0 || selectedSubcategories.length > 0
+      ? lastInventarioKpiBase
+      : getInventarioUnificado();
     const kpiTotal = allInventario.length;
     const kpiActivos = allInventario.filter(i => i.tipo_origen === 'ACTIVO FIJO' || i.tipo_origen === 'INCORPORACIÓN').length;
     const kpiObras = allInventario.filter(i => i.tipo_origen === 'OBRA EN CURSO').length;
@@ -4313,6 +4740,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
     });
+
+    if (data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="12" class="py-10 text-center text-slate-400 text-xs font-semibold">No hay bienes en esta vista con los filtros activos.</td></tr>';
+      return;
+    }
 
     const frag = document.createDocumentFragment();
     const isMobileViewport = window.innerWidth < 768;
@@ -4495,8 +4927,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const tbody = document.getElementById('terceros-tbody');
     tbody.innerHTML = '';
 
-    // Actualizar contadores de sub-pestañas de Regularización
-    const srcReg = regularizacion.length > 0 ? regularizacion : terceros;
+    // Actualizar contadores de sub-pestañas de Regularización respetando filtros activos
+    const srcReg = lastRegSubTabBase.length > 0 || searchInput.value.trim() || sucursalSelect.value || (localidadSelect && localidadSelect.value) || estadoSelect.value || selectedCategories.length > 0 || selectedSubcategories.length > 0
+      ? lastRegSubTabBase
+      : (regularizacion.length > 0 ? regularizacion : terceros);
     const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
     setTxt('reg-cnt-all', srcReg.length);
     setTxt('reg-cnt-conc', srcReg.filter(x => String(x.sub_modulo || '').toUpperCase() === 'CONCILIACION').length);
@@ -4529,6 +4963,13 @@ document.addEventListener('DOMContentLoaded', () => {
       CONTROL: 'bg-slate-100 text-slate-800 border-slate-300',
     };
 
+    if (data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="9" class="py-10 text-center text-slate-400 text-xs font-semibold">No hay registros en esta sub-pestaña con los filtros activos.</td></tr>';
+      return;
+    }
+
+    const frag = document.createDocumentFragment();
+    const isMobileViewport = window.innerWidth < 768;
     data.forEach(item => {
       const row = document.createElement('tr');
       row.className = 'hover:bg-blue-50/60 text-slate-700 transition-colors border-b border-slate-150 text-xs';
@@ -4572,9 +5013,10 @@ document.addEventListener('DOMContentLoaded', () => {
           ${unidadOrg ? `<div class="text-[9px] text-slate-500 uppercase truncate max-w-[175px]">${unidadOrg}</div>` : ''}
         </td>
       `;
-      tbody.appendChild(row);
-      renderTercerosMobileCard(item);
+      frag.appendChild(row);
+      if (isMobileViewport) renderTercerosMobileCard(item);
     });
+    tbody.appendChild(frag);
   }
 
   function renderTercerosMobileCard(item) {
