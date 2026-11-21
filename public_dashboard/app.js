@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let inventarioSubFilter = 'ALL'; // ALL | ACTIVOS | OBRAS | CONCILIACION | TERCEROS | SOBRANTE | FALTANTE
   let regularizacionSubTab = 'ALL'; // ALL | CONCILIACION | SOBRANTE | FALTANTE | TERCERO | CONTROL
   let currentFilteredData = [];
+  let cachedInventarioUnificado = null;
+  let currentPage = 1;
+  let pageSize = 100;
   let colFilters = {}; // { colKey: [val1, val2, ...] }
   let colSort = { key: null, direction: null }; // { key, direction: 'asc'|'desc'|null }
   let lastBaseFilteredForCols = [];
@@ -135,16 +138,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function loadData() {
     try {
-      const ts = Date.now();
-      const fetchOpts = { cache: 'no-store' };
+      // cache: 'no-cache' permite validación ETag/304 con GitHub Pages CDN (carga instantánea en visitas repetidas sin datos obsoletos)
+      const fetchOpts = { cache: 'no-cache' };
       const [assetsResponse, celularesResponse, inventarioResponse, tercerosResponse, salidasResponse, regResponse, vehCompResponse] = await Promise.all([
-        fetch(`./activos.json?t=${ts}`, fetchOpts),
-        fetch(`./celulares.json?t=${ts}`, fetchOpts).catch(() => null),
-        fetch(`./inventario_fisico.json?t=${ts}`, fetchOpts).catch(() => null),
-        fetch(`./bienes_terceros.json?t=${ts}`, fetchOpts).catch(() => null),
-        fetch(`./salidas.json?t=${ts}`, fetchOpts).catch(() => null),
-        fetch(`./regularizacion.json?t=${ts}`, fetchOpts).catch(() => null),
-        fetch(`./vehiculos_completo.json?t=${ts}`, fetchOpts).catch(() => null)
+        fetch('./activos.json', fetchOpts),
+        fetch('./celulares.json', fetchOpts).catch(() => null),
+        fetch('./inventario_fisico.json', fetchOpts).catch(() => null),
+        fetch('./bienes_terceros.json', fetchOpts).catch(() => null),
+        fetch('./salidas.json', fetchOpts).catch(() => null),
+        fetch('./regularizacion.json', fetchOpts).catch(() => null),
+        fetch('./vehiculos_completo.json', fetchOpts).catch(() => null)
       ]);
       
       if (!assetsResponse.ok) {
@@ -408,6 +411,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (contableLocalidadSelect) contableLocalidadSelect.addEventListener('change', applyFilters);
 
       initSalidaModule();
+      buildFastIndexes();
+      initPaginationBar();
       initExcelHeaderFilters();
       applyFilters();
       
@@ -637,8 +642,84 @@ document.addEventListener('DOMContentLoaded', () => {
     );
   }
 
-  // Obtener Inventario General Unificado (Activos Fijos, Obras, Conciliación, Sobrantes, Faltantes, Terceros y Control)
+  // Normalización rápida sin tildes para búsqueda instantánea multi-palabra
+  function normFastSearch(str) {
+    if (!str) return '';
+    return String(str).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  }
+
+  function indexItemFast(item) {
+    if (!item) return;
+    item._sucU = (item.sucursal || '').trim().toUpperCase();
+    item._locU = (item.localidad || '').trim().toUpperCase();
+    item._estU = (item.estado_activo || item.estado || '').trim().toUpperCase();
+    const dStr = item.fecha_registro_contable || item.fecha_alta_factura || item.fecha_alta || item.fecha_ingreso || item.fecha_asignacion || '';
+    if (dStr) {
+      const parts = parseDateParts(dStr);
+      item._year = parts.year || 0;
+      item._month = parts.month || 0;
+    } else {
+      item._year = 0;
+      item._month = 0;
+    }
+    item._blob = normFastSearch([
+      item.cod_patrimonial, item.cod_control, item.denominacion, item.marca, item.modelo,
+      item.numero_serie, item.placa, item.nro_motor, item.nro_chasis, item.n_doc,
+      item.cuenta_contable, item.centro_costo, item.sucursal, item.localidad,
+      item.categoria, item.subcategoria, item.responsable, item.propietario_manual,
+      item.puesto, item.unidad, item.imei, item.numero_linea, item.operador,
+      item.tipo_origen, item.sub_modulo, item.estado_activo, item.estado
+    ].filter(Boolean).join(' '));
+  }
+
+  function buildFastIndexes() {
+    cachedInventarioUnificado = null;
+    (assets || []).forEach(indexItemFast);
+    (regularizacion || []).forEach(indexItemFast);
+    (vehiculosCompleto || []).forEach(indexItemFast);
+    (celulares || []).forEach(indexItemFast);
+    (terceros || []).forEach(indexItemFast);
+    cachedInventarioUnificado = getInventarioUnificado();
+    cachedInventarioUnificado.forEach(indexItemFast);
+  }
+
+  function initPaginationBar() {
+    const sizeSel = document.getElementById('pg-size-select');
+    const btnFirst = document.getElementById('pg-first');
+    const btnPrev = document.getElementById('pg-prev');
+    const btnNext = document.getElementById('pg-next');
+    const btnLast = document.getElementById('pg-last');
+
+    const goToPage = (p) => {
+      const totalPages = pageSize === 0 ? 1 : Math.max(1, Math.ceil(currentFilteredData.length / pageSize));
+      currentPage = Math.max(1, Math.min(p, totalPages));
+      renderData(currentFilteredData, false);
+      const activeContainer = document.querySelector(`#${currentTab === 'activos' ? 'assets' : currentTab}-table-container .overflow-y-auto`);
+      if (activeContainer) activeContainer.scrollTop = 0;
+    };
+
+    if (sizeSel && !sizeSel.dataset.bound) {
+      sizeSel.dataset.bound = '1';
+      sizeSel.addEventListener('change', () => {
+        pageSize = Number(sizeSel.value) || 0;
+        goToPage(1);
+      });
+    }
+    if (btnFirst && !btnFirst.dataset.bound) { btnFirst.dataset.bound = '1'; btnFirst.addEventListener('click', () => goToPage(1)); }
+    if (btnPrev && !btnPrev.dataset.bound) { btnPrev.dataset.bound = '1'; btnPrev.addEventListener('click', () => goToPage(currentPage - 1)); }
+    if (btnNext && !btnNext.dataset.bound) { btnNext.dataset.bound = '1'; btnNext.addEventListener('click', () => goToPage(currentPage + 1)); }
+    if (btnLast && !btnLast.dataset.bound) {
+      btnLast.dataset.bound = '1';
+      btnLast.addEventListener('click', () => {
+        const totalPages = pageSize === 0 ? 1 : Math.max(1, Math.ceil(currentFilteredData.length / pageSize));
+        goToPage(totalPages);
+      });
+    }
+  }
+
+  // Obtener Inventario General Unificado (cacheado tras carga inicial para respuesta <1ms)
   function getInventarioUnificado() {
+    if (cachedInventarioUnificado) return cachedInventarioUnificado;
     const faltantesMap = new Map();
     const sobrantesLegacy = [];
 
@@ -1620,6 +1701,17 @@ document.addEventListener('DOMContentLoaded', () => {
       baseData = assets;
     }
 
+    const selSucU = (selectedSucursal || '').trim().toUpperCase();
+    const selLocU = (selectedLocalidad || '').trim().toUpperCase();
+    const selEstU = (selectedEstado || '').trim().toUpperCase();
+    const selYearNum = selectedGlobalYear ? Number(selectedGlobalYear) : 0;
+    const selMonthNum = selectedGlobalMonth ? Number(selectedGlobalMonth) : 0;
+    const selMonthsSet = selectedMonths.length > 0 ? new Set(selectedMonths.map(Number)) : null;
+    const searchTerms = query ? normFastSearch(query).split(/\s+/).filter(Boolean) : [];
+    const hasCategoriesTab = currentTab === 'activos' || currentTab === 'obras' || currentTab === 'inventario' || currentTab === 'terceros';
+    const selCatsSet = (hasCategoriesTab && selectedCategories.length > 0) ? new Set(selectedCategories) : null;
+    const selSubcatsSet = (hasCategoriesTab && selectedSubcategories.length > 0) ? new Set(selectedSubcategories) : null;
+
     const filtered = baseData.filter(item => {
       if (currentTab === 'salida-tabla' || currentTab === 'salidas') {
         const querySalida = (document.getElementById('filter-salida-search')?.value || '').toLowerCase().trim();
@@ -1694,151 +1786,54 @@ document.addEventListener('DOMContentLoaded', () => {
         return true;
       }
 
-      // Filtro de Sucursal (insensible a mayúsculas/espacios)
-      const sucursalMatch = !selectedSucursal || (item.sucursal || '').trim().toUpperCase() === selectedSucursal.trim().toUpperCase();
-
-      // Filtro de Localidad (insensible a mayúsculas/espacios)
-      const localidadMatch = !selectedLocalidad || (item.localidad || '').trim().toUpperCase() === selectedLocalidad.trim().toUpperCase();
-
-      // Filtro de Estado Físico del Activo (o estado de celular)
-      const estadoMatch = !selectedEstado || 
-        (currentTab === 'celulares'
-          ? (item.estado || '').trim().toUpperCase() === selectedEstado.trim().toUpperCase()
-          : (item.estado_activo || '').trim().toUpperCase() === selectedEstado.trim().toUpperCase());
+      // Filtro rápido O(1) usando campos precomputados (_sucU, _locU, _estU, _year, _month, _blob)
+      if (selSucU && (item._sucU ?? (item.sucursal || '').trim().toUpperCase()) !== selSucU) return false;
+      if (selLocU && (item._locU ?? (item.localidad || '').trim().toUpperCase()) !== selLocU) return false;
+      if (selEstU && (item._estU ?? (currentTab === 'celulares' ? (item.estado || '') : (item.estado_activo || '')).trim().toUpperCase()) !== selEstU) return false;
 
       // Filtro de Estado del SOAT (para VEHICULOS y SOAT & RT)
-      const isBaja = item.estado_activo === 'PARA BAJA' || item.estado_activo === 'BAJA' || item.estado_soat === 'NO_REQUIERE' || item.soat_estado === 'NO_REQUIERE';
-      let soatEstadoMatch = true;
       if (selectedSoatEstado) {
+        const isBaja = item.estado_activo === 'PARA BAJA' || item.estado_activo === 'BAJA' || item.estado_soat === 'NO_REQUIERE' || item.soat_estado === 'NO_REQUIERE';
         if (selectedSoatEstado === 'NO_REQUIERE' || selectedSoatEstado === 'PARA_BAJA') {
-          soatEstadoMatch = isBaja;
+          if (!isBaja) return false;
         } else {
-          soatEstadoMatch = !isBaja && (item.soat_estado === selectedSoatEstado || item.estado_soat === selectedSoatEstado);
+          if (isBaja || (item.soat_estado !== selectedSoatEstado && item.estado_soat !== selectedSoatEstado)) return false;
         }
       }
 
-      // Filtro de Categoría y Subcategoría (si aplica)
-      const hasCategories = currentTab === 'activos' || currentTab === 'obras' || currentTab === 'inventario' || currentTab === 'terceros';
-      const categoriaMatch = !hasCategories || selectedCategories.length === 0 || selectedCategories.includes(item.categoria);
-      const subcategoriaMatch = !hasCategories || selectedSubcategories.length === 0 || selectedSubcategories.includes(item.subcategoria);
+      // Filtro de Categoría y Subcategoría (O(1) Set lookup)
+      if (selCatsSet && !selCatsSet.has(item.categoria)) return false;
+      if (selSubcatsSet && !selSubcatsSet.has(item.subcategoria)) return false;
 
-      // Filtro de Año de Registro Global (Prioridad Fecha de Registro Contable)
-      let yearMatch = true;
-      if (selectedGlobalYear) {
-        const dateStr = item.fecha_registro_contable || item.fecha_alta_factura || item.fecha_alta || item.fecha_ingreso || item.fecha_asignacion;
-        if (!dateStr) {
-          yearMatch = false;
-        } else {
-          const { year: y } = parseDateParts(dateStr);
-          yearMatch = (y === Number(selectedGlobalYear));
-        }
-      }
-
-      // Filtro de Mes de Registro Global (Multiselección)
-      let monthMatch = true;
-      if (selectedMonths.length > 0) {
-        const dateStr = item.fecha_registro_contable || item.fecha_alta_factura || item.fecha_alta || item.fecha_ingreso || item.fecha_asignacion;
-        if (!dateStr) {
-          monthMatch = false;
-        } else {
-          const { month: m } = parseDateParts(dateStr);
-          monthMatch = m ? selectedMonths.includes(String(m)) : false;
-        }
-      } else if (selectedGlobalMonth) {
-        const dateStr = item.fecha_registro_contable || item.fecha_alta_factura || item.fecha_alta || item.fecha_ingreso || item.fecha_asignacion;
-        if (!dateStr) {
-          monthMatch = false;
-        } else {
-          const { month: m } = parseDateParts(dateStr);
-          monthMatch = (m === Number(selectedGlobalMonth));
-        }
+      // Filtro de Año y Mes precomputados
+      if (selYearNum && (item._year || 0) !== selYearNum) return false;
+      if (selMonthsSet) {
+        if (!item._month || !selMonthsSet.has(item._month)) return false;
+      } else if (selMonthNum && (item._month || 0) !== selMonthNum) {
+        return false;
       }
 
       // Filtro Rango de Valor Libros / Neto Global
-      let valorMatch = true;
       if (selectedGlobalValor) {
         const valorLibros = Number(item.valor_en_libros) || 0;
         const depAcum = Number(item.depreciacion_acumulada) || 0;
         const valorNeto = Math.max(0, valorLibros - depAcum);
+        if (selectedGlobalValor === 'MAJOR_0' && !(valorLibros > 0)) return false;
+        if (selectedGlobalValor === '1_1000' && !(valorLibros > 0 && valorLibros <= 1000)) return false;
+        if (selectedGlobalValor === '1000_10000' && !(valorLibros > 1000 && valorLibros <= 10000)) return false;
+        if (selectedGlobalValor === '10000_PLUS' && !(valorLibros > 10000)) return false;
+        if (selectedGlobalValor === 'DEPRECIADO' && !(valorLibros > 0 && valorNeto <= 1)) return false;
+      }
 
-        if (selectedGlobalValor === 'MAJOR_0') {
-          valorMatch = valorLibros > 0;
-        } else if (selectedGlobalValor === '1_1000') {
-          valorMatch = valorLibros > 0 && valorLibros <= 1000;
-        } else if (selectedGlobalValor === '1000_10000') {
-          valorMatch = valorLibros > 1000 && valorLibros <= 10000;
-        } else if (selectedGlobalValor === '10000_PLUS') {
-          valorMatch = valorLibros > 10000;
-        } else if (selectedGlobalValor === 'DEPRECIADO') {
-          valorMatch = valorLibros > 0 && valorNeto <= 1;
+      // Búsqueda inteligente multi-palabra sin tildes (O(1) sobre _blob precomputado)
+      if (searchTerms.length > 0) {
+        const blob = item._blob || '';
+        for (let t = 0; t < searchTerms.length; t++) {
+          if (!blob.includes(searchTerms[t])) return false;
         }
       }
 
-      // Filtro de Búsqueda de Texto
-      let textMatch = true;
-      if (query) {
-        if (currentTab === 'celulares') {
-          textMatch = 
-            (item.cod_control && item.cod_control.toLowerCase().includes(query)) ||
-            (item.marca && item.marca.toLowerCase().includes(query)) ||
-            (item.modelo && item.modelo.toLowerCase().includes(query)) ||
-            (item.imei && item.imei.toLowerCase().includes(query)) ||
-            (item.numero_linea && item.numero_linea.toLowerCase().includes(query)) ||
-            (item.responsable && item.responsable.toLowerCase().includes(query));
-        } else if (currentTab === 'vehiculos' || currentTab === 'soat') {
-          textMatch = 
-            (item.cod_patrimonial && item.cod_patrimonial.toLowerCase().includes(query)) ||
-            (item.placa && item.placa.toLowerCase().includes(query)) ||
-            (item.denominacion && item.denominacion.toLowerCase().includes(query)) ||
-            (item.marca && item.marca.toLowerCase().includes(query)) ||
-            (item.modelo && item.modelo.toLowerCase().includes(query)) ||
-            (item.nro_motor && item.nro_motor.toLowerCase().includes(query)) ||
-            (item.nro_chasis && item.nro_chasis.toLowerCase().includes(query)) ||
-            (item.responsable && item.responsable.toLowerCase().includes(query));
-        } else if (currentTab === 'inventario') {
-          textMatch = 
-            (item.cod_patrimonial && item.cod_patrimonial.toLowerCase().includes(query)) ||
-            (item.denominacion && item.denominacion.toLowerCase().includes(query)) ||
-            (item.marca && item.marca.toLowerCase().includes(query)) ||
-            (item.modelo && item.modelo.toLowerCase().includes(query)) ||
-            (item.numero_serie && item.numero_serie.toLowerCase().includes(query)) ||
-            (item.placa && item.placa.toLowerCase().includes(query)) ||
-            (item.n_doc && String(item.n_doc).toLowerCase().includes(query)) ||
-            (item.responsable && item.responsable.toLowerCase().includes(query)) ||
-            (item.puesto && item.puesto.toLowerCase().includes(query)) ||
-            (item.unidad && item.unidad.toLowerCase().includes(query)) ||
-            (item.categoria && item.categoria.toLowerCase().includes(query)) ||
-            (item.subcategoria && item.subcategoria.toLowerCase().includes(query));
-        } else if (currentTab === 'terceros') {
-          textMatch = 
-            (item.cod_patrimonial && item.cod_patrimonial.toLowerCase().includes(query)) ||
-            (item.denominacion && item.denominacion.toLowerCase().includes(query)) ||
-            (item.subcategoria && item.subcategoria.toLowerCase().includes(query)) ||
-            (item.marca && item.marca.toLowerCase().includes(query)) ||
-            (item.modelo && item.modelo.toLowerCase().includes(query)) ||
-            (item.numero_serie && item.numero_serie.toLowerCase().includes(query)) ||
-            (item.placa && item.placa.toLowerCase().includes(query)) ||
-            (item.puesto && item.puesto.toLowerCase().includes(query)) ||
-            (item.unidad && item.unidad.toLowerCase().includes(query)) ||
-            (item.propietario_manual && item.propietario_manual.toLowerCase().includes(query)) ||
-            (item.responsable && item.responsable.toLowerCase().includes(query));
-        } else {
-          // Activos / Obras
-          textMatch = 
-            (item.cod_patrimonial && item.cod_patrimonial.toLowerCase().includes(query)) ||
-            (item.denominacion && item.denominacion.toLowerCase().includes(query)) ||
-            (item.marca && item.marca.toLowerCase().includes(query)) ||
-            (item.modelo && item.modelo.toLowerCase().includes(query)) ||
-            (item.numero_serie && item.numero_serie.toLowerCase().includes(query)) ||
-            (item.n_doc && String(item.n_doc).toLowerCase().includes(query)) ||
-            (item.responsable && item.responsable.toLowerCase().includes(query)) ||
-            (item.puesto && item.puesto.toLowerCase().includes(query)) ||
-            (item.unidad && item.unidad.toLowerCase().includes(query)) ||
-            (item.subcategoria && item.subcategoria.toLowerCase().includes(query));
-        }
-      }
-
-      return sucursalMatch && localidadMatch && estadoMatch && soatEstadoMatch && categoriaMatch && subcategoriaMatch && textMatch && yearMatch && monthMatch && valorMatch;
+      return true;
     });
 
     // Guardar bases dinámicas para KPIs de Inventario y contadores de Regularización
@@ -2317,10 +2312,43 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Renderizado dinámico de datos y contenedores
-  function renderData(data) {
+  // Renderizado dinámico de datos y contenedores (con paginación rápida para respuesta instantánea)
+  function updatePaginationBar(totalCount) {
+    const pgBar = document.getElementById('dashboard-pagination-bar');
+    if (!pgBar) return;
+    const isPaginatedTab = ['activos', 'obras', 'vehiculos', 'soat', 'celulares', 'inventario', 'terceros'].includes(currentTab);
+    if (!isPaginatedTab || totalCount === 0) {
+      pgBar.classList.add('hidden');
+      return;
+    }
+    pgBar.classList.remove('hidden');
+    const totalPages = pageSize === 0 ? 1 : Math.max(1, Math.ceil(totalCount / pageSize));
+    const safePage = Math.min(currentPage, totalPages);
+    const startIdx = pageSize === 0 ? 1 : (safePage - 1) * pageSize + 1;
+    const endIdx = pageSize === 0 ? totalCount : Math.min(safePage * pageSize, totalCount);
+
+    const rangeEl = document.getElementById('pg-range-info');
+    const pageEl = document.getElementById('pg-page-info');
+    const navEl = document.getElementById('pg-nav-controls');
+    if (rangeEl) rangeEl.innerHTML = `Mostrando <strong class="font-mono text-slate-900">${startIdx}–${endIdx}</strong> de <strong class="font-mono text-slate-900">${totalCount}</strong> registros`;
+    if (pageEl) pageEl.textContent = `Pág. ${safePage} / ${totalPages}`;
+    if (navEl) navEl.classList.toggle('hidden', pageSize === 0 || totalPages <= 1);
+
+    const btnFirst = document.getElementById('pg-first');
+    const btnPrev = document.getElementById('pg-prev');
+    const btnNext = document.getElementById('pg-next');
+    const btnLast = document.getElementById('pg-last');
+    if (btnFirst) btnFirst.disabled = safePage <= 1;
+    if (btnPrev) btnPrev.disabled = safePage <= 1;
+    if (btnNext) btnNext.disabled = safePage >= totalPages;
+    if (btnLast) btnLast.disabled = safePage >= totalPages;
+  }
+
+  function renderData(data, resetPage = true) {
     currentFilteredData = data;
+    if (resetPage) currentPage = 1;
     resultsCount.textContent = `Encontrados: ${data.length}`;
+    updatePaginationBar(data.length);
 
     // Limpiar todas las tablas y contenedor de tarjetas móviles
     document.getElementById('assets-tbody').innerHTML = '';
@@ -2482,20 +2510,27 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    // Slice de paginación para renderizado instantáneo (Excel/PDF y KPIs usan 100% de currentFilteredData)
+    const totalPages = pageSize === 0 ? 1 : Math.max(1, Math.ceil(data.length / pageSize));
+    const safePage = Math.min(currentPage, totalPages);
+    const pageSlice = (pageSize === 0 || data.length <= pageSize)
+      ? data
+      : data.slice((safePage - 1) * pageSize, safePage * pageSize);
+
     if (currentTab === 'activos') {
-      renderActivosRows(data);
+      renderActivosRows(pageSlice);
     } else if (currentTab === 'obras') {
-      renderObrasRows(data);
+      renderObrasRows(pageSlice);
     } else if (currentTab === 'vehiculos') {
-      renderVehiculosRows(data);
+      renderVehiculosRows(pageSlice);
     } else if (currentTab === 'soat') {
-      renderSoatRows(data);
+      renderSoatRows(pageSlice);
     } else if (currentTab === 'celulares') {
-      renderCelularesRows(data);
+      renderCelularesRows(pageSlice);
     } else if (currentTab === 'inventario') {
-      renderInventarioRows(data);
+      renderInventarioRows(pageSlice);
     } else if (currentTab === 'terceros') {
-      renderTercerosRows(data);
+      renderTercerosRows(pageSlice);
     } else if (currentTab === 'salida-tabla') {
       renderSalidasRows(data);
     } else if (currentTab === 'salidas') {
@@ -3697,6 +3732,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Renders del Módulo: Activos Fijos ──────────────────────────────────────
   function renderActivosRows(data) {
     const tbody = document.getElementById('assets-tbody');
+    const frag = document.createDocumentFragment();
+    const isMobileViewport = window.innerWidth < 768;
     data.forEach(item => {
       const row = document.createElement('tr');
       row.className = 'hover:bg-slate-50 text-slate-700 transition-colors border-b border-slate-150';
@@ -3830,9 +3867,10 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         </td>
       `;
-      tbody.appendChild(row);
-      renderActivosMobileCard(item, valLibrosFormateado, valNetoFormateado);
+      frag.appendChild(row);
+      if (isMobileViewport) renderActivosMobileCard(item, valLibrosFormateado, valNetoFormateado);
     });
+    tbody.appendChild(frag);
 
     const bindFichaEvents = (container) => {
       if (!container) return;
@@ -3938,6 +3976,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Renders del Módulo: Obras en Curso ──────────────────────────────────────
   function renderObrasRows(data) {
     const tbody = document.getElementById('obras-tbody');
+    const frag = document.createDocumentFragment();
+    const isMobileViewport = window.innerWidth < 768;
     data.forEach(item => {
       const row = document.createElement('tr');
       row.className = 'hover:bg-slate-50 text-slate-700 transition-colors border-b border-slate-150';
@@ -4061,9 +4101,10 @@ document.addEventListener('DOMContentLoaded', () => {
           </button>
         </td>
       `;
-      tbody.appendChild(row);
-      renderObrasMobileCard(item, valLibrosFormateado, valNetoFormateado);
+      frag.appendChild(row);
+      if (isMobileViewport) renderObrasMobileCard(item, valLibrosFormateado, valNetoFormateado);
     });
+    tbody.appendChild(frag);
 
     const bindObrasFichaEvents = (container) => {
       if (!container) return;
@@ -4205,6 +4246,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Renders del Módulo: Vehículos ──────────────────────────────────────────
   function renderVehiculosRows(data) {
     const tbody = document.getElementById('vehiculos-tbody');
+    const frag = document.createDocumentFragment();
+    const isMobileViewport = window.innerWidth < 768;
     data.forEach(item => {
       const row = document.createElement('tr');
       row.className = 'hover:bg-slate-50 text-slate-700 transition-colors border-b border-slate-150';
@@ -4308,9 +4351,10 @@ document.addEventListener('DOMContentLoaded', () => {
           ` : '<span class="text-xs text-slate-400 font-semibold">—</span>'}
         </td>
       `;
-      tbody.appendChild(row);
-      renderVehiculosMobileCard(item, soatBadge, revTecBadge);
+      frag.appendChild(row);
+      if (isMobileViewport) renderVehiculosMobileCard(item, soatBadge, revTecBadge);
     });
+    tbody.appendChild(frag);
   }
 
   function renderVehiculosMobileCard(item, soatBadge, revTecBadge) {
@@ -4546,6 +4590,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Renders del Módulo: Celulares ──────────────────────────────────────────
   function renderCelularesRows(data) {
     const tbody = document.getElementById('celulares-tbody');
+    const frag = document.createDocumentFragment();
+    const isMobileViewport = window.innerWidth < 768;
     data.forEach(item => {
       const row = document.createElement('tr');
       row.className = 'hover:bg-slate-50 text-slate-700 transition-colors border-b border-slate-150';
@@ -4621,9 +4667,10 @@ document.addEventListener('DOMContentLoaded', () => {
           ${celEstadoBadge}
         </td>
       `;
-      tbody.appendChild(row);
-      renderCelularesMobileCard(item, valUtilBadge, celEstadoBadge);
+      frag.appendChild(row);
+      if (isMobileViewport) renderCelularesMobileCard(item, valUtilBadge, celEstadoBadge);
     });
+    tbody.appendChild(frag);
   }
 
   function renderCelularesMobileCard(item, valUtilBadge, celEstadoBadge) {

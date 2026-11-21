@@ -1503,6 +1503,26 @@
       </div>
     </div>
 
+    <!-- Barra Universal de Paginación Rápida (Excel/PDF exportan siempre el 100% de los registros filtrados) -->
+    <div id="dashboard-pagination-bar" class="hidden mt-1.5 flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-xl shadow-2xs text-[11px] text-slate-600 shrink-0">
+      <div class="flex items-center gap-2">
+        <span id="pg-range-info">Mostrando 0 de 0</span>
+        <select id="pg-size-select" class="h-6 px-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold text-slate-700 cursor-pointer" title="Filas por página">
+          <option value="50">50 / pág</option>
+          <option value="100" selected>100 / pág</option>
+          <option value="250">250 / pág</option>
+          <option value="0">Todos</option>
+        </select>
+      </div>
+      <div id="pg-nav-controls" class="flex items-center gap-1">
+        <button type="button" id="pg-first" class="px-2 h-6 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 disabled:opacity-40 font-bold cursor-pointer">«</button>
+        <button type="button" id="pg-prev" class="px-2.5 h-6 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 disabled:opacity-40 font-bold cursor-pointer">Anterior</button>
+        <span id="pg-page-info" class="px-2 font-mono font-extrabold text-slate-800">Pág. 1 / 1</span>
+        <button type="button" id="pg-next" class="px-2.5 h-6 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 disabled:opacity-40 font-bold cursor-pointer">Siguiente</button>
+        <button type="button" id="pg-last" class="px-2 h-6 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 disabled:opacity-40 font-bold cursor-pointer">»</button>
+      </div>
+    </div>
+
     <!-- Lista Vacía -->
     <div id="empty-state" class="hidden text-center py-16 text-slate-400">
       <span class="text-4xl">📦</span>
@@ -1583,6 +1603,6 @@
   <!-- Popover flotante universal de filtros de columna tipo Excel -->
   <div id="excel-col-filter-popover" class="hidden fixed z-[9999] w-64 bg-white border border-slate-200 rounded-xl shadow-2xl text-slate-800 text-xs overflow-hidden"></div>
 
-  <script src="app.js?v=7"></script>
+  <script src="app.js?v=8"></script>
 </body>
 </html>
