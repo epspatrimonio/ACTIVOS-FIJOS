@@ -1228,8 +1228,8 @@ document.addEventListener('DOMContentLoaded', () => {
           fecha_alta_factura: reg.fecha_ingreso || '',
           fecha_registro_contable: reg.fecha_ingreso || '',
           fecha_asignacion: reg.fecha_asignacion || reg.fecha_ingreso || '',
-          sucursal: reg.sucursal || 'SEDE CENTRAL',
-          localidad: reg.localidad || 'LA MERCED',
+          sucursal: reg.sucursal || '—',
+          localidad: reg.localidad || '—',
           fuente: isTer ? 'Bienes de Terceros' : 'Bien de Control',
           categoria: reg.categoria || (isTer ? 'BIENES DE TERCEROS' : 'CONTROL'),
           subcategoria: reg.subcategoria || (isTer ? 'Custodia / Terceros' : 'Control Interno'),
@@ -1262,8 +1262,8 @@ document.addEventListener('DOMContentLoaded', () => {
         cuenta_contable: '—',
         centro_costo: '—',
         fecha_alta_factura: ter.fecha_ingreso || '',
-        sucursal: ter.sucursal || 'SEDE CENTRAL',
-        localidad: ter.localidad || 'LA MERCED',
+        sucursal: ter.sucursal || '—',
+        localidad: ter.localidad || '—',
         fuente: hasOwner ? 'Bienes de Terceros' : 'SOBRANTE',
         categoria: 'BIENES DE TERCEROS',
         subcategoria: ter.subcategoria || 'Custodia / Terceros',
@@ -1296,8 +1296,8 @@ document.addEventListener('DOMContentLoaded', () => {
         cuenta_contable: '—',
         centro_costo: '—',
         fecha_alta_factura: sob.created_at ? sob.created_at.split('T')[0] : '',
-        sucursal: sob.sucursal || 'SEDE CENTRAL',
-        localidad: sob.localidad || 'LA MERCED',
+        sucursal: sob.sucursal || '—',
+        localidad: sob.localidad || '—',
         fuente: 'SOBRANTE',
         categoria: sob.categoria || 'SOBRANTES',
         subcategoria: sob.subcategoria || 'Sobrante de Inventario',
@@ -1749,7 +1749,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Poblar Sucursales filtradas según Localidad seleccionada
+    // Poblar todas las Sucursales de forma independiente a Localidad
     populateSucursalSelectOptions(previousSucursal);
     
     // Poblar Estados
