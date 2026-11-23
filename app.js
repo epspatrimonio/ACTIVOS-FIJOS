@@ -26,7 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
   let lastActivosKpiBase = [];
   let lastVehiculosKpiBase = [];
   let lastCelularesKpiBase = [];
-  let sucursalToLocalidad = new Map();
   let activeColPopoverKey = null;
   let responsablesMap = {};
   let selectedResponsableKey = null;
@@ -525,28 +524,10 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       if (localidadSelect) {
         localidadSelect.addEventListener('change', () => {
-          const selLocKey = normUpperKey(localidadSelect.value);
-          if (selLocKey && sucursalSelect.value) {
-            const sucLoc = sucursalToLocalidad.get(normUpperKey(sucursalSelect.value));
-            if (sucLoc && sucLoc !== selLocKey) {
-              sucursalSelect.value = '';
-            }
-          }
-          populateSucursalSelectOptions();
           applyFilters();
         });
       }
       sucursalSelect.addEventListener('change', () => {
-        const selSucKey = normUpperKey(sucursalSelect.value);
-        if (selSucKey && localidadSelect) {
-          const mappedLocKey = sucursalToLocalidad.get(selSucKey);
-          if (mappedLocKey) {
-            const matchingOpt = Array.from(localidadSelect.options).find(o => normUpperKey(o.value) === mappedLocKey);
-            if (matchingOpt && normUpperKey(localidadSelect.value) !== mappedLocKey) {
-              localidadSelect.value = matchingOpt.value;
-            }
-          }
-        }
         applyFilters();
       });
       estadoSelect.addEventListener('change', applyFilters);
@@ -841,20 +822,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function buildFastIndexes() {
     cachedInventarioUnificado = null;
-    sucursalToLocalidad = new Map();
-    const EXCLUDED_LOC_KEYS = new Set(['SEDE CENTRAL', 'SELVA CENTRAL', 'EPS SELVA CENTRAL', 'RETIRADAS', 'SIN ASIGNAR', 'TODAS', '']);
     const allSrc = [...(assets || []), ...(regularizacion || []), ...(vehiculosCompleto || []), ...(celulares || []), ...(terceros || [])];
     allSrc.forEach(item => {
       indexItemFast(item);
-      if (item && item._sucKey && item._locKey && !EXCLUDED_LOC_KEYS.has(item._locKey)) {
-        if (!sucursalToLocalidad.has(item._sucKey)) {
-          sucursalToLocalidad.set(item._sucKey, item._locKey);
-        }
-      }
     });
-    if (!sucursalToLocalidad.has('SEDE CENTRAL')) {
-      sucursalToLocalidad.set('SEDE CENTRAL', 'LA MERCED');
-    }
     cachedInventarioUnificado = getInventarioUnificado();
     cachedInventarioUnificado.forEach(indexItemFast);
   }
@@ -907,7 +878,7 @@ document.addEventListener('DOMContentLoaded', () => {
       chips.push({ label: `Búsqueda: "${searchInput.value.trim()}"`, clear: () => { searchInput.value = ''; } });
     }
     if (localidadSelect && localidadSelect.value) {
-      chips.push({ label: `Localidad: ${localidadSelect.value}`, clear: () => { localidadSelect.value = ''; populateSucursalSelectOptions(); } });
+      chips.push({ label: `Localidad: ${localidadSelect.value}`, clear: () => { localidadSelect.value = ''; } });
     }
     if (sucursalSelect && sucursalSelect.value) {
       chips.push({ label: `Sucursal: ${sucursalSelect.value}`, clear: () => { sucursalSelect.value = ''; } });
@@ -1699,16 +1670,10 @@ document.addEventListener('DOMContentLoaded', () => {
   function populateSucursalSelectOptions(preferredSucVal = null) {
     if (!sucursalSelect) return;
     const prevKey = normUpperKey(preferredSucVal !== null ? preferredSucVal : sucursalSelect.value);
-    const selLocKey = localidadSelect ? normUpperKey(localidadSelect.value) : '';
     const allItems = [...assets, ...celulares, ...inventario, ...terceros, ...regularizacion, ...vehiculosCompleto];
 
-    let sucCandidates = allItems
-      .filter(item => {
-        if (!item.sucursal) return false;
-        if (!selLocKey) return true;
-        const itemLoc = normUpperKey(item.localidad) || sucursalToLocalidad.get(normUpperKey(item.sucursal)) || '';
-        return itemLoc === selLocKey;
-      })
+    const sucCandidates = allItems
+      .filter(item => Boolean(item.sucursal))
       .map(item => item.sucursal);
 
     const sucursalNames = sortSucursales(sucCandidates);
