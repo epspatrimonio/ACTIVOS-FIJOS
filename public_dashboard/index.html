@@ -284,7 +284,7 @@
           📱 Celulares
         </button>
         <button id="tab-salidas" class="px-2.5 py-1.5 text-[0.7rem] sm:text-xs font-bold rounded-lg transition-all border-none cursor-pointer flex items-center justify-center gap-1 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap shrink-0 flex-1 text-center">
-          ↳ Salida de Bienes
+          👤 Usuario
         </button>
         <button id="tab-asignacion" class="px-2.5 py-1.5 text-[0.7rem] sm:text-xs font-bold rounded-lg transition-all border-none cursor-pointer flex items-center justify-center gap-1 text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap shrink-0 flex-1 text-center">
           📋 Acta de Bienes
@@ -791,276 +791,531 @@
       </div>
     </div>
 
-    <!-- Módulo: Salida de Bienes (Registro + Tabla) -->
-    <div id="salidas-table-container" class="hidden flex-col flex-1 min-h-0 rounded-2xl shadow-sm border border-slate-200 bg-slate-50/50 p-3.5 space-y-3.5 overflow-y-auto smooth-scroll">
-      
-      <!-- Bar Superior Unificada: Sub-navegación + Controles Horizontales -->
-      <div class="flex items-center justify-between gap-3 bg-white p-2.5 px-3.5 rounded-2xl border border-slate-200 shadow-xs shrink-0 overflow-x-auto">
-        <!-- Bloque Izquierdo: Subtabs + Filtros en línea horizontal -->
-        <div class="flex items-center gap-3 shrink-0">
-          <!-- Subtabs -->
-          <div class="flex items-center gap-3 border-r border-slate-200 pr-3 shrink-0">
-            <button type="button" id="btn-salidas-subtab-form" class="text-xs font-extrabold pb-0.5 border-b-2 border-brand-500 text-brand-600 transition-all cursor-pointer bg-transparent border-t-0 border-x-0 whitespace-nowrap">
-              ✍️ Registro y Gestión
+    <!-- Módulo: Usuario (Salida de Bienes + Transferencia Interna) -->
+    <div id="salidas-table-container" class="hidden flex-col flex-1 min-h-0 rounded-2xl shadow-sm border border-slate-200 bg-slate-50/50 p-3.5 space-y-3 overflow-y-auto smooth-scroll">
+
+      <datalist id="datalist-puestos-usuario"></datalist>
+
+      <!-- Barra de Selección de Trámite del Usuario -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-white p-2 px-3 rounded-2xl border border-slate-200 shadow-xs shrink-0">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-[10px] font-extrabold text-brand-700 uppercase tracking-wider bg-brand-50 border border-brand-200 px-2.5 py-1 rounded-xl">
+            👤 Trámites Usuario
+          </span>
+          <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200/80">
+            <button type="button" id="btn-usuario-mod-salida" class="px-3 py-1.5 text-xs font-extrabold rounded-lg transition-all border-none cursor-pointer bg-[#00B0F0] text-white shadow-xs whitespace-nowrap">
+              📤 Salida de Bienes
             </button>
-            <button type="button" id="btn-salidas-subtab-history" class="text-xs font-bold pb-0.5 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all cursor-pointer bg-transparent border-t-0 border-x-0 whitespace-nowrap">
-              📋 Tablas y Consultas
-            </button>
-          </div>
-
-          <!-- Filtros Horizontales para Tablas y Consultas (al lado izquierdo) -->
-          <div id="salidas-history-filters" style="display: none;" class="items-center gap-2 shrink-0">
-            <!-- Filtro Sucursal -->
-            <div class="flex items-center gap-1 bg-slate-50 px-2.5 py-1 rounded-xl border border-slate-200 shrink-0">
-              <label for="filter-salida-sucursal" class="text-[10px] font-extrabold text-slate-500 uppercase whitespace-nowrap">SUCURSAL:</label>
-              <select id="filter-salida-sucursal" class="text-xs font-bold bg-transparent text-slate-700 focus:outline-none cursor-pointer">
-                <option value="">Todas</option>
-              </select>
-            </div>
-
-            <!-- Filtro Año -->
-            <div class="flex items-center gap-1 bg-slate-50 px-2.5 py-1 rounded-xl border border-slate-200 shrink-0">
-              <label for="filter-salida-year" class="text-[10px] font-extrabold text-slate-500 uppercase whitespace-nowrap">AÑO:</label>
-              <select id="filter-salida-year" class="text-xs font-bold bg-transparent text-slate-700 focus:outline-none cursor-pointer">
-                <option value="">Todos</option>
-              </select>
-            </div>
-
-            <!-- Filtro Mes -->
-            <div class="flex items-center gap-1 bg-slate-50 px-2.5 py-1 rounded-xl border border-slate-200 shrink-0">
-              <label for="filter-salida-month" class="text-[10px] font-extrabold text-slate-500 uppercase whitespace-nowrap">MES:</label>
-              <select id="filter-salida-month" class="text-xs font-bold bg-transparent text-slate-700 focus:outline-none cursor-pointer">
-                <option value="">Todos</option>
-                <option value="1">Enero</option>
-                <option value="2">Febrero</option>
-                <option value="3">Marzo</option>
-                <option value="4">Abril</option>
-                <option value="5">Mayo</option>
-                <option value="6">Junio</option>
-                <option value="7">Julio</option>
-                <option value="8">Agosto</option>
-                <option value="9">Septiembre</option>
-                <option value="10">Octubre</option>
-                <option value="11">Noviembre</option>
-                <option value="12">Diciembre</option>
-              </select>
-            </div>
-
-            <!-- Buscador -->
-            <div class="relative shrink-0">
-              <input type="text" id="filter-salida-search" placeholder="🔍 Buscar orden..." class="w-36 text-xs font-semibold px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-500 text-slate-700" />
-            </div>
-          </div>
-        </div>
-
-        <!-- Controles para Vista 1: Registro (N° Orden y Modo) a la derecha -->
-        <div id="salidas-form-controls" style="display: flex;" class="items-center gap-2.5 shrink-0">
-          <div class="flex items-center gap-1.5 bg-brand-50/80 px-2.5 py-1 rounded-xl border border-brand-200/80">
-            <span class="text-[10px] font-extrabold text-brand-700 uppercase tracking-wider">N° ORDEN:</span>
-            <span id="salida-codigo-badge" class="font-mono font-extrabold text-brand-700 text-xs">OS-2026-AUTO</span>
-          </div>
-
-          <div class="flex items-center gap-1 bg-slate-100 p-0.5 rounded-xl shrink-0">
-            <button type="button" id="btn-salida-modo-sistema" class="px-2.5 py-1 text-xs font-bold rounded-lg transition-all border-none cursor-pointer bg-brand-500 text-white shadow-xs">
-              ⚡ Opción 1: Filtrar Sistema
-            </button>
-            <button type="button" id="btn-salida-modo-manual" class="px-2.5 py-1 text-xs font-bold rounded-lg transition-all border-none cursor-pointer text-slate-600 hover:bg-white bg-transparent">
-              ✍️ Opción 2: Manual
+            <button type="button" id="btn-usuario-mod-transferencia" class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all border-none cursor-pointer text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent whitespace-nowrap">
+              🔄 Transferencia Interna
             </button>
           </div>
         </div>
+        <p id="usuario-mod-desc" class="text-[11px] font-medium text-slate-500 hidden lg:block">
+          Control de salida temporal de activos e ingreso por portería
+        </p>
       </div>
 
-      <!-- VISTA 1: Formulario Interactivo (Registro y Gestión) -->
-      <div id="salidas-form-view" class="space-y-3.5">
-        <!-- Grid de 2 Columnas -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 pb-4">
-          
-          <!-- Columna Izquierda: Información General, Titular, Firmas -->
-          <div class="lg:col-span-4 space-y-3.5">
-            
-            <!-- Card 1: Información General -->
-            <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-xs space-y-3">
-              <h4 class="font-extrabold text-xs text-slate-800 uppercase tracking-wider border-b border-slate-150 pb-1.5">Información General</h4>
-              
-              <div>
-                <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">FECHA DE LA ORDEN *</label>
-                <input type="date" id="salida-fecha" class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" required />
-              </div>
-
-              <div>
-                <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">SOLICITO (TIPO DE SALIDA) *</label>
-                <div class="grid grid-cols-2 gap-1.5">
-                  <label class="flex items-center gap-1.5 p-1.5 border border-slate-200 rounded-xl text-[11px] font-semibold text-slate-700 cursor-pointer hover:bg-slate-50">
-                    <input type="radio" name="salida_tipo_public" value="Mantenimiento" checked class="w-3.5 h-3.5 text-brand-500 border-slate-300" />
-                    Mantenimiento
-                  </label>
-                  <label class="flex items-center gap-1.5 p-1.5 border border-slate-200 rounded-xl text-[11px] font-semibold text-slate-700 cursor-pointer hover:bg-slate-50">
-                    <input type="radio" name="salida_tipo_public" value="Trabajo de campo" class="w-3.5 h-3.5 text-brand-500 border-slate-300" />
-                    Trabajo de campo
-                  </label>
-                  <label class="flex items-center gap-1.5 p-1.5 border border-slate-200 rounded-xl text-[11px] font-semibold text-slate-700 cursor-pointer hover:bg-slate-50">
-                    <input type="radio" name="salida_tipo_public" value="Evento institucional" class="w-3.5 h-3.5 text-brand-500 border-slate-300" />
-                    Evento Institucional
-                  </label>
-                  <label class="flex items-center gap-1.5 p-1.5 border border-slate-200 rounded-xl text-[11px] font-semibold text-slate-700 cursor-pointer hover:bg-slate-50">
-                    <input type="radio" name="salida_tipo_public" value="Otros" class="w-3.5 h-3.5 text-brand-500 border-slate-300" />
-                    Otros
-                  </label>
-                </div>
-              </div>
-
-              <div>
-                <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">MOTIVO DETALLADO *</label>
-                <textarea id="salida-motivo" rows="2" placeholder="Escriba el motivo detallado de la salida..." class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" style="resize:none" required></textarea>
-              </div>
+      <!-- SUB-MÓDULO 1: SALIDA DE BIENES -->
+      <div id="usuario-modulo-salida" class="flex-1 flex flex-col space-y-3.5 min-h-0">
+        <!-- Bar Superior Unificada: Sub-navegación + Controles Horizontales -->
+        <div class="flex items-center justify-between gap-3 bg-white p-2.5 px-3.5 rounded-2xl border border-slate-200 shadow-xs shrink-0 overflow-x-auto">
+          <!-- Bloque Izquierdo: Subtabs + Filtros en línea horizontal -->
+          <div class="flex items-center gap-3 shrink-0">
+            <!-- Subtabs -->
+            <div class="flex items-center gap-3 border-r border-slate-200 pr-3 shrink-0">
+              <button type="button" id="btn-salidas-subtab-form" class="text-xs font-extrabold pb-0.5 border-b-2 border-brand-500 text-brand-600 transition-all cursor-pointer bg-transparent border-t-0 border-x-0 whitespace-nowrap">
+                ✍️ Registro y Gestión
+              </button>
+              <button type="button" id="btn-salidas-subtab-history" class="text-xs font-bold pb-0.5 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all cursor-pointer bg-transparent border-t-0 border-x-0 whitespace-nowrap">
+                📋 Tablas y Consultas
+              </button>
             </div>
 
-            <!-- Card 2: Titular del Bien -->
-            <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-xs space-y-3">
-              <h4 class="font-extrabold text-xs text-slate-800 uppercase tracking-wider border-b border-slate-150 pb-1.5">Titular del Bien</h4>
-              
-              <div class="relative">
-                <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">NOMBRE RESPONSABLE *</label>
-                <input type="text" id="salida-responsable" placeholder="Escriba para filtrar responsable..." class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" required />
-                <div id="salida-resp-sug" class="hidden absolute top-full left-0 right-0 z-30 bg-white border border-slate-200 rounded-xl shadow-lg mt-1 max-h-48 overflow-y-auto"></div>
+            <!-- Filtros Horizontales para Tablas y Consultas (al lado izquierdo) -->
+            <div id="salidas-history-filters" style="display: none;" class="items-center gap-2 shrink-0">
+              <div class="flex items-center gap-1 bg-slate-50 px-2.5 py-1 rounded-xl border border-slate-200 shrink-0">
+                <label for="filter-salida-sucursal" class="text-[10px] font-extrabold text-slate-500 uppercase whitespace-nowrap">SUCURSAL:</label>
+                <select id="filter-salida-sucursal" class="text-xs font-bold bg-transparent text-slate-700 focus:outline-none cursor-pointer">
+                  <option value="">Todas</option>
+                </select>
               </div>
-
-              <!-- Distribución Optimizado: Cargo y Sucursal en 2 columnas -->
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                <div>
-                  <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">PUESTO *</label>
-                  <input type="text" id="salida-cargo" placeholder="Escriba puesto..." class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" required />
-                </div>
-                <div>
-                  <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">SUCURSAL *</label>
-                  <select id="salida-ubicacion" class="w-full rounded-xl border border-slate-200 px-2.5 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" required>
-                    <option value="">-- Seleccionar --</option>
-                  </select>
-                </div>
+              <div class="flex items-center gap-1 bg-slate-50 px-2.5 py-1 rounded-xl border border-slate-200 shrink-0">
+                <label for="filter-salida-year" class="text-[10px] font-extrabold text-slate-500 uppercase whitespace-nowrap">AÑO:</label>
+                <select id="filter-salida-year" class="text-xs font-bold bg-transparent text-slate-700 focus:outline-none cursor-pointer">
+                  <option value="">Todos</option>
+                </select>
               </div>
+              <div class="flex items-center gap-1 bg-slate-50 px-2.5 py-1 rounded-xl border border-slate-200 shrink-0">
+                <label for="filter-salida-month" class="text-[10px] font-extrabold text-slate-500 uppercase whitespace-nowrap">MES:</label>
+                <select id="filter-salida-month" class="text-xs font-bold bg-transparent text-slate-700 focus:outline-none cursor-pointer">
+                  <option value="">Todos</option>
+                  <option value="1">Enero</option>
+                  <option value="2">Febrero</option>
+                  <option value="3">Marzo</option>
+                  <option value="4">Abril</option>
+                  <option value="5">Mayo</option>
+                  <option value="6">Junio</option>
+                  <option value="7">Julio</option>
+                  <option value="8">Agosto</option>
+                  <option value="9">Septiembre</option>
+                  <option value="10">Octubre</option>
+                  <option value="11">Noviembre</option>
+                  <option value="12">Diciembre</option>
+                </select>
+              </div>
+              <div class="relative shrink-0">
+                <input type="text" id="filter-salida-search" placeholder="🔍 Buscar orden..." class="w-36 text-xs font-semibold px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-500 text-slate-700" />
+              </div>
+              <button type="button" id="btn-salidas-export-json" title="Exportar respaldo JSON de salidas" class="px-2.5 py-1 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl border border-slate-200 cursor-pointer whitespace-nowrap">
+                ⬇️ JSON
+              </button>
             </div>
-
-            <!-- Card 3: Firmas y Observaciones -->
-            <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-xs space-y-3">
-              <h4 class="font-extrabold text-xs text-slate-800 uppercase tracking-wider border-b border-slate-150 pb-1.5">Firmas y Observaciones</h4>
-              
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                <div>
-                  <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">RESP. ÁREA TÉCNICA</label>
-                  <input type="text" id="salida-resp-tecnico" value="ÁREA TÉCNICA" placeholder="Quien entrega..." class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" />
-                </div>
-                <div>
-                  <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">OBSERVACIONES</label>
-                  <input type="text" id="salida-observaciones" placeholder="Opcional..." class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" />
-                </div>
-              </div>
-            </div>
-
           </div>
 
-          <!-- Columna Derecha: Tabla de Bienes y Acciones -->
-          <div class="lg:col-span-8 space-y-3.5">
-            
-            <!-- Card de Bienes -->
-            <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-xs space-y-3">
-              <div class="flex items-center justify-between gap-3">
-                <div class="flex items-center gap-2">
-                  <h4 class="font-extrabold text-xs text-slate-900 uppercase tracking-wider">Agregar Bienes a la Orden</h4>
-                  <span id="salida-bienes-header" class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-[11px] font-bold border border-slate-200">
-                    0 Seleccionados
-                  </span>
+          <!-- Controles para Vista 1: Registro (N° Orden y Modo) a la derecha -->
+          <div id="salidas-form-controls" style="display: flex;" class="items-center gap-2.5 shrink-0">
+            <div class="flex items-center gap-1.5 bg-brand-50/80 px-2.5 py-1 rounded-xl border border-brand-200/80">
+              <span class="text-[10px] font-extrabold text-brand-700 uppercase tracking-wider">N° ORDEN:</span>
+              <span id="salida-codigo-badge" class="font-mono font-extrabold text-brand-700 text-xs">OS-2026-AUTO</span>
+            </div>
+
+            <div class="flex items-center gap-1 bg-slate-100 p-0.5 rounded-xl shrink-0">
+              <button type="button" id="btn-salida-modo-sistema" class="px-2.5 py-1 text-xs font-bold rounded-lg transition-all border-none cursor-pointer bg-brand-500 text-white shadow-xs">
+                ⚡ Opción 1: Filtrar Sistema
+              </button>
+              <button type="button" id="btn-salida-modo-manual" class="px-2.5 py-1 text-xs font-bold rounded-lg transition-all border-none cursor-pointer text-slate-600 hover:bg-white bg-transparent">
+                ✍️ Opción 2: Manual
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- VISTA 1: Formulario Interactivo Salida (Registro y Gestión) -->
+        <div id="salidas-form-view" class="space-y-3.5">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 pb-4">
+            <!-- Columna Izquierda -->
+            <div class="lg:col-span-4 space-y-3.5">
+              <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-xs space-y-3">
+                <h4 class="font-extrabold text-xs text-slate-800 uppercase tracking-wider border-b border-slate-150 pb-1.5">Información General</h4>
+                <div>
+                  <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">FECHA DE LA ORDEN *</label>
+                  <input type="date" id="salida-fecha" class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" required />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">SOLICITO (TIPO DE SALIDA) *</label>
+                  <div class="grid grid-cols-2 gap-1.5">
+                    <label class="flex items-center gap-1.5 p-1.5 border border-slate-200 rounded-xl text-[11px] font-semibold text-slate-700 cursor-pointer hover:bg-slate-50">
+                      <input type="radio" name="salida_tipo_public" value="Mantenimiento" checked class="w-3.5 h-3.5 text-brand-500 border-slate-300" />
+                      Mantenimiento
+                    </label>
+                    <label class="flex items-center gap-1.5 p-1.5 border border-slate-200 rounded-xl text-[11px] font-semibold text-slate-700 cursor-pointer hover:bg-slate-50">
+                      <input type="radio" name="salida_tipo_public" value="Trabajo de campo" class="w-3.5 h-3.5 text-brand-500 border-slate-300" />
+                      Trabajo de campo
+                    </label>
+                    <label class="flex items-center gap-1.5 p-1.5 border border-slate-200 rounded-xl text-[11px] font-semibold text-slate-700 cursor-pointer hover:bg-slate-50">
+                      <input type="radio" name="salida_tipo_public" value="Evento institucional" class="w-3.5 h-3.5 text-brand-500 border-slate-300" />
+                      Evento Institucional
+                    </label>
+                    <label class="flex items-center gap-1.5 p-1.5 border border-slate-200 rounded-xl text-[11px] font-semibold text-slate-700 cursor-pointer hover:bg-slate-50">
+                      <input type="radio" name="salida_tipo_public" value="Otros" class="w-3.5 h-3.5 text-brand-500 border-slate-300" />
+                      Otros
+                    </label>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">MOTIVO DETALLADO *</label>
+                  <textarea id="salida-motivo" rows="2" placeholder="Escriba el motivo detallado de la salida..." class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" style="resize:none" required></textarea>
                 </div>
               </div>
 
-              <!-- Fila integrada de Búsqueda y Botón Agregar Manual -->
-              <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-2.5">
-                <div id="salida-search-activo-wrapper" class="relative flex-1">
-                  <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">BUSCAR POR CÓDIGO PATRIMONIAL O DENOMINACIÓN</label>
-                  <input type="text" id="salida-search-activo" placeholder="🔍 Ej: 742205560002 o LAPTOP..." class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" />
-                  <div id="salida-activo-sug" class="hidden absolute top-full left-0 right-0 z-30 bg-white border border-slate-200 rounded-xl shadow-lg mt-1 max-h-48 overflow-y-auto"></div>
+              <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-xs space-y-3">
+                <h4 class="font-extrabold text-xs text-slate-800 uppercase tracking-wider border-b border-slate-150 pb-1.5">Titular del Bien</h4>
+                <div class="relative">
+                  <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">NOMBRE RESPONSABLE *</label>
+                  <input type="text" id="salida-responsable" placeholder="Escriba para filtrar responsable..." class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" required />
+                  <div id="salida-resp-sug" class="hidden absolute top-full left-0 right-0 z-30 bg-white border border-slate-200 rounded-xl shadow-lg mt-1 max-h-48 overflow-y-auto"></div>
                 </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div>
+                    <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">PUESTO *</label>
+                    <input type="text" id="salida-cargo" list="datalist-puestos-usuario" placeholder="Escriba puesto..." class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" required />
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">SUCURSAL *</label>
+                    <select id="salida-ubicacion" class="w-full rounded-xl border border-slate-200 px-2.5 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" required>
+                      <option value="">-- Seleccionar --</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
 
-                <button type="button" id="btn-salida-add-manual" class="hidden shrink-0 px-3.5 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all border border-slate-300 cursor-pointer h-8">
-                  + Agregar Fila Manual
+              <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-xs space-y-3">
+                <h4 class="font-extrabold text-xs text-slate-800 uppercase tracking-wider border-b border-slate-150 pb-1.5">Firmas y Observaciones</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div>
+                    <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">RESP. ÁREA TÉCNICA</label>
+                    <input type="text" id="salida-resp-tecnico" value="ÁREA TÉCNICA" placeholder="Quien entrega..." class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" />
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">OBSERVACIONES</label>
+                    <input type="text" id="salida-observaciones" placeholder="Opcional..." class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Columna Derecha -->
+            <div class="lg:col-span-8 space-y-3.5">
+              <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-xs space-y-3">
+                <div class="flex items-center justify-between gap-3">
+                  <div class="flex items-center gap-2">
+                    <h4 class="font-extrabold text-xs text-slate-900 uppercase tracking-wider">Agregar Bienes a la Orden</h4>
+                    <span id="salida-bienes-header" class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-[11px] font-bold border border-slate-200">
+                      0 Seleccionados
+                    </span>
+                  </div>
+                </div>
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-2.5">
+                  <div id="salida-search-activo-wrapper" class="relative flex-1">
+                    <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">BUSCAR POR CÓDIGO PATRIMONIAL O DENOMINACIÓN</label>
+                    <input type="text" id="salida-search-activo" placeholder="🔍 Ej: 742205560002 o LAPTOP..." class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" />
+                    <div id="salida-activo-sug" class="hidden absolute top-full left-0 right-0 z-30 bg-white border border-slate-200 rounded-xl shadow-lg mt-1 max-h-48 overflow-y-auto"></div>
+                  </div>
+                  <button type="button" id="btn-salida-add-manual" class="hidden shrink-0 px-3.5 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all border border-slate-300 cursor-pointer h-8">
+                    + Agregar Fila Manual
+                  </button>
+                </div>
+                <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                  <table class="w-full text-left text-xs border-collapse">
+                    <thead class="bg-slate-100 text-slate-700 font-extrabold uppercase text-[10px] tracking-wider">
+                      <tr>
+                        <th id="col-salida-chk" class="p-2 w-10 text-center">Inc.</th>
+                        <th class="p-2 w-10 text-center">N°</th>
+                        <th class="p-2 w-28">Cód. Patrimonial</th>
+                        <th class="p-2 min-w-[160px]">Denominación</th>
+                        <th class="p-2 w-24">Color</th>
+                        <th class="p-2 w-24">Marca</th>
+                        <th class="p-2 w-24">Modelo</th>
+                        <th class="p-2 w-24">Serie</th>
+                        <th class="p-2 w-24 text-center">Estado</th>
+                        <th class="p-2 w-10 text-center">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody id="salida-bienes-form-tbody" class="divide-y divide-slate-100">
+                      <tr>
+                        <td colspan="10" class="p-6 text-center text-slate-400 font-medium">
+                          <div class="flex flex-col items-center justify-center space-y-1.5">
+                            <span class="text-2xl">📋</span>
+                            <p class="text-xs font-semibold">No se han agregado bienes a la orden. Búscalos arriba para agregarlos.</p>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-end gap-3 p-3 bg-white rounded-2xl border border-slate-200 shadow-xs">
+                <button type="button" id="btn-salida-limpiar" class="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-bold rounded-xl text-xs transition-all cursor-pointer shadow-xs">
+                  Limpiar Formulario
+                </button>
+                <button type="button" id="btn-salida-generar-pdf" class="px-5 py-2 bg-[#00B0F0] hover:bg-[#009ad4] active:scale-[0.98] text-white font-extrabold rounded-xl text-xs shadow-md transition-all cursor-pointer border-none flex items-center gap-2">
+                  📄 Generar Orden de Salida (PDF)
                 </button>
               </div>
 
-              <div class="overflow-x-auto border border-slate-200 rounded-xl">
-                <table class="w-full text-left text-xs border-collapse">
-                  <thead class="bg-slate-100 text-slate-700 font-extrabold uppercase text-[10px] tracking-wider">
-                    <tr>
-                      <th id="col-salida-chk" class="p-2 w-10 text-center">Inc.</th>
-                      <th class="p-2 w-10 text-center">N°</th>
-                      <th class="p-2 w-28">Cód. Patrimonial</th>
-                      <th class="p-2 min-w-[160px]">Denominación</th>
-                      <th class="p-2 w-24">Color</th>
-                      <th class="p-2 w-24">Marca</th>
-                      <th class="p-2 w-24">Modelo</th>
-                      <th class="p-2 w-24">Serie</th>
-                      <th class="p-2 w-24 text-center">Estado</th>
-                      <th class="p-2 w-10 text-center">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody id="salida-bienes-form-tbody" class="divide-y divide-slate-100">
-                    <tr>
-                      <td colspan="10" class="p-6 text-center text-slate-400 font-medium">
-                        <div class="flex flex-col items-center justify-center space-y-1.5">
-                          <span class="text-2xl">📋</span>
-                          <p class="text-xs font-semibold">No se han agregado bienes a la orden. Búscalos arriba para agregarlos.</p>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+              <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 space-y-1">
+                <div class="flex items-center gap-1.5 text-xs font-bold text-slate-800">
+                  <span>⚠️</span>
+                  <span>NOTA DE RESPONSABILIDAD (INCLUIDA EN EL PDF Y CONTROL DE PORTERÍA)</span>
+                </div>
+                <p class="text-[10px] text-slate-500 leading-relaxed uppercase">
+                  EL TRABAJADOR ES RESPONSABLE DIRECTO Y ABSOLUTO DE LA EXISTENCIA, PERMANENCIA, CONSERVACIÓN DEL BIEN EN USO, EVITAR PERDIDA, SUSTRACCIÓN, DETERIODO ETC. EN CASO DE PÉRDIDA, EXTRAVIO O DETERIORO POR EL MAL USO DE LOS BIENES PATRIMONIALES DESCRITOS, ESTOS SERÁN REPUESTOS O REPARADOS POR EL TRABAJADOR RESPONSABLE DE LOS MISMOS. CUALQUIER MOVIMIENTOS DENTRO O FUERA DE LA ENTIDAD DEBERA SER COMUNICADO AL RESPONSABLE DE CONTROL PATRIMONIAL, BAJO RESPONSABILIDAD.
+                </p>
               </div>
             </div>
-
-            <!-- Barra de Botones de Acción -->
-            <div class="flex items-center justify-end gap-3 p-3 bg-white rounded-2xl border border-slate-200 shadow-xs">
-              <button type="button" id="btn-salida-limpiar" class="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-bold rounded-xl text-xs transition-all cursor-pointer shadow-xs">
-                Limpiar Formulario
-              </button>
-              <button type="button" id="btn-salida-generar-pdf" class="px-5 py-2 bg-[#00B0F0] hover:bg-[#009ad4] active:scale-[0.98] text-white font-extrabold rounded-xl text-xs shadow-md transition-all cursor-pointer border-none flex items-center gap-2">
-                📄 Generar Orden de Salida (PDF)
-              </button>
-            </div>
-
-            <!-- Nota de Responsabilidad Banner -->
-            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 space-y-1">
-              <div class="flex items-center gap-1.5 text-xs font-bold text-slate-800">
-                <span>⚠️</span>
-                <span>NOTA DE RESPONSABILIDAD (INCLUIDA EN EL PDF)</span>
-              </div>
-              <p class="text-[10px] text-slate-500 leading-relaxed uppercase">
-                EL TRABAJADOR ES RESPONSABLE DIRECTO Y ABSOLUTO DE LA EXISTENCIA, PERMANENCIA, CONSERVACIÓN DEL BIEN EN USO, EVITAR PERDIDA, SUSTRACCIÓN, DETERIODO ETC. EN CASO DE PÉRDIDA, EXTRAVIO O DETERIORO POR EL MAL USO DE LOS BIENES PATRIMONIALES DESCRITOS, ESTOS SERÁN REPUESTOS O REPARADOS POR EL TRABAJADOR RESPONSABLE DE LOS MISMOS. CUALQUIER MOVIMIENTOS DENTRO O FUERA DE LA ENTIDAD DEBERA SER COMUNICADO AL RESPONSABLE DE CONTROL PATRIMONIAL, BAJO RESPONSABILIDAD.
-              </p>
-            </div>
-
           </div>
+        </div>
 
+        <!-- VISTA 2: Tabla de Consulta de Salidas -->
+        <div id="salidas-history-view" class="hidden flex-1 overflow-x-auto overflow-y-auto smooth-scroll w-full bg-white rounded-2xl border border-slate-200">
+          <table class="min-w-[1200px] w-full divide-y divide-slate-200 border-collapse">
+            <thead class="bg-[#00B0F0] text-white font-bold uppercase tracking-wider text-[10px] sticky top-0 z-10 shadow-md">
+              <tr>
+                <th scope="col" class="px-4 py-3 text-left w-28">N° Orden</th>
+                <th scope="col" class="px-4 py-3 text-left w-24">Fecha</th>
+                <th scope="col" class="px-4 py-3 text-left">Responsable</th>
+                <th scope="col" class="px-4 py-3 text-left w-36">Tipo Salida</th>
+                <th scope="col" class="px-4 py-3 text-left">Motivo de Salida</th>
+                <th scope="col" class="px-4 py-3 text-center w-20">Bienes</th>
+                <th scope="col" class="px-4 py-3 text-center w-36">Estado Devolución</th>
+                <th scope="col" class="px-4 py-3 text-center w-24">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="salidas-tbody" class="bg-white divide-y divide-slate-100 text-xs"></tbody>
+          </table>
         </div>
       </div>
 
-      <!-- VISTA 2: Tabla de Consulta de Salidas (Tablas y Consultas) -->
-      <div id="salidas-history-view" class="hidden flex-1 overflow-x-auto overflow-y-auto smooth-scroll w-full bg-white rounded-2xl border border-slate-200">
-        <table class="min-w-[1200px] w-full divide-y divide-slate-200 border-collapse">
-          <thead class="bg-[#00B0F0] text-white font-bold uppercase tracking-wider text-[10px] sticky top-0 z-10 shadow-md">
-            <tr>
-              <th scope="col" class="px-4 py-3 text-left w-28">N° Orden</th>
-              <th scope="col" class="px-4 py-3 text-left w-24">Fecha</th>
-              <th scope="col" class="px-4 py-3 text-left">Responsable</th>
-              <th scope="col" class="px-4 py-3 text-left w-36">Tipo Salida</th>
-              <th scope="col" class="px-4 py-3 text-left">Motivo de Salida</th>
-              <th scope="col" class="px-4 py-3 text-center w-20">Bienes</th>
-              <th scope="col" class="px-4 py-3 text-center w-36">Estado Devolución</th>
-              <th scope="col" class="px-4 py-3 text-center w-24">Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="salidas-tbody" class="bg-white divide-y divide-slate-100 text-xs">
-            <!-- Se inyectará vía JS -->
-          </tbody>
-        </table>
+      <!-- SUB-MÓDULO 2: TRANSFERENCIA INTERNA -->
+      <div id="usuario-modulo-transferencia" class="hidden flex-1 flex-col space-y-3.5 min-h-0">
+        <!-- Barra Superior Unificada -->
+        <div class="flex items-center justify-between gap-3 bg-white p-2.5 px-3.5 rounded-2xl border border-slate-200 shadow-xs shrink-0 overflow-x-auto">
+          <div class="flex items-center gap-3 shrink-0">
+            <div class="flex items-center gap-3 border-r border-slate-200 pr-3 shrink-0">
+              <button type="button" id="btn-transf-subtab-form" class="text-xs font-extrabold pb-0.5 border-b-2 border-brand-500 text-brand-600 transition-all cursor-pointer bg-transparent border-t-0 border-x-0 whitespace-nowrap">
+                ✍️ Registro y Gestión
+              </button>
+              <button type="button" id="btn-transf-subtab-history" class="text-xs font-bold pb-0.5 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all cursor-pointer bg-transparent border-t-0 border-x-0 whitespace-nowrap">
+                📋 Tablas y Consultas
+              </button>
+            </div>
+
+            <!-- Filtros Horizontales Tablas y Consultas -->
+            <div id="transf-history-filters" style="display: none;" class="items-center gap-2 shrink-0">
+              <div class="flex items-center gap-1 bg-slate-50 px-2.5 py-1 rounded-xl border border-slate-200 shrink-0">
+                <label for="filter-transf-sucursal" class="text-[10px] font-extrabold text-slate-500 uppercase whitespace-nowrap">SUCURSAL:</label>
+                <select id="filter-transf-sucursal" class="text-xs font-bold bg-transparent text-slate-700 focus:outline-none cursor-pointer">
+                  <option value="">Todas</option>
+                </select>
+              </div>
+              <div class="flex items-center gap-1 bg-slate-50 px-2.5 py-1 rounded-xl border border-slate-200 shrink-0">
+                <label for="filter-transf-year" class="text-[10px] font-extrabold text-slate-500 uppercase whitespace-nowrap">AÑO:</label>
+                <select id="filter-transf-year" class="text-xs font-bold bg-transparent text-slate-700 focus:outline-none cursor-pointer">
+                  <option value="">Todos</option>
+                </select>
+              </div>
+              <div class="flex items-center gap-1 bg-slate-50 px-2.5 py-1 rounded-xl border border-slate-200 shrink-0">
+                <label for="filter-transf-month" class="text-[10px] font-extrabold text-slate-500 uppercase whitespace-nowrap">MES:</label>
+                <select id="filter-transf-month" class="text-xs font-bold bg-transparent text-slate-700 focus:outline-none cursor-pointer">
+                  <option value="">Todos</option>
+                  <option value="1">Enero</option>
+                  <option value="2">Febrero</option>
+                  <option value="3">Marzo</option>
+                  <option value="4">Abril</option>
+                  <option value="5">Mayo</option>
+                  <option value="6">Junio</option>
+                  <option value="7">Julio</option>
+                  <option value="8">Agosto</option>
+                  <option value="9">Septiembre</option>
+                  <option value="10">Octubre</option>
+                  <option value="11">Noviembre</option>
+                  <option value="12">Diciembre</option>
+                </select>
+              </div>
+              <div class="relative shrink-0">
+                <input type="text" id="filter-transf-search" placeholder="🔍 Buscar transferencia..." class="w-40 text-xs font-semibold px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-500 text-slate-700" />
+              </div>
+              <button type="button" id="btn-transf-export-json" title="Exportar JSON de transferencias" class="px-2.5 py-1 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl border border-slate-200 cursor-pointer whitespace-nowrap">
+                ⬇️ JSON
+              </button>
+            </div>
+          </div>
+
+          <!-- Controles Formulario Transferencia -->
+          <div id="transf-form-controls" style="display: flex;" class="items-center gap-2.5 shrink-0">
+            <div class="flex items-center gap-1.5 bg-brand-50/80 px-2.5 py-1 rounded-xl border border-brand-200/80">
+              <span class="text-[10px] font-extrabold text-brand-700 uppercase tracking-wider">N° TRANSF.:</span>
+              <span id="transf-codigo-badge" class="font-mono font-extrabold text-brand-700 text-xs">TR-001-2026</span>
+            </div>
+
+            <div class="flex items-center gap-1 bg-slate-100 p-0.5 rounded-xl shrink-0">
+              <button type="button" id="btn-transf-modo-sistema" class="px-2.5 py-1 text-xs font-bold rounded-lg transition-all border-none cursor-pointer bg-brand-500 text-white shadow-xs">
+                ⚡ Opción 1: Filtrar Sistema
+              </button>
+              <button type="button" id="btn-transf-modo-manual" class="px-2.5 py-1 text-xs font-bold rounded-lg transition-all border-none cursor-pointer text-slate-600 hover:bg-white bg-transparent">
+                ✍️ Opción 2: Manual
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- VISTA 1: Formulario Transferencia Interna -->
+        <div id="transf-form-view" class="space-y-3.5">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 pb-4">
+            <!-- Columna Izquierda -->
+            <div class="lg:col-span-4 space-y-3.5">
+              <!-- Card 1: Información General -->
+              <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-xs space-y-3">
+                <h4 class="font-extrabold text-xs text-slate-800 uppercase tracking-wider border-b border-slate-150 pb-1.5">Información General</h4>
+                <div>
+                  <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">FECHA DE TRANSFERENCIA *</label>
+                  <input type="date" id="transf-fecha" class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" required />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">TIPO DE TRANSFERENCIA *</label>
+                  <div class="grid grid-cols-2 gap-1.5">
+                    <label class="flex items-center gap-1.5 p-1.5 border border-slate-200 rounded-xl text-[11px] font-semibold text-slate-700 cursor-pointer hover:bg-slate-50">
+                      <input type="radio" name="transf_tipo_public" value="Reasignación de personal" checked class="w-3.5 h-3.5 text-brand-500 border-slate-300" />
+                      Reasignación personal
+                    </label>
+                    <label class="flex items-center gap-1.5 p-1.5 border border-slate-200 rounded-xl text-[11px] font-semibold text-slate-700 cursor-pointer hover:bg-slate-50">
+                      <input type="radio" name="transf_tipo_public" value="Traslado de área / sede" class="w-3.5 h-3.5 text-brand-500 border-slate-300" />
+                      Traslado área / sede
+                    </label>
+                    <label class="flex items-center gap-1.5 p-1.5 border border-slate-200 rounded-xl text-[11px] font-semibold text-slate-700 cursor-pointer hover:bg-slate-50">
+                      <input type="radio" name="transf_tipo_public" value="Rotación / Encargatura" class="w-3.5 h-3.5 text-brand-500 border-slate-300" />
+                      Rotación / Encargatura
+                    </label>
+                    <label class="flex items-center gap-1.5 p-1.5 border border-slate-200 rounded-xl text-[11px] font-semibold text-slate-700 cursor-pointer hover:bg-slate-50">
+                      <input type="radio" name="transf_tipo_public" value="Otros" class="w-3.5 h-3.5 text-brand-500 border-slate-300" />
+                      Otros
+                    </label>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">MOTIVO DETALLADO *</label>
+                  <textarea id="transf-motivo" rows="2" placeholder="Indique el motivo de la transferencia interna..." class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" style="resize:none" required></textarea>
+                </div>
+              </div>
+
+              <!-- Card 2: Usuario que Entrega (Cedente) -->
+              <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-xs space-y-3">
+                <h4 class="font-extrabold text-xs text-rose-700 uppercase tracking-wider border-b border-slate-150 pb-1.5">Usuario que Entrega (Cedente / Origen)</h4>
+                <div class="relative">
+                  <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">RESPONSABLE ORIGEN *</label>
+                  <input type="text" id="transf-resp-origen" placeholder="Escriba para filtrar cedente..." class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" required />
+                  <div id="transf-resp-origen-sug" class="hidden absolute top-full left-0 right-0 z-30 bg-white border border-slate-200 rounded-xl shadow-lg mt-1 max-h-48 overflow-y-auto"></div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div>
+                    <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">PUESTO ORIGEN *</label>
+                    <input type="text" id="transf-cargo-origen" list="datalist-puestos-usuario" placeholder="Puesto..." class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" required />
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">SUCURSAL ORIGEN *</label>
+                    <select id="transf-sucursal-origen" class="w-full rounded-xl border border-slate-200 px-2.5 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" required>
+                      <option value="">-- Seleccionar --</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card 3: Usuario que Recibe (Receptor) -->
+              <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-xs space-y-3">
+                <h4 class="font-extrabold text-xs text-emerald-700 uppercase tracking-wider border-b border-slate-150 pb-1.5">Usuario que Recibe (Receptor / Destino)</h4>
+                <div class="relative">
+                  <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">NUEVO RESPONSABLE *</label>
+                  <input type="text" id="transf-resp-destino" placeholder="Escriba para filtrar receptor..." class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" required />
+                  <div id="transf-resp-destino-sug" class="hidden absolute top-full left-0 right-0 z-30 bg-white border border-slate-200 rounded-xl shadow-lg mt-1 max-h-48 overflow-y-auto"></div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div>
+                    <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">PUESTO DESTINO *</label>
+                    <input type="text" id="transf-cargo-destino" list="datalist-puestos-usuario" placeholder="Puesto..." class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" required />
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">SUCURSAL DESTINO *</label>
+                    <select id="transf-sucursal-destino" class="w-full rounded-xl border border-slate-200 px-2.5 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" required>
+                      <option value="">-- Seleccionar --</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">OBSERVACIONES</label>
+                  <input type="text" id="transf-observaciones" placeholder="Estado o detalles adicionales..." class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Columna Derecha: Tabla de Bienes Patrimoniales a Transferir -->
+            <div class="lg:col-span-8 space-y-3.5">
+              <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-xs space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div class="flex items-center gap-2">
+                    <h4 class="font-extrabold text-xs text-slate-900 uppercase tracking-wider">Bienes Patrimoniales a Transferir</h4>
+                    <span id="transf-bienes-header" class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-[11px] font-bold border border-slate-200">
+                      0 Seleccionados
+                    </span>
+                  </div>
+                  <button type="button" id="btn-transf-add-manual-inline" class="px-3 py-1 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl border border-slate-300 cursor-pointer">
+                    + Bien Manual
+                  </button>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-2.5">
+                  <div id="transf-search-activo-wrapper" class="relative flex-1">
+                    <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">BUSCAR EN SISTEMA POR CÓDIGO PATRIMONIAL, DENOMINACIÓN O SERIE</label>
+                    <input type="text" id="transf-search-activo" placeholder="🔍 Ej: 742205560002 o ESCRITORIO..." class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-500 bg-white" />
+                    <div id="transf-activo-sug" class="hidden absolute top-full left-0 right-0 z-30 bg-white border border-slate-200 rounded-xl shadow-lg mt-1 max-h-48 overflow-y-auto"></div>
+                  </div>
+                  <button type="button" id="btn-transf-add-manual" class="hidden shrink-0 px-3.5 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all border border-slate-300 cursor-pointer h-8">
+                    + Agregar Fila Manual
+                  </button>
+                </div>
+
+                <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                  <table class="w-full text-left text-xs border-collapse">
+                    <thead class="bg-slate-100 text-slate-700 font-extrabold uppercase text-[10px] tracking-wider">
+                      <tr>
+                        <th id="col-transf-chk" class="p-2 w-10 text-center">Inc.</th>
+                        <th class="p-2 w-8 text-center">N°</th>
+                        <th class="p-2 w-24">Cód. Pat.</th>
+                        <th class="p-2 min-w-[150px]">Denominación</th>
+                        <th class="p-2 w-20">Color</th>
+                        <th class="p-2 w-20">Marca</th>
+                        <th class="p-2 w-20">Modelo</th>
+                        <th class="p-2 w-24">Serie</th>
+                        <th class="p-2 w-22 text-center">Estado</th>
+                        <th class="p-2 w-28">Observ. / Acces.</th>
+                        <th class="p-2 w-10 text-center">Acc.</th>
+                      </tr>
+                    </thead>
+                    <tbody id="transf-bienes-form-tbody" class="divide-y divide-slate-100">
+                      <tr>
+                        <td colspan="11" class="p-6 text-center text-slate-400 font-medium">
+                          <div class="flex flex-col items-center justify-center space-y-1.5">
+                            <span class="text-2xl">🔄</span>
+                            <p class="text-xs font-semibold">Seleccione el responsable cedente, busque bienes arriba o cambie a Modo Manual.</p>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-end gap-3 p-3 bg-white rounded-2xl border border-slate-200 shadow-xs">
+                <button type="button" id="btn-transf-limpiar" class="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-bold rounded-xl text-xs transition-all cursor-pointer shadow-xs">
+                  Limpiar Formulario
+                </button>
+                <button type="button" id="btn-transf-generar-pdf" class="px-5 py-2 bg-[#00B0F0] hover:bg-[#009ad4] active:scale-[0.98] text-white font-extrabold rounded-xl text-xs shadow-md transition-all cursor-pointer border-none flex items-center gap-2">
+                  📄 Generar Acta de Transferencia Interna (PDF)
+                </button>
+              </div>
+
+              <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 space-y-1">
+                <div class="flex items-center gap-1.5 text-xs font-bold text-slate-800">
+                  <span>⚠️</span>
+                  <span>NOTA DE RESPONSABILIDAD PATRIMONIAL (INCLUIDA EN EL PDF)</span>
+                </div>
+                <p class="text-[10px] text-slate-500 leading-relaxed uppercase">
+                  EL TRABAJADOR RECEPTOR ASUME LA RESPONSABILIDAD DIRECTA DE LA CUSTODIA, CONSERVACIÓN Y USO ADECUADO DE LOS BIENES PATRIMONIALES DESCRITOS, QUEDANDO SUJETO A LAS DIRECTIVAS VIGENTES DE CONTROL PATRIMONIAL DE LA EPS SELVA CENTRAL S.A. CUALQUIER TRASLADO POSTERIOR DEBERÁ SER COMUNICADO OPORTUNAMENTE A CONTROL PATRIMONIAL.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VISTA 2: Tabla de Consulta de Transferencias -->
+        <div id="transf-history-view" class="hidden flex-1 overflow-x-auto overflow-y-auto smooth-scroll w-full bg-white rounded-2xl border border-slate-200">
+          <table class="min-w-[1200px] w-full divide-y divide-slate-200 border-collapse">
+            <thead class="bg-[#00B0F0] text-white font-bold uppercase tracking-wider text-[10px] sticky top-0 z-10 shadow-md">
+              <tr>
+                <th scope="col" class="px-4 py-3 text-left w-28">N° Transf.</th>
+                <th scope="col" class="px-4 py-3 text-left w-24">Fecha</th>
+                <th scope="col" class="px-4 py-3 text-left">Cedente (Origen)</th>
+                <th scope="col" class="px-4 py-3 text-left">Receptor (Destino)</th>
+                <th scope="col" class="px-4 py-3 text-left">Motivo / Tipo</th>
+                <th scope="col" class="px-4 py-3 text-center w-20">Bienes</th>
+                <th scope="col" class="px-4 py-3 text-center w-32">Estado</th>
+                <th scope="col" class="px-4 py-3 text-center w-24">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="transf-tbody" class="bg-white divide-y divide-slate-100 text-xs"></tbody>
+          </table>
+        </div>
       </div>
 
     </div>
@@ -1583,7 +1838,7 @@
           📱 Celulares
         </button>
         <button data-tab="salidas" class="mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left">
-          ↳ Salida de Bienes
+          👤 Usuario
         </button>
         <button data-tab="asignacion" class="mobile-menu-item w-full flex items-center gap-3 px-4 py-3 text-[0.875rem] font-bold rounded-xl transition-all border-none text-slate-700 hover:bg-slate-200/60 cursor-pointer text-left">
           📋 Asignación de Bienes
@@ -1603,6 +1858,6 @@
   <!-- Popover flotante universal de filtros de columna tipo Excel -->
   <div id="excel-col-filter-popover" class="hidden fixed z-[9999] w-64 bg-white border border-slate-200 rounded-xl shadow-2xl text-slate-800 text-xs overflow-hidden"></div>
 
-  <script src="app.js?v=8"></script>
+  <script src="app.js?v=9"></script>
 </body>
 </html>
