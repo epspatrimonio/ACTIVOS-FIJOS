@@ -1063,6 +1063,9 @@
               <div class="relative shrink-0">
                 <input type="text" id="filter-salida-search" placeholder="🔍 Buscar orden..." class="w-36 text-xs font-semibold px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-500 text-slate-700" />
               </div>
+              <button type="button" id="btn-salida-history-clear" title="Limpiar filtros" class="px-2 py-1 text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl border border-rose-200 cursor-pointer whitespace-nowrap">
+                ✕ Limpiar
+              </button>
               <button type="button" id="btn-salidas-export-json" title="Exportar respaldo JSON de salidas" class="px-2.5 py-1 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl border border-slate-200 cursor-pointer whitespace-nowrap">
                 ⬇️ JSON
               </button>
@@ -1303,6 +1306,9 @@
               <div class="relative shrink-0">
                 <input type="text" id="filter-transf-search" placeholder="🔍 Buscar transferencia..." class="w-40 text-xs font-semibold px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-500 text-slate-700" />
               </div>
+              <button type="button" id="btn-transf-history-clear" title="Limpiar filtros" class="px-2 py-1 text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl border border-rose-200 cursor-pointer whitespace-nowrap">
+                ✕ Limpiar
+              </button>
               <button type="button" id="btn-transf-export-json" title="Exportar JSON de transferencias" class="px-2.5 py-1 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl border border-slate-200 cursor-pointer whitespace-nowrap">
                 ⬇️ JSON
               </button>
@@ -2052,8 +2058,8 @@
   </div>
 
   <!-- Popover flotante universal de filtros de columna tipo Excel -->
-  <div id="excel-col-filter-popover" class="hidden fixed z-[9999] w-64 bg-white border border-slate-200 rounded-xl shadow-2xl text-slate-800 text-xs overflow-hidden"></div>
+  <div id="excel-col-filter-popover" class="hidden fixed z-[9999] w-72 bg-white border border-slate-200 rounded-xl shadow-2xl text-slate-800 text-xs overflow-hidden"></div>
 
-  <script src="app.js?v=9"></script>
+  <script src="app.js?v=10"></script>
 </body>
 </html>
