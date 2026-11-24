@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>INVENTARIO DE CAMPO — EPS Selva Central S.A.</title>
+  <link rel="icon" type="image/jpeg" href="./logo.jpg" />
+  <style>
+    :root {
+      --navy: #00509d;
+      --blue: #0077b6;
+      --sky: #00b0f0;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --border: #cbd5e1;
+      --text: #0f172a;
+      --muted: #64748b;
+      --emerald: #059669;
+      --amber: #d97706;
+      --rose: #e11d48;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    button, input, select { font-family: inherit; }
+    .hidden { display: none !important; }
+
+    /* Login Screen */
+    .auth-overlay {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: linear-gradient(135deg, #003566 0%, #00509d 50%, #0077b6 100%);
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 400px;
+      background: #fff;
+      border-radius: 18px;
+      padding: 32px 28px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+      text-align: center;
+    }
+    .auth-logo {
+      width: 68px;
+      height: 68px;
+      object-fit: contain;
+      border-radius: 14px;
+      border: 1px solid #e2e8f0;
+      padding: 4px;
+      margin-bottom: 12px;
+      background: #fff;
+    }
+    .auth-card h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--navy);
+      letter-spacing: -0.01em;
+    }
+    .auth-card p {
+      margin: 6px 0 20px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .auth-input {
+      width: 100%;
+      padding: 11px 14px;
+      font-size: 14px;
+      border: 2px solid #cbd5e1;
+      border-radius: 11px;
+      outline: none;
+      text-align: center;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      margin-bottom: 12px;
+      transition: border-color .15s;
+    }
+    .auth-input:focus { border-color: var(--sky); }
+    .auth-btn {
+      width: 100%;
+      padding: 11px 16px;
+      border: none;
+      border-radius: 11px;
+      background: linear-gradient(90deg, var(--navy), var(--blue));
+      color: #fff;
+      font-weight: 800;
+      font-size: 13.5px;
+      cursor: pointer;
+      transition: opacity .15s, transform .1s;
+    }
+    .auth-btn:hover { opacity: 0.94; }
+    .auth-btn:active { transform: scale(0.99); }
+    .auth-err {
+      margin-top: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--rose);
+      background: #fff1f2;
+      border: 1px solid #fecdd3;
+      border-radius: 8px;
+      padding: 8px;
+    }
+
+    /* App Layout */
+    .app-shell {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    .topbar {
+      background: linear-gradient(90deg, #003b73 0%, #00509d 55%, #0077b6 100%);
+      color: #fff;
+      padding: 10px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand img {
+      width: 38px;
+      height: 38px;
+      border-radius: 9px;
+      background: #fff;
+      padding: 2px;
+      object-fit: contain;
+    }
+    .brand-title { font-size: 15px; font-weight: 800; letter-spacing: -0.01em; }
+    .brand-sub { font-size: 11px; opacity: 0.85; }
+    .top-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+    .pill-status {
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 999px;
+      padding: 5px 11px;
+      font-size: 11.5px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pill-status.dirty {
+      background: #fef3c7;
+      color: #92400e;
+      border-color: #fcd34d;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      border-radius: 9px;
+      border: 1px solid transparent;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-primary { background: var(--sky); color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: #0284c7; }
+    .btn-emerald { background: #10b981; color: #fff; }
+    .btn-emerald:hover:not(:disabled) { background: #059669; }
+    .btn-amber { background: #f59e0b; color: #fff; }
+    .btn-amber:hover:not(:disabled) { background: #d97706; }
+    .btn-light { background: #fff; color: var(--text); border-color: var(--border); }
+    .btn-light:hover:not(:disabled) { background: #f8fafc; }
+    .btn-ghost-white {
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+      border-color: rgba(255,255,255,0.28);
+    }
+    .btn-ghost-white:hover:not(:disabled) { background: rgba(255,255,255,0.22); }
+    .btn-rose-outline { background: #fff1f2; color: var(--rose); border-color: #fecdd3; }
+    .btn-rose-outline:hover:not(:disabled) { background: #ffe4e6; }
+
+    .container {
+      width: 100%;
+      max-width: 1920px;
+      margin: 0 auto;
+      padding: 12px 16px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Sucursal Tabs */
+    .sucursal-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      background: #fff;
+      padding: 8px;
+      border-radius: 13px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+    .suc-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 12px;
+      border-radius: 9px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      color: #334155;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .suc-tab:hover { border-color: var(--sky); background: #f0f9ff; }
+    .suc-tab.active {
+      background: var(--navy);
+      color: #fff;
+      border-color: var(--navy);
+      box-shadow: 0 2px 6px rgba(0, 80, 157, 0.28);
+    }
+    .suc-count {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.08);
+    }
+    .suc-tab.active .suc-count { background: rgba(255, 255, 255, 0.2); color: #fff; }
+    .suc-mod-badge {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 10.5px;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: #fef3c7;
+      color: #b45309;
+      border: 1px solid #fcd34d;
+      font-weight: 800;
+    }
+
+    /* Filters & Export Bar */
+    .toolbar {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 13px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+    .search-box {
+      flex: 1;
+      min-width: 220px;
+      position: relative;
+    }
+    .search-box input {
+      width: 100%;
+      height: 34px;
+      padding: 0 30px 0 12px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: #f8fafc;
+      font-size: 12.5px;
+      font-weight: 600;
+      outline: none;
+    }
+    .search-box input:focus { background: #fff; border-color: var(--sky); }
+    .search-clear {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 800;
+      font-size: 13px;
+    }
+    .f-select {
+      height: 34px;
+      padding: 0 10px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: #f8fafc;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      outline: none;
+      cursor: pointer;
+    }
+    .f-select:focus { background: #fff; border-color: var(--sky); }
+    .quick-pills {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+    .q-pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #475569;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .q-pill.active {
+      background: #e0f2fe;
+      border-color: var(--sky);
+      color: #0369a1;
+    }
+    .q-pill.mod-pill.active {
+      background: #fef3c7;
+      border-color: #f59e0b;
+      color: #92400e;
+    }
+
+    /* Batch Bar */
+    .batch-bar {
+      background: linear-gradient(90deg, #eff6ff, #ecfeff);
+      border: 1.5px solid #38bdf8;
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(0, 176, 240, 0.12);
+    }
+    .batch-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--navy);
+      margin-right: 4px;
+    }
+
+    /* Table */
+    .table-card {
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      border-radius: 13px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+    .table-scroll {
+      overflow-x: auto;
+      max-height: calc(100vh - 295px);
+      min-height: 360px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1380px;
+    }
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #0f2942;
+      color: #fff;
+      font-size: 10.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 9px 7px;
+      text-align: left;
+      border-bottom: 2px solid var(--sky);
+      white-space: nowrap;
+    }
+    tbody td {
+      padding: 6px 7px;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: middle;
+      font-size: 11.5px;
+    }
+    tbody tr:hover { background: #f0f9ff; }
+    tbody tr.row-modified { background: #fffbeb !important; }
+    tbody tr.row-modified:hover { background: #fef3c7 !important; }
+    tbody tr.row-selected { outline: 2px solid var(--sky); outline-offset: -2px; }
+
+    .code-badge {
+      display: inline-block;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-weight: 800;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: #eff6ff;
+      color: var(--navy);
+      border: 1px solid #bfdbfe;
+    }
+    .origin-tag {
+      display: inline-block;
+      margin-top: 3px;
+      font-size: 9.5px;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 5px;
+      text-transform: uppercase;
+    }
+    .origin-ACTIVO { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+    .origin-OBRA { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+    .origin-CONC { background: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd; }
+    .origin-SOB { background: #faf5ff; color: #7e22ce; border: 1px solid #e9d5ff; }
+    .origin-FALT { background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; }
+    .mod-tag {
+      display: inline-block;
+      margin-top: 3px;
+      font-size: 9.5px;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 5px;
+      background: #fef08a;
+      color: #854d0e;
+      border: 1px solid #facc15;
+    }
+
+    .cell-input, .cell-select {
+      width: 100%;
+      height: 30px;
+      padding: 2px 6px;
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid #cbd5e1;
+      border-radius: 7px;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s, background .15s;
+    }
+    .cell-input:focus, .cell-select:focus {
+      border-color: var(--sky);
+      box-shadow: 0 0 0 2px rgba(0, 176, 240, 0.18);
+    }
+    .cell-changed {
+      border-color: #f59e0b !important;
+      background: #fef9c3 !important;
+    }
+    .cell-warn {
+      border-color: #ef4444 !important;
+      background: #fef2f2 !important;
+    }
+    .undo-btn {
+      margin-top: 3px;
+      padding: 2px 6px;
+      font-size: 10px;
+      font-weight: 700;
+      border-radius: 5px;
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      color: #475569;
+      cursor: pointer;
+    }
+    .undo-btn:hover { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
+    .char-toggle-btn {
+      border: none;
+      background: transparent;
+      color: var(--blue);
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0;
+      text-decoration: underline;
+    }
+
+    .pagination-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 12px;
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      font-size: 11.5px;
+      color: #475569;
+    }
+    .pg-btns { display: flex; align-items: center; gap: 5px; }
+    .pg-btn {
+      padding: 4px 9px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-weight: 700;
+      font-size: 11.5px;
+      cursor: pointer;
+    }
+    .pg-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .toast {
+      position: fixed;
+      bottom: 18px;
+      right: 18px;
+      z-index: 60;
+      background: #0f172a;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 12.5px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PANTALLA DE ACCESO PROTEGIDO -->
+  <div id="authScreen" class="auth-overlay">
+    <form id="authForm" class="auth-card">
+      <img src="./logo.jpg" alt="EPS Selva Central" class="auth-logo" onerror="this.style.display='none'" />
+      <h1>Portal de Inventario de Campo</h1>
+      <p>EPS Selva Central S.A. · Verificación y Actualización por Sucursal</p>
+      <input
+        id="authPassword"
+        type="password"
+        class="auth-input"
+        placeholder="Ingrese clave de edición..."
+        autocomplete="current-password"
+        autofocus
+        required
+      />
+      <button type="submit" class="auth-btn">🔓 Desbloquear Portal de Edición</button>
+      <div id="authError" class="auth-err hidden">Clave incorrecta. Verifique e intente nuevamente.</div>
+    </form>
+  </div>
+
+  <!-- APLICACIÓN PRINCIPAL -->
+  <div id="appShell" class="app-shell hidden">
+    <header class="topbar">
+      <div class="brand">
+        <img src="./logo.jpg" alt="EPS" onerror="this.style.display='none'" />
+        <div>
+          <div class="brand-title">INVENTARIO DE CAMPO — EPS SELVA CENTRAL S.A.</div>
+          <div class="brand-sub" id="catalogMeta">Cargando inventario unificado...</div>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <span id="statusPill" class="pill-status">💾 Sin cambios pendientes</span>
+        <button id="btnDownloadBranchJson" type="button" class="btn btn-amber" disabled>
+          📥 Descargar Cambios Sucursal (.json)
+        </button>
+        <button id="btnDownloadAllJson" type="button" class="btn btn-emerald" disabled>
+          📥 Descargar Todos (.json)
+        </button>
+        <button id="btnExportExcel" type="button" class="btn btn-primary">
+          📊 Excel Tabla
+        </button>
+        <button id="btnClearDraft" type="button" class="btn btn-ghost-white hidden">
+          🗑️ Descartar Borrador
+        </button>
+        <button id="btnLogout" type="button" class="btn btn-ghost-white">
+          🔒 Salir
+        </button>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- Pestañas por Sucursal (reales desde BD) -->
+      <section id="sucursalTabs" class="sucursal-strip" aria-label="Sucursales"></section>
+
+      <!-- Barra de Búsqueda y Filtros -->
+      <section class="toolbar">
+        <div class="filter-row">
+          <div class="search-box">
+            <input id="searchInput" type="text" placeholder="Buscar por código, denominación, serie, marca, placa, responsable o puesto..." />
+            <button id="searchClear" type="button" class="search-clear hidden" title="Limpiar búsqueda">✕</button>
+          </div>
+          <select id="filterUnidad" class="f-select" title="Filtrar por Unidad Orgánica">
+            <option value="">Todas las Unidades Orgánicas</option>
+          </select>
+          <select id="filterPuesto" class="f-select" title="Filtrar por Puesto">
+            <option value="">Todos los Puestos</option>
+          </select>
+          <select id="filterEstado" class="f-select" title="Filtrar por Estado">
+            <option value="">Todos los Estados</option>
+          </select>
+          <button id="btnResetFilters" type="button" class="btn btn-light">Limpiar Filtros</button>
+        </div>
+
+        <div class="quick-pills" id="quickPills">
+          <button type="button" class="q-pill active" data-pill="ALL">Todos</button>
+          <button type="button" class="q-pill" data-pill="ACTIVO">Activos Fijos</button>
+          <button type="button" class="q-pill" data-pill="OBRA">Obras</button>
+          <button type="button" class="q-pill" data-pill="CONCILIACION">Conciliación</button>
+          <button type="button" class="q-pill" data-pill="SOBRANTE">Sobrantes</button>
+          <button type="button" class="q-pill" data-pill="SIN_RESP">Sin Responsable</button>
+          <button type="button" class="q-pill mod-pill" data-pill="MODIFICADOS">✏️ Solo Modificados (<span id="modPillCount">0</span>)</button>
+        </div>
+      </section>
+
+      <!-- Barra de Edición Rápida en Lote -->
+      <section id="batchBar" class="batch-bar hidden">
+        <span class="batch-title" id="batchCountLabel">0 seleccionados</span>
+        <button id="btnSelectAllFiltered" type="button" class="btn btn-light">Seleccionar todos los filtrados</button>
+        <select id="batchSucursal" class="f-select" style="height:30px">
+          <option value="">— Cambiar Sucursal —</option>
+        </select>
+        <select id="batchUnidad" class="f-select" style="height:30px">
+          <option value="">— Unidad Orgánica —</option>
+        </select>
+        <select id="batchPuesto" class="f-select" style="height:30px">
+          <option value="">— Puesto —</option>
+        </select>
+        <input id="batchResponsable" type="text" list="dl-personal" class="cell-input" style="width:220px" placeholder="Cambiar Responsable..." />
+        <select id="batchEstado" class="f-select" style="height:30px">
+          <option value="">— Estado —</option>
+        </select>
+        <button id="btnApplyBatch" type="button" class="btn btn-emerald">✓ Aplicar a seleccionados</button>
+        <button id="btnClearSelection" type="button" class="btn btn-rose-outline">✕ Quitar selección</button>
+      </section>
+
+      <!-- Tabla Editable -->
+      <section class="table-card">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:34px; text-align:center;">
+                  <input id="checkPageAll" type="checkbox" title="Seleccionar página actual" />
+                </th>
+                <th style="width:125px;">Código / Origen</th>
+                <th style="min-width:230px;">Denominación / Características</th>
+                <th style="width:140px;">Sucursal</th>
+                <th style="width:170px;">Unidad Orgánica</th>
+                <th style="width:185px;">Puesto</th>
+                <th style="width:225px;">Responsable (Padrón)</th>
+                <th style="width:110px;">Estado</th>
+                <th style="min-width:190px;">Observaciones / Espec.</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <tr>
+                <td colspan="9" style="text-align:center; padding:40px; color:#64748b;">
+                  Cargando datos de inventario...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination-bar">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span id="pageInfo">Mostrando 0 de 0</span>
+            <select id="pageSizeSelect" class="f-select" style="height:26px; font-size:11px;">
+              <option value="50" selected>50 / pág</option>
+              <option value="100">100 / pág</option>
+              <option value="250">250 / pág</option>
+              <option value="0">Todos</option>
+            </select>
+          </div>
+          <div class="pg-btns">
+            <button id="pgFirst" type="button" class="pg-btn">«</button>
+            <button id="pgPrev" type="button" class="pg-btn">Anterior</button>
+            <span id="pgLabel" style="font-weight:800; padding:0 6px;">Pág. 1 / 1</span>
+            <button id="pgNext" type="button" class="pg-btn">Siguiente</button>
+            <button id="pgLast" type="button" class="pg-btn">»</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Datalist único compartido para autocompletado instantáneo de personal -->
+  <datalist id="dl-personal"></datalist>
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="./vendor/xlsx.full.min.js"></script>
+  <script src="./app.js?v=1"></script>
+</body>
+</html>
