@@ -365,52 +365,94 @@
       margin-right: 4px;
     }
 
+    .actions-divider {
+      width: 1px;
+      height: 24px;
+      background: rgba(255, 255, 255, 0.28);
+      margin: 0 2px;
+    }
+
     /* Table */
     .table-card {
       background: #fff;
       border: 1px solid #cbd5e1;
-      border-radius: 13px;
+      border-radius: 14px;
       overflow: hidden;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
     }
     .table-scroll {
-      overflow-x: auto;
-      max-height: calc(100vh - 295px);
-      min-height: 360px;
+      overflow: auto;
+      max-height: calc(100vh - 245px);
+      min-height: 380px;
+      scroll-behavior: smooth;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 1380px;
+      min-width: 1460px;
     }
     thead th {
       position: sticky;
       top: 0;
       z-index: 10;
-      background: #0f2942;
+      background: linear-gradient(180deg, #0f2942 0%, #0b2239 100%);
       color: #fff;
       font-size: 10.5px;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.04em;
-      padding: 9px 7px;
+      padding: 10px 8px;
       text-align: left;
       border-bottom: 2px solid var(--sky);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.14);
       white-space: nowrap;
     }
     thead th.sortable-th { cursor: pointer; user-select: none; transition: background .15s; }
     thead th.sortable-th:hover { background: #173a5e; }
     .sort-ind { margin-left: 4px; font-size: 9px; color: #38bdf8; }
     tbody td {
-      padding: 6px 7px;
+      padding: 7px 7px;
       border-bottom: 1px solid #e2e8f0;
       vertical-align: middle;
       font-size: 11.5px;
     }
+    tbody tr:nth-child(even) { background: #f8fafc; }
     tbody tr:hover { background: #f0f9ff; }
-    tbody tr.row-modified { background: #fffbeb !important; }
+    tbody tr.row-modified,
+    tbody tr.row-modified:nth-child(even) { background: #fffbeb !important; }
     tbody tr.row-modified:hover { background: #fef3c7 !important; }
     tbody tr.row-selected { outline: 2px solid var(--sky); outline-offset: -2px; }
+
+    .spec-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 6px;
+    }
+    .spec-field {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+    .spec-lbl {
+      font-size: 9px;
+      font-weight: 800;
+      color: #64748b;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      line-height: 1.1;
+    }
+    .spec-input {
+      height: 25px !important;
+      padding: 1px 5px !important;
+      font-size: 10.5px !important;
+      border-radius: 5px !important;
+    }
+    .spec-mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+    .cell-select.est-bueno { background: #ecfdf5; color: #065f46; border-color: #a7f3d0; font-weight: 800; }
+    .cell-select.est-regular { background: #f8fafc; color: #334155; border-color: #cbd5e1; font-weight: 700; }
+    .cell-select.est-malo { background: #fff7ed; color: #c2410c; border-color: #fed7aa; font-weight: 800; }
+    .cell-select.est-baja { background: #fff1f2; color: #be123c; border-color: #fecdd3; font-weight: 800; }
 
     .code-badge {
       display: inline-block;
@@ -486,39 +528,33 @@
       cursor: pointer;
     }
     .undo-btn:hover { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
-    .char-toggle-btn {
-      border: none;
-      background: transparent;
-      color: var(--blue);
-      font-size: 10px;
-      font-weight: 700;
-      cursor: pointer;
-      padding: 0;
-      text-decoration: underline;
-    }
 
-    .pagination-bar {
+    .table-footer-bar {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      padding: 8px 12px;
+      padding: 9px 14px;
       background: #f8fafc;
       border-top: 1px solid #e2e8f0;
       font-size: 11.5px;
+      font-weight: 600;
       color: #475569;
     }
-    .pg-btns { display: flex; align-items: center; gap: 5px; }
+    .pg-btns { display: flex; align-items: center; gap: 6px; }
     .pg-btn {
-      padding: 4px 9px;
+      padding: 5px 11px;
       border-radius: 7px;
       border: 1px solid var(--border);
       background: #fff;
+      color: var(--navy);
       font-weight: 700;
       font-size: 11.5px;
       cursor: pointer;
+      transition: all .15s;
     }
+    .pg-btn:hover:not(:disabled) { background: #f0f9ff; border-color: var(--sky); }
     .pg-btn:disabled { opacity: 0.4; cursor: not-allowed; }
     .toast {
       position: fixed;
@@ -659,12 +695,14 @@
         <button id="btnDownloadAllJson" type="button" class="btn btn-light" disabled>
           📥 Descargar Todos (.json)
         </button>
+        <span class="actions-divider" aria-hidden="true"></span>
         <button id="btnExportPdf" type="button" class="btn btn-rose-outline" style="background:#e11d48; color:#fff; border-color:#be123c;" title="Descargar relación en PDF optimizada para verificación física en campo">
           📄 PDF Verificación
         </button>
         <button id="btnExportExcel" type="button" class="btn btn-primary">
           📊 Excel Tabla
         </button>
+        <span class="actions-divider" aria-hidden="true"></span>
         <button id="btnClearDraft" type="button" class="btn btn-ghost-white hidden">
           🗑️ Descartar Borrador
         </button>
@@ -682,7 +720,7 @@
       <section class="toolbar">
         <div class="filter-row">
           <div class="search-box">
-            <input id="searchInput" type="text" placeholder="Buscar por código, denominación, serie, marca, placa, responsable o puesto..." />
+            <input id="searchInput" type="text" placeholder="Buscar por código, denominación, marca, modelo, serie, color, placa, responsable o puesto..." />
             <button id="searchClear" type="button" class="search-clear hidden" title="Limpiar búsqueda">✕</button>
           </div>
           <select id="filterUnidad" class="f-select" title="Filtrar por Unidad Orgánica">
@@ -739,28 +777,29 @@
         <button id="btnClearSelection" type="button" class="btn btn-rose-outline">✕ Quitar selección</button>
       </section>
 
-      <!-- Tabla Editable -->
+      <!-- Tabla Editable (Scroll Continuo) -->
       <section class="table-card">
-        <div class="table-scroll">
+        <div id="tableScroll" class="table-scroll">
           <table>
             <thead>
               <tr>
                 <th style="width:34px; text-align:center;">
-                  <input id="checkPageAll" type="checkbox" title="Seleccionar página actual" />
+                  <input id="checkPageAll" type="checkbox" title="Seleccionar todos los visibles" />
                 </th>
-                <th class="sortable-th" data-sort="cod_patrimonial" style="width:125px;">Código / Origen<span class="sort-ind"></span></th>
-                <th class="sortable-th" data-sort="denominacion" style="min-width:230px;">Denominación / Características<span class="sort-ind"></span></th>
-                <th class="sortable-th" data-sort="sucursal" style="width:140px;">Sucursal<span class="sort-ind"></span></th>
-                <th class="sortable-th" data-sort="unidad" style="width:170px;">Unidad Orgánica<span class="sort-ind"></span></th>
-                <th class="sortable-th" data-sort="puesto" style="width:185px;">Puesto<span class="sort-ind"></span></th>
-                <th class="sortable-th" data-sort="responsable" style="width:225px;">Responsable (Padrón)<span class="sort-ind"></span></th>
-                <th class="sortable-th" data-sort="estado_activo" style="width:110px;">Estado<span class="sort-ind"></span></th>
-                <th style="min-width:190px;">Observaciones / Espec.</th>
+                <th class="sortable-th" data-sort="cod_patrimonial" style="width:122px;">Código / Origen<span class="sort-ind"></span></th>
+                <th class="sortable-th" data-sort="denominacion" style="min-width:195px;">Denominación<span class="sort-ind"></span></th>
+                <th class="sortable-th" data-sort="marca" style="min-width:270px;">Marca · Modelo · Serie · Color<span class="sort-ind"></span></th>
+                <th class="sortable-th" data-sort="sucursal" style="width:132px;">Sucursal<span class="sort-ind"></span></th>
+                <th class="sortable-th" data-sort="unidad" style="width:160px;">Unidad Orgánica<span class="sort-ind"></span></th>
+                <th class="sortable-th" data-sort="puesto" style="width:175px;">Puesto<span class="sort-ind"></span></th>
+                <th class="sortable-th" data-sort="responsable" style="width:210px;">Responsable (Padrón)<span class="sort-ind"></span></th>
+                <th class="sortable-th" data-sort="estado_activo" style="width:108px;">Estado<span class="sort-ind"></span></th>
+                <th style="min-width:175px;">Observaciones</th>
               </tr>
             </thead>
             <tbody id="tableBody">
               <tr>
-                <td colspan="9" style="text-align:center; padding:40px; color:#64748b;">
+                <td colspan="10" style="text-align:center; padding:40px; color:#64748b;">
                   Cargando datos de inventario...
                 </td>
               </tr>
@@ -768,22 +807,11 @@
           </table>
         </div>
 
-        <div class="pagination-bar">
-          <div style="display:flex; align-items:center; gap:8px;">
-            <span id="pageInfo">Mostrando 0 de 0</span>
-            <select id="pageSizeSelect" class="f-select" style="height:26px; font-size:11px;">
-              <option value="50" selected>50 / pág</option>
-              <option value="100">100 / pág</option>
-              <option value="250">250 / pág</option>
-              <option value="0">Todos</option>
-            </select>
-          </div>
+        <div class="table-footer-bar">
+          <span id="tableCountInfo">Mostrando 0 de 0 registros</span>
           <div class="pg-btns">
-            <button id="pgFirst" type="button" class="pg-btn">«</button>
-            <button id="pgPrev" type="button" class="pg-btn">Anterior</button>
-            <span id="pgLabel" style="font-weight:800; padding:0 6px;">Pág. 1 / 1</span>
-            <button id="pgNext" type="button" class="pg-btn">Siguiente</button>
-            <button id="pgLast" type="button" class="pg-btn">»</button>
+            <button id="btnLoadAllRows" type="button" class="pg-btn hidden">⬇ Cargar todos los restantes</button>
+            <button id="btnScrollTop" type="button" class="pg-btn">↑ Subir al inicio</button>
           </div>
         </div>
       </section>

@@ -12,6 +12,9 @@
   const ACCESS_KEY_SHA256 = "6b4d18a060d1833674da885839e68ccf44ed05c0de1f610b13ce56bc0f614180";
   const ACCESS_FALLBACK_PLAIN = "patrimonio1996";
 
+  const INITIAL_CHUNK = 250;
+  const SCROLL_CHUNK = 200;
+
   function getGhToken() {
     return sessionStorage.getItem(GH_TOKEN_SESSION_KEY) || localStorage.getItem(GH_TOKEN_LOCAL_KEY) || "";
   }
@@ -37,7 +40,8 @@
     items: [],
     drafts: {}, // uid -> { uid, origen_tabla, id_regularizacion, cod_patrimonial, ..., campos_modificados: [] }
     selectedUids: new Set(),
-    expandedCharUids: new Set(),
+    filteredCache: [],
+    renderedCount: 0,
     activeSucursalId: "ALL",
     search: "",
     filterUnidad: "",
@@ -47,8 +51,6 @@
     sortMode: "JERARQUICO",
     colSortKey: null,
     colSortDir: "asc",
-    page: 1,
-    pageSize: 50,
     personalLookup: new Map(), // norm(name) -> { cod_personal, personal }
     sucursalById: new Map(),
     puestoById: new Map(),
@@ -62,6 +64,21 @@
       .replace(/\s+/g, " ")
       .trim()
       .toUpperCase();
+  }
+
+  function formatSucursalTitle(name) {
+    const clean = String(name || "").trim();
+    if (!clean) return "—";
+    return clean.toLowerCase().replace(/(^|\s)\S/g, (l) => l.toUpperCase());
+  }
+
+  function getEstadoSelectClass(est) {
+    const k = normText(est);
+    if (k === "BUENO") return "est-bueno";
+    if (k === "REGULAR") return "est-regular";
+    if (k === "MALO") return "est-malo";
+    if (k === "PARA BAJA" || k === "BAJA" || k === "FALTANTE") return "est-baja";
+    return "";
   }
 
   function escapeHtml(str) {
@@ -195,11 +212,6 @@
           .join("");
       }
 
-      // Seleccionar primera sucursal real por defecto o ALL
-      if (state.catalogos.sucursales.length > 0 && state.activeSucursalId === "ALL") {
-        // Mantener ALL o permitir cambiar con 1 clic en pestañas
-      }
-
       const metaEl = document.getElementById("catalogMeta");
       if (metaEl) {
         const fechaTxt = state.catalogos.generado_en
@@ -213,7 +225,7 @@
     } catch (err) {
       const tbody = document.getElementById("tableBody");
       if (tbody) {
-        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:40px; color:#e11d48; font-weight:700;">Error al cargar inventario: ${escapeHtml(err.message)}. Ejecute Sincronizar en el APP Activos Fijos.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:40px; color:#e11d48; font-weight:700;">Error al cargar inventario: ${escapeHtml(err.message)}. Ejecute Sincronizar en el APP Activos Fijos.</td></tr>`;
       }
     }
   }
@@ -379,7 +391,8 @@
         if (qTokens.length > 0) {
           const blob = normText([
             it.cod_patrimonial, it.denominacion, it.marca, it.modelo, it.numero_serie,
-            it.placa, it.responsable, it.unidad, it.puesto, it.sucursal, it.observaciones, it.caracteristicas_accesorios
+            it.color, it.placa, it.responsable, it.unidad, it.puesto, it.sucursal,
+            it.observaciones, it.caracteristicas_accesorios
           ].join(" "));
           if (!qTokens.every((t) => blob.includes(t))) return false;
         }
@@ -403,7 +416,6 @@
 
     const nextDraft = { ...prevDraft, ...fieldUpdates, updated_at: new Date().toISOString() };
 
-    // Comparar cada campo editable contra el valor original de base
     const trackedKeys = [
       "id_sucursal", "sucursal", "unidad", "puesto_id", "puesto",
       "cod_personal", "responsable", "estado_activo", "observaciones",
@@ -494,7 +506,6 @@
           : `☁️ Enviar Sucursal a GitHub (${currentSucMod})`;
     }
 
-    // Tabs de Sucursales dinámicas
     const sucCounts = new Map();
     state.items.forEach((base) => {
       const eff = getEffectiveItem(base);
@@ -531,158 +542,232 @@
     }
   }
 
-  function renderTable() {
-    const filtered = getFilteredItems();
-    const pageSize = state.pageSize;
-    const totalPages = pageSize === 0 ? 1 : Math.max(1, Math.ceil(filtered.length / pageSize));
-    if (state.page > totalPages) state.page = totalPages;
+  function createRowOptionBuilders() {
+    const sucOptionsCache = new Map();
+    const buildSucOpts = (currId) => {
+      const key = String(currId || "");
+      if (!sucOptionsCache.has(key)) {
+        const opts = [`<option value="">— Seleccionar —</option>`].concat(
+          state.catalogos.sucursales.map(
+            (s) => `<option value="${s.id_sucursal}" ${String(s.id_sucursal) === key ? "selected" : ""}>${escapeHtml(s.sucursal)}</option>`
+          )
+        ).join("");
+        sucOptionsCache.set(key, opts);
+      }
+      return sucOptionsCache.get(key);
+    };
 
-    const startIdx = pageSize === 0 ? 0 : (state.page - 1) * pageSize;
-    const endIdx = pageSize === 0 ? filtered.length : Math.min(startIdx + pageSize, filtered.length);
-    const pageItems = filtered.slice(startIdx, endIdx);
+    const estOptionsCache = new Map();
+    const buildEstOpts = (currEst) => {
+      const key = normText(currEst);
+      if (!estOptionsCache.has(key)) {
+        const list = [...state.catalogos.estados];
+        if (key && !list.includes(key)) list.push(key);
+        estOptionsCache.set(
+          key,
+          list.map((e) => `<option value="${escapeHtml(e)}" ${normText(e) === key ? "selected" : ""}>${escapeHtml(e)}</option>`).join("")
+        );
+      }
+      return estOptionsCache.get(key);
+    };
 
-    const tbody = document.getElementById("tableBody");
-    if (pageItems.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:42px; color:#64748b; font-weight:600;">No se encontraron bienes con los filtros actuales.</td></tr>`;
-    } else {
-      const sucOptionsCache = new Map();
-      const buildSucOpts = (currId) => {
-        const key = String(currId || "");
-        if (!sucOptionsCache.has(key)) {
-          const opts = [`<option value="">— Seleccionar —</option>`].concat(
-            state.catalogos.sucursales.map(
-              (s) => `<option value="${s.id_sucursal}" ${String(s.id_sucursal) === key ? "selected" : ""}>${escapeHtml(s.sucursal)}</option>`
-            )
-          ).join("");
-          sucOptionsCache.set(key, opts);
-        }
-        return sucOptionsCache.get(key);
-      };
+    return { buildSucOpts, buildEstOpts };
+  }
 
-      const estOptionsCache = new Map();
-      const buildEstOpts = (currEst) => {
-        const key = normText(currEst);
-        if (!estOptionsCache.has(key)) {
-          const list = [...state.catalogos.estados];
-          if (key && !list.includes(key)) list.push(key);
-          estOptionsCache.set(
-            key,
-            list.map((e) => `<option value="${escapeHtml(e)}" ${normText(e) === key ? "selected" : ""}>${escapeHtml(e)}</option>`).join("")
-          );
-        }
-        return estOptionsCache.get(key);
-      };
+  let cachedOptionBuilders = null;
+  function getOptionBuilders() {
+    if (!cachedOptionBuilders) cachedOptionBuilders = createRowOptionBuilders();
+    return cachedOptionBuilders;
+  }
 
-      tbody.innerHTML = pageItems.map((it) => {
-        const draft = state.drafts[it.uid];
-        const chSet = new Set(it._changedFields || []);
-        const isSelected = state.selectedUids.has(it.uid);
-        const isCharOpen = state.expandedCharUids.has(it.uid);
+  function renderRowHtml(it, buildSucOpts, buildEstOpts) {
+    const draft = state.drafts[it.uid];
+    const chSet = new Set(it._changedFields || []);
+    const isSelected = state.selectedUids.has(it.uid);
 
-        const ctx = getContextForSucursal(it.id_sucursal);
-        const unidades = getUnidadesForContext(ctx);
-        const currUni = (it.unidad || "").trim();
-        const unitList = currUni && !unidades.includes(currUni) ? [currUni, ...unidades] : unidades;
-        const puestos = getPuestosFor(ctx, currUni || null);
+    const ctx = getContextForSucursal(it.id_sucursal);
+    const unidades = getUnidadesForContext(ctx);
+    const currUni = (it.unidad || "").trim();
+    const unitList = currUni && !unidades.includes(currUni) ? [currUni, ...unidades] : unidades;
+    const puestos = getPuestosFor(ctx, currUni || null);
 
-        let originClass = "origin-ACTIVO";
-        if (it.tipo_origen === "OBRA EN CURSO") originClass = "origin-OBRA";
-        else if (it.sub_modulo === "CONCILIACION") originClass = "origin-CONC";
-        else if (it.sub_modulo === "SOBRANTE") originClass = "origin-SOB";
-        else if (it.sub_modulo === "FALTANTE" || it.estado_activo === "FALTANTE") originClass = "origin-FALT";
+    let originClass = "origin-ACTIVO";
+    if (it.tipo_origen === "OBRA EN CURSO") originClass = "origin-OBRA";
+    else if (it.sub_modulo === "CONCILIACION") originClass = "origin-CONC";
+    else if (it.sub_modulo === "SOBRANTE") originClass = "origin-SOB";
+    else if (it.sub_modulo === "FALTANTE" || it.estado_activo === "FALTANTE") originClass = "origin-FALT";
 
-        const obsFieldKey = it.origen_tabla === "REGULARIZACION" ? "observaciones" : "caracteristicas_accesorios";
-        const obsValue = it[obsFieldKey] || it.observaciones || "";
+    const obsFieldKey = it.origen_tabla === "REGULARIZACION" ? "observaciones" : "caracteristicas_accesorios";
+    const obsValue = it[obsFieldKey] || it.observaciones || "";
 
-        const respNorm = normText(it.responsable);
-        const respValid = !respNorm || respNorm === "SIN ASIGNAR" || respNorm === "PENDIENTE DE UBICACION" || state.personalLookup.has(respNorm);
+    const respNorm = normText(it.responsable);
+    const respValid = !respNorm || respNorm === "SIN ASIGNAR" || respNorm === "PENDIENTE DE UBICACION" || state.personalLookup.has(respNorm);
+    const estClass = getEstadoSelectClass(it.estado_activo);
 
-        return `
-          <tr data-uid="${escapeHtml(it.uid)}" class="${draft ? "row-modified" : ""} ${isSelected ? "row-selected" : ""}">
-            <td style="text-align:center;">
-              <input type="checkbox" class="row-check" data-uid="${escapeHtml(it.uid)}" ${isSelected ? "checked" : ""} />
-            </td>
-            <td>
-              <span class="code-badge">${escapeHtml(it.cod_patrimonial)}</span><br/>
-              <span class="origin-tag ${originClass}">${escapeHtml(it.tipo_origen || it.origen_tabla)}</span>
-              ${draft ? `<div><span class="mod-tag">MODIFICADO</span> <button type="button" class="undo-btn" data-undo="${escapeHtml(it.uid)}" title="Deshacer cambios de esta fila">↺</button></div>` : ""}
-            </td>
-            <td>
-              <div style="font-weight:800; color:#0f172a; line-height:1.25;">${escapeHtml(it.denominacion)}</div>
-              <div style="font-size:10.5px; color:#475569; margin-top:2px;">
-                ${it.placa ? `<span style="background:#fef3c7; padding:0 4px; border-radius:4px; font-weight:800; color:#92400e;">${escapeHtml(it.placa)}</span> · ` : ""}
-                Marca: <strong>${escapeHtml(it.marca || "S/M")}</strong> · Mod: ${escapeHtml(it.modelo || "—")} · Serie: <span style="font-family:monospace;">${escapeHtml(it.numero_serie || "S/S")}</span>
-                <button type="button" class="char-toggle-btn" data-char="${escapeHtml(it.uid)}">${isCharOpen ? "Ocultar caract." : "Editar serie/marca"}</button>
-              </div>
-              ${isCharOpen ? `
-                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; margin-top:5px;">
-                  <input type="text" class="cell-input ${chSet.has("marca") ? "cell-changed" : ""}" data-field="marca" value="${escapeHtml(it.marca || "")}" placeholder="Marca" />
-                  <input type="text" class="cell-input ${chSet.has("modelo") ? "cell-changed" : ""}" data-field="modelo" value="${escapeHtml(it.modelo || "")}" placeholder="Modelo" />
-                  <input type="text" class="cell-input ${chSet.has("numero_serie") ? "cell-changed" : ""}" data-field="numero_serie" value="${escapeHtml(it.numero_serie || "")}" placeholder="N° Serie" />
-                </div>
-              ` : ""}
-            </td>
-            <td>
-              <select class="cell-select ${chSet.has("id_sucursal") ? "cell-changed" : ""}" data-field="id_sucursal">
-                ${buildSucOpts(it.id_sucursal)}
-              </select>
-            </td>
-            <td>
-              <select class="cell-select ${chSet.has("unidad") ? "cell-changed" : ""}" data-field="unidad">
-                <option value="">— Seleccionar Unidad —</option>
-                ${unitList.map((u) => `<option value="${escapeHtml(u)}" ${u === currUni ? "selected" : ""}>${escapeHtml(u)}</option>`).join("")}
-              </select>
-            </td>
-            <td>
-              <select class="cell-select ${chSet.has("puesto_id") ? "cell-changed" : ""}" data-field="puesto_id">
-                <option value="">— Seleccionar Puesto —</option>
-                ${puestos.map((p) => `<option value="${p.puesto_id}" ${String(p.puesto_id) === String(it.puesto_id || "") ? "selected" : ""}>${currUni ? escapeHtml(p.puesto) : `${escapeHtml(p.departamento)} · ${escapeHtml(p.puesto)}`}</option>`).join("")}
-              </select>
-            </td>
-            <td>
-              <input
-                type="text"
-                list="dl-personal"
-                class="cell-input ${chSet.has("cod_personal") || chSet.has("responsable") ? "cell-changed" : ""} ${!respValid ? "cell-warn" : ""}"
-                data-field="responsable"
-                value="${escapeHtml(it.responsable || "")}"
-                placeholder="Buscar personal..."
-                title="${respValid ? "Seleccione del padrón oficial" : "Nombre no coincide exactamente con el padrón oficial"}"
-              />
-            </td>
-            <td>
-              <select class="cell-select ${chSet.has("estado_activo") ? "cell-changed" : ""}" data-field="estado_activo">
-                ${buildEstOpts(it.estado_activo)}
-              </select>
-            </td>
-            <td>
-              <input
-                type="text"
-                class="cell-input ${chSet.has(obsFieldKey) ? "cell-changed" : ""}"
-                data-field="${obsFieldKey}"
-                value="${escapeHtml(obsValue)}"
-                placeholder="Observación o especificación..."
-              />
-            </td>
-          </tr>
-        `;
-      }).join("");
+    return `
+      <tr data-uid="${escapeHtml(it.uid)}" class="${draft ? "row-modified" : ""} ${isSelected ? "row-selected" : ""}">
+        <td style="text-align:center;">
+          <input type="checkbox" class="row-check" data-uid="${escapeHtml(it.uid)}" ${isSelected ? "checked" : ""} />
+        </td>
+        <td>
+          <span class="code-badge">${escapeHtml(it.cod_patrimonial)}</span><br/>
+          <span class="origin-tag ${originClass}">${escapeHtml(it.tipo_origen || it.origen_tabla)}</span>
+          ${draft ? `<div><span class="mod-tag">MODIFICADO</span> <button type="button" class="undo-btn" data-undo="${escapeHtml(it.uid)}" title="Deshacer cambios de esta fila">↺</button></div>` : ""}
+        </td>
+        <td>
+          <div style="font-weight:800; color:#0f172a; line-height:1.28;">${escapeHtml(it.denominacion)}</div>
+          <div style="font-size:10px; color:#64748b; margin-top:3px; display:flex; flex-wrap:wrap; align-items:center; gap:5px;">
+            ${it.placa ? `<span style="background:#fef3c7; padding:1px 5px; border-radius:4px; font-weight:800; color:#92400e; border:1px solid #fde68a;">PLACA: ${escapeHtml(it.placa)}</span>` : ""}
+            ${it.subcategoria ? `<span>${escapeHtml(it.subcategoria)}</span>` : ""}
+          </div>
+        </td>
+        <td>
+          <div class="spec-grid">
+            <div class="spec-field">
+              <span class="spec-lbl">Marca</span>
+              <input type="text" class="cell-input spec-input ${chSet.has("marca") ? "cell-changed" : ""}" data-field="marca" value="${escapeHtml(it.marca || "")}" placeholder="S/M" />
+            </div>
+            <div class="spec-field">
+              <span class="spec-lbl">Modelo</span>
+              <input type="text" class="cell-input spec-input ${chSet.has("modelo") ? "cell-changed" : ""}" data-field="modelo" value="${escapeHtml(it.modelo || "")}" placeholder="S/M" />
+            </div>
+            <div class="spec-field">
+              <span class="spec-lbl">Serie</span>
+              <input type="text" class="cell-input spec-input spec-mono ${chSet.has("numero_serie") ? "cell-changed" : ""}" data-field="numero_serie" value="${escapeHtml(it.numero_serie || "")}" placeholder="S/S" />
+            </div>
+            <div class="spec-field">
+              <span class="spec-lbl">Color</span>
+              <input type="text" class="cell-input spec-input ${chSet.has("color") ? "cell-changed" : ""}" data-field="color" value="${escapeHtml(it.color || "")}" placeholder="Color" />
+            </div>
+          </div>
+        </td>
+        <td>
+          <select class="cell-select ${chSet.has("id_sucursal") ? "cell-changed" : ""}" data-field="id_sucursal">
+            ${buildSucOpts(it.id_sucursal)}
+          </select>
+        </td>
+        <td>
+          <select class="cell-select ${chSet.has("unidad") ? "cell-changed" : ""}" data-field="unidad">
+            <option value="">— Seleccionar Unidad —</option>
+            ${unitList.map((u) => `<option value="${escapeHtml(u)}" ${u === currUni ? "selected" : ""}>${escapeHtml(u)}</option>`).join("")}
+          </select>
+        </td>
+        <td>
+          <select class="cell-select ${chSet.has("puesto_id") ? "cell-changed" : ""}" data-field="puesto_id">
+            <option value="">— Seleccionar Puesto —</option>
+            ${puestos.map((p) => `<option value="${p.puesto_id}" ${String(p.puesto_id) === String(it.puesto_id || "") ? "selected" : ""}>${currUni ? escapeHtml(p.puesto) : `${escapeHtml(p.departamento)} · ${escapeHtml(p.puesto)}`}</option>`).join("")}
+          </select>
+        </td>
+        <td>
+          <input
+            type="text"
+            list="dl-personal"
+            class="cell-input ${chSet.has("cod_personal") || chSet.has("responsable") ? "cell-changed" : ""} ${!respValid ? "cell-warn" : ""}"
+            data-field="responsable"
+            value="${escapeHtml(it.responsable || "")}"
+            placeholder="Buscar personal..."
+            title="${respValid ? "Seleccione del padrón oficial" : "Nombre no coincide exactamente con el padrón oficial"}"
+          />
+        </td>
+        <td>
+          <select class="cell-select ${estClass} ${chSet.has("estado_activo") ? "cell-changed" : ""}" data-field="estado_activo">
+            ${buildEstOpts(it.estado_activo)}
+          </select>
+        </td>
+        <td>
+          <input
+            type="text"
+            class="cell-input ${chSet.has(obsFieldKey) ? "cell-changed" : ""}"
+            data-field="${obsFieldKey}"
+            value="${escapeHtml(obsValue)}"
+            placeholder="Observación..."
+          />
+        </td>
+      </tr>
+    `;
+  }
+
+  function updateFooterInfo() {
+    const total = state.filteredCache.length;
+    const shown = state.renderedCount;
+    const infoEl = document.getElementById("tableCountInfo");
+    const loadAllBtn = document.getElementById("btnLoadAllRows");
+    if (infoEl) {
+      if (total === 0) {
+        infoEl.textContent = "Mostrando 0 de 0 registros";
+      } else if (shown < total) {
+        infoEl.textContent = `Mostrando ${shown} de ${total} registros (deslice hacia abajo para ver los demás)`;
+      } else {
+        infoEl.textContent = `Mostrando todos los ${total} registros`;
+      }
     }
-
-    document.getElementById("pageInfo").textContent =
-      filtered.length === 0
-        ? "Mostrando 0 de 0 registros"
-        : `Mostrando ${startIdx + 1}–${endIdx} de ${filtered.length} registros`;
-    document.getElementById("pgLabel").textContent = `Pág. ${state.page} / ${totalPages}`;
-    document.getElementById("pgFirst").disabled = state.page <= 1;
-    document.getElementById("pgPrev").disabled = state.page <= 1;
-    document.getElementById("pgNext").disabled = state.page >= totalPages;
-    document.getElementById("pgLast").disabled = state.page >= totalPages;
+    if (loadAllBtn) {
+      const rem = total - shown;
+      loadAllBtn.classList.toggle("hidden", rem <= 0);
+      if (rem > 0) loadAllBtn.textContent = `⬇ Cargar todos los ${rem} restantes`;
+    }
 
     const checkAll = document.getElementById("checkPageAll");
     if (checkAll) {
-      checkAll.checked = pageItems.length > 0 && pageItems.every((x) => state.selectedUids.has(x.uid));
+      checkAll.checked = total > 0 && state.filteredCache.every((x) => state.selectedUids.has(x.uid));
     }
+  }
+
+  function renderTable() {
+    cachedOptionBuilders = null;
+    state.filteredCache = getFilteredItems();
+    const tbody = document.getElementById("tableBody");
+    const scrollBox = document.getElementById("tableScroll");
+    if (scrollBox) scrollBox.scrollTop = 0;
+
+    if (state.filteredCache.length === 0) {
+      state.renderedCount = 0;
+      tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:42px; color:#64748b; font-weight:600;">No se encontraron bienes con los filtros actuales.</td></tr>`;
+      updateFooterInfo();
+      return;
+    }
+
+    const { buildSucOpts, buildEstOpts } = getOptionBuilders();
+    const firstChunk = state.filteredCache.slice(0, INITIAL_CHUNK);
+    state.renderedCount = firstChunk.length;
+    tbody.innerHTML = firstChunk.map((it) => renderRowHtml(it, buildSucOpts, buildEstOpts)).join("");
+    updateFooterInfo();
+  }
+
+  function appendMoreRows(limit = SCROLL_CHUNK) {
+    if (state.renderedCount >= state.filteredCache.length) return;
+    const nextEnd = limit === Infinity
+      ? state.filteredCache.length
+      : Math.min(state.renderedCount + limit, state.filteredCache.length);
+    const slice = state.filteredCache.slice(state.renderedCount, nextEnd);
+    if (slice.length === 0) return;
+    const { buildSucOpts, buildEstOpts } = getOptionBuilders();
+    const tbody = document.getElementById("tableBody");
+    tbody.insertAdjacentHTML("beforeend", slice.map((it) => renderRowHtml(it, buildSucOpts, buildEstOpts)).join(""));
+    state.renderedCount = nextEnd;
+    updateFooterInfo();
+  }
+
+  function rerenderSingleRow(uid) {
+    const base = state.items.find((x) => x.uid === uid);
+    if (!base) return;
+    const eff = getEffectiveItem(base);
+    const idx = state.filteredCache.findIndex((x) => x.uid === uid);
+    if (idx !== -1) state.filteredCache[idx] = eff;
+
+    const tbody = document.getElementById("tableBody");
+    const tr = Array.from(tbody.querySelectorAll("tr[data-uid]")).find((el) => el.dataset.uid === uid);
+    if (!tr) {
+      updateFooterInfo();
+      return;
+    }
+    const { buildSucOpts, buildEstOpts } = getOptionBuilders();
+    const tmp = document.createElement("tbody");
+    tmp.innerHTML = renderRowHtml(eff, buildSucOpts, buildEstOpts).trim();
+    if (tmp.firstElementChild) {
+      tr.replaceWith(tmp.firstElementChild);
+    }
+    updateFooterInfo();
   }
 
   function renderAll() {
@@ -840,7 +925,7 @@
 
     const { payload, sucLabel, targetDrafts } = built;
     const slug = normText(sucLabel).replace(/[^A-Z0-9]+/g, "_") || "CAMPO";
-    const stamp = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 15); // YYYYMMDDHHMMSS
+    const stamp = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 15);
     const filename = `cambios_${slug}_${stamp}.json`;
     const repoPath = `INVENTARIO/pendientes/${filename}`;
 
@@ -905,13 +990,14 @@
       "MARCA": it.marca || "",
       "MODELO": it.modelo || "",
       "SERIE": it.numero_serie || "",
+      "COLOR": it.color || "",
       "PLACA": it.placa || "",
       "SUCURSAL": it.sucursal || "",
       "UNIDAD ORGÁNICA": it.unidad || "",
       "PUESTO": it.puesto || "",
       "RESPONSABLE": it.responsable || "",
       "ESTADO": it.estado_activo || "",
-      "OBSERVACIONES / ESPEC.": (it.origen_tabla === "REGULARIZACION" ? it.observaciones : it.caracteristicas_accesorios) || "",
+      "OBSERVACIONES": (it.origen_tabla === "REGULARIZACION" ? it.observaciones : it.caracteristicas_accesorios) || "",
       "MODIFICADO": it._isModified ? "SI" : "NO",
       "CAMPOS MODIFICADOS": (it._changedFields || []).join(", "),
     }));
@@ -962,7 +1048,7 @@
 
     const logoData = await loadLogoBase64();
     const sucObj = state.activeSucursalId !== "ALL" ? state.sucursalById.get(Number(state.activeSucursalId)) : null;
-    const sucTitle = sucObj ? `${sucObj.sucursal} (${sucObj.localidad})` : "TODAS LAS SUCURSALES";
+    const sucTitle = sucObj ? formatSucursalTitle(sucObj.sucursal) : "Todas las Sucursales";
     const modCount = filtered.filter((x) => x._isModified).length;
 
     const filterBadges = [`Sucursal: ${sucTitle}`];
@@ -1006,14 +1092,15 @@
     };
 
     const bodyRows = filtered.map((it, idx) => {
-      const carParts = [];
-      if (it.marca && it.marca !== "S/M") carParts.push(`Marca: ${it.marca}`);
-      if (it.modelo && it.modelo !== "S/M") carParts.push(`Mod: ${it.modelo}`);
-      if (it.numero_serie && it.numero_serie !== "S/S") carParts.push(`Serie: ${it.numero_serie}`);
-      if (it.placa) carParts.push(`Placa: ${it.placa}`);
-      const denomText = `${it.denominacion || "—"}${carParts.length ? `\n${carParts.join(" · ")}` : ""}`;
+      const denomText = `${it.denominacion || "—"}${it.placa ? `\nPlaca: ${it.placa}` : ""}`;
+      const specsText = [
+        `Marca: ${it.marca || "—"}`,
+        `Modelo: ${it.modelo || "—"}`,
+        `Serie: ${it.numero_serie || "—"}`,
+        `Color: ${it.color || "—"}`,
+      ].join("\n");
 
-      const ubicLines = [it.sucursal || "—"];
+      const ubicLines = [formatSucursalTitle(it.sucursal)];
       const up = [it.unidad, it.puesto].filter(Boolean).join(" · ");
       if (up) ubicLines.push(up);
 
@@ -1024,6 +1111,7 @@
         num: String(idx + 1),
         cod: `${it.cod_patrimonial || "—"}\n[${it.tipo_origen || it.origen_tabla}]`,
         denom: denomText,
+        specs: specsText,
         ubic: ubicLines.join("\n"),
         resp: it.responsable || "Sin Asignar",
         est: it.estado_activo || "—",
@@ -1036,21 +1124,23 @@
     doc.autoTable({
       startY: 26,
       margin: { top: 26, left: marginX, right: marginX, bottom: 14 },
+      rowPageBreak: "avoid",
       columns: [
         { header: "N°", dataKey: "num" },
         { header: "Código / Origen", dataKey: "cod" },
-        { header: "Denominación y Características", dataKey: "denom" },
+        { header: "Denominación", dataKey: "denom" },
+        { header: "Marca / Modelo / Serie / Color", dataKey: "specs" },
         { header: "Sucursal / Unidad / Puesto", dataKey: "ubic" },
         { header: "Responsable", dataKey: "resp" },
         { header: "Estado", dataKey: "est" },
         { header: "Verif.", dataKey: "check" },
-        { header: "Observaciones / Corrección en Campo", dataKey: "obs" },
+        { header: "Observaciones", dataKey: "obs" },
       ],
       body: bodyRows,
       theme: "grid",
       styles: {
         font: "helvetica",
-        fontSize: 7.2,
+        fontSize: 7.0,
         cellPadding: { top: 2, right: 2, bottom: 2, left: 2 },
         lineColor: [203, 213, 225],
         lineWidth: 0.2,
@@ -1062,24 +1152,33 @@
         fillColor: [0, 80, 157],
         textColor: [255, 255, 255],
         fontStyle: "bold",
-        fontSize: 7.5,
+        fontSize: 7.3,
         halign: "center",
         valign: "middle",
       },
       alternateRowStyles: { fillColor: [248, 250, 252] },
       columnStyles: {
-        num: { cellWidth: 9, halign: "center", fontStyle: "bold" },
+        num: { cellWidth: 8, halign: "center", fontStyle: "bold" },
         cod: { cellWidth: 26, halign: "center", fontStyle: "bold" },
-        denom: { cellWidth: 74 },
-        ubic: { cellWidth: 52 },
-        resp: { cellWidth: 42 },
-        est: { cellWidth: 18, halign: "center", fontStyle: "bold" },
-        check: { cellWidth: 11, halign: "center" },
-        obs: { cellWidth: 45 },
+        denom: { cellWidth: 46, fontStyle: "bold" },
+        specs: { cellWidth: 56 },
+        ubic: { cellWidth: 44 },
+        resp: { cellWidth: 36 },
+        est: { cellWidth: 16, halign: "center", fontStyle: "bold" },
+        check: { cellWidth: 10, halign: "center" },
+        obs: { cellWidth: 35 },
       },
       didParseCell: (data) => {
-        if (data.section === "body" && data.row.raw && data.row.raw._isModified) {
-          data.cell.styles.fillColor = [254, 249, 195];
+        if (data.section === "body") {
+          if (data.row.raw && data.row.raw._isModified) {
+            data.cell.styles.fillColor = [254, 249, 195];
+          }
+          if (data.column.dataKey === "est") {
+            const estVal = normText(data.cell.raw);
+            if (estVal === "BUENO") data.cell.styles.textColor = [5, 150, 105];
+            else if (estVal === "MALO") data.cell.styles.textColor = [194, 65, 12];
+            else if (estVal === "PARA BAJA" || estVal === "BAJA" || estVal === "FALTANTE") data.cell.styles.textColor = [190, 18, 60];
+          }
         }
       },
       didDrawCell: (data) => {
@@ -1170,7 +1269,6 @@
       const btn = e.target.closest(".suc-tab");
       if (!btn) return;
       state.activeSucursalId = btn.dataset.suc;
-      state.page = 1;
       state.selectedUids.clear();
       refreshCascadeFilterOptions();
       refreshBatchCascadeOptions();
@@ -1185,7 +1283,6 @@
       clearTimeout(searchTimeout);
       searchTimeout = setTimeout(() => {
         state.search = val;
-        state.page = 1;
         renderTable();
       }, 150);
     });
@@ -1193,30 +1290,25 @@
       document.getElementById("searchInput").value = "";
       document.getElementById("searchClear").classList.add("hidden");
       state.search = "";
-      state.page = 1;
       renderTable();
     });
     document.getElementById("filterUnidad").addEventListener("change", (e) => {
       state.filterUnidad = e.target.value;
       state.filterPuesto = "";
-      state.page = 1;
       refreshCascadeFilterOptions();
       renderTable();
     });
     document.getElementById("filterPuesto").addEventListener("change", (e) => {
       state.filterPuesto = e.target.value;
-      state.page = 1;
       renderTable();
     });
     document.getElementById("filterEstado").addEventListener("change", (e) => {
       state.filterEstado = e.target.value;
-      state.page = 1;
       renderTable();
     });
     document.getElementById("sortSelect").addEventListener("change", (e) => {
       state.sortMode = e.target.value;
       state.colSortKey = null;
-      state.page = 1;
       updateSortHeaderIndicators();
       renderTable();
     });
@@ -1230,7 +1322,6 @@
         state.colSortKey = key;
         state.colSortDir = "asc";
       }
-      state.page = 1;
       updateSortHeaderIndicators();
       renderTable();
     });
@@ -1243,7 +1334,6 @@
       state.sortMode = "JERARQUICO";
       state.colSortKey = null;
       state.colSortDir = "asc";
-      state.page = 1;
       document.getElementById("searchInput").value = "";
       document.getElementById("searchClear").classList.add("hidden");
       document.getElementById("filterEstado").value = "";
@@ -1259,7 +1349,6 @@
       const pill = e.target.closest(".q-pill");
       if (!pill) return;
       state.activePill = pill.dataset.pill;
-      state.page = 1;
       document.querySelectorAll("#quickPills .q-pill").forEach((b) => b.classList.toggle("active", b === pill));
       renderTable();
     });
@@ -1270,14 +1359,6 @@
       const undoBtn = e.target.closest("[data-undo]");
       if (undoBtn) {
         revertItem(undoBtn.dataset.undo);
-        return;
-      }
-      const charBtn = e.target.closest("[data-char]");
-      if (charBtn) {
-        const uid = charBtn.dataset.char;
-        if (state.expandedCharUids.has(uid)) state.expandedCharUids.delete(uid);
-        else state.expandedCharUids.add(uid);
-        renderTable();
       }
     });
 
@@ -1287,7 +1368,9 @@
         if (e.target.checked) state.selectedUids.add(uid);
         else state.selectedUids.delete(uid);
         renderBatchBar();
-        renderTable();
+        const tr = e.target.closest("tr[data-uid]");
+        if (tr) tr.classList.toggle("row-selected", e.target.checked);
+        updateFooterInfo();
         return;
       }
 
@@ -1316,7 +1399,11 @@
           }
         }
         updateField(uid, upd);
-        renderTable();
+        if (state.activeSucursalId !== "ALL" && String(newSucId || "") !== String(state.activeSucursalId)) {
+          renderTable();
+        } else {
+          rerenderSingleRow(uid);
+        }
       } else if (field === "unidad") {
         const ctx = getContextForSucursal(eff.id_sucursal);
         const validPuestos = getPuestosFor(ctx, val);
@@ -1332,7 +1419,7 @@
           }
         }
         updateField(uid, upd);
-        renderTable();
+        rerenderSingleRow(uid);
       } else if (field === "puesto_id") {
         const pid = val ? Number(val) : null;
         const pObj = pid ? state.puestoById.get(pid) : null;
@@ -1342,7 +1429,7 @@
         };
         if (pObj && pObj.departamento) upd.unidad = pObj.departamento;
         updateField(uid, upd);
-        renderTable();
+        rerenderSingleRow(uid);
       } else if (field === "responsable") {
         const clean = normText(val);
         if (!clean || clean === "SIN ASIGNAR") {
@@ -1353,33 +1440,52 @@
         } else {
           updateField(uid, { cod_personal: "", responsable: val.trim().toUpperCase() });
         }
-        renderTable();
+        rerenderSingleRow(uid);
       } else {
         updateField(uid, { [field]: val });
-        renderTable();
+        if (state.activePill === "MODIFICADOS" && !state.drafts[uid]) {
+          renderTable();
+        } else {
+          rerenderSingleRow(uid);
+        }
       }
     });
 
-    // Selección de página / todos filtrados / Lote
+    // Selección global de visibles / Lote
     document.getElementById("checkPageAll").addEventListener("change", (e) => {
-      const checks = document.querySelectorAll("#tableBody .row-check");
-      checks.forEach((chk) => {
-        if (e.target.checked) state.selectedUids.add(chk.dataset.uid);
-        else state.selectedUids.delete(chk.dataset.uid);
+      const checked = e.target.checked;
+      state.filteredCache.forEach((it) => {
+        if (checked) state.selectedUids.add(it.uid);
+        else state.selectedUids.delete(it.uid);
+      });
+      document.querySelectorAll("#tableBody tr[data-uid]").forEach((tr) => {
+        tr.classList.toggle("row-selected", checked);
+        const chk = tr.querySelector(".row-check");
+        if (chk) chk.checked = checked;
       });
       renderBatchBar();
-      renderTable();
+      updateFooterInfo();
     });
 
     document.getElementById("btnSelectAllFiltered").addEventListener("click", () => {
-      getFilteredItems().forEach((it) => state.selectedUids.add(it.uid));
+      state.filteredCache.forEach((it) => state.selectedUids.add(it.uid));
+      document.querySelectorAll("#tableBody tr[data-uid]").forEach((tr) => {
+        tr.classList.add("row-selected");
+        const chk = tr.querySelector(".row-check");
+        if (chk) chk.checked = true;
+      });
       renderBatchBar();
-      renderTable();
+      updateFooterInfo();
     });
     document.getElementById("btnClearSelection").addEventListener("click", () => {
       state.selectedUids.clear();
+      document.querySelectorAll("#tableBody tr[data-uid]").forEach((tr) => {
+        tr.classList.remove("row-selected");
+        const chk = tr.querySelector(".row-check");
+        if (chk) chk.checked = false;
+      });
       renderBatchBar();
-      renderTable();
+      updateFooterInfo();
     });
 
     document.getElementById("batchSucursal").addEventListener("change", refreshBatchCascadeOptions);
@@ -1489,19 +1595,18 @@
       showToast("Borrador local limpiado.");
     });
 
-    // Paginación
-    document.getElementById("pageSizeSelect").addEventListener("change", (e) => {
-      state.pageSize = Number(e.target.value);
-      state.page = 1;
-      renderTable();
-    });
-    document.getElementById("pgFirst").addEventListener("click", () => { state.page = 1; renderTable(); });
-    document.getElementById("pgPrev").addEventListener("click", () => { state.page = Math.max(1, state.page - 1); renderTable(); });
-    document.getElementById("pgNext").addEventListener("click", () => { state.page += 1; renderTable(); });
-    document.getElementById("pgLast").addEventListener("click", () => {
-      const total = getFilteredItems().length;
-      state.page = state.pageSize === 0 ? 1 : Math.max(1, Math.ceil(total / state.pageSize));
-      renderTable();
+    // Scroll continuo sin paginación
+    const scrollBox = document.getElementById("tableScroll");
+    if (scrollBox) {
+      scrollBox.addEventListener("scroll", () => {
+        if (scrollBox.scrollTop + scrollBox.clientHeight >= scrollBox.scrollHeight - 500) {
+          appendMoreRows(SCROLL_CHUNK);
+        }
+      });
+    }
+    document.getElementById("btnLoadAllRows").addEventListener("click", () => appendMoreRows(Infinity));
+    document.getElementById("btnScrollTop").addEventListener("click", () => {
+      if (scrollBox) scrollBox.scrollTo({ top: 0, behavior: "smooth" });
     });
   }
 
