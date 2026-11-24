@@ -5807,9 +5807,10 @@ document.addEventListener('DOMContentLoaded', () => {
           ${revTecBadge}
         </td>
         
-        <!-- Responsable -->
+        <!-- Responsable / Puesto -->
         <td class="px-1.5 py-1 whitespace-nowrap text-[0.72rem] font-bold text-slate-800">
-          ${item.responsable || '—'}
+          <div>${item.responsable || '—'}</div>
+          ${item.puesto ? `<div class="text-[0.65rem] font-semibold text-indigo-700 mt-0.5">${item.puesto}</div>` : ''}
         </td>
 
         <!-- Documento SOAT PDF (Al Final) -->
@@ -5927,8 +5928,9 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>
 
-      <div class="mt-3 border-t border-slate-100 pt-3 text-[0.8125rem]">
-        <span class="font-semibold text-slate-400">Responsable:</span> <span class="font-medium text-slate-700">${item.responsable || 'Sin asignar'}</span>
+      <div class="mt-3 border-t border-slate-100 pt-3 text-[0.8125rem] space-y-1">
+        <div><span class="font-semibold text-slate-400">Responsable:</span> <span class="font-medium text-slate-700">${item.responsable || 'Sin asignar'}</span></div>
+        ${item.puesto ? `<div><span class="font-semibold text-slate-400">Puesto:</span> <span class="font-semibold text-indigo-700">${item.puesto}</span></div>` : ''}
       </div>
     `;
     mobileContainer.appendChild(mobileCard);
@@ -6065,8 +6067,9 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>
 
-      <div class="mt-3 border-t border-slate-100 pt-3 text-[0.8125rem]">
-        <span class="font-semibold text-slate-400">Responsable:</span> <span class="font-medium text-slate-700">${item.responsable || 'Sin asignar'}</span>
+      <div class="mt-3 border-t border-slate-100 pt-3 text-[0.8125rem] space-y-1">
+        <div><span class="font-semibold text-slate-400">Responsable:</span> <span class="font-medium text-slate-700">${item.responsable || 'Sin asignar'}</span></div>
+        ${item.puesto ? `<div><span class="font-semibold text-slate-400">Puesto:</span> <span class="font-semibold text-indigo-700">${item.puesto}</span></div>` : ''}
       </div>
     `;
     mobileContainer.appendChild(mobileCard);
