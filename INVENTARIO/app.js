@@ -3,9 +3,34 @@
 
   const SESSION_AUTH_KEY = "eps_inv_campo_auth_ok";
   const DRAFT_STORAGE_KEY = "eps_inventario_campo_v1";
+  const GH_TOKEN_SESSION_KEY = "eps_inv_gh_pat_sess";
+  const GH_TOKEN_LOCAL_KEY = "eps_inv_gh_pat_local";
+  const GH_OWNER = "epspatrimonio";
+  const GH_REPO = "ACTIVOS-FIJOS";
+  const GH_BRANCH = "master";
   // Hash SHA-256 de la clave autorizada + validación directa para entornos HTTP LAN sin crypto.subtle
   const ACCESS_KEY_SHA256 = "6b4d18a060d1833674da885839e68ccf44ed05c0de1f610b13ce56bc0f614180";
   const ACCESS_FALLBACK_PLAIN = "patrimonio1996";
+
+  function getGhToken() {
+    return sessionStorage.getItem(GH_TOKEN_SESSION_KEY) || localStorage.getItem(GH_TOKEN_LOCAL_KEY) || "";
+  }
+  function saveGhToken(token, remember) {
+    const clean = String(token || "").trim();
+    sessionStorage.setItem(GH_TOKEN_SESSION_KEY, clean);
+    if (remember) localStorage.setItem(GH_TOKEN_LOCAL_KEY, clean);
+    else localStorage.removeItem(GH_TOKEN_LOCAL_KEY);
+  }
+  function clearGhToken() {
+    sessionStorage.removeItem(GH_TOKEN_SESSION_KEY);
+    localStorage.removeItem(GH_TOKEN_LOCAL_KEY);
+  }
+  function utf8ToBase64(str) {
+    const bytes = new TextEncoder().encode(str);
+    let bin = "";
+    for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin);
+  }
 
   const state = {
     catalogos: { sucursales: [], puestos: [], personal: [], estados: ["BUENO", "REGULAR", "MALO", "PARA BAJA", "BAJA"] },
@@ -361,6 +386,21 @@
     document.getElementById("btnDownloadAllJson").textContent = `📥 Descargar Todos (${totalMod}) (.json)`;
     document.getElementById("btnClearDraft").classList.toggle("hidden", totalMod === 0);
 
+    const hasToken = Boolean(getGhToken());
+    const tokBtn = document.getElementById("btnTokenConfig");
+    if (tokBtn) {
+      tokBtn.textContent = hasToken ? "🟢 GitHub Conectado" : "🔑 Token GitHub";
+      tokBtn.style.background = hasToken ? "rgba(16, 185, 129, 0.28)" : "rgba(255,255,255,0.12)";
+    }
+    const pushBtn = document.getElementById("btnPushGithub");
+    if (pushBtn) {
+      pushBtn.disabled = currentSucMod === 0;
+      pushBtn.textContent =
+        state.activeSucursalId === "ALL"
+          ? `☁️ Enviar a GitHub (${totalMod})`
+          : `☁️ Enviar Sucursal a GitHub (${currentSucMod})`;
+    }
+
     // Tabs de Sucursales dinámicas
     const sucCounts = new Map();
     state.items.forEach((base) => {
@@ -558,8 +598,8 @@
     renderTable();
   }
 
-  // ── Exportaciones (.json para el APP + .xlsx para verificación) ───────────
-  function downloadJsonPackage(onlyActiveSucursal) {
+  // ── Exportaciones y Envío Seguro a GitHub ─────────────────────────────────
+  function buildChangesPayload(onlyActiveSucursal, extraMeta = {}) {
     const allDrafts = Object.values(state.drafts);
     let targetDrafts = allDrafts;
     let sucLabel = "TODAS";
@@ -573,11 +613,7 @@
         return String(effSuc) === String(state.activeSucursalId) || String(base.id_sucursal) === String(state.activeSucursalId);
       });
     }
-
-    if (targetDrafts.length === 0) {
-      showToast("No hay cambios registrados para descargar.");
-      return;
-    }
+    if (targetDrafts.length === 0) return null;
 
     const payload = {
       version: "1.0",
@@ -585,13 +621,23 @@
       generado_en: new Date().toISOString(),
       sucursal_origen_paquete: sucLabel,
       total_cambios: targetDrafts.length,
+      ...extraMeta,
       cambios: targetDrafts.map((d) => {
         const copy = { ...d };
         delete copy.sucursal_original;
         return copy;
       }),
     };
+    return { payload, sucLabel, targetDrafts };
+  }
 
+  function downloadJsonPackage(onlyActiveSucursal) {
+    const built = buildChangesPayload(onlyActiveSucursal);
+    if (!built) {
+      showToast("No hay cambios registrados para descargar.");
+      return;
+    }
+    const { payload, sucLabel, targetDrafts } = built;
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" });
     const a = document.createElement("a");
     const slug = normText(sucLabel).replace(/[^A-Z0-9]+/g, "_");
@@ -603,6 +649,150 @@
     a.remove();
     URL.revokeObjectURL(a.href);
     showToast(`Descargado paquete con ${targetDrafts.length} cambio(s).`);
+  }
+
+  function openTokenModal() {
+    const modal = document.getElementById("tokenModal");
+    const inp = document.getElementById("ghTokenInput");
+    const rem = document.getElementById("ghTokenRemember");
+    const fb = document.getElementById("tokenFeedback");
+    const rmBtn = document.getElementById("btnRemoveToken");
+    const existing = getGhToken();
+    inp.value = existing;
+    rem.checked = Boolean(localStorage.getItem(GH_TOKEN_LOCAL_KEY));
+    fb.className = "hidden";
+    fb.textContent = "";
+    rmBtn.classList.toggle("hidden", !existing);
+    modal.classList.remove("hidden");
+  }
+
+  async function saveAndTestToken() {
+    const inp = document.getElementById("ghTokenInput");
+    const rem = document.getElementById("ghTokenRemember");
+    const fb = document.getElementById("tokenFeedback");
+    const btn = document.getElementById("btnSaveTestToken");
+    const token = inp.value.trim();
+    if (!token) {
+      fb.className = "err-box";
+      fb.textContent = "Ingrese un token válido.";
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = "Verificando...";
+    try {
+      const res = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+      });
+      if (!res.ok) {
+        const errJ = await res.json().catch(() => ({}));
+        throw new Error(errJ.message || `GitHub rechazó el token (HTTP ${res.status})`);
+      }
+      const repoInfo = await res.json();
+      if (repoInfo.permissions && repoInfo.permissions.push === false) {
+        throw new Error("El token es solo lectura. Debe tener permiso Contents: Read & Write.");
+      }
+      saveGhToken(token, rem.checked);
+      fb.className = "ok-box";
+      fb.textContent = `✓ Token verificado correctamente para ${GH_OWNER}/${GH_REPO}.`;
+      document.getElementById("btnRemoveToken").classList.remove("hidden");
+      renderHeaderAndTabs();
+      setTimeout(() => document.getElementById("tokenModal").classList.add("hidden"), 900);
+    } catch (e) {
+      fb.className = "err-box";
+      fb.textContent = e.message || "Error al validar token con GitHub.";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "✓ Probar y Guardar Token";
+    }
+  }
+
+  function openPushConfirmModal() {
+    if (!getGhToken()) {
+      openTokenModal();
+      showToast("Primero configura tu Token GitHub para enviar en línea.");
+      return;
+    }
+    const built = buildChangesPayload(true);
+    if (!built) {
+      showToast("No hay cambios en esta vista para enviar.");
+      return;
+    }
+    const { sucLabel, targetDrafts } = built;
+    const summaryBox = document.getElementById("pushSummaryBox");
+    summaryBox.innerHTML =
+      `<strong>Sucursal / Vista:</strong> ${escapeHtml(sucLabel)}<br/>` +
+      `<strong>Registros modificados a enviar:</strong> ${targetDrafts.length}<br/>` +
+      `<strong>Destino seguro:</strong> <code>INVENTARIO/pendientes/</code> en GitHub (no sobreescribe datos oficiales hasta que Sede Central revise el comparador).`;
+    const fb = document.getElementById("pushFeedback");
+    fb.className = "hidden";
+    fb.textContent = "";
+    document.getElementById("btnConfirmPush").disabled = false;
+    document.getElementById("pushConfirmModal").classList.remove("hidden");
+  }
+
+  async function confirmPushToGithub() {
+    const token = getGhToken();
+    if (!token) { openTokenModal(); return; }
+    const note = document.getElementById("pushNoteInput").value.trim();
+    const clearAfter = document.getElementById("pushClearAfter").checked;
+    const fb = document.getElementById("pushFeedback");
+    const btn = document.getElementById("btnConfirmPush");
+
+    const built = buildChangesPayload(true, note ? { nota_envio: note } : {});
+    if (!built) { showToast("No hay cambios para enviar."); return; }
+
+    const { payload, sucLabel, targetDrafts } = built;
+    const slug = normText(sucLabel).replace(/[^A-Z0-9]+/g, "_") || "CAMPO";
+    const stamp = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 15); // YYYYMMDDHHMMSS
+    const filename = `cambios_${slug}_${stamp}.json`;
+    const repoPath = `INVENTARIO/pendientes/${filename}`;
+
+    btn.disabled = true;
+    btn.textContent = "Subiendo a GitHub...";
+    fb.className = "hidden";
+
+    try {
+      const contentB64 = utf8ToBase64(JSON.stringify(payload, null, 2));
+      const res = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${repoPath}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/vnd.github+json",
+          "Content-Type": "application/json",
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+        body: JSON.stringify({
+          message: `Verificación de campo ${sucLabel}: ${targetDrafts.length} cambio(s)${note ? " - " + note : ""}`,
+          content: contentB64,
+          branch: GH_BRANCH,
+        }),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || `Error GitHub API HTTP ${res.status}`);
+      }
+
+      if (clearAfter) {
+        targetDrafts.forEach((d) => { delete state.drafts[d.uid]; });
+        persistDrafts();
+        renderAll();
+      }
+      fb.className = "ok-box";
+      fb.innerHTML = `✓ Enviado a GitHub: <code>${escapeHtml(filename)}</code> (${targetDrafts.length} cambio(s)). Ya puedes importarlo en la pestaña Inventario del APP Activos Fijos.`;
+      setTimeout(() => {
+        document.getElementById("pushConfirmModal").classList.add("hidden");
+      }, 2400);
+    } catch (e) {
+      fb.className = "err-box";
+      fb.textContent = `Error al subir a GitHub: ${e.message}`;
+      btn.disabled = false;
+    } finally {
+      btn.textContent = "☁️ Confirmar y Subir a GitHub";
+    }
   }
 
   function exportExcelTable() {
@@ -934,7 +1124,23 @@
       showToast(`Cambios aplicados a ${count} bien(es).`);
     });
 
-    // Descargas y Borrador
+    // Descargas, Envío GitHub y Borrador
+    document.getElementById("btnTokenConfig").addEventListener("click", openTokenModal);
+    document.getElementById("btnCloseTokenModal").addEventListener("click", () => document.getElementById("tokenModal").classList.add("hidden"));
+    document.getElementById("btnCancelToken").addEventListener("click", () => document.getElementById("tokenModal").classList.add("hidden"));
+    document.getElementById("btnSaveTestToken").addEventListener("click", saveAndTestToken);
+    document.getElementById("btnRemoveToken").addEventListener("click", () => {
+      clearGhToken();
+      renderHeaderAndTabs();
+      document.getElementById("tokenModal").classList.add("hidden");
+      showToast("Token eliminado del navegador.");
+    });
+
+    document.getElementById("btnPushGithub").addEventListener("click", openPushConfirmModal);
+    document.getElementById("btnClosePushModal").addEventListener("click", () => document.getElementById("pushConfirmModal").classList.add("hidden"));
+    document.getElementById("btnCancelPush").addEventListener("click", () => document.getElementById("pushConfirmModal").classList.add("hidden"));
+    document.getElementById("btnConfirmPush").addEventListener("click", confirmPushToGithub);
+
     document.getElementById("btnDownloadBranchJson").addEventListener("click", () => downloadJsonPackage(true));
     document.getElementById("btnDownloadAllJson").addEventListener("click", () => downloadJsonPackage(false));
     document.getElementById("btnExportExcel").addEventListener("click", exportExcelTable);
