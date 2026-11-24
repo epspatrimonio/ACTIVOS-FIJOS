@@ -232,31 +232,174 @@
 
   function populateStaticSelects() {
     const estOpts = state.catalogos.estados.map((e) => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join("");
-    document.getElementById("filterEstado").innerHTML = `<option value="">Todos los Estados</option>${estOpts}`;
     document.getElementById("batchEstado").innerHTML = `<option value="">— Estado —</option>${estOpts}`;
 
     const sucOpts = state.catalogos.sucursales
       .map((s) => `<option value="${s.id_sucursal}">${escapeHtml(s.sucursal)} (${escapeHtml(s.localidad)})</option>`)
       .join("");
     document.getElementById("batchSucursal").innerHTML = `<option value="">— Cambiar Sucursal —</option>${sucOpts}`;
-    refreshCascadeFilterOptions();
+    refreshDynamicFilters();
     refreshBatchCascadeOptions();
   }
 
-  function refreshCascadeFilterOptions() {
-    const ctx = state.activeSucursalId === "ALL" ? null : getContextForSucursal(state.activeSucursalId);
-    const unidades = getUnidadesForContext(ctx);
-    const fUni = document.getElementById("filterUnidad");
-    if (state.filterUnidad && !unidades.includes(state.filterUnidad)) state.filterUnidad = "";
-    fUni.innerHTML = `<option value="">Todas las Unidades Orgánicas</option>` +
-      unidades.map((u) => `<option value="${escapeHtml(u)}" ${u === state.filterUnidad ? "selected" : ""}>${escapeHtml(u)}</option>`).join("");
+  const EMPTY_FILTER = "__EMPTY__";
 
-    const puestos = getPuestosFor(ctx, state.filterUnidad || null);
-    const fPst = document.getElementById("filterPuesto");
-    const uniquePuestos = Array.from(new Set(puestos.map((p) => p.puesto)));
-    if (state.filterPuesto && !uniquePuestos.includes(state.filterPuesto)) state.filterPuesto = "";
-    fPst.innerHTML = `<option value="">Todos los Puestos</option>` +
-      uniquePuestos.map((p) => `<option value="${escapeHtml(p)}" ${p === state.filterPuesto ? "selected" : ""}>${escapeHtml(p)}</option>`).join("");
+  function filterItemsExcluding(exclude = {}) {
+    const qTokens = exclude.search ? [] : normText(state.search).split(/\s+/).filter(Boolean);
+    const activeSucId = state.activeSucursalId;
+
+    return state.items
+      .map(getEffectiveItem)
+      .filter((it) => {
+        if (!exclude.sucursal && activeSucId !== "ALL" && String(it.id_sucursal || "") !== String(activeSucId)) return false;
+
+        if (!exclude.pill) {
+          if (state.activePill === "ACTIVO" && it.origen_tabla !== "ACTIVO") return false;
+          if (state.activePill === "OBRA" && it.tipo_origen !== "OBRA EN CURSO") return false;
+          if (state.activePill === "CONCILIACION" && it.sub_modulo !== "CONCILIACION") return false;
+          if (state.activePill === "SOBRANTE" && it.sub_modulo !== "SOBRANTE") return false;
+          if (state.activePill === "SIN_RESP") {
+            const resp = normText(it.responsable);
+            if (resp && resp !== "SIN ASIGNAR" && resp !== "PENDIENTE DE UBICACION") return false;
+          }
+          if (state.activePill === "MODIFICADOS" && !it._isModified) return false;
+        }
+
+        if (!exclude.unidad && state.filterUnidad) {
+          const uNorm = normText(it.unidad);
+          if (state.filterUnidad === EMPTY_FILTER ? uNorm !== "" : uNorm !== normText(state.filterUnidad)) return false;
+        }
+        if (!exclude.puesto && state.filterPuesto) {
+          const pNorm = normText(it.puesto);
+          if (state.filterPuesto === EMPTY_FILTER ? pNorm !== "" : pNorm !== normText(state.filterPuesto)) return false;
+        }
+        if (!exclude.estado && state.filterEstado) {
+          const eNorm = normText(it.estado_activo);
+          if (state.filterEstado === EMPTY_FILTER ? eNorm !== "" : eNorm !== normText(state.filterEstado)) return false;
+        }
+
+        if (qTokens.length > 0) {
+          const blob = normText([
+            it.cod_patrimonial, it.denominacion, it.marca, it.modelo, it.numero_serie,
+            it.color, it.placa, it.responsable, it.unidad, it.puesto, it.sucursal,
+            it.observaciones, it.caracteristicas_accesorios
+          ].join(" "));
+          if (!qTokens.every((t) => blob.includes(t))) return false;
+        }
+        return true;
+      });
+  }
+
+  function buildDynamicSelect(selectEl, items, getValue, allLabel, emptyLabel, currentVal) {
+    const counts = new Map();
+    let emptyCount = 0;
+
+    items.forEach((it) => {
+      const raw = String(getValue(it) || "").trim();
+      const key = normText(raw);
+      if (!key) {
+        emptyCount += 1;
+        return;
+      }
+      const existing = counts.get(key);
+      if (existing) {
+        existing.count += 1;
+      } else {
+        counts.set(key, { value: raw, label: raw, count: 1 });
+      }
+    });
+
+    let nextVal = currentVal || "";
+    if (nextVal === EMPTY_FILTER) {
+      if (emptyCount === 0) nextVal = "";
+    } else if (nextVal) {
+      const currNorm = normText(nextVal);
+      if (!counts.has(currNorm)) nextVal = "";
+      else nextVal = counts.get(currNorm).value;
+    }
+
+    const sorted = Array.from(counts.values()).sort((a, b) =>
+      a.label.localeCompare(b.label, "es", { numeric: true, sensitivity: "base" })
+    );
+
+    const opts = [`<option value="">${escapeHtml(allLabel)} (${items.length})</option>`]
+      .concat(
+        sorted.map(
+          (entry) =>
+            `<option value="${escapeHtml(entry.value)}" ${entry.value === nextVal ? "selected" : ""}>${escapeHtml(entry.label)} (${entry.count})</option>`
+        )
+      );
+    if (emptyCount > 0) {
+      opts.push(
+        `<option value="${EMPTY_FILTER}" ${nextVal === EMPTY_FILTER ? "selected" : ""}>${escapeHtml(emptyLabel)} (${emptyCount})</option>`
+      );
+    }
+    selectEl.innerHTML = opts.join("");
+    return nextVal;
+  }
+
+  function refreshDynamicFilters() {
+    // 1. Unidad Orgánica (según sucursal, búsqueda, píldora y estado)
+    const unidadItems = filterItemsExcluding({ unidad: true, puesto: true });
+    state.filterUnidad = buildDynamicSelect(
+      document.getElementById("filterUnidad"),
+      unidadItems,
+      (it) => it.unidad,
+      "Todas las Unidades Orgánicas",
+      "(Sin Unidad Orgánica)",
+      state.filterUnidad
+    );
+
+    // 2. Puesto (en cascada tras unidad)
+    const puestoItems = filterItemsExcluding({ puesto: true });
+    state.filterPuesto = buildDynamicSelect(
+      document.getElementById("filterPuesto"),
+      puestoItems,
+      (it) => it.puesto,
+      "Todos los Puestos",
+      "(Sin Puesto)",
+      state.filterPuesto
+    );
+
+    // 3. Estado real en la tabla filtrada
+    const estadoItems = filterItemsExcluding({ estado: true });
+    state.filterEstado = buildDynamicSelect(
+      document.getElementById("filterEstado"),
+      estadoItems,
+      (it) => it.estado_activo,
+      "Todos los Estados",
+      "(Sin Estado)",
+      state.filterEstado
+    );
+
+    // 4. Píldoras rápidas con conteos reales de la vista actual
+    const pillItems = filterItemsExcluding({ pill: true });
+    const pillCounts = {
+      ALL: pillItems.length,
+      ACTIVO: 0,
+      OBRA: 0,
+      CONCILIACION: 0,
+      SOBRANTE: 0,
+      SIN_RESP: 0,
+      MODIFICADOS: 0,
+    };
+    pillItems.forEach((it) => {
+      if (it.origen_tabla === "ACTIVO") pillCounts.ACTIVO += 1;
+      if (it.tipo_origen === "OBRA EN CURSO") pillCounts.OBRA += 1;
+      if (it.sub_modulo === "CONCILIACION") pillCounts.CONCILIACION += 1;
+      if (it.sub_modulo === "SOBRANTE") pillCounts.SOBRANTE += 1;
+      const resp = normText(it.responsable);
+      if (!resp || resp === "SIN ASIGNAR" || resp === "PENDIENTE DE UBICACION") pillCounts.SIN_RESP += 1;
+      if (it._isModified) pillCounts.MODIFICADOS += 1;
+    });
+
+    document.querySelectorAll("#quickPills .q-pill[data-pill]").forEach((btn) => {
+      const key = btn.dataset.pill;
+      const cnt = pillCounts[key] ?? 0;
+      const cntSpan = btn.querySelector(".q-pill-cnt");
+      if (cntSpan) cntSpan.textContent = `(${cnt})`;
+      btn.disabled = cnt === 0 && key !== "ALL" && key !== "MODIFICADOS" && state.activePill !== key;
+    });
   }
 
   function refreshBatchCascadeOptions() {
@@ -366,40 +509,7 @@
   }
 
   function getFilteredItems() {
-    const qTokens = normText(state.search).split(/\s+/).filter(Boolean);
-    const activeSucId = state.activeSucursalId;
-
-    const filtered = state.items
-      .map(getEffectiveItem)
-      .filter((it) => {
-        if (activeSucId !== "ALL" && String(it.id_sucursal || "") !== String(activeSucId)) return false;
-
-        if (state.activePill === "ACTIVO" && it.origen_tabla !== "ACTIVO") return false;
-        if (state.activePill === "OBRA" && it.tipo_origen !== "OBRA EN CURSO") return false;
-        if (state.activePill === "CONCILIACION" && it.sub_modulo !== "CONCILIACION") return false;
-        if (state.activePill === "SOBRANTE" && it.sub_modulo !== "SOBRANTE") return false;
-        if (state.activePill === "SIN_RESP") {
-          const resp = normText(it.responsable);
-          if (resp && resp !== "SIN ASIGNAR" && resp !== "PENDIENTE DE UBICACION") return false;
-        }
-        if (state.activePill === "MODIFICADOS" && !it._isModified) return false;
-
-        if (state.filterUnidad && normText(it.unidad) !== normText(state.filterUnidad)) return false;
-        if (state.filterPuesto && normText(it.puesto) !== normText(state.filterPuesto)) return false;
-        if (state.filterEstado && normText(it.estado_activo) !== normText(state.filterEstado)) return false;
-
-        if (qTokens.length > 0) {
-          const blob = normText([
-            it.cod_patrimonial, it.denominacion, it.marca, it.modelo, it.numero_serie,
-            it.color, it.placa, it.responsable, it.unidad, it.puesto, it.sucursal,
-            it.observaciones, it.caracteristicas_accesorios
-          ].join(" "));
-          if (!qTokens.every((t) => blob.includes(t))) return false;
-        }
-        return true;
-      });
-
-    return sortItems(filtered);
+    return sortItems(filterItemsExcluding());
   }
 
   // ── Mutación de Borradores ─────────────────────────────────────────────────
@@ -481,7 +591,8 @@
       statusPill.textContent = "💾 Sin cambios pendientes";
     }
 
-    document.getElementById("modPillCount").textContent = String(totalMod);
+    const modPillCntEl = document.getElementById("modPillCount");
+    if (modPillCntEl) modPillCntEl.textContent = `(${totalMod})`;
     document.getElementById("btnDownloadBranchJson").disabled = currentSucMod === 0;
     document.getElementById("btnDownloadBranchJson").textContent =
       state.activeSucursalId === "ALL"
@@ -767,12 +878,14 @@
     if (tmp.firstElementChild) {
       tr.replaceWith(tmp.firstElementChild);
     }
+    refreshDynamicFilters();
     updateFooterInfo();
   }
 
   function renderAll() {
     renderHeaderAndTabs();
     renderBatchBar();
+    refreshDynamicFilters();
     renderTable();
   }
 
@@ -1270,7 +1383,7 @@
       if (!btn) return;
       state.activeSucursalId = btn.dataset.suc;
       state.selectedUids.clear();
-      refreshCascadeFilterOptions();
+      refreshDynamicFilters();
       refreshBatchCascadeOptions();
       renderAll();
     });
@@ -1283,6 +1396,7 @@
       clearTimeout(searchTimeout);
       searchTimeout = setTimeout(() => {
         state.search = val;
+        refreshDynamicFilters();
         renderTable();
       }, 150);
     });
@@ -1290,20 +1404,23 @@
       document.getElementById("searchInput").value = "";
       document.getElementById("searchClear").classList.add("hidden");
       state.search = "";
+      refreshDynamicFilters();
       renderTable();
     });
     document.getElementById("filterUnidad").addEventListener("change", (e) => {
       state.filterUnidad = e.target.value;
       state.filterPuesto = "";
-      refreshCascadeFilterOptions();
+      refreshDynamicFilters();
       renderTable();
     });
     document.getElementById("filterPuesto").addEventListener("change", (e) => {
       state.filterPuesto = e.target.value;
+      refreshDynamicFilters();
       renderTable();
     });
     document.getElementById("filterEstado").addEventListener("change", (e) => {
       state.filterEstado = e.target.value;
+      refreshDynamicFilters();
       renderTable();
     });
     document.getElementById("sortSelect").addEventListener("change", (e) => {
@@ -1336,20 +1453,20 @@
       state.colSortDir = "asc";
       document.getElementById("searchInput").value = "";
       document.getElementById("searchClear").classList.add("hidden");
-      document.getElementById("filterEstado").value = "";
       document.getElementById("sortSelect").value = "JERARQUICO";
       document.querySelectorAll("#quickPills .q-pill").forEach((b) => b.classList.toggle("active", b.dataset.pill === "ALL"));
       updateSortHeaderIndicators();
-      refreshCascadeFilterOptions();
+      refreshDynamicFilters();
       renderTable();
     });
 
     // Píldoras
     document.getElementById("quickPills").addEventListener("click", (e) => {
       const pill = e.target.closest(".q-pill");
-      if (!pill) return;
+      if (!pill || pill.disabled) return;
       state.activePill = pill.dataset.pill;
       document.querySelectorAll("#quickPills .q-pill").forEach((b) => b.classList.toggle("active", b === pill));
+      refreshDynamicFilters();
       renderTable();
     });
 
@@ -1400,6 +1517,7 @@
         }
         updateField(uid, upd);
         if (state.activeSucursalId !== "ALL" && String(newSucId || "") !== String(state.activeSucursalId)) {
+          refreshDynamicFilters();
           renderTable();
         } else {
           rerenderSingleRow(uid);
@@ -1444,6 +1562,7 @@
       } else {
         updateField(uid, { [field]: val });
         if (state.activePill === "MODIFICADOS" && !state.drafts[uid]) {
+          refreshDynamicFilters();
           renderTable();
         } else {
           rerenderSingleRow(uid);

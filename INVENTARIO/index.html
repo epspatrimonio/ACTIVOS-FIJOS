@@ -334,6 +334,17 @@
       font-size: 11px;
       font-weight: 700;
       cursor: pointer;
+      transition: opacity .15s, background .15s, border-color .15s;
+    }
+    .q-pill:disabled {
+      opacity: 0.42;
+      cursor: not-allowed;
+    }
+    .q-pill-cnt {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 10.5px;
+      opacity: 0.85;
+      margin-left: 2px;
     }
     .q-pill.active {
       background: #e0f2fe;
@@ -746,13 +757,13 @@
         </div>
 
         <div class="quick-pills" id="quickPills">
-          <button type="button" class="q-pill active" data-pill="ALL">Todos</button>
-          <button type="button" class="q-pill" data-pill="ACTIVO">Activos Fijos</button>
-          <button type="button" class="q-pill" data-pill="OBRA">Obras</button>
-          <button type="button" class="q-pill" data-pill="CONCILIACION">Conciliación</button>
-          <button type="button" class="q-pill" data-pill="SOBRANTE">Sobrantes</button>
-          <button type="button" class="q-pill" data-pill="SIN_RESP">Sin Responsable</button>
-          <button type="button" class="q-pill mod-pill" data-pill="MODIFICADOS">✏️ Solo Modificados (<span id="modPillCount">0</span>)</button>
+          <button type="button" class="q-pill active" data-pill="ALL">Todos <span class="q-pill-cnt">(0)</span></button>
+          <button type="button" class="q-pill" data-pill="ACTIVO">Activos Fijos <span class="q-pill-cnt">(0)</span></button>
+          <button type="button" class="q-pill" data-pill="OBRA">Obras <span class="q-pill-cnt">(0)</span></button>
+          <button type="button" class="q-pill" data-pill="CONCILIACION">Conciliación <span class="q-pill-cnt">(0)</span></button>
+          <button type="button" class="q-pill" data-pill="SOBRANTE">Sobrantes <span class="q-pill-cnt">(0)</span></button>
+          <button type="button" class="q-pill" data-pill="SIN_RESP">Sin Responsable <span class="q-pill-cnt">(0)</span></button>
+          <button type="button" class="q-pill mod-pill" data-pill="MODIFICADOS">✏️ Solo Modificados <span class="q-pill-cnt" id="modPillCount">(0)</span></button>
         </div>
       </section>
 
@@ -888,6 +899,6 @@
   <script src="./vendor/xlsx.full.min.js"></script>
   <script src="./vendor/jspdf.umd.min.js"></script>
   <script src="./vendor/jspdf.plugin.autotable.min.js"></script>
-  <script src="./app.js?v=4"></script>
+  <script src="./app.js?v=5"></script>
 </body>
 </html>
