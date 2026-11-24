@@ -44,6 +44,9 @@
     filterPuesto: "",
     filterEstado: "",
     activePill: "ALL",
+    sortMode: "JERARQUICO",
+    colSortKey: null,
+    colSortDir: "asc",
     page: 1,
     pageSize: 50,
     personalLookup: new Map(), // norm(name) -> { cod_personal, personal }
@@ -261,12 +264,100 @@
       puestos.map((p) => `<option value="${p.puesto_id}" ${String(p.puesto_id) === String(prevP) ? "selected" : ""}>${nextU ? escapeHtml(p.puesto) : `${escapeHtml(p.departamento)} · ${escapeHtml(p.puesto)}`}</option>`).join("");
   }
 
-  // ── Filtrado y Conteos ─────────────────────────────────────────────────────
+  // ── Filtrado, Ordenamiento Jerárquico y Conteos ────────────────────────────
+  function cmpText(a, b, emptyLast = true) {
+    const sa = String(a || "").trim();
+    const sb = String(b || "").trim();
+    if (emptyLast) {
+      const ea = !sa || sa === "—" || sa.toUpperCase() === "SIN ASIGNAR";
+      const eb = !sb || sb === "—" || sb.toUpperCase() === "SIN ASIGNAR";
+      if (ea && !eb) return 1;
+      if (!ea && eb) return -1;
+      if (ea && eb) return 0;
+    }
+    return sa.localeCompare(sb, "es", { numeric: true, sensitivity: "base" });
+  }
+
+  function compareJerarquico(a, b) {
+    return (
+      cmpText(a.sucursal, b.sucursal) ||
+      cmpText(a.unidad, b.unidad) ||
+      cmpText(a.puesto, b.puesto) ||
+      cmpText(a.responsable, b.responsable) ||
+      cmpText(a.denominacion, b.denominacion) ||
+      cmpText(a.cod_patrimonial, b.cod_patrimonial)
+    );
+  }
+
+  function sortItems(list) {
+    const arr = [...list];
+    if (state.colSortKey) {
+      const k = state.colSortKey;
+      const dir = state.colSortDir === "desc" ? -1 : 1;
+      arr.sort((a, b) => {
+        const c = cmpText(a[k], b[k], true);
+        if (c !== 0) return c * dir;
+        return compareJerarquico(a, b);
+      });
+      return arr;
+    }
+
+    switch (state.sortMode) {
+      case "UNIDAD_PUESTO":
+        arr.sort((a, b) =>
+          cmpText(a.unidad, b.unidad) ||
+          cmpText(a.puesto, b.puesto) ||
+          cmpText(a.denominacion, b.denominacion) ||
+          cmpText(a.cod_patrimonial, b.cod_patrimonial)
+        );
+        break;
+      case "RESPONSABLE":
+        arr.sort((a, b) =>
+          cmpText(a.responsable, b.responsable) ||
+          cmpText(a.puesto, b.puesto) ||
+          cmpText(a.denominacion, b.denominacion)
+        );
+        break;
+      case "CODIGO_ASC":
+        arr.sort((a, b) => cmpText(a.cod_patrimonial, b.cod_patrimonial));
+        break;
+      case "CODIGO_DESC":
+        arr.sort((a, b) => -cmpText(a.cod_patrimonial, b.cod_patrimonial));
+        break;
+      case "DENOMINACION":
+        arr.sort((a, b) => cmpText(a.denominacion, b.denominacion) || cmpText(a.cod_patrimonial, b.cod_patrimonial));
+        break;
+      case "ESTADO":
+        arr.sort((a, b) => cmpText(a.estado_activo, b.estado_activo) || compareJerarquico(a, b));
+        break;
+      case "MODIFICADOS":
+        arr.sort((a, b) => (Number(Boolean(b._isModified)) - Number(Boolean(a._isModified))) || compareJerarquico(a, b));
+        break;
+      case "JERARQUICO":
+      default:
+        arr.sort(compareJerarquico);
+        break;
+    }
+    return arr;
+  }
+
+  function updateSortHeaderIndicators() {
+    document.querySelectorAll("thead th.sortable-th").forEach((th) => {
+      const ind = th.querySelector(".sort-ind");
+      if (!ind) return;
+      if (state.colSortKey === th.dataset.sort) {
+        ind.textContent = state.colSortDir === "asc" ? "▲" : "▼";
+      } else {
+        ind.textContent = "";
+      }
+    });
+  }
+
   function getFilteredItems() {
     const qTokens = normText(state.search).split(/\s+/).filter(Boolean);
     const activeSucId = state.activeSucursalId;
 
-    return state.items
+    const filtered = state.items
       .map(getEffectiveItem)
       .filter((it) => {
         if (activeSucId !== "ALL" && String(it.id_sucursal || "") !== String(activeSucId)) return false;
@@ -294,6 +385,8 @@
         }
         return true;
       });
+
+    return sortItems(filtered);
   }
 
   // ── Mutación de Borradores ─────────────────────────────────────────────────
@@ -830,6 +923,221 @@
     window.XLSX.writeFile(wb, `Inventario_Campo_${slug}_${new Date().toISOString().slice(0, 10)}.xlsx`);
   }
 
+  function loadLogoBase64() {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        try {
+          const c = document.createElement("canvas");
+          c.width = img.naturalWidth;
+          c.height = img.naturalHeight;
+          c.getContext("2d").drawImage(img, 0, 0);
+          resolve(c.toDataURL("image/jpeg", 0.9));
+        } catch (e) {
+          resolve(null);
+        }
+      };
+      img.onerror = () => resolve(null);
+      img.src = "./logo.jpg";
+    });
+  }
+
+  async function exportVerificationPDF() {
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+      showToast("Librería PDF no cargada.");
+      return;
+    }
+    const filtered = getFilteredItems();
+    if (filtered.length === 0) {
+      showToast("No hay registros filtrados para exportar a PDF.");
+      return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const marginX = 10;
+
+    const logoData = await loadLogoBase64();
+    const sucObj = state.activeSucursalId !== "ALL" ? state.sucursalById.get(Number(state.activeSucursalId)) : null;
+    const sucTitle = sucObj ? `${sucObj.sucursal} (${sucObj.localidad})` : "TODAS LAS SUCURSALES";
+    const modCount = filtered.filter((x) => x._isModified).length;
+
+    const filterBadges = [`Sucursal: ${sucTitle}`];
+    if (state.filterUnidad) filterBadges.push(`Unidad: ${state.filterUnidad}`);
+    if (state.filterPuesto) filterBadges.push(`Puesto: ${state.filterPuesto}`);
+    if (state.filterEstado) filterBadges.push(`Estado: ${state.filterEstado}`);
+    if (state.activePill !== "ALL") filterBadges.push(`Filtro: ${state.activePill}`);
+    const nowStr = new Date().toLocaleString("es-PE");
+
+    const drawPageHeader = () => {
+      if (logoData) {
+        try { doc.addImage(logoData, "JPEG", marginX, 7, 13, 13); } catch (e) {}
+      }
+      const xTxt = logoData ? marginX + 16 : marginX;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.setTextColor(0, 80, 157);
+      doc.text('E.P.S. "SELVA CENTRAL" S.A. — CONTROL PATRIMONIAL', xTxt, 11.5);
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9.5);
+      doc.setTextColor(15, 23, 42);
+      doc.text("RELACIÓN DE BIENES PARA VERIFICACIÓN FÍSICA DE INVENTARIO", xTxt, 16.5);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.5);
+      doc.setTextColor(71, 85, 105);
+      doc.text(filterBadges.join("   |   "), xTxt, 21);
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7.5);
+      doc.setTextColor(0, 119, 182);
+      doc.text(`Total: ${filtered.length} bien(es)  ·  Modificados: ${modCount}`, pageW - marginX, 11.5, { align: "right" });
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(100, 116, 139);
+      doc.text(`Emisión: ${nowStr}`, pageW - marginX, 16.5, { align: "right" });
+
+      doc.setDrawColor(0, 176, 240);
+      doc.setLineWidth(0.5);
+      doc.line(marginX, 23.5, pageW - marginX, 23.5);
+    };
+
+    const bodyRows = filtered.map((it, idx) => {
+      const carParts = [];
+      if (it.marca && it.marca !== "S/M") carParts.push(`Marca: ${it.marca}`);
+      if (it.modelo && it.modelo !== "S/M") carParts.push(`Mod: ${it.modelo}`);
+      if (it.numero_serie && it.numero_serie !== "S/S") carParts.push(`Serie: ${it.numero_serie}`);
+      if (it.placa) carParts.push(`Placa: ${it.placa}`);
+      const denomText = `${it.denominacion || "—"}${carParts.length ? `\n${carParts.join(" · ")}` : ""}`;
+
+      const ubicLines = [it.sucursal || "—"];
+      const up = [it.unidad, it.puesto].filter(Boolean).join(" · ");
+      if (up) ubicLines.push(up);
+
+      const rawObs = (it.origen_tabla === "REGULARIZACION" ? it.observaciones : it.caracteristicas_accesorios) || "";
+      const obsText = `${it._isModified ? "[MOD] " : ""}${rawObs}`;
+
+      return {
+        num: String(idx + 1),
+        cod: `${it.cod_patrimonial || "—"}\n[${it.tipo_origen || it.origen_tabla}]`,
+        denom: denomText,
+        ubic: ubicLines.join("\n"),
+        resp: it.responsable || "Sin Asignar",
+        est: it.estado_activo || "—",
+        check: "",
+        obs: obsText,
+        _isModified: Boolean(it._isModified),
+      };
+    });
+
+    doc.autoTable({
+      startY: 26,
+      margin: { top: 26, left: marginX, right: marginX, bottom: 14 },
+      columns: [
+        { header: "N°", dataKey: "num" },
+        { header: "Código / Origen", dataKey: "cod" },
+        { header: "Denominación y Características", dataKey: "denom" },
+        { header: "Sucursal / Unidad / Puesto", dataKey: "ubic" },
+        { header: "Responsable", dataKey: "resp" },
+        { header: "Estado", dataKey: "est" },
+        { header: "Verif.", dataKey: "check" },
+        { header: "Observaciones / Corrección en Campo", dataKey: "obs" },
+      ],
+      body: bodyRows,
+      theme: "grid",
+      styles: {
+        font: "helvetica",
+        fontSize: 7.2,
+        cellPadding: { top: 2, right: 2, bottom: 2, left: 2 },
+        lineColor: [203, 213, 225],
+        lineWidth: 0.2,
+        textColor: [15, 23, 42],
+        valign: "middle",
+        overflow: "linebreak",
+      },
+      headStyles: {
+        fillColor: [0, 80, 157],
+        textColor: [255, 255, 255],
+        fontStyle: "bold",
+        fontSize: 7.5,
+        halign: "center",
+        valign: "middle",
+      },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      columnStyles: {
+        num: { cellWidth: 9, halign: "center", fontStyle: "bold" },
+        cod: { cellWidth: 26, halign: "center", fontStyle: "bold" },
+        denom: { cellWidth: 74 },
+        ubic: { cellWidth: 52 },
+        resp: { cellWidth: 42 },
+        est: { cellWidth: 18, halign: "center", fontStyle: "bold" },
+        check: { cellWidth: 11, halign: "center" },
+        obs: { cellWidth: 45 },
+      },
+      didParseCell: (data) => {
+        if (data.section === "body" && data.row.raw && data.row.raw._isModified) {
+          data.cell.styles.fillColor = [254, 249, 195];
+        }
+      },
+      didDrawCell: (data) => {
+        if (data.section === "body" && data.column.dataKey === "check") {
+          const boxSize = 3.6;
+          const x = data.cell.x + (data.cell.width - boxSize) / 2;
+          const y = data.cell.y + (data.cell.height - boxSize) / 2;
+          doc.setDrawColor(100, 116, 139);
+          doc.setLineWidth(0.3);
+          doc.rect(x, y, boxSize, boxSize);
+        }
+      },
+      didDrawPage: () => {
+        drawPageHeader();
+      },
+    });
+
+    // Bloque de firmas al final del documento
+    let finalY = (doc.lastAutoTable && doc.lastAutoTable.finalY) ? doc.lastAutoTable.finalY + 14 : 50;
+    if (finalY + 24 > pageH - 12) {
+      doc.addPage();
+      drawPageHeader();
+      finalY = 42;
+    }
+    doc.setDrawColor(100, 116, 139);
+    doc.setLineWidth(0.35);
+    const sigWidth = 68;
+    const leftX = 48;
+    const rightX = pageW - 48 - sigWidth;
+    doc.line(leftX, finalY, leftX + sigWidth, finalY);
+    doc.line(rightX, finalY, rightX + sigWidth, finalY);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(15, 23, 42);
+    doc.text("VERIFICADOR / CONTROL PATRIMONIAL", leftX + sigWidth / 2, finalY + 4.5, { align: "center" });
+    doc.text("RESPONSABLE DE SUCURSAL / UNIDAD", rightX + sigWidth / 2, finalY + 4.5, { align: "center" });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7);
+    doc.setTextColor(100, 116, 139);
+    doc.text("Nombre, Firma y Fecha", leftX + sigWidth / 2, finalY + 8.5, { align: "center" });
+    doc.text("Nombre, Firma y Sello", rightX + sigWidth / 2, finalY + 8.5, { align: "center" });
+
+    // Numeración total de páginas
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text(`Portal de Inventario de Campo — ${sucTitle}`, marginX, pageH - 5.5);
+      doc.text(`Página ${i} de ${totalPages}`, pageW - marginX, pageH - 5.5, { align: "right" });
+    }
+
+    const slug = sucObj ? normText(sucObj.sucursal).replace(/[^A-Z0-9]+/g, "_") : "TODAS";
+    doc.save(`Verificacion_Inventario_${slug}_${new Date().toISOString().slice(0, 10)}.pdf`);
+    showToast(`PDF generado con ${filtered.length} bien(es).`);
+  }
+
   // ── Listeners de Eventos ───────────────────────────────────────────────────
   function bindEvents() {
     // Login
@@ -905,17 +1213,43 @@
       state.page = 1;
       renderTable();
     });
+    document.getElementById("sortSelect").addEventListener("change", (e) => {
+      state.sortMode = e.target.value;
+      state.colSortKey = null;
+      state.page = 1;
+      updateSortHeaderIndicators();
+      renderTable();
+    });
+    document.querySelector("thead").addEventListener("click", (e) => {
+      const th = e.target.closest("th.sortable-th");
+      if (!th) return;
+      const key = th.dataset.sort;
+      if (state.colSortKey === key) {
+        state.colSortDir = state.colSortDir === "asc" ? "desc" : "asc";
+      } else {
+        state.colSortKey = key;
+        state.colSortDir = "asc";
+      }
+      state.page = 1;
+      updateSortHeaderIndicators();
+      renderTable();
+    });
     document.getElementById("btnResetFilters").addEventListener("click", () => {
       state.search = "";
       state.filterUnidad = "";
       state.filterPuesto = "";
       state.filterEstado = "";
       state.activePill = "ALL";
+      state.sortMode = "JERARQUICO";
+      state.colSortKey = null;
+      state.colSortDir = "asc";
       state.page = 1;
       document.getElementById("searchInput").value = "";
       document.getElementById("searchClear").classList.add("hidden");
       document.getElementById("filterEstado").value = "";
+      document.getElementById("sortSelect").value = "JERARQUICO";
       document.querySelectorAll("#quickPills .q-pill").forEach((b) => b.classList.toggle("active", b.dataset.pill === "ALL"));
+      updateSortHeaderIndicators();
       refreshCascadeFilterOptions();
       renderTable();
     });
@@ -1143,6 +1477,7 @@
 
     document.getElementById("btnDownloadBranchJson").addEventListener("click", () => downloadJsonPackage(true));
     document.getElementById("btnDownloadAllJson").addEventListener("click", () => downloadJsonPackage(false));
+    document.getElementById("btnExportPdf").addEventListener("click", exportVerificationPDF);
     document.getElementById("btnExportExcel").addEventListener("click", exportExcelTable);
     document.getElementById("btnClearDraft").addEventListener("click", () => {
       const cnt = Object.keys(state.drafts).length;
