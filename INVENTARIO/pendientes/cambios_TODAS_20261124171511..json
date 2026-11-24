@@ -1,0 +1,530 @@
+{
+  "version": "1.0",
+  "origen": "PORTAL_INVENTARIO_CAMPO",
+  "generado_en": "2026-11-24T17:15:11.002Z",
+  "sucursal_origen_paquete": "TODAS",
+  "total_cambios": 40,
+  "nota_envio": "juan eder",
+  "cambios": [
+    {
+      "uid": "ACTIVO:620066011",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "620066011",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:13:09.491Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "ACTIVO:620046018",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "620046018",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:14:11.859Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "ACTIVO:620046014",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "620046014",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:14:16.405Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "ACTIVO:620046013",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "620046013",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:15:05.630Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "ACTIVO:620036017",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "620036017",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:15:20.364Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "ACTIVO:620036016",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "620036016",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:15:14.107Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "ACTIVO:620036015",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "620036015",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:15:27.152Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "ACTIVO:620036014",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "620036014",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:15:29.937Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "ACTIVO:300086005",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "300086005",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:15:38.814Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "ACTIVO:300086004",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "300086004",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:15:41.749Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "ACTIVO:300086003",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "300086003",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:15:43.863Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "ACTIVO:300086002",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "300086002",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:15:46.672Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "ACTIVO:300086001",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "300086001",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:15:48.084Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "ACTIVO:300076009",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "300076009",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:15:50.088Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "ACTIVO:300076008",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "300076008",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:15:51.824Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "ACTIVO:300076007",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "300076007",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:15:53.842Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "ACTIVO:300076001",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "300076001",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:15:56.928Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "ACTIVO:300036002",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "300036002",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:15:59.358Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "ACTIVO:300036001",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "300036001",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:16:00.859Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "REG:6851",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6851,
+      "cod_patrimonial": "SOB-333-0098",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:16:05.400Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "REG:6850",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6850,
+      "cod_patrimonial": "SOB-333-0097",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:16:07.278Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "REG:6849",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6849,
+      "cod_patrimonial": "SOB-333-0096",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:16:09.070Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "REG:6190",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6190,
+      "cod_patrimonial": "620046011",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:16:11.088Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "REG:6189",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6189,
+      "cod_patrimonial": "620046009",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:16:13.875Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "REG:6188",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6188,
+      "cod_patrimonial": "630016009",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:16:15.514Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "REG:6187",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6187,
+      "cod_patrimonial": "620036011",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:16:16.890Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "REG:6186",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6186,
+      "cod_patrimonial": "620036012",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:16:18.658Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "REG:6185",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6185,
+      "cod_patrimonial": "620036003",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:16:20.434Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "REG:6184",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6184,
+      "cod_patrimonial": "620036005",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:16:22.773Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "REG:6183",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6183,
+      "cod_patrimonial": "620036004",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:16:26.904Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "REG:6182",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6182,
+      "cod_patrimonial": "620036002",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:16:28.640Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "REG:6181",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6181,
+      "cod_patrimonial": "620036000",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:16:30.165Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "REG:6180",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6180,
+      "cod_patrimonial": "620066005",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:16:31.868Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "REG:6179",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6179,
+      "cod_patrimonial": "320016015",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:16:33.282Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "REG:6178",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6178,
+      "cod_patrimonial": "320016014",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:16:37.120Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "REG:6177",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6177,
+      "cod_patrimonial": "320016013",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:16:39.673Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "REG:6176",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6176,
+      "cod_patrimonial": "320016012",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:16:43.144Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "REG:6175",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6175,
+      "cod_patrimonial": "320016011",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:16:45.628Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "REG:6174",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6174,
+      "cod_patrimonial": "320016010",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:16:47.883Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    },
+    {
+      "uid": "REG:6173",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6173,
+      "cod_patrimonial": "200036000",
+      "cod_personal": "L015",
+      "responsable": "LAZO MUÑOZ HENRY NILTON",
+      "updated_at": "2026-11-24T16:16:51.508Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ]
+    }
+  ]
+}
