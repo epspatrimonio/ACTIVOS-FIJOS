@@ -35,6 +35,13 @@ document.addEventListener('DOMContentLoaded', () => {
     return String(val).normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toUpperCase();
   }
 
+  function formatUnidadPuesto(item) {
+    const u = String(item?.unidad || '').trim();
+    const p = String(item?.puesto || '').trim();
+    if (u && p && u.toUpperCase() !== p.toUpperCase()) return `${u} · ${p}`;
+    return p || u;
+  }
+
   // Orden oficial jerárquico de Sucursales (SEDE CENTRAL primero, luego LA MERCED, SAN RAMÓN, etc.)
   const SUCURSALES_ORDER = [
     'SEDE CENTRAL',
@@ -1181,7 +1188,8 @@ document.addEventListener('DOMContentLoaded', () => {
           valor_neto: Number(reg.valor_en_libros) || 0,
           depreciacion_acumulada: 0,
           responsable: reg.responsable || 'Sin Asignar',
-          puesto: unidadOrg,
+          unidad: reg.unidad || '',
+          puesto: reg.puesto || '',
           observaciones: reg.observaciones || reg.observaciones_calidad || '',
           is_conciliacion_origin: true
         });
@@ -1209,7 +1217,8 @@ document.addEventListener('DOMContentLoaded', () => {
           valor_neto: Number(reg.valor_en_libros) || 0,
           depreciacion_acumulada: 0,
           responsable: reg.responsable || 'Sin Asignar',
-          puesto: unidadOrg,
+          unidad: reg.unidad || '',
+          puesto: reg.puesto || '',
           observaciones: reg.observaciones || '',
           is_sobrante_origin: true
         });
@@ -1238,7 +1247,8 @@ document.addEventListener('DOMContentLoaded', () => {
           valor_neto: Number(reg.valor_en_libros) || 0,
           depreciacion_acumulada: 0,
           responsable: isTer ? (reg.propietario_manual || reg.responsable || 'Tercero') : (reg.responsable || 'Sin Asignar'),
-          puesto: unidadOrg || (isTer ? 'Propietario / Tercero' : ''),
+          unidad: reg.unidad || '',
+          puesto: reg.puesto || (!reg.unidad && isTer ? 'Propietario / Tercero' : ''),
           observaciones: reg.observaciones || '',
           is_terceros_origin: isTer
         });
@@ -1344,7 +1354,8 @@ document.addEventListener('DOMContentLoaded', () => {
           valor_neto: 0,
           depreciacion_acumulada: 0,
           responsable: falt.responsable || 'PENDIENTE DE UBICACIÓN',
-          puesto: falt.puesto || falt.unidad || '',
+          unidad: falt.unidad || '',
+          puesto: falt.puesto || '',
           observaciones: falt.observaciones || '',
           is_faltante_origin: true
         });
@@ -2425,7 +2436,7 @@ document.addEventListener('DOMContentLoaded', () => {
       case 'valor_en_libros': return formatMoney(item.valor_en_libros || 0);
       case 'valor_neto': return formatMoney(getNetValue(item));
       case 'responsable': return String(item.responsable || item.propietario_manual || 'Sin Asignar').trim();
-      case 'puesto': return String(item.puesto || item.unidad || '').trim();
+      case 'puesto': return formatUnidadPuesto(item);
       case 'placa': return String(item.placa || '').trim();
       case 'tipo_vehiculo': return String(item.tipo_vehiculo || item.combustible || '').trim();
       case 'soat_estado': {
@@ -5305,7 +5316,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="font-bold text-slate-800 text-[0.72rem]">
             ${item.responsable || 'Sin Asignar'}
           </div>
-          ${(item.puesto || item.unidad) ? `<div class="text-[0.625rem] text-slate-500 italic font-medium uppercase mt-0.5">${item.puesto || item.unidad}</div>` : ''}
+          ${formatUnidadPuesto(item) ? `<div class="text-[0.625rem] text-slate-500 italic font-medium uppercase mt-0.5" title="${formatUnidadPuesto(item)}">${formatUnidadPuesto(item)}</div>` : ''}
         </td>
         <td class="px-1 py-1 whitespace-nowrap text-center">
           <div class="inline-flex items-center justify-center gap-1">
@@ -5549,7 +5560,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="font-bold text-slate-800 text-[0.72rem]">
             ${item.responsable || 'Sin Asignar'}
           </div>
-          ${(item.puesto || item.unidad) ? `<div class="text-[0.625rem] text-slate-500 italic font-medium uppercase mt-0.5">${item.puesto || item.unidad}</div>` : ''}
+          ${formatUnidadPuesto(item) ? `<div class="text-[0.625rem] text-slate-500 italic font-medium uppercase mt-0.5" title="${formatUnidadPuesto(item)}">${formatUnidadPuesto(item)}</div>` : ''}
         </td>
         <td class="px-1 py-1 whitespace-nowrap text-center">
           <button type="button" data-ficha-code="${item.cod_patrimonial}" class="btn-download-ficha-pdf inline-flex items-center justify-center gap-1 px-1.5 py-1 text-emerald-800 bg-emerald-50 hover:bg-emerald-100 hover:text-emerald-950 border border-emerald-300 rounded-lg shadow-2xs transition-all active:scale-95 cursor-pointer" title="Descargar Ficha Digital de Obra (PDF)">
@@ -6366,7 +6377,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="font-bold text-slate-800 text-[10px] leading-tight">
             ${item.responsable || 'Sin Asignar'}
           </div>
-          ${(item.puesto || item.unidad) ? `<div class="text-[8.5px] text-slate-500 italic uppercase mt-0.5">${item.puesto || item.unidad}</div>` : ''}
+          ${formatUnidadPuesto(item) ? `<div class="text-[8.5px] text-slate-500 italic uppercase mt-0.5" title="${formatUnidadPuesto(item)}">${formatUnidadPuesto(item)}</div>` : ''}
         </td>
         <td class="px-1 py-1 whitespace-nowrap text-center align-middle">
           ${item.cod_patrimonial && !item.is_sobrante_origin && !item.is_faltante_origin ? `
@@ -6411,7 +6422,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div>
           <span class="font-bold text-slate-400 block text-[9px] uppercase">Responsable</span>
           <span class="font-semibold text-slate-800">${item.responsable || 'Sin Asignar'}</span>
-          ${(item.puesto || item.unidad) ? `<span class="block text-slate-500 text-[9px] truncate">${item.puesto || item.unidad}</span>` : ''}
+          ${formatUnidadPuesto(item) ? `<span class="block text-slate-500 text-[9px] truncate" title="${formatUnidadPuesto(item)}">${formatUnidadPuesto(item)}</span>` : ''}
         </div>
         <div>
           <span class="font-bold text-slate-400 block text-[9px] uppercase">Valor Libros</span>
@@ -6479,7 +6490,7 @@ document.addEventListener('DOMContentLoaded', () => {
       row.className = 'hover:bg-blue-50/60 text-slate-700 transition-colors border-b border-slate-150 text-xs';
       const subMod = String(item.sub_modulo || item.tipo || 'CONCILIACION').toUpperCase();
       const badgeCls = subBadgeMap[subMod] || 'bg-slate-100 text-slate-700 border-slate-200';
-      const unidadOrg = item.puesto || item.unidad || '';
+      const unidadOrg = formatUnidadPuesto(item);
       const especHtml = item.placa
         ? `<div><span class="font-mono font-extrabold text-slate-900 bg-amber-100/90 px-1 rounded">Placa: ${item.placa}</span></div>
            <div class="text-[10px] text-slate-500 font-mono">Mot: ${item.nro_motor || '—'} · Chas: ${item.nro_chasis || '—'}</div>`
@@ -6941,7 +6952,8 @@ document.addEventListener('DOMContentLoaded', () => {
         "Valor en Libros / Ref. (S/.)": Number(item.valor_en_libros) || 0,
         "Valor Neto (S/.)": getNetValue(item) || 0,
         "Responsable": item.responsable || "Sin Asignar",
-        "Unidad Orgánica": item.puesto || item.unidad || "",
+        "Unidad Orgánica": item.unidad || "",
+        "Puesto": formatUnidadPuesto(item),
         "Observaciones": item.observaciones || item.observaciones_inventario || ""
       }));
     } else if (currentTab === 'terceros') {
@@ -6951,7 +6963,8 @@ document.addEventListener('DOMContentLoaded', () => {
         "Código Patrimonial": item.cod_patrimonial || "",
         "Sucursal": item.sucursal || "",
         "Localidad": item.localidad || "",
-        "Unidad Orgánica": item.puesto || item.unidad || "",
+        "Unidad Orgánica": item.unidad || "",
+        "Puesto": formatUnidadPuesto(item),
         "Categoría": item.categoria || "",
         "Subcategoría": item.subcategoria || "",
         "Denominación": item.denominacion || "",
@@ -7132,9 +7145,9 @@ document.addEventListener('DOMContentLoaded', () => {
           };
 
           const respObj = {
-            content: `${item.responsable || 'Sin Asignar'}${item.puesto ? `\n${item.puesto}` : ''}`,
+            content: `${item.responsable || 'Sin Asignar'}${formatUnidadPuesto(item) ? `\n${formatUnidadPuesto(item)}` : ''}`,
             resp: item.responsable || 'Sin Asignar',
-            puesto: item.puesto || ''
+            puesto: formatUnidadPuesto(item)
           };
 
           return [
@@ -7383,7 +7396,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const ubi = `${item.sucursal || '—'}${item.localidad ? `\n(${item.localidad})` : ''}`;
           const estado = item.estado_activo || '—';
           const valLibros = `S/. ${formatMoney(item.valor_en_libros || 0)}`;
-          const unidadTxt = item.puesto || item.unidad || '';
+          const unidadTxt = formatUnidadPuesto(item);
           const resp = `${item.responsable || 'Sin Asignar'}${unidadTxt ? `\n(${unidadTxt})` : ''}`;
 
           return [cod, origenDoc, denom, especs, ubi, estado, valLibros, resp];
@@ -7409,7 +7422,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "Características / Placa",
             "Estado",
             "Valor (S/.)",
-            "Responsable / Unidad Org."
+            "Responsable / Puesto"
           ]
         ];
         data = currentFilteredData.map(item => {
@@ -7420,7 +7433,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const especs = `${item.placa ? `Placa: ${item.placa}\n` : ''}Marca: ${item.marca || 'S/M'}\nMod: ${item.modelo || '—'}\nSerie: ${item.numero_serie || 'S/S'}`;
           const est = item.estado_activo || '—';
           const val = `S/. ${formatMoney(item.valor_en_libros || 0)}`;
-          const unidadTxt = item.puesto || item.unidad || '';
+          const unidadTxt = formatUnidadPuesto(item);
           const resp = `${item.responsable || item.propietario_manual || 'Sin Asignar'}${unidadTxt ? `\n(${unidadTxt})` : ''}`;
           return [cod, sub, suc, denom, especs, est, val, resp];
         });
