@@ -4520,12 +4520,22 @@ document.addEventListener('DOMContentLoaded', () => {
     posY = doc.lastAutoTable.finalY + 5;
 
     const pageHeight = doc.internal.pageSize.height;
-    const obsText = transfData.observaciones ? transfData.observaciones.trim().toUpperCase() : 'SIN OBSERVACIONES ADICIONALES.';
-    const splitObs = doc.splitTextToSize(obsText, 180);
-    const notaText = 'EL TRABAJADOR RECEPTOR ASUME LA RESPONSABILIDAD DIRECTA DE LA CUSTODIA, CONSERVACIÓN Y USO ADECUADO DE LOS BIENES PATRIMONIALES DESCRITOS, QUEDANDO SUJETO A LAS DIRECTIVAS VIGENTES DE CONTROL PATRIMONIAL DE LA EPS SELVA CENTRAL S.A. CUALQUIER TRASLADO POSTERIOR DEBERÁ SER COMUNICADO OPORTUNAMENTE A CONTROL PATRIMONIAL.';
-    const splitNota = doc.splitTextToSize(notaText, 180);
+    const pageWidth = doc.internal.pageSize.width;
+    const contentWidth = pageWidth - marginX * 2;
 
-    const footerNeeded = 10 + splitObs.length * 4 + splitNota.length * 3.1 + 38;
+    const obsText = transfData.observaciones ? transfData.observaciones.trim().toUpperCase() : 'SIN OBSERVACIONES ADICIONALES.';
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+    const splitObs = doc.splitTextToSize(obsText, contentWidth);
+
+    const notaText = 'EL TRABAJADOR RECEPTOR ASUME LA RESPONSABILIDAD DIRECTA DE LA CUSTODIA, CONSERVACIÓN Y USO ADECUADO DE LOS BIENES PATRIMONIALES DESCRITOS, QUEDANDO SUJETO A LAS DIRECTIVAS VIGENTES DE CONTROL PATRIMONIAL DE LA EPS SELVA CENTRAL S.A. CUALQUIER TRASLADO POSTERIOR DEBERÁ SER COMUNICADO OPORTUNAMENTE A CONTROL PATRIMONIAL.';
+    const padX = 3.5;
+    const notaInnerWidth = contentWidth - padX * 2;
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.8);
+    const splitNota = doc.splitTextToSize(notaText, notaInnerWidth);
+    const notaLineH = 3.2;
+    const notaBoxH = 6.5 + splitNota.length * notaLineH + 2;
+
+    const footerNeeded = 10 + splitObs.length * 4 + notaBoxH + 40;
     if (posY + footerNeeded > pageHeight - 10) {
       doc.addPage();
       posY = 20;
@@ -4538,11 +4548,16 @@ document.addEventListener('DOMContentLoaded', () => {
     doc.text(splitObs, marginX, posY);
     posY += splitObs.length * 4 + 4;
 
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(0, 0, 0);
-    doc.text('NOTA', marginX, posY);
-    posY += 3.5;
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.2); doc.setTextColor(30, 41, 59);
-    doc.text(splitNota, marginX, posY);
+    doc.setFillColor(248, 250, 252);
+    doc.setDrawColor(203, 213, 225);
+    doc.setLineWidth(0.25);
+    doc.roundedRect(marginX, posY, contentWidth, notaBoxH, 1.5, 1.5, 'FD');
+    doc.setFillColor(0, 176, 240);
+    doc.rect(marginX, posY, 1.2, notaBoxH, 'F');
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(15, 23, 42);
+    doc.text('NOTA', marginX + padX, posY + 4.3);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.8); doc.setTextColor(30, 41, 59);
+    doc.text(notaText, marginX + padX, posY + 7.8, { align: 'justify', maxWidth: notaInnerWidth, lineHeightFactor: 1.3 });
 
     const yLine = pageHeight - 34;
     doc.setDrawColor(150, 150, 150); doc.setLineWidth(0.25);
