@@ -36,8 +36,9 @@
   }
 
   const state = {
-    catalogos: { sucursales: [], puestos: [], personal: [], estados: ["BUENO", "REGULAR", "MALO", "PARA BAJA", "BAJA"] },
+    catalogos: { sucursales: [], puestos: [], personal: [], categorias: [], estados: ["BUENO", "REGULAR", "MALO", "PARA BAJA", "BAJA"] },
     items: [],
+    newItems: [], // Bienes nuevos agregados en campo (SOBRANTE / CONTROL / TERCERO)
     drafts: {}, // uid -> { uid, origen_tabla, id_regularizacion, cod_patrimonial, ..., campos_modificados: [] }
     selectedUids: new Set(),
     filteredCache: [],
@@ -54,6 +55,7 @@
     personalLookup: new Map(), // norm(name) -> { cod_personal, personal }
     sucursalById: new Map(),
     puestoById: new Map(),
+    categoriaById: new Map(),
   };
 
   function normText(v) {
@@ -118,12 +120,14 @@
       const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (parsed && typeof parsed === "object" && parsed.drafts) {
-          state.drafts = parsed.drafts;
+        if (parsed && typeof parsed === "object") {
+          state.drafts = (parsed.drafts && typeof parsed.drafts === "object") ? parsed.drafts : {};
+          state.newItems = Array.isArray(parsed.newItems) ? parsed.newItems : [];
         }
       }
     } catch (e) {
       state.drafts = {};
+      state.newItems = [];
     }
   }
 
@@ -131,7 +135,7 @@
     try {
       localStorage.setItem(
         DRAFT_STORAGE_KEY,
-        JSON.stringify({ saved_at: new Date().toISOString(), drafts: state.drafts })
+        JSON.stringify({ saved_at: new Date().toISOString(), drafts: state.drafts, newItems: state.newItems })
       );
     } catch (e) {
       showToast("Aviso: No se pudo guardar en localStorage.");
@@ -142,6 +146,23 @@
     const draft = state.drafts[baseItem.uid];
     if (!draft) return baseItem;
     return { ...baseItem, ...draft, _isModified: true, _changedFields: draft.campos_modificados || [] };
+  }
+
+  function getAllWorkingItems() {
+    const news = state.newItems.map((n) => ({
+      ...n,
+      _isNew: true,
+      _isModified: true,
+      _changedFields: Array.isArray(n._changedFields) ? n._changedFields : [],
+    }));
+    return news.concat(state.items.map(getEffectiveItem));
+  }
+
+  function findWorkingItemByUid(uid) {
+    const n = state.newItems.find((x) => x.uid === uid);
+    if (n) return { ...n, _isNew: true, _isModified: true, _changedFields: n._changedFields || [] };
+    const b = state.items.find((x) => x.uid === uid);
+    return b ? getEffectiveItem(b) : null;
   }
 
   function getContextForSucursal(idSucursal) {
@@ -190,6 +211,7 @@
         sucursales: Array.isArray(catData.sucursales) ? catData.sucursales : [],
         puestos: Array.isArray(catData.puestos) ? catData.puestos : [],
         personal: Array.isArray(catData.personal) ? catData.personal : [],
+        categorias: Array.isArray(catData.categorias) ? catData.categorias : [],
         estados: Array.isArray(catData.estados) && catData.estados.length ? catData.estados : ["BUENO", "REGULAR", "MALO", "PARA BAJA", "BAJA"],
         generado_en: catData.generado_en || null,
       };
@@ -200,6 +222,9 @@
 
       state.puestoById.clear();
       state.catalogos.puestos.forEach((p) => state.puestoById.set(Number(p.puesto_id), p));
+
+      state.categoriaById.clear();
+      state.catalogos.categorias.forEach((c) => state.categoriaById.set(Number(c.cod_categoria), c));
 
       state.personalLookup.clear();
       const dl = document.getElementById("dl-personal");
@@ -248,8 +273,7 @@
     const qTokens = exclude.search ? [] : normText(state.search).split(/\s+/).filter(Boolean);
     const activeSucId = state.activeSucursalId;
 
-    return state.items
-      .map(getEffectiveItem)
+    return getAllWorkingItems()
       .filter((it) => {
         if (!exclude.sucursal && activeSucId !== "ALL" && String(it.id_sucursal || "") !== String(activeSucId)) return false;
 
@@ -514,6 +538,21 @@
 
   // ── Mutación de Borradores ─────────────────────────────────────────────────
   function updateField(uid, fieldUpdates) {
+    const newIdx = state.newItems.findIndex((x) => x.uid === uid);
+    if (newIdx !== -1) {
+      const target = { ...state.newItems[newIdx], ...fieldUpdates, updated_at: new Date().toISOString() };
+      const chSet = new Set(target._changedFields || []);
+      Object.keys(fieldUpdates).forEach((k) => {
+        if (!["updated_at", "_changedFields", "_isNew", "_isModified"].includes(k)) chSet.add(k);
+      });
+      target._changedFields = Array.from(chSet);
+      state.newItems[newIdx] = target;
+      persistDrafts();
+      renderHeaderAndTabs();
+      renderBatchBar();
+      return;
+    }
+
     const base = state.items.find((x) => x.uid === uid);
     if (!base) return;
     const prevDraft = state.drafts[uid] || {
@@ -564,20 +603,36 @@
     }
   }
 
+  function deleteNewItem(uid) {
+    const idx = state.newItems.findIndex((x) => x.uid === uid);
+    if (idx === -1) return;
+    state.newItems.splice(idx, 1);
+    state.selectedUids.delete(uid);
+    persistDrafts();
+    renderAll();
+    showToast("Bien nuevo eliminado del borrador.");
+  }
+
   // ── Renderizado ────────────────────────────────────────────────────────────
   function renderHeaderAndTabs() {
     const allDrafts = Object.values(state.drafts);
-    const totalMod = allDrafts.length;
+    const allNew = state.newItems;
+    const totalMod = allDrafts.length + allNew.length;
 
     const branchModCount = (sucId) => {
       if (sucId === "ALL") return totalMod;
-      return state.items.reduce((acc, base) => {
+      const editCnt = state.items.reduce((acc, base) => {
         const d = state.drafts[base.uid];
         if (!d) return acc;
         const effSuc = d.id_sucursal !== undefined ? d.id_sucursal : base.id_sucursal;
         if (String(effSuc) === String(sucId) || String(base.id_sucursal) === String(sucId)) return acc + 1;
         return acc;
       }, 0);
+      const newCnt = allNew.reduce((acc, n) => {
+        if (String(n.id_sucursal || "") === String(sucId)) return acc + 1;
+        return acc;
+      }, 0);
+      return editCnt + newCnt;
     };
 
     const currentSucMod = branchModCount(state.activeSucursalId);
@@ -585,7 +640,13 @@
     const statusPill = document.getElementById("statusPill");
     if (totalMod > 0) {
       statusPill.className = "pill-status dirty";
-      statusPill.textContent = `✏️ ${totalMod} bien(es) modificado(s) (Guardado automático)`;
+      if (allNew.length > 0 && allDrafts.length > 0) {
+        statusPill.textContent = `✏️ ${allDrafts.length} editado(s) · ➕ ${allNew.length} nuevo(s)`;
+      } else if (allNew.length > 0) {
+        statusPill.textContent = `➕ ${allNew.length} bien(es) nuevo(s) (Guardado automático)`;
+      } else {
+        statusPill.textContent = `✏️ ${totalMod} bien(es) modificado(s) (Guardado automático)`;
+      }
     } else {
       statusPill.className = "pill-status";
       statusPill.textContent = "💾 Sin cambios pendientes";
@@ -618,8 +679,8 @@
     }
 
     const sucCounts = new Map();
-    state.items.forEach((base) => {
-      const eff = getEffectiveItem(base);
+    const workingAll = getAllWorkingItems();
+    workingAll.forEach((eff) => {
       const sid = String(eff.id_sucursal || "");
       sucCounts.set(sid, (sucCounts.get(sid) || 0) + 1);
     });
@@ -627,7 +688,7 @@
     const tabsHtml = [
       `<button type="button" class="suc-tab ${state.activeSucursalId === "ALL" ? "active" : ""}" data-suc="ALL">
         <span>TODAS LAS SUCURSALES</span>
-        <span class="suc-count">${state.items.length}</span>
+        <span class="suc-count">${workingAll.length}</span>
         ${totalMod > 0 ? `<span class="suc-mod-badge">✏️ ${totalMod}</span>` : ""}
       </button>`,
       ...state.catalogos.sucursales.map((s) => {
@@ -692,6 +753,7 @@
   }
 
   function renderRowHtml(it, buildSucOpts, buildEstOpts) {
+    const isNew = Boolean(it._isNew);
     const draft = state.drafts[it.uid];
     const chSet = new Set(it._changedFields || []);
     const isSelected = state.selectedUids.has(it.uid);
@@ -703,12 +765,13 @@
     const puestos = getPuestosFor(ctx, currUni || null);
 
     let originClass = "origin-ACTIVO";
-    if (it.tipo_origen === "OBRA EN CURSO") originClass = "origin-OBRA";
+    if (isNew) originClass = "origin-NUEVO";
+    else if (it.tipo_origen === "OBRA EN CURSO") originClass = "origin-OBRA";
     else if (it.sub_modulo === "CONCILIACION") originClass = "origin-CONC";
     else if (it.sub_modulo === "SOBRANTE") originClass = "origin-SOB";
     else if (it.sub_modulo === "FALTANTE" || it.estado_activo === "FALTANTE") originClass = "origin-FALT";
 
-    const obsFieldKey = it.origen_tabla === "REGULARIZACION" ? "observaciones" : "caracteristicas_accesorios";
+    const obsFieldKey = (it.origen_tabla === "REGULARIZACION" || it.origen_tabla === "NUEVO_CAMPO") ? "observaciones" : "caracteristicas_accesorios";
     const obsValue = it[obsFieldKey] || it.observaciones || "";
 
     const respNorm = normText(it.responsable);
@@ -716,20 +779,23 @@
     const estClass = getEstadoSelectClass(it.estado_activo);
 
     return `
-      <tr data-uid="${escapeHtml(it.uid)}" class="${draft ? "row-modified" : ""} ${isSelected ? "row-selected" : ""}">
+      <tr data-uid="${escapeHtml(it.uid)}" class="${isNew ? "row-new" : (draft ? "row-modified" : "")} ${isSelected ? "row-selected" : ""}">
         <td style="text-align:center;">
           <input type="checkbox" class="row-check" data-uid="${escapeHtml(it.uid)}" ${isSelected ? "checked" : ""} />
         </td>
         <td>
           <span class="code-badge">${escapeHtml(it.cod_patrimonial)}</span><br/>
           <span class="origin-tag ${originClass}">${escapeHtml(it.tipo_origen || it.origen_tabla)}</span>
-          ${draft ? `<div><span class="mod-tag">MODIFICADO</span> <button type="button" class="undo-btn" data-undo="${escapeHtml(it.uid)}" title="Deshacer cambios de esta fila">↺</button></div>` : ""}
+          ${isNew
+            ? `<div><span class="mod-tag" style="background:#c7d2fe; color:#312e81; border-color:#818cf8;">NUEVO</span> <button type="button" class="undo-btn" data-delnew="${escapeHtml(it.uid)}" title="Eliminar registro nuevo">✕</button></div>`
+            : (draft ? `<div><span class="mod-tag">MODIFICADO</span> <button type="button" class="undo-btn" data-undo="${escapeHtml(it.uid)}" title="Deshacer cambios de esta fila">↺</button></div>` : "")}
         </td>
         <td>
           <div style="font-weight:800; color:#0f172a; line-height:1.28;">${escapeHtml(it.denominacion)}</div>
           <div style="font-size:10px; color:#64748b; margin-top:3px; display:flex; flex-wrap:wrap; align-items:center; gap:5px;">
             ${it.placa ? `<span style="background:#fef3c7; padding:1px 5px; border-radius:4px; font-weight:800; color:#92400e; border:1px solid #fde68a;">PLACA: ${escapeHtml(it.placa)}</span>` : ""}
             ${it.subcategoria ? `<span>${escapeHtml(it.subcategoria)}</span>` : ""}
+            ${it.propietario_manual ? `<span style="color:#4338ca; font-weight:700;">Prop: ${escapeHtml(it.propietario_manual)}</span>` : ""}
           </div>
         </td>
         <td>
@@ -860,9 +926,8 @@
   }
 
   function rerenderSingleRow(uid) {
-    const base = state.items.find((x) => x.uid === uid);
-    if (!base) return;
-    const eff = getEffectiveItem(base);
+    const eff = findWorkingItemByUid(uid);
+    if (!eff) return;
     const idx = state.filteredCache.findIndex((x) => x.uid === uid);
     if (idx !== -1) state.filteredCache[idx] = eff;
 
@@ -893,6 +958,7 @@
   function buildChangesPayload(onlyActiveSucursal, extraMeta = {}) {
     const allDrafts = Object.values(state.drafts);
     let targetDrafts = allDrafts;
+    let targetNews = [...state.newItems];
     let sucLabel = "TODAS";
     if (onlyActiveSucursal && state.activeSucursalId !== "ALL") {
       const sucObj = state.sucursalById.get(Number(state.activeSucursalId));
@@ -903,32 +969,63 @@
         const effSuc = d.id_sucursal !== undefined ? d.id_sucursal : base.id_sucursal;
         return String(effSuc) === String(state.activeSucursalId) || String(base.id_sucursal) === String(state.activeSucursalId);
       });
+      targetNews = state.newItems.filter((n) => String(n.id_sucursal || "") === String(state.activeSucursalId));
     }
-    if (targetDrafts.length === 0) return null;
+    const totalCount = targetDrafts.length + targetNews.length;
+    if (totalCount === 0) return null;
+
+    const mappedDrafts = targetDrafts.map((d) => {
+      const copy = { ...d, tipo_operacion: "MODIFICACION" };
+      delete copy.sucursal_original;
+      return copy;
+    });
+    const mappedNews = targetNews.map((n) => ({
+      uid: n.uid,
+      tipo_operacion: `ALTA_${n.sub_modulo || "SOBRANTE"}`,
+      sub_modulo: n.sub_modulo || "SOBRANTE",
+      origen_tabla: "NUEVO_CAMPO",
+      cod_categoria: n.cod_categoria,
+      categoria: n.categoria || "",
+      subcategoria: n.subcategoria || "",
+      denominacion: n.denominacion || "",
+      id_sucursal: n.id_sucursal,
+      sucursal: n.sucursal || "",
+      unidad: n.unidad || "",
+      puesto_id: n.puesto_id || null,
+      puesto: n.puesto || "",
+      cod_personal: n.cod_personal || "",
+      responsable: n.responsable || "Sin Asignar",
+      propietario_manual: n.propietario_manual || "",
+      estado_activo: n.estado_activo || "REGULAR",
+      observaciones: n.observaciones || "",
+      marca: n.marca || "",
+      modelo: n.modelo || "",
+      numero_serie: n.numero_serie || "",
+      color: n.color || "",
+      placa: n.placa || "",
+    }));
 
     const payload = {
-      version: "1.0",
+      version: "1.1",
       origen: "PORTAL_INVENTARIO_CAMPO",
       generado_en: new Date().toISOString(),
       sucursal_origen_paquete: sucLabel,
-      total_cambios: targetDrafts.length,
+      total_cambios: totalCount,
+      total_modificaciones: mappedDrafts.length,
+      total_altas_nuevas: mappedNews.length,
       ...extraMeta,
-      cambios: targetDrafts.map((d) => {
-        const copy = { ...d };
-        delete copy.sucursal_original;
-        return copy;
-      }),
+      cambios: [...mappedDrafts, ...mappedNews],
     };
-    return { payload, sucLabel, targetDrafts };
+    return { payload, sucLabel, targetDrafts, targetNews, totalCount };
   }
 
   function downloadJsonPackage(onlyActiveSucursal) {
     const built = buildChangesPayload(onlyActiveSucursal);
     if (!built) {
-      showToast("No hay cambios registrados para descargar.");
+      showToast("No hay cambios ni altas registradas para descargar.");
       return;
     }
-    const { payload, sucLabel, targetDrafts } = built;
+    const { payload, sucLabel, totalCount } = built;
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" });
     const a = document.createElement("a");
     const slug = normText(sucLabel).replace(/[^A-Z0-9]+/g, "_");
@@ -939,7 +1036,7 @@
     a.click();
     a.remove();
     URL.revokeObjectURL(a.href);
-    showToast(`Descargado paquete con ${targetDrafts.length} cambio(s).`);
+    showToast(`Descargado paquete con ${totalCount} registro(s).`);
   }
 
   function openTokenModal() {
@@ -1009,14 +1106,14 @@
     }
     const built = buildChangesPayload(true);
     if (!built) {
-      showToast("No hay cambios en esta vista para enviar.");
+      showToast("No hay cambios ni altas en esta vista para enviar.");
       return;
     }
-    const { sucLabel, targetDrafts } = built;
+    const { sucLabel, targetDrafts, targetNews, totalCount } = built;
     const summaryBox = document.getElementById("pushSummaryBox");
     summaryBox.innerHTML =
       `<strong>Sucursal / Vista:</strong> ${escapeHtml(sucLabel)}<br/>` +
-      `<strong>Registros modificados a enviar:</strong> ${targetDrafts.length}<br/>` +
+      `<strong>Registros a enviar:</strong> ${totalCount} (${targetDrafts.length} edición(es), ${targetNews.length} alta(s) nueva(s))<br/>` +
       `<strong>Destino seguro:</strong> <code>INVENTARIO/pendientes/</code> en GitHub (no sobreescribe datos oficiales hasta que Sede Central revise el comparador).`;
     const fb = document.getElementById("pushFeedback");
     fb.className = "hidden";
@@ -1036,7 +1133,7 @@
     const built = buildChangesPayload(true, note ? { nota_envio: note } : {});
     if (!built) { showToast("No hay cambios para enviar."); return; }
 
-    const { payload, sucLabel, targetDrafts } = built;
+    const { payload, sucLabel, targetDrafts, targetNews, totalCount } = built;
     const slug = normText(sucLabel).replace(/[^A-Z0-9]+/g, "_") || "CAMPO";
     const stamp = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 15);
     const filename = `cambios_${slug}_${stamp}.json`;
@@ -1057,7 +1154,7 @@
           "X-GitHub-Api-Version": "2022-11-28",
         },
         body: JSON.stringify({
-          message: `Verificación de campo ${sucLabel}: ${targetDrafts.length} cambio(s)${note ? " - " + note : ""}`,
+          message: `Verificación de campo ${sucLabel}: ${totalCount} registro(s)${note ? " - " + note : ""}`,
           content: contentB64,
           branch: GH_BRANCH,
         }),
@@ -1069,11 +1166,15 @@
 
       if (clearAfter) {
         targetDrafts.forEach((d) => { delete state.drafts[d.uid]; });
+        if (targetNews.length > 0) {
+          const sentNewsUids = new Set(targetNews.map((n) => n.uid));
+          state.newItems = state.newItems.filter((n) => !sentNewsUids.has(n.uid));
+        }
         persistDrafts();
         renderAll();
       }
       fb.className = "ok-box";
-      fb.innerHTML = `✓ Enviado a GitHub: <code>${escapeHtml(filename)}</code> (${targetDrafts.length} cambio(s)). Ya puedes importarlo en la pestaña Inventario del APP Activos Fijos.`;
+      fb.innerHTML = `✓ Enviado a GitHub: <code>${escapeHtml(filename)}</code> (${totalCount} registro(s)). Ya puedes importarlo en la pestaña Inventario del APP Activos Fijos.`;
       setTimeout(() => {
         document.getElementById("pushConfirmModal").classList.add("hidden");
       }, 2400);
@@ -1110,8 +1211,8 @@
       "PUESTO": it.puesto || "",
       "RESPONSABLE": it.responsable || "",
       "ESTADO": it.estado_activo || "",
-      "OBSERVACIONES": (it.origen_tabla === "REGULARIZACION" ? it.observaciones : it.caracteristicas_accesorios) || "",
-      "MODIFICADO": it._isModified ? "SI" : "NO",
+      "OBSERVACIONES": ((it.origen_tabla === "REGULARIZACION" || it.origen_tabla === "NUEVO_CAMPO") ? it.observaciones : it.caracteristicas_accesorios) || "",
+      "MODIFICADO": it._isNew ? "NUEVO" : (it._isModified ? "SI" : "NO"),
       "CAMPOS MODIFICADOS": (it._changedFields || []).join(", "),
     }));
     const ws = window.XLSX.utils.json_to_sheet(rows);
@@ -1217,8 +1318,9 @@
       const up = [it.unidad, it.puesto].filter(Boolean).join(" · ");
       if (up) ubicLines.push(up);
 
-      const rawObs = (it.origen_tabla === "REGULARIZACION" ? it.observaciones : it.caracteristicas_accesorios) || "";
-      const obsText = `${it._isModified ? "[MOD] " : ""}${rawObs}`;
+      const rawObs = ((it.origen_tabla === "REGULARIZACION" || it.origen_tabla === "NUEVO_CAMPO") ? it.observaciones : it.caracteristicas_accesorios) || "";
+      const prefixTag = it._isNew ? "[NUEVO] " : (it._isModified ? "[MOD] " : "");
+      const obsText = `${prefixTag}${rawObs}`;
 
       return {
         num: String(idx + 1),
@@ -1476,6 +1578,13 @@
       const undoBtn = e.target.closest("[data-undo]");
       if (undoBtn) {
         revertItem(undoBtn.dataset.undo);
+        return;
+      }
+      const delBtn = e.target.closest("[data-delnew]");
+      if (delBtn) {
+        if (confirm("¿Eliminar este bien nuevo del borrador local?")) {
+          deleteNewItem(delBtn.dataset.delnew);
+        }
       }
     });
 
@@ -1497,9 +1606,8 @@
       const field = e.target.dataset.field;
       if (!field) return;
 
-      const base = state.items.find((x) => x.uid === uid);
-      if (!base) return;
-      const eff = getEffectiveItem(base);
+      const eff = findWorkingItemByUid(uid);
+      if (!eff) return;
       const val = e.target.value;
 
       if (field === "id_sucursal") {
@@ -1561,7 +1669,7 @@
         rerenderSingleRow(uid);
       } else {
         updateField(uid, { [field]: val });
-        if (state.activePill === "MODIFICADOS" && !state.drafts[uid]) {
+        if (state.activePill === "MODIFICADOS" && !state.drafts[uid] && !eff._isNew) {
           refreshDynamicFilters();
           renderTable();
         } else {
@@ -1655,11 +1763,10 @@
 
       let count = 0;
       state.selectedUids.forEach((uid) => {
-        const base = state.items.find((x) => x.uid === uid);
-        if (!base) return;
+        const eff = findWorkingItemByUid(uid);
+        if (!eff) return;
         const rowUpd = { ...upd };
         if (rowUpd.id_sucursal && !rowUpd.puesto_id) {
-          const eff = getEffectiveItem(base);
           const ctx = getContextForSucursal(rowUpd.id_sucursal);
           const currP = eff.puesto_id ? state.puestoById.get(Number(eff.puesto_id)) : null;
           if (!currP || currP.tipo_contexto !== ctx) {
@@ -1705,13 +1812,214 @@
     document.getElementById("btnExportPdf").addEventListener("click", exportVerificationPDF);
     document.getElementById("btnExportExcel").addEventListener("click", exportExcelTable);
     document.getElementById("btnClearDraft").addEventListener("click", () => {
-      const cnt = Object.keys(state.drafts).length;
+      const cnt = Object.keys(state.drafts).length + state.newItems.length;
       if (cnt === 0) return;
-      if (!confirm(`¿Descartar los ${cnt} cambios guardados en el borrador local de este navegador?`)) return;
+      if (!confirm(`¿Descartar los ${cnt} registro(s) pendientes (ediciones y bienes nuevos) guardados en este navegador?`)) return;
       state.drafts = {};
+      state.newItems = [];
       persistDrafts();
       renderAll();
       showToast("Borrador local limpiado.");
+    });
+
+    // Modal Agregar Nuevo Bien en Campo
+    const populateNewAssetSubcategories = (catName) => {
+      const subSel = document.getElementById("newSubcategoria");
+      const subs = state.catalogos.categorias
+        .filter((c) => !catName || c.categoria === catName)
+        .sort((a, b) => a.subcategoria.localeCompare(b.subcategoria, "es"));
+      subSel.innerHTML = `<option value="">— Seleccionar Subcategoría —</option>` +
+        subs.map((c) => `<option value="${c.cod_categoria}">${escapeHtml(c.subcategoria)}</option>`).join("");
+      document.getElementById("newPlacaWrap").classList.add("hidden");
+    };
+
+    const populateNewAssetCascade = () => {
+      const sucVal = document.getElementById("newSucursal").value;
+      const ctx = sucVal ? getContextForSucursal(sucVal) : null;
+      const uSel = document.getElementById("newUnidad");
+      const prevU = uSel.value;
+      const unidades = getUnidadesForContext(ctx);
+      const nextU = unidades.includes(prevU) ? prevU : "";
+      uSel.innerHTML = `<option value="">— Seleccionar Unidad Orgánica —</option>` +
+        unidades.map((u) => `<option value="${escapeHtml(u)}" ${u === nextU ? "selected" : ""}>${escapeHtml(u)}</option>`).join("");
+
+      const pSel = document.getElementById("newPuesto");
+      const prevP = pSel.value;
+      const puestos = getPuestosFor(ctx, nextU || null);
+      pSel.innerHTML = `<option value="">— Seleccionar Puesto —</option>` +
+        puestos.map((p) => `<option value="${p.puesto_id}" ${String(p.puesto_id) === String(prevP) ? "selected" : ""}>${nextU ? escapeHtml(p.puesto) : `${escapeHtml(p.departamento)} · ${escapeHtml(p.puesto)}`}</option>`).join("");
+    };
+
+    const checkNewAssetSerieDuplicate = () => {
+      const warnEl = document.getElementById("newSerieWarning");
+      const valNorm = normText(document.getElementById("newSerie").value);
+      const IGNORED = new Set(["", "-", "S/S", "SS", "SIN SERIE", "SN", "S/N", "NA", "N/A", "NONE", "NO TIENE"]);
+      if (valNorm.length < 3 || IGNORED.has(valNorm)) {
+        warnEl.classList.add("hidden");
+        warnEl.textContent = "";
+        return;
+      }
+      const hits = getAllWorkingItems().filter((it) => normText(it.numero_serie) === valNorm);
+      if (hits.length === 0) {
+        warnEl.classList.add("hidden");
+        warnEl.textContent = "";
+        return;
+      }
+      const previewHits = hits.slice(0, 3).map((h) => `${h.cod_patrimonial} (${h.sucursal || "—"} · ${h.denominacion})`).join("; ");
+      warnEl.textContent = `⚠ Atención: esta serie ya coincide con ${hits.length} registro(s) en inventario: ${previewHits}. Verifica que no sea duplicado.`;
+      warnEl.classList.remove("hidden");
+    };
+
+    const openAddAssetModal = () => {
+      document.getElementById("addAssetForm").reset();
+      document.getElementById("newAssetError").classList.add("hidden");
+      document.getElementById("newSerieWarning").classList.add("hidden");
+
+      const sucSel = document.getElementById("newSucursal");
+      sucSel.innerHTML = `<option value="">— Seleccionar Sucursal —</option>` +
+        state.catalogos.sucursales.map(
+          (s) => `<option value="${s.id_sucursal}" ${String(s.id_sucursal) === String(state.activeSucursalId) ? "selected" : ""}>${escapeHtml(s.sucursal)} (${escapeHtml(s.localidad)})</option>`
+        ).join("");
+
+      const estSel = document.getElementById("newEstado");
+      estSel.innerHTML = state.catalogos.estados.map(
+        (e) => `<option value="${escapeHtml(e)}" ${e === "REGULAR" ? "selected" : ""}>${escapeHtml(e)}</option>`
+      ).join("");
+
+      const catSel = document.getElementById("newCategoria");
+      const catNames = Array.from(new Set(state.catalogos.categorias.map((c) => c.categoria))).sort((a, b) => a.localeCompare(b, "es"));
+      catSel.innerHTML = `<option value="">— Seleccionar Categoría —</option>` +
+        catNames.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
+      populateNewAssetSubcategories("");
+      populateNewAssetCascade();
+
+      document.getElementById("newPropietarioWrap").classList.add("hidden");
+      document.getElementById("newPlacaWrap").classList.add("hidden");
+      document.getElementById("addAssetModal").classList.remove("hidden");
+    };
+
+    document.getElementById("btnAddNewAsset").addEventListener("click", openAddAssetModal);
+    document.getElementById("btnCloseAddAsset").addEventListener("click", () => document.getElementById("addAssetModal").classList.add("hidden"));
+    document.getElementById("btnCancelAddAsset").addEventListener("click", () => document.getElementById("addAssetModal").classList.add("hidden"));
+
+    document.getElementById("newSubModulo").addEventListener("change", (e) => {
+      const sub = e.target.value;
+      document.getElementById("newPropietarioWrap").classList.toggle("hidden", sub !== "TERCERO");
+      const estSel = document.getElementById("newEstado");
+      estSel.value = (sub === "TERCERO" || sub === "CONTROL") ? "BUENO" : "REGULAR";
+    });
+    document.getElementById("newSucursal").addEventListener("change", () => {
+      document.getElementById("newUnidad").value = "";
+      document.getElementById("newPuesto").value = "";
+      populateNewAssetCascade();
+    });
+    document.getElementById("newUnidad").addEventListener("change", () => {
+      document.getElementById("newPuesto").value = "";
+      populateNewAssetCascade();
+    });
+    document.getElementById("newCategoria").addEventListener("change", (e) => {
+      populateNewAssetSubcategories(e.target.value);
+    });
+    document.getElementById("newSubcategoria").addEventListener("change", (e) => {
+      const catObj = e.target.value ? state.categoriaById.get(Number(e.target.value)) : null;
+      if (catObj && !document.getElementById("newCategoria").value) {
+        document.getElementById("newCategoria").value = catObj.categoria;
+      }
+      document.getElementById("newPlacaWrap").classList.toggle("hidden", !(catObj && catObj.c_cont_3 === "334"));
+    });
+    document.getElementById("newSerie").addEventListener("input", checkNewAssetSerieDuplicate);
+
+    document.getElementById("addAssetForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const errBox = document.getElementById("newAssetError");
+      errBox.classList.add("hidden");
+
+      const subModulo = document.getElementById("newSubModulo").value || "SOBRANTE";
+      const sucVal = document.getElementById("newSucursal").value;
+      const catIdVal = document.getElementById("newSubcategoria").value;
+      const denom = document.getElementById("newDenominacion").value.trim().toUpperCase();
+      const estado = document.getElementById("newEstado").value;
+
+      if (!sucVal) { errBox.textContent = "Seleccione la sucursal."; errBox.classList.remove("hidden"); return; }
+      if (!catIdVal) { errBox.textContent = "Seleccione la categoría y subcategoría."; errBox.classList.remove("hidden"); return; }
+      if (!denom) { errBox.textContent = "Ingrese la denominación del bien."; errBox.classList.remove("hidden"); return; }
+
+      const sucObj = state.sucursalById.get(Number(sucVal));
+      const catObj = state.categoriaById.get(Number(catIdVal));
+      const uniVal = document.getElementById("newUnidad").value || "";
+      const pstIdVal = document.getElementById("newPuesto").value ? Number(document.getElementById("newPuesto").value) : null;
+      const pObj = pstIdVal ? state.puestoById.get(pstIdVal) : null;
+      const effUni = uniVal || (pObj ? pObj.departamento : "");
+
+      const respInput = document.getElementById("newResponsable").value.trim();
+      const respNorm = normText(respInput);
+      let codPersonal = "";
+      let respFinal = "Sin Asignar";
+      if (respNorm && respNorm !== "SIN ASIGNAR") {
+        if (state.personalLookup.has(respNorm)) {
+          const pers = state.personalLookup.get(respNorm);
+          codPersonal = pers.cod_personal;
+          respFinal = pers.personal;
+        } else if (subModulo === "TERCERO") {
+          respFinal = respInput.toUpperCase();
+        } else {
+          errBox.textContent = "El responsable debe coincidir con el padrón oficial o dejarse vacío ('Sin Asignar').";
+          errBox.classList.remove("hidden");
+          return;
+        }
+      }
+
+      const propietarioManual = subModulo === "TERCERO" ? document.getElementById("newPropietario").value.trim().toUpperCase() : "";
+      const uid = `NEW:${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      const tipoLabelMap = {
+        SOBRANTE: "NUEVO SOBRANTE",
+        CONTROL: "NUEVO BIEN CONTROL",
+        TERCERO: "NUEVO TERCERO",
+      };
+
+      const newItem = {
+        uid,
+        origen_tabla: "NUEVO_CAMPO",
+        sub_modulo: subModulo,
+        cod_patrimonial: "POR ASIGNAR",
+        tipo_origen: tipoLabelMap[subModulo] || "NUEVO SOBRANTE",
+        cod_categoria: catObj ? catObj.cod_categoria : Number(catIdVal),
+        categoria: catObj ? catObj.categoria : "",
+        subcategoria: catObj ? catObj.subcategoria : "",
+        denominacion: denom,
+        marca: document.getElementById("newMarca").value.trim(),
+        modelo: document.getElementById("newModelo").value.trim(),
+        numero_serie: document.getElementById("newSerie").value.trim(),
+        color: document.getElementById("newColor").value.trim(),
+        placa: document.getElementById("newPlaca").value.trim().toUpperCase(),
+        id_sucursal: Number(sucVal),
+        sucursal: sucObj ? sucObj.sucursal : "",
+        localidad: sucObj ? sucObj.localidad : "",
+        unidad: effUni,
+        puesto_id: pstIdVal,
+        puesto: pObj ? pObj.puesto : "",
+        cod_personal: codPersonal,
+        responsable: respFinal,
+        propietario_manual: propietarioManual,
+        estado_activo: estado || "REGULAR",
+        observaciones: document.getElementById("newObservaciones").value.trim(),
+        _isNew: true,
+        _isModified: true,
+        _changedFields: ["denominacion", "id_sucursal", "estado_activo"],
+        updated_at: new Date().toISOString(),
+      };
+
+      state.newItems.unshift(newItem);
+      persistDrafts();
+
+      if (state.activeSucursalId !== "ALL" && String(state.activeSucursalId) !== String(newItem.id_sucursal)) {
+        state.activeSucursalId = String(newItem.id_sucursal);
+        refreshBatchCascadeOptions();
+      }
+
+      document.getElementById("addAssetModal").classList.add("hidden");
+      renderAll();
+      showToast(`✓ Bien agregado como ${subModulo} en ${sucObj ? sucObj.sucursal : "borrador"}.`);
     });
 
     // Scroll continuo sin paginación

@@ -657,6 +657,21 @@
       font-size: 11.5px;
       font-weight: 700;
     }
+    .origin-NUEVO { background: #e0e7ff; color: #3730a3; border: 1px solid #a5b4fc; }
+    tbody tr.row-new,
+    tbody tr.row-new:nth-child(even) { background: #eef2ff !important; }
+    tbody tr.row-new:hover { background: #e0e7ff !important; }
+    .modal-box.modal-wide { max-width: 720px; max-height: 92vh; display: flex; flex-direction: column; }
+    .modal-box.modal-wide .modal-body { overflow-y: auto; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; }
+    .form-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 12px; }
+    .form-field { display: flex; flex-direction: column; gap: 4px; }
+    .form-field.full { grid-column: 1 / -1; }
+    .form-lbl { font-size: 11px; font-weight: 800; color: #334155; }
+    .form-req { color: #e11d48; }
+    @media (max-width: 640px) {
+      .form-grid, .form-grid-3 { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -694,6 +709,9 @@
 
       <div class="top-actions">
         <span id="statusPill" class="pill-status">💾 Sin cambios pendientes</span>
+        <button id="btnAddNewAsset" type="button" class="btn btn-primary" style="background:#4f46e5; border-color:#4338ca;" title="Registrar un bien encontrado en campo que no figura en la tabla">
+          ➕ Agregar Bien
+        </button>
         <button id="btnTokenConfig" type="button" class="btn btn-ghost-white" title="Configurar Fine-Grained Token de GitHub para envío directo">
           🔑 Token GitHub
         </button>
@@ -892,6 +910,116 @@
     </div>
   </div>
 
+  <!-- MODAL AGREGAR NUEVO BIEN EN CAMPO -->
+  <div id="addAssetModal" class="modal-backdrop hidden">
+    <div class="modal-box modal-wide">
+      <div class="modal-hdr">
+        <span>➕ Registrar Bien No Considerado (Campo)</span>
+        <button id="btnCloseAddAsset" type="button" class="btn btn-light" style="padding:3px 8px;">✕</button>
+      </div>
+      <form id="addAssetForm" class="modal-body">
+        <div class="info-box">
+          Este bien se registrará en borrador local como <strong>Sobrante, Tercero o Bien de Control</strong> en la sucursal seleccionada. Cuando envíes a GitHub o descargues el <code>.json</code>, Patrimonio validará e incorporará asignando su código definitivo (<code>SOB-/TER-/CON-</code>).
+        </div>
+
+        <div class="form-grid-3">
+          <div class="form-field">
+            <label class="form-lbl">Tipo de Registro <span class="form-req">*</span></label>
+            <select id="newSubModulo" class="cell-select" required>
+              <option value="SOBRANTE">Sobrante de Inventario</option>
+              <option value="CONTROL">Bien de Control</option>
+              <option value="TERCERO">Bien de Tercero</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-lbl">Sucursal <span class="form-req">*</span></label>
+            <select id="newSucursal" class="cell-select" required></select>
+          </div>
+          <div class="form-field">
+            <label class="form-lbl">Estado Físico <span class="form-req">*</span></label>
+            <select id="newEstado" class="cell-select" required></select>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-field">
+            <label class="form-lbl">Categoría <span class="form-req">*</span></label>
+            <select id="newCategoria" class="cell-select" required></select>
+          </div>
+          <div class="form-field">
+            <label class="form-lbl">Subcategoría <span class="form-req">*</span></label>
+            <select id="newSubcategoria" class="cell-select" required></select>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="form-lbl">Denominación del Bien <span class="form-req">*</span></label>
+          <input id="newDenominacion" type="text" class="cell-input" maxlength="300" placeholder="Ej. LAPTOP HP PROBOOK / ELECTROBOMBA / ESCRITORIO..." required />
+        </div>
+
+        <div class="form-grid">
+          <div class="form-field">
+            <label class="form-lbl">Marca</label>
+            <input id="newMarca" type="text" class="cell-input" placeholder="Ej. HP, TOYOTA, S/M" />
+          </div>
+          <div class="form-field">
+            <label class="form-lbl">Modelo</label>
+            <input id="newModelo" type="text" class="cell-input" placeholder="Ej. ProBook 450, S/M" />
+          </div>
+          <div class="form-field">
+            <label class="form-lbl">N° de Serie</label>
+            <input id="newSerie" type="text" class="cell-input spec-mono" placeholder="Ej. 5CD1234ABC o S/S" />
+          </div>
+          <div class="form-field">
+            <label class="form-lbl">Color</label>
+            <input id="newColor" type="text" class="cell-input" placeholder="Ej. Negro, Gris, Azul..." />
+          </div>
+        </div>
+
+        <div id="newSerieWarning" class="warn-box hidden"></div>
+
+        <div class="form-grid">
+          <div class="form-field">
+            <label class="form-lbl">Unidad Orgánica</label>
+            <select id="newUnidad" class="cell-select">
+              <option value="">— Seleccionar Unidad —</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-lbl">Puesto</label>
+            <select id="newPuesto" class="cell-select">
+              <option value="">— Seleccionar Puesto —</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-lbl">Responsable (Padrón)</label>
+            <input id="newResponsable" type="text" list="dl-personal" class="cell-input" placeholder="Buscar personal o dejar Sin Asignar..." />
+          </div>
+          <div id="newPropietarioWrap" class="form-field hidden">
+            <label class="form-lbl">Propietario / Entidad Tercera</label>
+            <input id="newPropietario" type="text" class="cell-input" placeholder="Nombre o razón social del propietario..." />
+          </div>
+          <div id="newPlacaWrap" class="form-field hidden">
+            <label class="form-lbl">Placa (si es vehículo)</label>
+            <input id="newPlaca" type="text" class="cell-input spec-mono" placeholder="Ej. ABC-123" />
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="form-lbl">Observaciones / Sustento de Hallazgo en Campo</label>
+          <input id="newObservaciones" type="text" class="cell-input" placeholder="Ubicación física exacta, detalles adicionales..." />
+        </div>
+
+        <div id="newAssetError" class="err-box hidden"></div>
+
+        <div class="modal-ftr" style="margin: 4px -18px -16px; border-top: 1px solid #e2e8f0;">
+          <button id="btnCancelAddAsset" type="button" class="btn btn-light">Cancelar</button>
+          <button type="submit" class="btn btn-emerald">✓ Agregar Bien al Inventario</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Datalist único compartido para autocompletado instantáneo de personal -->
   <datalist id="dl-personal"></datalist>
   <div id="toast" class="toast hidden"></div>
@@ -899,6 +1027,6 @@
   <script src="./vendor/xlsx.full.min.js"></script>
   <script src="./vendor/jspdf.umd.min.js"></script>
   <script src="./vendor/jspdf.plugin.autotable.min.js"></script>
-  <script src="./app.js?v=5"></script>
+  <script src="./app.js?v=6"></script>
 </body>
 </html>
