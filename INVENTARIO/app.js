@@ -1314,9 +1314,11 @@
         `Color: ${it.color || "—"}`,
       ].join("\n");
 
-      const ubicLines = [formatSucursalTitle(it.sucursal)];
-      const up = [it.unidad, it.puesto].filter(Boolean).join(" · ");
-      if (up) ubicLines.push(up);
+      const ubicLines = [
+        formatSucursalTitle(it.sucursal),
+        it.unidad ? it.unidad : "—",
+        it.puesto ? it.puesto : "—",
+      ];
 
       const rawObs = ((it.origen_tabla === "REGULARIZACION" || it.origen_tabla === "NUEVO_CAMPO") ? it.observaciones : it.caracteristicas_accesorios) || "";
       const prefixTag = it._isNew ? "[NUEVO] " : (it._isModified ? "[MOD] " : "");
