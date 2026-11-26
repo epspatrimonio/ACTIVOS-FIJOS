@@ -993,15 +993,60 @@
                 <th style="width:34px; text-align:center;">
                   <input id="checkPageAll" type="checkbox" title="Seleccionar todos los visibles" />
                 </th>
-                <th class="sortable-th" data-sort="cod_patrimonial" style="width:122px;">Código / Origen<span class="sort-ind"></span></th>
-                <th class="sortable-th" data-sort="denominacion" style="min-width:195px;">Denominación<span class="sort-ind"></span></th>
-                <th class="sortable-th" data-sort="marca" style="min-width:270px;">Marca · Modelo · Serie · Color<span class="sort-ind"></span></th>
-                <th class="sortable-th" data-sort="sucursal" style="width:132px;">Sucursal<span class="sort-ind"></span></th>
-                <th class="sortable-th" data-sort="unidad" style="width:160px;">Unidad Orgánica<span class="sort-ind"></span></th>
-                <th class="sortable-th" data-sort="puesto" style="width:175px;">Puesto<span class="sort-ind"></span></th>
-                <th class="sortable-th" data-sort="responsable" style="width:210px;">Responsable (Padrón)<span class="sort-ind"></span></th>
-                <th class="sortable-th" data-sort="estado_activo" style="width:108px;">Estado<span class="sort-ind"></span></th>
-                <th style="min-width:175px;">Observaciones</th>
+                <th class="sortable-th" data-sort="cod_patrimonial" style="width:136px;">
+                  <div class="th-inner">
+                    <button type="button" class="th-label-btn" data-sort-btn="cod_patrimonial"><span>Código / Origen</span><span class="sort-ind"></span></button>
+                    <button type="button" class="th-filter-btn" data-colfilter="cod_patrimonial" data-collabel="Código Patrimonial" title="Filtrar por Código">▾<span class="th-filter-badge hidden"></span></button>
+                  </div>
+                </th>
+                <th class="sortable-th" data-sort="denominacion" style="min-width:205px;">
+                  <div class="th-inner">
+                    <button type="button" class="th-label-btn" data-sort-btn="denominacion"><span>Denominación</span><span class="sort-ind"></span></button>
+                    <button type="button" class="th-filter-btn" data-colfilter="denominacion" data-collabel="Denominación" title="Filtrar por Denominación">▾<span class="th-filter-badge hidden"></span></button>
+                  </div>
+                </th>
+                <th class="sortable-th" data-sort="marca" style="min-width:275px;">
+                  <div class="th-inner">
+                    <button type="button" class="th-label-btn" data-sort-btn="marca"><span>Marca · Modelo · Serie · Color</span><span class="sort-ind"></span></button>
+                    <button type="button" class="th-filter-btn" data-colfilter="marca" data-collabel="Marca" title="Filtrar por Marca">▾<span class="th-filter-badge hidden"></span></button>
+                  </div>
+                </th>
+                <th class="sortable-th" data-sort="sucursal" style="width:138px;">
+                  <div class="th-inner">
+                    <button type="button" class="th-label-btn" data-sort-btn="sucursal"><span>Sucursal</span><span class="sort-ind"></span></button>
+                    <button type="button" class="th-filter-btn" data-colfilter="sucursal" data-collabel="Sucursal" title="Filtrar por Sucursal">▾<span class="th-filter-badge hidden"></span></button>
+                  </div>
+                </th>
+                <th class="sortable-th" data-sort="unidad" style="width:168px;">
+                  <div class="th-inner">
+                    <button type="button" class="th-label-btn" data-sort-btn="unidad"><span>Unidad Orgánica</span><span class="sort-ind"></span></button>
+                    <button type="button" class="th-filter-btn" data-colfilter="unidad" data-collabel="Unidad Orgánica" title="Filtrar por Unidad Orgánica">▾<span class="th-filter-badge hidden"></span></button>
+                  </div>
+                </th>
+                <th class="sortable-th" data-sort="puesto" style="width:182px;">
+                  <div class="th-inner">
+                    <button type="button" class="th-label-btn" data-sort-btn="puesto"><span>Puesto</span><span class="sort-ind"></span></button>
+                    <button type="button" class="th-filter-btn" data-colfilter="puesto" data-collabel="Puesto" title="Filtrar por Puesto">▾<span class="th-filter-badge hidden"></span></button>
+                  </div>
+                </th>
+                <th class="sortable-th" data-sort="responsable" style="width:215px;">
+                  <div class="th-inner">
+                    <button type="button" class="th-label-btn" data-sort-btn="responsable"><span>Responsable (Padrón)</span><span class="sort-ind"></span></button>
+                    <button type="button" class="th-filter-btn" data-colfilter="responsable" data-collabel="Responsable" title="Filtrar por Responsable">▾<span class="th-filter-badge hidden"></span></button>
+                  </div>
+                </th>
+                <th class="sortable-th" data-sort="estado_activo" style="width:115px;">
+                  <div class="th-inner">
+                    <button type="button" class="th-label-btn" data-sort-btn="estado_activo"><span>Estado</span><span class="sort-ind"></span></button>
+                    <button type="button" class="th-filter-btn" data-colfilter="estado_activo" data-collabel="Estado" title="Filtrar por Estado">▾<span class="th-filter-badge hidden"></span></button>
+                  </div>
+                </th>
+                <th style="min-width:180px;">
+                  <div class="th-inner">
+                    <span>Observaciones</span>
+                    <button type="button" class="th-filter-btn" data-colfilter="observaciones" data-collabel="Observaciones" title="Filtrar por Observaciones">▾<span class="th-filter-badge hidden"></span></button>
+                  </div>
+                </th>
               </tr>
             </thead>
             <tbody id="tableBody">
@@ -1198,6 +1243,9 @@
     </div>
   </div>
 
+  <!-- Popover flotante de filtros de columna tipo Excel -->
+  <div id="excel-col-filter-popover" class="col-popover hidden"></div>
+
   <!-- Datalist único compartido para autocompletado instantáneo de personal -->
   <datalist id="dl-personal"></datalist>
   <div id="toast" class="toast hidden"></div>
@@ -1205,6 +1253,6 @@
   <script src="./vendor/xlsx.full.min.js"></script>
   <script src="./vendor/jspdf.umd.min.js"></script>
   <script src="./vendor/jspdf.plugin.autotable.min.js"></script>
-  <script src="./app.js?v=6"></script>
+  <script src="./app.js?v=7"></script>
 </body>
 </html>

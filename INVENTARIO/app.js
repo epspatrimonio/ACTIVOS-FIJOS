@@ -52,6 +52,8 @@
     sortMode: "JERARQUICO",
     colSortKey: null,
     colSortDir: "asc",
+    colFilters: {}, // colKey -> [val1, val2, ...]
+    activeColPopoverKey: null,
     personalLookup: new Map(), // norm(name) -> { cod_personal, personal }
     sucursalById: new Map(),
     puestoById: new Map(),
@@ -269,9 +271,19 @@
 
   const EMPTY_FILTER = "__EMPTY__";
 
+  function getColFilterValue(it, key) {
+    if (key === "observaciones") {
+      return String(((it.origen_tabla === "REGULARIZACION" || it.origen_tabla === "NUEVO_CAMPO") ? it.observaciones : it.caracteristicas_accesorios) || "").trim();
+    }
+    return String(it[key] || "").trim();
+  }
+
   function filterItemsExcluding(exclude = {}) {
     const qTokens = exclude.search ? [] : normText(state.search).split(/\s+/).filter(Boolean);
     const activeSucId = state.activeSucursalId;
+    const activeColKeys = Object.keys(state.colFilters || {}).filter(
+      (k) => k !== exclude.colKey && Array.isArray(state.colFilters[k]) && state.colFilters[k].length > 0
+    );
 
     return getAllWorkingItems()
       .filter((it) => {
@@ -302,6 +314,11 @@
           if (state.filterEstado === EMPTY_FILTER ? eNorm !== "" : eNorm !== normText(state.filterEstado)) return false;
         }
 
+        for (let i = 0; i < activeColKeys.length; i++) {
+          const ck = activeColKeys[i];
+          if (!state.colFilters[ck].includes(getColFilterValue(it, ck))) return false;
+        }
+
         if (qTokens.length > 0) {
           const blob = normText([
             it.cod_patrimonial, it.denominacion, it.marca, it.modelo, it.numero_serie,
@@ -312,6 +329,260 @@
         }
         return true;
       });
+  }
+
+  function closeColFilterPopover() {
+    const pop = document.getElementById("excel-col-filter-popover");
+    if (pop) pop.classList.add("hidden");
+    state.activeColPopoverKey = null;
+  }
+
+  function updateColFilterIndicators() {
+    let activeColCount = 0;
+    document.querySelectorAll(".th-filter-btn").forEach((btn) => {
+      const k = btn.dataset.colfilter;
+      const sel = state.colFilters[k] || [];
+      const badge = btn.querySelector(".th-filter-badge");
+      if (sel.length > 0) {
+        activeColCount += 1;
+        btn.classList.add("active");
+        if (badge) {
+          badge.textContent = String(sel.length);
+          badge.classList.remove("hidden");
+        }
+      } else {
+        btn.classList.remove("active");
+        if (badge) badge.classList.add("hidden");
+      }
+    });
+    const resetBtn = document.getElementById("btnResetFilters");
+    if (resetBtn) {
+      resetBtn.textContent = activeColCount > 0 ? `Limpiar Filtros (${activeColCount} col.)` : "Limpiar Filtros";
+    }
+  }
+
+  function openColFilterPopover(colKey, labelText, triggerEl) {
+    const pop = document.getElementById("excel-col-filter-popover");
+    if (!pop) return;
+    if (state.activeColPopoverKey === colKey && !pop.classList.contains("hidden")) {
+      closeColFilterPopover();
+      return;
+    }
+    state.activeColPopoverKey = colKey;
+
+    const cascadeData = filterItemsExcluding({ colKey });
+    const valueCounts = new Map();
+    cascadeData.forEach((it) => {
+      const v = getColFilterValue(it, colKey);
+      valueCounts.set(v, (valueCounts.get(v) || 0) + 1);
+    });
+
+    const activeSet = new Set(state.colFilters[colKey] || []);
+    const allUniqueVals = Array.from(valueCounts.keys()).sort((a, b) => {
+      const aSel = activeSet.has(a);
+      const bSel = activeSet.has(b);
+      if (aSel !== bSel) return aSel ? -1 : 1;
+      return a.localeCompare(b, "es", { numeric: true, sensitivity: "base" });
+    });
+
+    let draftSelected = new Set(state.colFilters[colKey] || []);
+    let searchQ = "";
+
+    pop.innerHTML = `
+      <div class="col-pop-hdr">
+        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(labelText)}</span>
+        <div style="display:flex; align-items:center; gap:6px; shrink:0;">
+          <span id="ecf-hdr-badge" style="font-size:10px; background:rgba(255,255,255,0.22); padding:1px 6px; border-radius:999px;"></span>
+          <button type="button" id="ecf-close" style="background:transparent; border:none; color:#fff; font-weight:800; cursor:pointer; font-size:12px;">✕</button>
+        </div>
+      </div>
+      <div class="col-pop-sort">
+        <button type="button" id="ecf-sort-asc" class="${state.colSortKey === colKey && state.colSortDir === "asc" ? "active" : ""}">↑ A → Z</button>
+        <button type="button" id="ecf-sort-desc" class="${state.colSortKey === colKey && state.colSortDir === "desc" ? "active" : ""}">↓ Z → A</button>
+      </div>
+      <div class="col-pop-search">
+        <input type="text" id="ecf-search" placeholder="Buscar valor... (Enter para aplicar)" />
+      </div>
+      <div class="col-pop-master">
+        <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+          <input type="checkbox" id="ecf-select-all" />
+          <span>(Seleccionar todo)</span>
+        </label>
+        <span id="ecf-count-lbl" style="font-family:monospace; font-size:10px; color:#64748b;"></span>
+      </div>
+      <div id="ecf-list" class="col-pop-list"></div>
+      <div class="col-pop-ftr">
+        <button type="button" id="ecf-clear" class="pg-btn">Limpiar</button>
+        <div style="display:flex; gap:6px;">
+          <button type="button" id="ecf-cancel" class="pg-btn">Cancelar</button>
+          <button type="button" id="ecf-apply" class="btn btn-primary" style="padding:5px 12px;">Aceptar</button>
+        </div>
+      </div>
+    `;
+
+    const listEl = pop.querySelector("#ecf-list");
+    const searchEl = pop.querySelector("#ecf-search");
+    const selectAllEl = pop.querySelector("#ecf-select-all");
+    const countLbl = pop.querySelector("#ecf-count-lbl");
+    const hdrBadge = pop.querySelector("#ecf-hdr-badge");
+
+    const getVisibleVals = () => {
+      const tokens = normText(searchQ).split(/\s+/).filter(Boolean);
+      if (tokens.length === 0) return allUniqueVals;
+      return allUniqueVals.filter((v) => {
+        const vn = normText(v || "(Vacío)");
+        return tokens.every((t) => vn.includes(t));
+      });
+    };
+
+    const syncMaster = () => {
+      const vis = getVisibleVals();
+      const selCount = vis.filter((v) => draftSelected.has(v)).length;
+      selectAllEl.checked = vis.length > 0 && selCount === vis.length;
+      selectAllEl.indeterminate = selCount > 0 && selCount < vis.length;
+      countLbl.textContent = `${vis.length} valor(es)`;
+      hdrBadge.textContent = draftSelected.size > 0 ? `${draftSelected.size} sel.` : "Todos";
+    };
+
+    const applyAndClose = () => {
+      const vis = getVisibleVals();
+      if (draftSelected.size > 0) {
+        if (!searchQ.trim() && draftSelected.size === allUniqueVals.length) {
+          delete state.colFilters[colKey];
+        } else {
+          state.colFilters[colKey] = Array.from(draftSelected);
+        }
+      } else if (searchQ.trim() !== "") {
+        if (vis.length > 0 && vis.length < allUniqueVals.length) {
+          state.colFilters[colKey] = vis;
+        } else if (vis.length === 0) {
+          state.colFilters[colKey] = ["__SIN_COINCIDENCIAS__"];
+        } else {
+          delete state.colFilters[colKey];
+        }
+      } else {
+        delete state.colFilters[colKey];
+      }
+      closeColFilterPopover();
+      refreshDynamicFilters();
+      updateColFilterIndicators();
+      renderTable();
+    };
+
+    const renderList = () => {
+      const vis = getVisibleVals();
+      listEl.innerHTML = "";
+      if (vis.length === 0) {
+        listEl.innerHTML = `<div style="padding:16px; text-align:center; color:#94a3b8; font-style:italic; font-size:11px;">No hay coincidencias</div>`;
+        syncMaster();
+        return;
+      }
+      const frag = document.createDocumentFragment();
+      vis.slice(0, 400).forEach((val) => {
+        const row = document.createElement("div");
+        row.className = "col-pop-row";
+
+        const lbl = document.createElement("label");
+        const chk = document.createElement("input");
+        chk.type = "checkbox";
+        chk.checked = draftSelected.has(val);
+        chk.addEventListener("change", () => {
+          if (chk.checked) draftSelected.add(val);
+          else draftSelected.delete(val);
+          syncMaster();
+        });
+        const span = document.createElement("span");
+        span.className = "col-pop-val";
+        span.textContent = val || "(Vacío)";
+        span.title = val || "(Vacío)";
+        if (!val) span.style.color = "#94a3b8";
+        lbl.appendChild(chk);
+        lbl.appendChild(span);
+
+        const right = document.createElement("div");
+        right.style.cssText = "display:flex; align-items:center; gap:4px; shrink:0;";
+
+        const soloBtn = document.createElement("button");
+        soloBtn.type = "button";
+        soloBtn.className = "col-pop-solo";
+        soloBtn.textContent = "Solo";
+        soloBtn.addEventListener("click", (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          state.colFilters[colKey] = [val];
+          closeColFilterPopover();
+          refreshDynamicFilters();
+          updateColFilterIndicators();
+          renderTable();
+        });
+
+        const cnt = document.createElement("span");
+        cnt.className = "col-pop-cnt";
+        cnt.textContent = String(valueCounts.get(val) || 0);
+
+        right.appendChild(soloBtn);
+        right.appendChild(cnt);
+        row.appendChild(lbl);
+        row.appendChild(right);
+        frag.appendChild(row);
+      });
+      if (vis.length > 400) {
+        const more = document.createElement("div");
+        more.style.cssText = "padding:6px; text-align:center; font-size:10px; color:#64748b;";
+        more.textContent = `Mostrando primeros 400 de ${vis.length}. Usa el buscador para filtrar.`;
+        frag.appendChild(more);
+      }
+      listEl.appendChild(frag);
+      syncMaster();
+    };
+
+    renderList();
+
+    pop.classList.remove("hidden");
+    const rect = triggerEl.getBoundingClientRect();
+    const popW = 285;
+    const popH = pop.offsetHeight || 360;
+    const left = Math.min(Math.max(8, rect.left - 120), window.innerWidth - popW - 8);
+    const top = rect.bottom + 6 + popH > window.innerHeight ? Math.max(8, rect.top - popH - 6) : rect.bottom + 6;
+    pop.style.left = `${left}px`;
+    pop.style.top = `${top}px`;
+
+    searchEl.focus();
+    searchEl.addEventListener("input", (ev) => { searchQ = ev.target.value; renderList(); });
+    searchEl.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") { ev.preventDefault(); applyAndClose(); }
+      else if (ev.key === "Escape") closeColFilterPopover();
+    });
+    selectAllEl.addEventListener("change", () => {
+      const vis = getVisibleVals();
+      if (selectAllEl.checked) vis.forEach((v) => draftSelected.add(v));
+      else vis.forEach((v) => draftSelected.delete(v));
+      renderList();
+    });
+    pop.querySelector("#ecf-sort-asc").addEventListener("click", () => {
+      state.colSortKey = colKey;
+      state.colSortDir = "asc";
+      updateSortHeaderIndicators();
+      closeColFilterPopover();
+      renderTable();
+    });
+    pop.querySelector("#ecf-sort-desc").addEventListener("click", () => {
+      state.colSortKey = colKey;
+      state.colSortDir = "desc";
+      updateSortHeaderIndicators();
+      closeColFilterPopover();
+      renderTable();
+    });
+    pop.querySelector("#ecf-clear").addEventListener("click", () => {
+      delete state.colFilters[colKey];
+      closeColFilterPopover();
+      refreshDynamicFilters();
+      updateColFilterIndicators();
+      renderTable();
+    });
+    pop.querySelector("#ecf-cancel").addEventListener("click", closeColFilterPopover);
+    pop.querySelector("#ecf-close").addEventListener("click", closeColFilterPopover);
+    pop.querySelector("#ecf-apply").addEventListener("click", applyAndClose);
   }
 
   function buildDynamicSelect(selectEl, items, getValue, allLabel, emptyLabel, currentVal) {
@@ -1378,11 +1649,11 @@
         num: { cellWidth: 8, halign: "center", fontStyle: "bold" },
         cod: { cellWidth: 26, halign: "center", fontStyle: "bold" },
         denom: { cellWidth: 46, fontStyle: "bold" },
-        specs: { cellWidth: 56 },
+        specs: { cellWidth: 54 },
         ubic: { cellWidth: 44 },
         resp: { cellWidth: 36 },
         est: { cellWidth: 16, halign: "center", fontStyle: "bold" },
-        check: { cellWidth: 10, halign: "center" },
+        check: { cellWidth: 12, halign: "center" },
         obs: { cellWidth: 35 },
       },
       didParseCell: (data) => {
@@ -1487,6 +1758,9 @@
       if (!btn) return;
       state.activeSucursalId = btn.dataset.suc;
       state.selectedUids.clear();
+      state.colFilters = {};
+      closeColFilterPopover();
+      updateColFilterIndicators();
       refreshDynamicFilters();
       refreshBatchCascadeOptions();
       renderAll();
@@ -1534,6 +1808,12 @@
       renderTable();
     });
     document.querySelector("thead").addEventListener("click", (e) => {
+      const filterBtn = e.target.closest(".th-filter-btn");
+      if (filterBtn) {
+        e.stopPropagation();
+        openColFilterPopover(filterBtn.dataset.colfilter, filterBtn.dataset.collabel || filterBtn.dataset.colfilter, filterBtn);
+        return;
+      }
       const th = e.target.closest("th.sortable-th");
       if (!th) return;
       const key = th.dataset.sort;
@@ -1546,6 +1826,16 @@
       updateSortHeaderIndicators();
       renderTable();
     });
+    document.addEventListener("click", (e) => {
+      const pop = document.getElementById("excel-col-filter-popover");
+      if (!pop || pop.classList.contains("hidden")) return;
+      if (!pop.contains(e.target) && !e.target.closest(".th-filter-btn")) {
+        closeColFilterPopover();
+      }
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeColFilterPopover();
+    });
     document.getElementById("btnResetFilters").addEventListener("click", () => {
       state.search = "";
       state.filterUnidad = "";
@@ -1555,6 +1845,9 @@
       state.sortMode = "JERARQUICO";
       state.colSortKey = null;
       state.colSortDir = "asc";
+      state.colFilters = {};
+      closeColFilterPopover();
+      updateColFilterIndicators();
       document.getElementById("searchInput").value = "";
       document.getElementById("searchClear").classList.add("hidden");
       document.getElementById("sortSelect").value = "JERARQUICO";
