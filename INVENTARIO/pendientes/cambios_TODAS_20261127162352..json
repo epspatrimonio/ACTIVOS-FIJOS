@@ -1,0 +1,220 @@
+{
+  "version": "1.1",
+  "origen": "PORTAL_INVENTARIO_CAMPO",
+  "generado_en": "2026-11-27T16:23:52.421Z",
+  "sucursal_origen_paquete": "TODAS",
+  "total_cambios": 12,
+  "total_modificaciones": 12,
+  "total_altas_nuevas": 0,
+  "nota_envio": "Sincronización automática de campo",
+  "cambios": [
+    {
+      "uid": "ACTIVO:339106006",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "339106006",
+      "unidad": "UNIDAD OPERATIVA",
+      "updated_at": "2026-11-26T03:21:04.975Z",
+      "campos_modificados": [
+        "unidad",
+        "puesto_id",
+        "puesto"
+      ],
+      "puesto_id": 79,
+      "puesto": "OTROS",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:339106007",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "339106007",
+      "unidad": "UNIDAD OPERATIVA",
+      "updated_at": "2026-11-26T03:20:53.798Z",
+      "campos_modificados": [
+        "unidad",
+        "puesto_id",
+        "puesto"
+      ],
+      "puesto_id": 79,
+      "puesto": "OTROS",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:339106001",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "339106001",
+      "unidad": "UNIDAD OPERATIVA",
+      "updated_at": "2026-11-26T03:20:48.841Z",
+      "campos_modificados": [
+        "unidad",
+        "puesto_id",
+        "puesto"
+      ],
+      "puesto_id": 79,
+      "puesto": "OTROS",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:339106002",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "339106002",
+      "unidad": "UNIDAD OPERATIVA",
+      "updated_at": "2026-11-26T03:20:55.830Z",
+      "campos_modificados": [
+        "unidad",
+        "puesto_id",
+        "puesto"
+      ],
+      "puesto_id": 79,
+      "puesto": "OTROS",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:339106004",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "339106004",
+      "unidad": "UNIDAD OPERATIVA",
+      "updated_at": "2026-11-26T03:20:57.999Z",
+      "campos_modificados": [
+        "unidad",
+        "puesto_id",
+        "puesto"
+      ],
+      "puesto_id": 79,
+      "puesto": "OTROS",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:339106005",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "339106005",
+      "unidad": "UNIDAD OPERATIVA",
+      "updated_at": "2026-11-26T03:20:59.655Z",
+      "campos_modificados": [
+        "unidad",
+        "puesto_id",
+        "puesto"
+      ],
+      "puesto_id": 79,
+      "puesto": "OTROS",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:339106008",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "339106008",
+      "unidad": "UNIDAD OPERATIVA",
+      "updated_at": "2026-11-26T03:21:01.333Z",
+      "campos_modificados": [
+        "unidad",
+        "puesto_id",
+        "puesto"
+      ],
+      "puesto_id": 79,
+      "puesto": "OTROS",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:339106003",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "339106003",
+      "unidad": "UNIDAD OPERATIVA",
+      "updated_at": "2026-11-26T03:21:03.253Z",
+      "campos_modificados": [
+        "unidad",
+        "puesto_id",
+        "puesto"
+      ],
+      "puesto_id": 79,
+      "puesto": "OTROS",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:630016032",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "630016032",
+      "puesto_id": 5,
+      "puesto": "COMERCIALIZACIÓN",
+      "updated_at": "2026-11-26T03:10:53.803Z",
+      "campos_modificados": [
+        "puesto_id",
+        "puesto"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:630016031",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "630016031",
+      "puesto_id": 5,
+      "puesto": "COMERCIALIZACIÓN",
+      "updated_at": "2026-11-26T03:10:56.682Z",
+      "campos_modificados": [
+        "puesto_id",
+        "puesto"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:600046001",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "600046001",
+      "numero_serie": "AF4C191760180",
+      "updated_at": "2026-11-27T16:23:32.080Z",
+      "campos_modificados": [
+        "puesto_id",
+        "puesto",
+        "cod_personal",
+        "responsable",
+        "caracteristicas_accesorios",
+        "marca",
+        "modelo",
+        "numero_serie",
+        "color"
+      ],
+      "marca": "ZKTECO",
+      "modelo": "UFACE 800",
+      "color": "GRIS",
+      "puesto_id": 39,
+      "puesto": "JEFATURA UO",
+      "cod_personal": "R046",
+      "responsable": "RAMIREZ BALTODANO TITO EDEN",
+      "caracteristicas_accesorios": "",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6230",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6230,
+      "cod_patrimonial": "610056003",
+      "puesto_id": 79,
+      "puesto": "OTROS",
+      "updated_at": "2026-11-27T16:23:27.499Z",
+      "campos_modificados": [
+        "puesto_id",
+        "puesto",
+        "observaciones",
+        "marca",
+        "modelo",
+        "numero_serie",
+        "color"
+      ],
+      "color": "",
+      "numero_serie": "",
+      "marca": "",
+      "modelo": "",
+      "observaciones": "ELIMINAR",
+      "tipo_operacion": "MODIFICACION"
+    }
+  ]
+}
