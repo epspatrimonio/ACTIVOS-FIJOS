@@ -1377,14 +1377,21 @@
     "sucursal": "SATIPO",
     "localidad": "SATIPO",
     "unidad": "UNIDAD OPERATIVA",
-    "puesto_id": 2,
-    "puesto": "ATENCIÓN AL CLIENTE",
+    "puesto_id": 5,
+    "puesto": "COMERCIALIZACIÓN",
     "cod_personal": "C073",
     "responsable": "COLONIO QUIÑONEZ KELVA KELY",
     "estado_activo": "BUENO",
     "valor_en_libros": "4610.0000",
     "valor_neto": "4129.7900",
-    "color": "NEGRO"
+    "color": "NEGRO",
+    "id_regularizacion": null,
+    "sucursal_original": "SATIPO",
+    "updated_at": "2026-11-26T03:10:53.803Z",
+    "campos_modificados": [
+      "puesto_id",
+      "puesto"
+    ]
   },
   {
     "uid": "ACTIVO:630016031",
@@ -1404,13 +1411,20 @@
     "sucursal": "SATIPO",
     "localidad": "SATIPO",
     "unidad": "UNIDAD OPERATIVA",
-    "puesto_id": 2,
-    "puesto": "ATENCIÓN AL CLIENTE",
+    "puesto_id": 5,
+    "puesto": "COMERCIALIZACIÓN",
     "cod_personal": "C073",
     "responsable": "COLONIO QUIÑONEZ KELVA KELY",
     "estado_activo": "BUENO",
     "valor_en_libros": "380.0000",
-    "valor_neto": "340.4200"
+    "valor_neto": "340.4200",
+    "id_regularizacion": null,
+    "sucursal_original": "SATIPO",
+    "updated_at": "2026-11-26T03:10:56.682Z",
+    "campos_modificados": [
+      "puesto_id",
+      "puesto"
+    ]
   },
   {
     "uid": "ACTIVO:339104002",
@@ -10236,13 +10250,32 @@
     "sucursal": "SATIPO",
     "localidad": "SATIPO",
     "unidad": "UNIDAD OPERATIVA",
-    "puesto_id": 79,
-    "puesto": "OTROS",
-    "responsable": "Sin Asignar",
+    "puesto_id": 39,
+    "puesto": "JEFATURA UO",
+    "responsable": "RAMIREZ BALTODANO TITO EDEN",
     "estado_activo": "BUENO",
     "valor_en_libros": "1305.0800",
     "valor_neto": "0",
-    "caracteristicas_accesorios": "COMERCIAL  610056003 / REVISAR"
+    "caracteristicas_accesorios": "",
+    "id_regularizacion": null,
+    "sucursal_original": "SATIPO",
+    "numero_serie": "AF4C191760180",
+    "updated_at": "2026-11-27T16:23:32.080Z",
+    "campos_modificados": [
+      "puesto_id",
+      "puesto",
+      "cod_personal",
+      "responsable",
+      "caracteristicas_accesorios",
+      "marca",
+      "modelo",
+      "numero_serie",
+      "color"
+    ],
+    "marca": "ZKTECO",
+    "modelo": "UFACE 800",
+    "color": "GRIS",
+    "cod_personal": "R046"
   },
   {
     "uid": "ACTIVO:600045002",
@@ -14183,7 +14216,18 @@
     "responsable": "Sin Asignar",
     "estado_activo": "BUENO",
     "valor_en_libros": "2350.0000",
-    "valor_neto": "1018.3300"
+    "valor_neto": "1018.3300",
+    "id_regularizacion": null,
+    "sucursal_original": "SATIPO",
+    "unidad": "UNIDAD OPERATIVA",
+    "updated_at": "2026-11-26T03:21:01.333Z",
+    "campos_modificados": [
+      "unidad",
+      "puesto_id",
+      "puesto"
+    ],
+    "puesto_id": 79,
+    "puesto": "OTROS"
   },
   {
     "uid": "ACTIVO:339106007",
@@ -14209,7 +14253,15 @@
     "puesto": "OTROS",
     "puesto_id": 79,
     "cod_personal": "R046",
-    "caracteristicas_accesorios": "PMO COMERCIAL"
+    "caracteristicas_accesorios": "PMO COMERCIAL",
+    "id_regularizacion": null,
+    "sucursal_original": "SATIPO",
+    "updated_at": "2026-11-26T03:20:53.798Z",
+    "campos_modificados": [
+      "unidad",
+      "puesto_id",
+      "puesto"
+    ]
   },
   {
     "uid": "ACTIVO:339106006",
@@ -14226,7 +14278,18 @@
     "responsable": "Sin Asignar",
     "estado_activo": "BUENO",
     "valor_en_libros": "1599.0000",
-    "valor_neto": "639.6000"
+    "valor_neto": "639.6000",
+    "id_regularizacion": null,
+    "sucursal_original": "SATIPO",
+    "unidad": "UNIDAD OPERATIVA",
+    "updated_at": "2026-11-26T03:21:04.975Z",
+    "campos_modificados": [
+      "unidad",
+      "puesto_id",
+      "puesto"
+    ],
+    "puesto_id": 79,
+    "puesto": "OTROS"
   },
   {
     "uid": "ACTIVO:339106005",
@@ -14243,7 +14306,18 @@
     "responsable": "Sin Asignar",
     "estado_activo": "BUENO",
     "valor_en_libros": "1945.0000",
-    "valor_neto": "1588.4200"
+    "valor_neto": "1588.4200",
+    "id_regularizacion": null,
+    "sucursal_original": "SATIPO",
+    "unidad": "UNIDAD OPERATIVA",
+    "updated_at": "2026-11-26T03:20:59.655Z",
+    "campos_modificados": [
+      "unidad",
+      "puesto_id",
+      "puesto"
+    ],
+    "puesto_id": 79,
+    "puesto": "OTROS"
   },
   {
     "uid": "ACTIVO:339106004",
@@ -14260,7 +14334,18 @@
     "responsable": "Sin Asignar",
     "estado_activo": "BUENO",
     "valor_en_libros": "1760.0000",
-    "valor_neto": "1356.6700"
+    "valor_neto": "1356.6700",
+    "id_regularizacion": null,
+    "sucursal_original": "SATIPO",
+    "unidad": "UNIDAD OPERATIVA",
+    "updated_at": "2026-11-26T03:20:57.999Z",
+    "campos_modificados": [
+      "unidad",
+      "puesto_id",
+      "puesto"
+    ],
+    "puesto_id": 79,
+    "puesto": "OTROS"
   },
   {
     "uid": "ACTIVO:339106003",
@@ -14277,7 +14362,18 @@
     "responsable": "Sin Asignar",
     "estado_activo": "BUENO",
     "valor_en_libros": "120.0000",
-    "valor_neto": "96.0000"
+    "valor_neto": "96.0000",
+    "id_regularizacion": null,
+    "sucursal_original": "SATIPO",
+    "unidad": "UNIDAD OPERATIVA",
+    "updated_at": "2026-11-26T03:21:03.253Z",
+    "campos_modificados": [
+      "unidad",
+      "puesto_id",
+      "puesto"
+    ],
+    "puesto_id": 79,
+    "puesto": "OTROS"
   },
   {
     "uid": "ACTIVO:339106002",
@@ -14294,7 +14390,18 @@
     "responsable": "Sin Asignar",
     "estado_activo": "BUENO",
     "valor_en_libros": "430.0000",
-    "valor_neto": "344.0000"
+    "valor_neto": "344.0000",
+    "id_regularizacion": null,
+    "sucursal_original": "SATIPO",
+    "unidad": "UNIDAD OPERATIVA",
+    "updated_at": "2026-11-26T03:20:55.830Z",
+    "campos_modificados": [
+      "unidad",
+      "puesto_id",
+      "puesto"
+    ],
+    "puesto_id": 79,
+    "puesto": "OTROS"
   },
   {
     "uid": "ACTIVO:339106001",
@@ -14311,7 +14418,18 @@
     "responsable": "Sin Asignar",
     "estado_activo": "BUENO",
     "valor_en_libros": "32906.4400",
-    "valor_neto": "23582.9500"
+    "valor_neto": "23582.9500",
+    "id_regularizacion": null,
+    "sucursal_original": "SATIPO",
+    "unidad": "UNIDAD OPERATIVA",
+    "updated_at": "2026-11-26T03:20:48.841Z",
+    "campos_modificados": [
+      "unidad",
+      "puesto_id",
+      "puesto"
+    ],
+    "puesto_id": 79,
+    "puesto": "OTROS"
   },
   {
     "uid": "ACTIVO:339105005",
@@ -33244,8 +33362,8 @@
     "puesto": "COMERCIALIZACIÓN",
     "responsable": "DURAND DE LA O FLOR DE MARIA",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 11000.0,
-    "valor_neto": 11000.0,
+    "valor_en_libros": 11000,
+    "valor_neto": 11000,
     "cod_personal": "D018"
   },
   {
@@ -33294,8 +33412,8 @@
     "puesto": "OTROS",
     "responsable": "RAMIREZ BALTODANO TITO EDEN",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 4550.0,
-    "valor_neto": 4550.0,
+    "valor_en_libros": 4550,
+    "valor_neto": 4550,
     "cod_personal": "R046",
     "observaciones": "APOYO ADM"
   },
@@ -33322,8 +33440,8 @@
     "puesto": "OTROS",
     "responsable": "Sin asignar",
     "estado_activo": "PARA BAJA",
-    "valor_en_libros": 800.0,
-    "valor_neto": 800.0,
+    "valor_en_libros": 800,
+    "valor_neto": 800,
     "observaciones": "VESTIDOR - 630010269"
   },
   {
@@ -33350,8 +33468,8 @@
     "puesto": "JEFATURA UO",
     "responsable": "RAMIREZ BALTODANO TITO EDEN",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 400.0,
-    "valor_neto": 400.0,
+    "valor_en_libros": 400,
+    "valor_neto": 400,
     "cod_personal": "R046"
   },
   {
@@ -33377,8 +33495,8 @@
     "puesto": "OTROS",
     "responsable": "RAMIREZ BALTODANO TITO EDEN",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 597.0,
-    "valor_neto": 597.0,
+    "valor_en_libros": 597,
+    "valor_neto": 597,
     "cod_personal": "R046",
     "observaciones": "APOYO ADM"
   },
@@ -33393,22 +33511,33 @@
     "denominacion": "RELOJ BIOMETRICO",
     "categoria": "EQUIPOS DIVERSOS",
     "subcategoria": "EQUIPOS DE REGISTRO CONTROL Y SEGURIDAD",
-    "marca": "ZKTECO",
-    "modelo": "UFACE 800",
-    "color": "GRIS",
+    "marca": "",
+    "modelo": "",
+    "color": "",
     "id_sucursal": 60,
     "sucursal": "SATIPO",
     "localidad": "SATIPO",
     "unidad": "UNIDAD OPERATIVA",
-    "puesto_id": 39,
-    "puesto": "JEFATURA UO",
+    "puesto_id": 79,
+    "puesto": "OTROS",
     "responsable": "RAMIREZ BALTODANO TITO EDEN",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 1540.0,
-    "valor_neto": 1540.0,
-    "numero_serie": "AF4C191760180",
+    "valor_en_libros": 1540,
+    "valor_neto": 1540,
+    "numero_serie": "",
     "cod_personal": "R046",
-    "observaciones": "COMERCIAL 600046001 / REVISAR"
+    "observaciones": "ELIMINAR",
+    "sucursal_original": "SATIPO",
+    "updated_at": "2026-11-27T16:23:27.499Z",
+    "campos_modificados": [
+      "puesto_id",
+      "puesto",
+      "observaciones",
+      "marca",
+      "modelo",
+      "numero_serie",
+      "color"
+    ]
   },
   {
     "uid": "REG:6229",
@@ -33459,8 +33588,8 @@
     "puesto": "JEFATURA UO",
     "responsable": "Sin asignar",
     "estado_activo": "MALO",
-    "valor_en_libros": 555.0,
-    "valor_neto": 555.0
+    "valor_en_libros": 555,
+    "valor_neto": 555
   },
   {
     "uid": "REG:6227",
@@ -33657,8 +33786,8 @@
     "puesto": "OTROS",
     "responsable": "Sin asignar",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 514.0,
-    "valor_neto": 514.0
+    "valor_en_libros": 514,
+    "valor_neto": 514
   },
   {
     "uid": "REG:6218",
@@ -33930,8 +34059,8 @@
     "puesto": "OTROS",
     "responsable": "Sin Asignar",
     "estado_activo": "PARA BAJA",
-    "valor_en_libros": 2450.0,
-    "valor_neto": 2450.0,
+    "valor_en_libros": 2450,
+    "valor_neto": 2450,
     "observaciones": "VESTIDOR - 630010240"
   },
   {
@@ -33984,8 +34113,8 @@
     "puesto": "OTROS",
     "responsable": "Sin Asignar",
     "estado_activo": "PARA BAJA",
-    "valor_en_libros": 1300.0,
-    "valor_neto": 1300.0,
+    "valor_en_libros": 1300,
+    "valor_neto": 1300,
     "observaciones": "VESTIDOR 630010153"
   },
   {
@@ -34013,8 +34142,8 @@
     "cod_personal": "R046",
     "responsable": "RAMIREZ BALTODANO TITO EDEN",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 1000.0,
-    "valor_neto": 1000.0
+    "valor_en_libros": 1000,
+    "valor_neto": 1000
   },
   {
     "uid": "REG:6203",
@@ -34038,8 +34167,8 @@
     "puesto": "OTROS",
     "responsable": "Sin Asignar",
     "estado_activo": "PARA BAJA",
-    "valor_en_libros": 750.0,
-    "valor_neto": 750.0,
+    "valor_en_libros": 750,
+    "valor_neto": 750,
     "observaciones": "NO ENCONTRADO"
   },
   {
@@ -34065,8 +34194,8 @@
     "puesto": "ATENCIÓN AL CLIENTE",
     "responsable": "COLONIO QUIÑONEZ KELVA KELY",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 2150.0,
-    "valor_neto": 2150.0,
+    "valor_en_libros": 2150,
+    "valor_neto": 2150,
     "cod_personal": "C073"
   },
   {
@@ -34091,8 +34220,8 @@
     "puesto": "OTROS",
     "responsable": "Sin Asignar",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 4300.0,
-    "valor_neto": 4300.0,
+    "valor_en_libros": 4300,
+    "valor_neto": 4300,
     "observaciones": "NO ENCONTRADO"
   },
   {
@@ -34118,8 +34247,8 @@
     "puesto": "RECAUDACIÓN",
     "responsable": "ARIZAPANA MURAYARI NANCY JANETH",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 770.0,
-    "valor_neto": 770.0,
+    "valor_en_libros": 770,
+    "valor_neto": 770,
     "cod_personal": "A054"
   },
   {
@@ -34199,8 +34328,8 @@
     "puesto": "ALMACÉN MAQUINARIAS",
     "responsable": "Sin asignar",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 4777.0,
-    "valor_neto": 4777.0,
+    "valor_en_libros": 4777,
+    "valor_neto": 4777,
     "observaciones": "REVISAR"
   },
   {
@@ -34354,8 +34483,8 @@
     "puesto": "ALMACÉN MAQUINARIAS",
     "responsable": "Sin asignar",
     "estado_activo": "MALO",
-    "valor_en_libros": 790.0,
-    "valor_neto": 790.0
+    "valor_en_libros": 790,
+    "valor_neto": 790
   },
   {
     "uid": "REG:6190",
@@ -34382,8 +34511,8 @@
     "cod_personal": "R035",
     "responsable": "ROJAS BELTRAN NILTON ALCIDES",
     "estado_activo": "MALO",
-    "valor_en_libros": 940.0,
-    "valor_neto": 940.0,
+    "valor_en_libros": 940,
+    "valor_neto": 940,
     "numero_serie": "200043"
   },
   {
@@ -34412,8 +34541,8 @@
     "cod_personal": "R035",
     "responsable": "ROJAS BELTRAN NILTON ALCIDES",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 600.0,
-    "valor_neto": 600.0
+    "valor_en_libros": 600,
+    "valor_neto": 600
   },
   {
     "uid": "REG:6188",
@@ -34439,8 +34568,8 @@
     "cod_personal": "R035",
     "responsable": "ROJAS BELTRAN NILTON ALCIDES",
     "estado_activo": "PARA BAJA",
-    "valor_en_libros": 750.0,
-    "valor_neto": 750.0,
+    "valor_en_libros": 750,
+    "valor_neto": 750,
     "observaciones": "INOPERATIVO / IRREPARABLE"
   },
   {
@@ -34467,8 +34596,8 @@
     "cod_personal": "R035",
     "responsable": "ROJAS BELTRAN NILTON ALCIDES",
     "estado_activo": "BUENO",
-    "valor_en_libros": 580.0,
-    "valor_neto": 580.0,
+    "valor_en_libros": 580,
+    "valor_neto": 580,
     "observaciones": "NO SE DA USO"
   },
   {
@@ -34660,8 +34789,8 @@
     "cod_personal": "R035",
     "responsable": "ROJAS BELTRAN NILTON ALCIDES",
     "estado_activo": "PARA BAJA",
-    "valor_en_libros": 1250.0,
-    "valor_neto": 1250.0
+    "valor_en_libros": 1250,
+    "valor_neto": 1250
   },
   {
     "uid": "REG:6179",
@@ -34738,8 +34867,8 @@
     "cod_personal": "R035",
     "responsable": "ROJAS BELTRAN NILTON ALCIDES",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 1640.0,
-    "valor_neto": 1640.0
+    "valor_en_libros": 1640,
+    "valor_neto": 1640
   },
   {
     "uid": "REG:6176",
@@ -34764,8 +34893,8 @@
     "cod_personal": "R035",
     "responsable": "ROJAS BELTRAN NILTON ALCIDES",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 1640.0,
-    "valor_neto": 1640.0
+    "valor_en_libros": 1640,
+    "valor_neto": 1640
   },
   {
     "uid": "REG:6175",
@@ -34790,8 +34919,8 @@
     "cod_personal": "R035",
     "responsable": "ROJAS BELTRAN NILTON ALCIDES",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 1640.0,
-    "valor_neto": 1640.0
+    "valor_en_libros": 1640,
+    "valor_neto": 1640
   },
   {
     "uid": "REG:6174",
@@ -34816,8 +34945,8 @@
     "cod_personal": "R035",
     "responsable": "ROJAS BELTRAN NILTON ALCIDES",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 1640.0,
-    "valor_neto": 1640.0
+    "valor_en_libros": 1640,
+    "valor_neto": 1640
   },
   {
     "uid": "REG:6173",
@@ -34871,8 +35000,8 @@
     "cod_personal": "B023",
     "responsable": "BARZOLA LOPEZ MORELIA KATHERINE",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 450.0,
-    "valor_neto": 450.0
+    "valor_en_libros": 450,
+    "valor_neto": 450
   },
   {
     "uid": "REG:6171",
@@ -34926,8 +35055,8 @@
     "cod_personal": "F009",
     "responsable": "FERNANDEZ ARELLANO REMIGIO DAVID",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 795.0,
-    "valor_neto": 795.0
+    "valor_en_libros": 795,
+    "valor_neto": 795
   },
   {
     "uid": "REG:6169",
@@ -34950,8 +35079,8 @@
     "puesto": "JEFATURA UO",
     "responsable": "Sin asignar",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 3310.0,
-    "valor_neto": 3310.0
+    "valor_en_libros": 3310,
+    "valor_neto": 3310
   },
   {
     "uid": "REG:6168",
@@ -34975,8 +35104,8 @@
     "cod_personal": "F009",
     "responsable": "FERNANDEZ ARELLANO REMIGIO DAVID",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 2450.0,
-    "valor_neto": 2450.0
+    "valor_en_libros": 2450,
+    "valor_neto": 2450
   },
   {
     "uid": "REG:6167",
@@ -35003,8 +35132,8 @@
     "cod_personal": "Z001",
     "responsable": "ZUÑIGA INGA SADITH",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 3700.0,
-    "valor_neto": 3700.0
+    "valor_en_libros": 3700,
+    "valor_neto": 3700
   },
   {
     "uid": "REG:6166",
@@ -35030,8 +35159,8 @@
     "cod_personal": "Z001",
     "responsable": "ZUÑIGA INGA SADITH",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 2890.0,
-    "valor_neto": 2890.0
+    "valor_en_libros": 2890,
+    "valor_neto": 2890
   },
   {
     "uid": "REG:6165",
@@ -35058,8 +35187,8 @@
     "cod_personal": "Z001",
     "responsable": "ZUÑIGA INGA SADITH",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 3700.0,
-    "valor_neto": 3700.0
+    "valor_en_libros": 3700,
+    "valor_neto": 3700
   },
   {
     "uid": "REG:6164",
@@ -35193,8 +35322,8 @@
     "cod_personal": "Q013",
     "responsable": "QQUENTE ZELADA KARINA BRIGIDA",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 2120.0,
-    "valor_neto": 2120.0
+    "valor_en_libros": 2120,
+    "valor_neto": 2120
   },
   {
     "uid": "REG:6159",
@@ -35247,8 +35376,8 @@
     "cod_personal": "Q013",
     "responsable": "QQUENTE ZELADA KARINA BRIGIDA",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 2400.0,
-    "valor_neto": 2400.0
+    "valor_en_libros": 2400,
+    "valor_neto": 2400
   },
   {
     "uid": "REG:6157",
@@ -35273,8 +35402,8 @@
     "puesto": "JEFATURA UO",
     "responsable": "Sin asignar",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 795.0,
-    "valor_neto": 795.0
+    "valor_en_libros": 795,
+    "valor_neto": 795
   },
   {
     "uid": "REG:6156",
@@ -35300,8 +35429,8 @@
     "puesto": "EXTERIORES",
     "responsable": "Sin asignar",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 1600.0,
-    "valor_neto": 1600.0
+    "valor_en_libros": 1600,
+    "valor_neto": 1600
   },
   {
     "uid": "REG:6155",
@@ -35350,8 +35479,8 @@
     "cod_personal": "C098",
     "responsable": "CONCHA COLINA JOSE EDWIN",
     "estado_activo": "BUENO",
-    "valor_en_libros": 790.0,
-    "valor_neto": 790.0
+    "valor_en_libros": 790,
+    "valor_neto": 790
   },
   {
     "uid": "REG:6153",
@@ -35378,8 +35507,8 @@
     "cod_personal": "C098",
     "responsable": "CONCHA COLINA JOSE EDWIN",
     "estado_activo": "MALO",
-    "valor_en_libros": 400.0,
-    "valor_neto": 400.0
+    "valor_en_libros": 400,
+    "valor_neto": 400
   },
   {
     "uid": "REG:6152",
@@ -35406,8 +35535,8 @@
     "cod_personal": "C098",
     "responsable": "CONCHA COLINA JOSE EDWIN",
     "estado_activo": "MALO",
-    "valor_en_libros": 555.0,
-    "valor_neto": 555.0
+    "valor_en_libros": 555,
+    "valor_neto": 555
   },
   {
     "uid": "REG:6151",
@@ -35460,8 +35589,8 @@
     "cod_personal": "V002",
     "responsable": "VALLEZ PILCO JOSE LUIS",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 6635.0,
-    "valor_neto": 6635.0
+    "valor_en_libros": 6635,
+    "valor_neto": 6635
   },
   {
     "uid": "REG:6149",
@@ -35487,8 +35616,8 @@
     "cod_personal": "S046",
     "responsable": "SOSA GOSME STEPFANIE KARLA",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 2890.0,
-    "valor_neto": 2890.0
+    "valor_en_libros": 2890,
+    "valor_neto": 2890
   },
   {
     "uid": "REG:6148",
@@ -35514,8 +35643,8 @@
     "cod_personal": "S046",
     "responsable": "SOSA GOSME STEPFANIE KARLA",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 1998.0,
-    "valor_neto": 1998.0
+    "valor_en_libros": 1998,
+    "valor_neto": 1998
   },
   {
     "uid": "REG:6147",
@@ -35567,8 +35696,8 @@
     "cod_personal": "S046",
     "responsable": "SOSA GOSME STEPFANIE KARLA",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 480.0,
-    "valor_neto": 480.0
+    "valor_en_libros": 480,
+    "valor_neto": 480
   },
   {
     "uid": "REG:6145",
@@ -35594,8 +35723,8 @@
     "cod_personal": "O017",
     "responsable": "ORTIZ RAMOS VIANCA ROCIO",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 400.0,
-    "valor_neto": 400.0
+    "valor_en_libros": 400,
+    "valor_neto": 400
   },
   {
     "uid": "REG:6144",
@@ -35621,8 +35750,8 @@
     "cod_personal": "O017",
     "responsable": "ORTIZ RAMOS VIANCA ROCIO",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 840.0,
-    "valor_neto": 840.0
+    "valor_en_libros": 840,
+    "valor_neto": 840
   },
   {
     "uid": "REG:6143",
@@ -35646,8 +35775,8 @@
     "cod_personal": "C080",
     "responsable": "CASIMIRO ROBLES GREICY KELLY",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 2450.0,
-    "valor_neto": 2450.0
+    "valor_en_libros": 2450,
+    "valor_neto": 2450
   },
   {
     "uid": "REG:6142",
@@ -35673,8 +35802,8 @@
     "cod_personal": "M059",
     "responsable": "MENDOZA FLORES MARIA MAGDALENA",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 2890.0,
-    "valor_neto": 2890.0
+    "valor_en_libros": 2890,
+    "valor_neto": 2890
   },
   {
     "uid": "REG:6141",
@@ -35699,8 +35828,8 @@
     "cod_personal": "C068",
     "responsable": "COCHACHI BRAVO LUIS JUAN",
     "estado_activo": "BUENO",
-    "valor_en_libros": 495.0,
-    "valor_neto": 495.0
+    "valor_en_libros": 495,
+    "valor_neto": 495
   },
   {
     "uid": "REG:6140",
@@ -35724,8 +35853,8 @@
     "cod_personal": "C068",
     "responsable": "COCHACHI BRAVO LUIS JUAN",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 1000.0,
-    "valor_neto": 1000.0
+    "valor_en_libros": 1000,
+    "valor_neto": 1000
   },
   {
     "uid": "REG:6139",
@@ -35749,8 +35878,8 @@
     "cod_personal": "C068",
     "responsable": "COCHACHI BRAVO LUIS JUAN",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 1000.0,
-    "valor_neto": 1000.0
+    "valor_en_libros": 1000,
+    "valor_neto": 1000
   },
   {
     "uid": "REG:6138",
@@ -35774,8 +35903,8 @@
     "cod_personal": "C068",
     "responsable": "COCHACHI BRAVO LUIS JUAN",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 1000.0,
-    "valor_neto": 1000.0
+    "valor_en_libros": 1000,
+    "valor_neto": 1000
   },
   {
     "uid": "REG:6137",
@@ -35799,8 +35928,8 @@
     "cod_personal": "C068",
     "responsable": "COCHACHI BRAVO LUIS JUAN",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 1000.0,
-    "valor_neto": 1000.0
+    "valor_en_libros": 1000,
+    "valor_neto": 1000
   },
   {
     "uid": "REG:6136",
@@ -35824,8 +35953,8 @@
     "cod_personal": "C068",
     "responsable": "COCHACHI BRAVO LUIS JUAN",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 1000.0,
-    "valor_neto": 1000.0
+    "valor_en_libros": 1000,
+    "valor_neto": 1000
   },
   {
     "uid": "REG:6135",
@@ -35880,8 +36009,8 @@
     "cod_personal": "M059",
     "responsable": "MENDOZA FLORES MARIA MAGDALENA",
     "estado_activo": "MALO",
-    "valor_en_libros": 2600.0,
-    "valor_neto": 2600.0
+    "valor_en_libros": 2600,
+    "valor_neto": 2600
   },
   {
     "uid": "REG:6133",
@@ -35907,8 +36036,8 @@
     "cod_personal": "R044",
     "responsable": "RODRIGUEZ FLORES LENNY YEISON",
     "estado_activo": "BUENO",
-    "valor_en_libros": 750.0,
-    "valor_neto": 750.0
+    "valor_en_libros": 750,
+    "valor_neto": 750
   },
   {
     "uid": "REG:6132",
@@ -35935,8 +36064,8 @@
     "cod_personal": "R044",
     "responsable": "RODRIGUEZ FLORES LENNY YEISON",
     "estado_activo": "PARA BAJA",
-    "valor_en_libros": 495.0,
-    "valor_neto": 495.0
+    "valor_en_libros": 495,
+    "valor_neto": 495
   },
   {
     "uid": "REG:6131",
@@ -35959,8 +36088,8 @@
     "cod_personal": "R044",
     "responsable": "RODRIGUEZ FLORES LENNY YEISON",
     "estado_activo": "MALO",
-    "valor_en_libros": 10500.0,
-    "valor_neto": 10500.0
+    "valor_en_libros": 10500,
+    "valor_neto": 10500
   },
   {
     "uid": "REG:6130",
@@ -35986,8 +36115,8 @@
     "cod_personal": "R044",
     "responsable": "RODRIGUEZ FLORES LENNY YEISON",
     "estado_activo": "PARA BAJA",
-    "valor_en_libros": 400.0,
-    "valor_neto": 400.0
+    "valor_en_libros": 400,
+    "valor_neto": 400
   },
   {
     "uid": "REG:6129",
@@ -36013,8 +36142,8 @@
     "cod_personal": "R044",
     "responsable": "RODRIGUEZ FLORES LENNY YEISON",
     "estado_activo": "PARA BAJA",
-    "valor_en_libros": 2560.0,
-    "valor_neto": 2560.0
+    "valor_en_libros": 2560,
+    "valor_neto": 2560
   },
   {
     "uid": "REG:6128",
@@ -36095,8 +36224,8 @@
     "cod_personal": "C068",
     "responsable": "COCHACHI BRAVO LUIS JUAN",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 6855.0,
-    "valor_neto": 6855.0
+    "valor_en_libros": 6855,
+    "valor_neto": 6855
   },
   {
     "uid": "REG:6125",
@@ -36122,8 +36251,8 @@
     "cod_personal": "C068",
     "responsable": "COCHACHI BRAVO LUIS JUAN",
     "estado_activo": "PARA BAJA",
-    "valor_en_libros": 870.0,
-    "valor_neto": 870.0
+    "valor_en_libros": 870,
+    "valor_neto": 870
   },
   {
     "uid": "REG:6124",
@@ -36175,8 +36304,8 @@
     "cod_personal": "E009",
     "responsable": "ESPINOZA MUÑOZ ANTHONI EULOGIO",
     "estado_activo": "PARA BAJA",
-    "valor_en_libros": 2620.0,
-    "valor_neto": 2620.0
+    "valor_en_libros": 2620,
+    "valor_neto": 2620
   },
   {
     "uid": "REG:6122",
@@ -36201,8 +36330,8 @@
     "cod_personal": "C069",
     "responsable": "CRISTOBAL GOMEZ EDWIN HOMER",
     "estado_activo": "BUENO",
-    "valor_en_libros": 2820.0,
-    "valor_neto": 2820.0
+    "valor_en_libros": 2820,
+    "valor_neto": 2820
   },
   {
     "uid": "REG:6121",
@@ -36255,8 +36384,8 @@
     "cod_personal": "C069",
     "responsable": "CRISTOBAL GOMEZ EDWIN HOMER",
     "estado_activo": "PARA BAJA",
-    "valor_en_libros": 4765.0,
-    "valor_neto": 4765.0
+    "valor_en_libros": 4765,
+    "valor_neto": 4765
   },
   {
     "uid": "REG:6119",
@@ -36308,8 +36437,8 @@
     "cod_personal": "C069",
     "responsable": "CRISTOBAL GOMEZ EDWIN HOMER",
     "estado_activo": "PARA BAJA",
-    "valor_en_libros": 3310.0,
-    "valor_neto": 3310.0
+    "valor_en_libros": 3310,
+    "valor_neto": 3310
   },
   {
     "uid": "REG:6117",
@@ -36336,8 +36465,8 @@
     "cod_personal": "C069",
     "responsable": "CRISTOBAL GOMEZ EDWIN HOMER",
     "estado_activo": "PARA BAJA",
-    "valor_en_libros": 460.0,
-    "valor_neto": 460.0
+    "valor_en_libros": 460,
+    "valor_neto": 460
   },
   {
     "uid": "REG:6116",
@@ -36362,8 +36491,8 @@
     "cod_personal": "C069",
     "responsable": "CRISTOBAL GOMEZ EDWIN HOMER",
     "estado_activo": "PARA BAJA",
-    "valor_en_libros": 1300.0,
-    "valor_neto": 1300.0
+    "valor_en_libros": 1300,
+    "valor_neto": 1300
   },
   {
     "uid": "REG:6115",
@@ -36417,8 +36546,8 @@
     "cod_personal": "C069",
     "responsable": "CRISTOBAL GOMEZ EDWIN HOMER",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 6980.0,
-    "valor_neto": 6980.0
+    "valor_en_libros": 6980,
+    "valor_neto": 6980
   },
   {
     "uid": "REG:6113",
@@ -36578,8 +36707,8 @@
     "cod_personal": "C069",
     "responsable": "CRISTOBAL GOMEZ EDWIN HOMER",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 4850.0,
-    "valor_neto": 4850.0
+    "valor_en_libros": 4850,
+    "valor_neto": 4850
   },
   {
     "uid": "REG:6107",
@@ -36628,8 +36757,8 @@
     "puesto": "VESTIDOR",
     "responsable": "Sin asignar",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 850.0,
-    "valor_neto": 850.0
+    "valor_en_libros": 850,
+    "valor_neto": 850
   },
   {
     "uid": "REG:6105",
@@ -36652,8 +36781,8 @@
     "puesto": "VESTIDOR",
     "responsable": "Sin asignar",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 850.0,
-    "valor_neto": 850.0
+    "valor_en_libros": 850,
+    "valor_neto": 850
   },
   {
     "uid": "REG:6104",
@@ -36676,8 +36805,8 @@
     "puesto": "VESTIDOR",
     "responsable": "Sin asignar",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 850.0,
-    "valor_neto": 850.0
+    "valor_en_libros": 850,
+    "valor_neto": 850
   },
   {
     "uid": "REG:6103",
@@ -36700,8 +36829,8 @@
     "puesto": "VESTIDOR",
     "responsable": "Sin asignar",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 850.0,
-    "valor_neto": 850.0
+    "valor_en_libros": 850,
+    "valor_neto": 850
   },
   {
     "uid": "REG:6102",
@@ -36757,8 +36886,8 @@
     "cod_personal": "P051",
     "responsable": "PILLHUAMAN CORBETTA JENNYFER DANITZA",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 450.0,
-    "valor_neto": 450.0
+    "valor_en_libros": 450,
+    "valor_neto": 450
   },
   {
     "uid": "REG:6100",
@@ -36781,8 +36910,8 @@
     "cod_personal": "P051",
     "responsable": "PILLHUAMAN CORBETTA JENNYFER DANITZA",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 5280.0,
-    "valor_neto": 5280.0
+    "valor_en_libros": 5280,
+    "valor_neto": 5280
   },
   {
     "uid": "REG:6099",
@@ -36806,8 +36935,8 @@
     "cod_personal": "P051",
     "responsable": "PILLHUAMAN CORBETTA JENNYFER DANITZA",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 449.0,
-    "valor_neto": 449.0
+    "valor_en_libros": 449,
+    "valor_neto": 449
   },
   {
     "uid": "REG:6098",
@@ -36833,8 +36962,8 @@
     "cod_personal": "R031",
     "responsable": "ROMERO CHANG NORA MIRTHA",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 450.0,
-    "valor_neto": 450.0
+    "valor_en_libros": 450,
+    "valor_neto": 450
   },
   {
     "uid": "REG:6097",
@@ -36860,8 +36989,8 @@
     "cod_personal": "R031",
     "responsable": "ROMERO CHANG NORA MIRTHA",
     "estado_activo": "BUENO",
-    "valor_en_libros": 1750.0,
-    "valor_neto": 1750.0
+    "valor_en_libros": 1750,
+    "valor_neto": 1750
   },
   {
     "uid": "REG:6096",
@@ -36909,8 +37038,8 @@
     "cod_personal": "R031",
     "responsable": "ROMERO CHANG NORA MIRTHA",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 449.0,
-    "valor_neto": 449.0
+    "valor_en_libros": 449,
+    "valor_neto": 449
   },
   {
     "uid": "REG:6094",
@@ -36937,8 +37066,8 @@
     "puesto": "ATENCIÓN AL CLIENTE",
     "responsable": "Sin asignar",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 1998.0,
-    "valor_neto": 1998.0
+    "valor_en_libros": 1998,
+    "valor_neto": 1998
   },
   {
     "uid": "REG:6093",
@@ -37117,8 +37246,8 @@
     "puesto": "ALMACÉN MAQUINARIAS",
     "responsable": "Sin asignar",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 4840.0,
-    "valor_neto": 4840.0
+    "valor_en_libros": 4840,
+    "valor_neto": 4840
   },
   {
     "uid": "REG:6086",
@@ -37166,8 +37295,8 @@
     "puesto": "ALMACÉN MAQUINARIAS",
     "responsable": "Sin asignar",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 480.0,
-    "valor_neto": 480.0
+    "valor_en_libros": 480,
+    "valor_neto": 480
   },
   {
     "uid": "REG:6084",
@@ -37192,8 +37321,8 @@
     "cod_personal": "G010",
     "responsable": "GOMEZ DIAZ EDGAR ROCIO.",
     "estado_activo": "MALO",
-    "valor_en_libros": 1920.0,
-    "valor_neto": 1920.0
+    "valor_en_libros": 1920,
+    "valor_neto": 1920
   },
   {
     "uid": "REG:6083",
@@ -37241,8 +37370,8 @@
     "cod_personal": "G010",
     "responsable": "GOMEZ DIAZ EDGAR ROCIO.",
     "estado_activo": "BUENO",
-    "valor_en_libros": 5400.0,
-    "valor_neto": 5400.0
+    "valor_en_libros": 5400,
+    "valor_neto": 5400
   },
   {
     "uid": "REG:6081",
@@ -37267,8 +37396,8 @@
     "cod_personal": "G010",
     "responsable": "GOMEZ DIAZ EDGAR ROCIO.",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 480.0,
-    "valor_neto": 480.0
+    "valor_en_libros": 480,
+    "valor_neto": 480
   },
   {
     "uid": "REG:6080",
@@ -37291,8 +37420,8 @@
     "cod_personal": "G010",
     "responsable": "GOMEZ DIAZ EDGAR ROCIO.",
     "estado_activo": "PARA BAJA",
-    "valor_en_libros": 720.0,
-    "valor_neto": 720.0
+    "valor_en_libros": 720,
+    "valor_neto": 720
   },
   {
     "uid": "REG:6079",
@@ -37428,8 +37557,8 @@
     "puesto": "CTO BOMBAS",
     "responsable": "Sin asignar",
     "estado_activo": "MALO",
-    "valor_en_libros": 3800.0,
-    "valor_neto": 3800.0
+    "valor_en_libros": 3800,
+    "valor_neto": 3800
   },
   {
     "uid": "REG:6074",
@@ -37482,8 +37611,8 @@
     "puesto": "CTO BOMBAS",
     "responsable": "Sin asignar",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 1400.0,
-    "valor_neto": 1400.0
+    "valor_en_libros": 1400,
+    "valor_neto": 1400
   },
   {
     "uid": "REG:6072",
@@ -37532,8 +37661,8 @@
     "puesto": "ALMACÉN UO",
     "responsable": "Sin asignar",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 2820.0,
-    "valor_neto": 2820.0
+    "valor_en_libros": 2820,
+    "valor_neto": 2820
   },
   {
     "uid": "REG:6070",
@@ -37555,8 +37684,8 @@
     "puesto": "ALMACÉN UO",
     "responsable": "Sin asignar",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 1560.0,
-    "valor_neto": 1560.0
+    "valor_en_libros": 1560,
+    "valor_neto": 1560
   },
   {
     "uid": "REG:6069",
@@ -37578,8 +37707,8 @@
     "puesto": "ALMACÉN UO",
     "responsable": "Sin asignar",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 1500.0,
-    "valor_neto": 1500.0
+    "valor_en_libros": 1500,
+    "valor_neto": 1500
   },
   {
     "uid": "REG:6068",
@@ -37601,8 +37730,8 @@
     "puesto": "ALMACÉN UO",
     "responsable": "Sin asignar",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 1640.0,
-    "valor_neto": 1640.0
+    "valor_en_libros": 1640,
+    "valor_neto": 1640
   },
   {
     "uid": "REG:6067",
@@ -37624,8 +37753,8 @@
     "puesto": "ALMACÉN UO",
     "responsable": "Sin asignar",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 1640.0,
-    "valor_neto": 1640.0
+    "valor_en_libros": 1640,
+    "valor_neto": 1640
   },
   {
     "uid": "REG:6066",
@@ -37724,8 +37853,8 @@
     "cod_personal": "L032",
     "responsable": "LAURA VERGARA DENNIS EDDIE",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 1960.0,
-    "valor_neto": 1960.0
+    "valor_en_libros": 1960,
+    "valor_neto": 1960
   },
   {
     "uid": "REG:6062",
@@ -37749,8 +37878,8 @@
     "cod_personal": "L032",
     "responsable": "LAURA VERGARA DENNIS EDDIE",
     "estado_activo": "MALO",
-    "valor_en_libros": 720.0,
-    "valor_neto": 720.0
+    "valor_en_libros": 720,
+    "valor_neto": 720
   },
   {
     "uid": "REG:6061",
@@ -37797,8 +37926,8 @@
     "cod_personal": "L032",
     "responsable": "LAURA VERGARA DENNIS EDDIE",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 1830.0,
-    "valor_neto": 1830.0
+    "valor_en_libros": 1830,
+    "valor_neto": 1830
   },
   {
     "uid": "REG:6059",
@@ -37821,8 +37950,8 @@
     "cod_personal": "L032",
     "responsable": "LAURA VERGARA DENNIS EDDIE",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 850.0,
-    "valor_neto": 850.0
+    "valor_en_libros": 850,
+    "valor_neto": 850
   },
   {
     "uid": "REG:6058",
@@ -37845,8 +37974,8 @@
     "cod_personal": "L032",
     "responsable": "LAURA VERGARA DENNIS EDDIE",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 850.0,
-    "valor_neto": 850.0
+    "valor_en_libros": 850,
+    "valor_neto": 850
   },
   {
     "uid": "REG:6057",
@@ -37869,8 +37998,8 @@
     "cod_personal": "L032",
     "responsable": "LAURA VERGARA DENNIS EDDIE",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 850.0,
-    "valor_neto": 850.0
+    "valor_en_libros": 850,
+    "valor_neto": 850
   },
   {
     "uid": "REG:6056",
@@ -37893,8 +38022,8 @@
     "cod_personal": "L032",
     "responsable": "LAURA VERGARA DENNIS EDDIE",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 850.0,
-    "valor_neto": 850.0
+    "valor_en_libros": 850,
+    "valor_neto": 850
   },
   {
     "uid": "REG:6055",
@@ -37917,8 +38046,8 @@
     "cod_personal": "L032",
     "responsable": "LAURA VERGARA DENNIS EDDIE",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 850.0,
-    "valor_neto": 850.0
+    "valor_en_libros": 850,
+    "valor_neto": 850
   },
   {
     "uid": "REG:6054",
@@ -37941,8 +38070,8 @@
     "cod_personal": "L032",
     "responsable": "LAURA VERGARA DENNIS EDDIE",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 850.0,
-    "valor_neto": 850.0
+    "valor_en_libros": 850,
+    "valor_neto": 850
   },
   {
     "uid": "REG:6053",
@@ -37965,8 +38094,8 @@
     "cod_personal": "L032",
     "responsable": "LAURA VERGARA DENNIS EDDIE",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 850.0,
-    "valor_neto": 850.0
+    "valor_en_libros": 850,
+    "valor_neto": 850
   },
   {
     "uid": "REG:6052",
@@ -37989,8 +38118,8 @@
     "cod_personal": "L032",
     "responsable": "LAURA VERGARA DENNIS EDDIE",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 850.0,
-    "valor_neto": 850.0
+    "valor_en_libros": 850,
+    "valor_neto": 850
   },
   {
     "uid": "REG:6051",
@@ -38016,8 +38145,8 @@
     "cod_personal": "R045",
     "responsable": "RAMIREZ PASSUNI ERICK HANS",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 6500.0,
-    "valor_neto": 6500.0
+    "valor_en_libros": 6500,
+    "valor_neto": 6500
   },
   {
     "uid": "REG:6050",
@@ -38044,8 +38173,8 @@
     "cod_personal": "R045",
     "responsable": "RAMIREZ PASSUNI ERICK HANS",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 4200.0,
-    "valor_neto": 4200.0
+    "valor_en_libros": 4200,
+    "valor_neto": 4200
   },
   {
     "uid": "REG:6049",
@@ -38098,8 +38227,8 @@
     "cod_personal": "B020",
     "responsable": "BLANCAS HUATUCO HELYN ROCIO",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 435.0,
-    "valor_neto": 435.0
+    "valor_en_libros": 435,
+    "valor_neto": 435
   },
   {
     "uid": "REG:6047",
@@ -38125,8 +38254,8 @@
     "cod_personal": "R045",
     "responsable": "RAMIREZ PASSUNI ERICK HANS",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 1925.0,
-    "valor_neto": 1925.0
+    "valor_en_libros": 1925,
+    "valor_neto": 1925
   },
   {
     "uid": "REG:6046",
@@ -38153,8 +38282,8 @@
     "cod_personal": "R045",
     "responsable": "RAMIREZ PASSUNI ERICK HANS",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 3300.0,
-    "valor_neto": 3300.0
+    "valor_en_libros": 3300,
+    "valor_neto": 3300
   },
   {
     "uid": "REG:6045",
@@ -38178,8 +38307,8 @@
     "cod_personal": "R045",
     "responsable": "RAMIREZ PASSUNI ERICK HANS",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 900.0,
-    "valor_neto": 900.0
+    "valor_en_libros": 900,
+    "valor_neto": 900
   },
   {
     "uid": "REG:6044",
@@ -38203,8 +38332,8 @@
     "cod_personal": "R045",
     "responsable": "RAMIREZ PASSUNI ERICK HANS",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 475.0,
-    "valor_neto": 475.0
+    "valor_en_libros": 475,
+    "valor_neto": 475
   },
   {
     "uid": "REG:6043",
@@ -38228,8 +38357,8 @@
     "cod_personal": "R045",
     "responsable": "RAMIREZ PASSUNI ERICK HANS",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 1039.0,
-    "valor_neto": 1039.0
+    "valor_en_libros": 1039,
+    "valor_neto": 1039
   },
   {
     "uid": "REG:6042",
@@ -38256,8 +38385,8 @@
     "cod_personal": "C091",
     "responsable": "CASIMIRO ZAPATA KARLA ESTHEFANY",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 834.0,
-    "valor_neto": 834.0
+    "valor_en_libros": 834,
+    "valor_neto": 834
   },
   {
     "uid": "REG:6041",
@@ -38309,8 +38438,8 @@
     "cod_personal": "C091",
     "responsable": "CASIMIRO ZAPATA KARLA ESTHEFANY",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 2800.0,
-    "valor_neto": 2800.0
+    "valor_en_libros": 2800,
+    "valor_neto": 2800
   },
   {
     "uid": "REG:6039",
@@ -38334,8 +38463,8 @@
     "cod_personal": "C091",
     "responsable": "CASIMIRO ZAPATA KARLA ESTHEFANY",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 380.0,
-    "valor_neto": 380.0
+    "valor_en_libros": 380,
+    "valor_neto": 380
   },
   {
     "uid": "REG:6038",
@@ -38388,8 +38517,8 @@
     "cod_personal": "Q004",
     "responsable": "QUISPE RODRIGUEZ WALTER RAUL",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 600.0,
-    "valor_neto": 600.0
+    "valor_en_libros": 600,
+    "valor_neto": 600
   },
   {
     "uid": "REG:6036",
@@ -38415,8 +38544,8 @@
     "cod_personal": "Q004",
     "responsable": "QUISPE RODRIGUEZ WALTER RAUL",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 1925.0,
-    "valor_neto": 1925.0
+    "valor_en_libros": 1925,
+    "valor_neto": 1925
   },
   {
     "uid": "REG:6035",
@@ -38440,8 +38569,8 @@
     "cod_personal": "Q004",
     "responsable": "QUISPE RODRIGUEZ WALTER RAUL",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 4800.0,
-    "valor_neto": 4800.0
+    "valor_en_libros": 4800,
+    "valor_neto": 4800
   },
   {
     "uid": "REG:6034",
@@ -38465,8 +38594,8 @@
     "cod_personal": "Q004",
     "responsable": "QUISPE RODRIGUEZ WALTER RAUL",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 10000.0,
-    "valor_neto": 10000.0
+    "valor_en_libros": 10000,
+    "valor_neto": 10000
   },
   {
     "uid": "REG:6033",
@@ -38493,8 +38622,8 @@
     "cod_personal": "R045",
     "responsable": "RAMIREZ PASSUNI ERICK HANS",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 3900.0,
-    "valor_neto": 3900.0
+    "valor_en_libros": 3900,
+    "valor_neto": 3900
   },
   {
     "uid": "REG:6032",
@@ -38521,8 +38650,8 @@
     "cod_personal": "C003",
     "responsable": "CARDENAS RODRIGO VICTOR",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 2000.0,
-    "valor_neto": 2000.0
+    "valor_en_libros": 2000,
+    "valor_neto": 2000
   },
   {
     "uid": "REG:6031",
@@ -38549,8 +38678,8 @@
     "cod_personal": "C003",
     "responsable": "CARDENAS RODRIGO VICTOR",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 3960.0,
-    "valor_neto": 3960.0
+    "valor_en_libros": 3960,
+    "valor_neto": 3960
   },
   {
     "uid": "REG:6030",
@@ -38576,8 +38705,8 @@
     "cod_personal": "C003",
     "responsable": "CARDENAS RODRIGO VICTOR",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 7570.0,
-    "valor_neto": 7570.0
+    "valor_en_libros": 7570,
+    "valor_neto": 7570
   },
   {
     "uid": "REG:6029",
@@ -38603,8 +38732,8 @@
     "cod_personal": "C003",
     "responsable": "CARDENAS RODRIGO VICTOR",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 3345.0,
-    "valor_neto": 3345.0
+    "valor_en_libros": 3345,
+    "valor_neto": 3345
   },
   {
     "uid": "REG:6028",
@@ -38631,8 +38760,8 @@
     "cod_personal": "C003",
     "responsable": "CARDENAS RODRIGO VICTOR",
     "estado_activo": "MALO",
-    "valor_en_libros": 2800.0,
-    "valor_neto": 2800.0
+    "valor_en_libros": 2800,
+    "valor_neto": 2800
   },
   {
     "uid": "REG:6027",
@@ -38657,8 +38786,8 @@
     "cod_personal": "C003",
     "responsable": "CARDENAS RODRIGO VICTOR",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 1295.0,
-    "valor_neto": 1295.0
+    "valor_en_libros": 1295,
+    "valor_neto": 1295
   },
   {
     "uid": "REG:6026",
@@ -38683,8 +38812,8 @@
     "cod_personal": "R045",
     "responsable": "RAMIREZ PASSUNI ERICK HANS",
     "estado_activo": "PARA BAJA",
-    "valor_en_libros": 2452.0,
-    "valor_neto": 2452.0
+    "valor_en_libros": 2452,
+    "valor_neto": 2452
   },
   {
     "uid": "REG:6025",
@@ -38710,8 +38839,8 @@
     "cod_personal": "C003",
     "responsable": "CARDENAS RODRIGO VICTOR",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 1900.0,
-    "valor_neto": 1900.0
+    "valor_en_libros": 1900,
+    "valor_neto": 1900
   },
   {
     "uid": "REG:6024",
@@ -38736,8 +38865,8 @@
     "cod_personal": "C003",
     "responsable": "CARDENAS RODRIGO VICTOR",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 6620.0,
-    "valor_neto": 6620.0
+    "valor_en_libros": 6620,
+    "valor_neto": 6620
   },
   {
     "uid": "REG:6023",
@@ -38812,8 +38941,8 @@
     "cod_personal": "C003",
     "responsable": "CARDENAS RODRIGO VICTOR",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 4100.0,
-    "valor_neto": 4100.0
+    "valor_en_libros": 4100,
+    "valor_neto": 4100
   },
   {
     "uid": "REG:6020",
@@ -38838,8 +38967,8 @@
     "cod_personal": "C003",
     "responsable": "CARDENAS RODRIGO VICTOR",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 930.0,
-    "valor_neto": 930.0
+    "valor_en_libros": 930,
+    "valor_neto": 930
   },
   {
     "uid": "REG:6019",
@@ -38970,8 +39099,8 @@
     "cod_personal": "L029",
     "responsable": "LANAZCA HUAMAN JHONY KARSON",
     "estado_activo": "MALO",
-    "valor_en_libros": 2199.0,
-    "valor_neto": 2199.0
+    "valor_en_libros": 2199,
+    "valor_neto": 2199
   },
   {
     "uid": "REG:6014",
@@ -39185,8 +39314,8 @@
     "cod_personal": "S005",
     "responsable": "SANCHEZ CONTRERAS FLORENTINO",
     "estado_activo": "MALO",
-    "valor_en_libros": 2100.0,
-    "valor_neto": 2100.0
+    "valor_en_libros": 2100,
+    "valor_neto": 2100
   },
   {
     "uid": "REG:6006",
@@ -39238,8 +39367,8 @@
     "cod_personal": "S005",
     "responsable": "SANCHEZ CONTRERAS FLORENTINO",
     "estado_activo": "MALO",
-    "valor_en_libros": 3600.0,
-    "valor_neto": 3600.0
+    "valor_en_libros": 3600,
+    "valor_neto": 3600
   },
   {
     "uid": "REG:6004",
@@ -39265,8 +39394,8 @@
     "cod_personal": "S005",
     "responsable": "SANCHEZ CONTRERAS FLORENTINO",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 555.0,
-    "valor_neto": 555.0
+    "valor_en_libros": 555,
+    "valor_neto": 555
   },
   {
     "uid": "REG:6003",
@@ -39293,8 +39422,8 @@
     "cod_personal": "S005",
     "responsable": "SANCHEZ CONTRERAS FLORENTINO",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 950.0,
-    "valor_neto": 950.0
+    "valor_en_libros": 950,
+    "valor_neto": 950
   },
   {
     "uid": "REG:6002",
@@ -39393,8 +39522,8 @@
     "cod_personal": "L032",
     "responsable": "LAURA VERGARA DENNIS EDDIE",
     "estado_activo": "MALO",
-    "valor_en_libros": 3100.0,
-    "valor_neto": 3100.0
+    "valor_en_libros": 3100,
+    "valor_neto": 3100
   },
   {
     "uid": "REG:5998",
@@ -39417,8 +39546,8 @@
     "cod_personal": "R045",
     "responsable": "RAMIREZ PASSUNI ERICK HANS",
     "estado_activo": "MALO",
-    "valor_en_libros": 5000.0,
-    "valor_neto": 5000.0
+    "valor_en_libros": 5000,
+    "valor_neto": 5000
   },
   {
     "uid": "REG:5997",
@@ -45256,8 +45385,8 @@
     "puesto": "HANGAR VEHICULAR",
     "responsable": "CASACHAHUA YUPANQUI ALEJANDRO",
     "estado_activo": "BUENO",
-    "valor_en_libros": 8355.0,
-    "valor_neto": 8355.0,
+    "valor_en_libros": 8355,
+    "valor_neto": 8355,
     "cod_personal": "C045",
     "observaciones": "NINGUNA"
   },
@@ -45286,8 +45415,8 @@
     "cod_personal": "C083",
     "responsable": "CONDORI HUAMAN JESUS FAUSTINO",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 6550.0,
-    "valor_neto": 6550.0,
+    "valor_en_libros": 6550,
+    "valor_neto": 6550,
     "observaciones": "NINGUNA"
   },
   {
@@ -45314,8 +45443,8 @@
     "puesto": "HANGAR VEHICULAR",
     "responsable": "RAMIREZ BALTODANO TITO EDEN",
     "estado_activo": "MALO",
-    "valor_en_libros": 8800.0,
-    "valor_neto": 8800.0,
+    "valor_en_libros": 8800,
+    "valor_neto": 8800,
     "cod_personal": "R046",
     "observaciones": "EN LA PTAP - POR REPARAR"
   },
@@ -45343,8 +45472,8 @@
     "puesto": "HANGAR VEHICULAR",
     "responsable": "REYES TAIPE AURELIO",
     "estado_activo": "BUENO",
-    "valor_en_libros": 7470.0,
-    "valor_neto": 7470.0,
+    "valor_en_libros": 7470,
+    "valor_neto": 7470,
     "cod_personal": "R004",
     "observaciones": "NINGUNA"
   },
@@ -45373,8 +45502,8 @@
     "cod_personal": "R035",
     "responsable": "ROJAS BELTRAN NILTON ALCIDES",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 4090.0,
-    "valor_neto": 4090.0,
+    "valor_en_libros": 4090,
+    "valor_neto": 4090,
     "observaciones": "NINGUNA"
   },
   {
@@ -45430,8 +45559,8 @@
     "puesto": "HANGAR VEHICULAR",
     "responsable": "Sin asignar",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 3500.0,
-    "valor_neto": 3500.0
+    "valor_en_libros": 3500,
+    "valor_neto": 3500
   },
   {
     "uid": "REG:30",
@@ -45457,8 +45586,8 @@
     "puesto": "HANGAR VEHICULAR",
     "responsable": "Sin asignar",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 4010.0,
-    "valor_neto": 4010.0
+    "valor_en_libros": 4010,
+    "valor_neto": 4010
   },
   {
     "uid": "REG:29",
@@ -45511,8 +45640,8 @@
     "puesto": "HANGAR VEHICULAR",
     "responsable": "Sin asignar",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 6550.0,
-    "valor_neto": 6550.0
+    "valor_en_libros": 6550,
+    "valor_neto": 6550
   },
   {
     "uid": "REG:27",
@@ -45539,8 +45668,8 @@
     "cod_personal": "V002",
     "responsable": "VALLEZ PILCO JOSE LUIS",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 3500.0,
-    "valor_neto": 3500.0
+    "valor_en_libros": 3500,
+    "valor_neto": 3500
   },
   {
     "uid": "REG:26",
@@ -45567,8 +45696,8 @@
     "cod_personal": "R039",
     "responsable": "ROJAS ALVARADO ROLANDO",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 6500.0,
-    "valor_neto": 6500.0
+    "valor_en_libros": 6500,
+    "valor_neto": 6500
   },
   {
     "uid": "REG:25",
@@ -45623,8 +45752,8 @@
     "cod_personal": "S025",
     "responsable": "SORIA VALDIVIA E. DAVID",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 3800.0,
-    "valor_neto": 3800.0
+    "valor_en_libros": 3800,
+    "valor_neto": 3800
   },
   {
     "uid": "REG:23",
@@ -45651,8 +45780,8 @@
     "cod_personal": "V002",
     "responsable": "VALLEZ PILCO JOSE LUIS",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 8200.0,
-    "valor_neto": 8200.0
+    "valor_en_libros": 8200,
+    "valor_neto": 8200
   },
   {
     "uid": "REG:22",
@@ -45679,8 +45808,8 @@
     "cod_personal": "A017",
     "responsable": "ARCE LAZARO MARLON DANILO",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 8800.0,
-    "valor_neto": 8800.0
+    "valor_en_libros": 8800,
+    "valor_neto": 8800
   },
   {
     "uid": "REG:21",
@@ -45706,8 +45835,8 @@
     "puesto": "HANGAR VEHICULAR",
     "responsable": "Sin asignar",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 4200.0,
-    "valor_neto": 4200.0
+    "valor_en_libros": 4200,
+    "valor_neto": 4200
   },
   {
     "uid": "REG:20",
@@ -45733,8 +45862,8 @@
     "puesto": "HANGAR VEHICULAR",
     "responsable": "Sin asignar",
     "estado_activo": "PARA BAJA",
-    "valor_en_libros": 9000.0,
-    "valor_neto": 9000.0
+    "valor_en_libros": 9000,
+    "valor_neto": 9000
   },
   {
     "uid": "REG:19",
@@ -45760,8 +45889,8 @@
     "puesto": "HANGAR VEHICULAR",
     "responsable": "Sin asignar",
     "estado_activo": "PARA BAJA",
-    "valor_en_libros": 8400.0,
-    "valor_neto": 8400.0
+    "valor_en_libros": 8400,
+    "valor_neto": 8400
   },
   {
     "uid": "REG:18",
@@ -45843,8 +45972,8 @@
     "puesto": "HANGAR VEHICULAR",
     "responsable": "Sin asignar",
     "estado_activo": "PARA BAJA",
-    "valor_en_libros": 4500.0,
-    "valor_neto": 4500.0
+    "valor_en_libros": 4500,
+    "valor_neto": 4500
   },
   {
     "uid": "REG:15",
@@ -45870,8 +45999,8 @@
     "puesto": "HANGAR VEHICULAR",
     "responsable": "Sin asignar",
     "estado_activo": "PARA BAJA",
-    "valor_en_libros": 6950.0,
-    "valor_neto": 6950.0
+    "valor_en_libros": 6950,
+    "valor_neto": 6950
   },
   {
     "uid": "REG:14",
@@ -45897,8 +46026,8 @@
     "puesto": "HANGAR VEHICULAR",
     "responsable": "Sin asignar",
     "estado_activo": "PARA BAJA",
-    "valor_en_libros": 3500.0,
-    "valor_neto": 3500.0
+    "valor_en_libros": 3500,
+    "valor_neto": 3500
   },
   {
     "uid": "REG:13",
@@ -45924,8 +46053,8 @@
     "puesto": "HANGAR VEHICULAR",
     "responsable": "Sin asignar",
     "estado_activo": "PARA BAJA",
-    "valor_en_libros": 3500.0,
-    "valor_neto": 3500.0
+    "valor_en_libros": 3500,
+    "valor_neto": 3500
   },
   {
     "uid": "REG:12",
@@ -45951,8 +46080,8 @@
     "puesto": "HANGAR VEHICULAR",
     "responsable": "Sin asignar",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 3500.0,
-    "valor_neto": 3500.0
+    "valor_en_libros": 3500,
+    "valor_neto": 3500
   },
   {
     "uid": "REG:11",
@@ -46005,8 +46134,8 @@
     "puesto": "HANGAR VEHICULAR",
     "responsable": "Sin asignar",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 7500.0,
-    "valor_neto": 7500.0
+    "valor_en_libros": 7500,
+    "valor_neto": 7500
   },
   {
     "uid": "REG:9",
@@ -46087,8 +46216,8 @@
     "puesto": "HANGAR VEHICULAR",
     "responsable": "Sin asignar",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 8800.0,
-    "valor_neto": 8800.0
+    "valor_en_libros": 8800,
+    "valor_neto": 8800
   },
   {
     "uid": "REG:6",
@@ -46114,8 +46243,8 @@
     "puesto": "HANGAR VEHICULAR",
     "responsable": "Sin asignar",
     "estado_activo": "PARA BAJA",
-    "valor_en_libros": 4200.0,
-    "valor_neto": 4200.0
+    "valor_en_libros": 4200,
+    "valor_neto": 4200
   },
   {
     "uid": "REG:5",
@@ -46170,8 +46299,8 @@
     "cod_personal": "A070",
     "responsable": "ALANIA HUAMAN LUIS ENRIQUE",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 6900.0,
-    "valor_neto": 6900.0
+    "valor_en_libros": 6900,
+    "valor_neto": 6900
   },
   {
     "uid": "REG:3",
@@ -46197,8 +46326,8 @@
     "puesto": "HANGAR VEHICULAR",
     "responsable": "Sin asignar",
     "estado_activo": "PARA BAJA",
-    "valor_en_libros": 8800.0,
-    "valor_neto": 8800.0
+    "valor_en_libros": 8800,
+    "valor_neto": 8800
   },
   {
     "uid": "REG:2",
@@ -46225,8 +46354,8 @@
     "cod_personal": "L032",
     "responsable": "LAURA VERGARA DENNIS EDDIE",
     "estado_activo": "REGULAR",
-    "valor_en_libros": 3500.0,
-    "valor_neto": 3500.0
+    "valor_en_libros": 3500,
+    "valor_neto": 3500
   },
   {
     "uid": "REG:1",
