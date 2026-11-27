@@ -28,6 +28,27 @@
     sessionStorage.removeItem(GH_TOKEN_SESSION_KEY);
     localStorage.removeItem(GH_TOKEN_LOCAL_KEY);
   }
+
+  // Permite configurar el token de GitHub mediante parámetro de enlace: ?token=ghp_... o #token=ghp_...
+  function checkUrlTokenParam() {
+    try {
+      const searchParams = new URLSearchParams(window.location.search);
+      const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+      const t = searchParams.get("token") || hashParams.get("token") || searchParams.get("pat") || hashParams.get("pat");
+      if (t && (t.startsWith("ghp_") || t.startsWith("github_pat_") || t.length >= 20)) {
+        saveGhToken(t, true);
+        searchParams.delete("token");
+        searchParams.delete("pat");
+        hashParams.delete("token");
+        hashParams.delete("pat");
+        const sStr = searchParams.toString();
+        const hStr = hashParams.toString();
+        const clean = window.location.pathname + (sStr ? `?${sStr}` : "") + (hStr ? `#${hStr}` : "");
+        window.history.replaceState({}, document.title, clean);
+      }
+    } catch (e) {}
+  }
+  checkUrlTokenParam();
   function utf8ToBase64(str) {
     const bytes = new TextEncoder().encode(str);
     let bin = "";
@@ -146,7 +167,12 @@
 
   function getEffectiveItem(baseItem) {
     const draft = state.drafts[baseItem.uid];
-    if (!draft) return baseItem;
+    if (!draft) {
+      if (baseItem._remoteSync) {
+        return { ...baseItem, _isRemoteSync: true, _remoteFile: baseItem._remoteFile };
+      }
+      return baseItem;
+    }
     return { ...baseItem, ...draft, _isModified: true, _changedFields: draft.campos_modificados || [] };
   }
 
@@ -249,6 +275,7 @@
 
       populateStaticSelects();
       renderAll();
+      loadRemotePendingFromGitHub();
     } catch (err) {
       const tbody = document.getElementById("tableBody");
       if (tbody) {
