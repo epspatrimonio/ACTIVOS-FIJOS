@@ -1611,7 +1611,7 @@
 
     doc.autoTable({
       startY: 26,
-      margin: { top: 26, left: marginX, right: marginX, bottom: 14 },
+      margin: { top: 26, left: marginX, right: marginX, bottom: 33 },
       rowPageBreak: "avoid",
       columns: [
         { header: "N°", dataKey: "num" },
@@ -1684,40 +1684,46 @@
       },
     });
 
-    // Bloque de firmas al final del documento
-    let finalY = (doc.lastAutoTable && doc.lastAutoTable.finalY) ? doc.lastAutoTable.finalY + 14 : 50;
-    if (finalY + 24 > pageH - 12) {
-      doc.addPage();
-      drawPageHeader();
-      finalY = 42;
-    }
-    doc.setDrawColor(100, 116, 139);
-    doc.setLineWidth(0.35);
-    const sigWidth = 68;
-    const leftX = 48;
-    const rightX = pageW - 48 - sigWidth;
-    doc.line(leftX, finalY, leftX + sigWidth, finalY);
-    doc.line(rightX, finalY, rightX + sigWidth, finalY);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(8);
-    doc.setTextColor(15, 23, 42);
-    doc.text("VERIFICADOR / CONTROL PATRIMONIAL", leftX + sigWidth / 2, finalY + 4.5, { align: "center" });
-    doc.text("RESPONSABLE DE SUCURSAL / UNIDAD", rightX + sigWidth / 2, finalY + 4.5, { align: "center" });
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(7);
-    doc.setTextColor(100, 116, 139);
-    doc.text("Nombre, Firma y Fecha", leftX + sigWidth / 2, finalY + 8.5, { align: "center" });
-    doc.text("Nombre, Firma y Sello", rightX + sigWidth / 2, finalY + 8.5, { align: "center" });
-
-    // Numeración total de páginas
+    // Firmas institucionales y numeración en CADA HOJA del documento
     const totalPages = doc.internal.getNumberOfPages();
+    const sigWidth = 72;
+    const sigY = pageH - 14;
+    const x1 = marginX + 6;
+    const x2 = (pageW - sigWidth) / 2;
+    const x3 = pageW - marginX - 6 - sigWidth;
+
     for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i);
-      doc.setFont("helvetica", "normal");
+
+      // Líneas de firma
+      doc.setDrawColor(100, 116, 139);
+      doc.setLineWidth(0.35);
+      doc.line(x1, sigY, x1 + sigWidth, sigY);
+      doc.line(x2, sigY, x2 + sigWidth, sigY);
+      doc.line(x3, sigY, x3 + sigWidth, sigY);
+
+      // Rótulos principales
+      doc.setFont("helvetica", "bold");
       doc.setFontSize(7.5);
+      doc.setTextColor(15, 23, 42);
+      doc.text("CONTROL PATRIMONIAL", x1 + sigWidth / 2, sigY + 3.8, { align: "center" });
+      doc.text("RESPONSABLE DEL ACTIVO", x2 + sigWidth / 2, sigY + 3.8, { align: "center" });
+      doc.text("JEFE O GERENTE DE ÁREA", x3 + sigWidth / 2, sigY + 3.8, { align: "center" });
+
+      // Subtítulos
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(6.5);
       doc.setTextColor(100, 116, 139);
-      doc.text(`Portal de Inventario de Campo — ${sucTitle}`, marginX, pageH - 5.5);
-      doc.text(`Página ${i} de ${totalPages}`, pageW - marginX, pageH - 5.5, { align: "right" });
+      doc.text("Nombre, Firma y Fecha", x1 + sigWidth / 2, sigY + 7.2, { align: "center" });
+      doc.text("Nombre, Firma y Sello", x2 + sigWidth / 2, sigY + 7.2, { align: "center" });
+      doc.text("Nombre, Firma y Sello", x3 + sigWidth / 2, sigY + 7.2, { align: "center" });
+
+      // Pie de página institucional
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7);
+      doc.setTextColor(148, 163, 184);
+      doc.text(`Portal de Inventario de Campo — ${sucTitle}`, marginX, pageH - 3.5);
+      doc.text(`Página ${i} de ${totalPages}`, pageW - marginX, pageH - 3.5, { align: "right" });
     }
 
     const slug = sucObj ? normText(sucObj.sucursal).replace(/[^A-Z0-9]+/g, "_") : "TODAS";
