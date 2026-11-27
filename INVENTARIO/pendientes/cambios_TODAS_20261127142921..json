@@ -1,0 +1,2070 @@
+{
+  "version": "1.1",
+  "origen": "PORTAL_INVENTARIO_CAMPO",
+  "generado_en": "2026-11-27T14:29:21.729Z",
+  "sucursal_origen_paquete": "TODAS",
+  "total_cambios": 124,
+  "total_modificaciones": 120,
+  "total_altas_nuevas": 4,
+  "nota_envio": "Sincronización rápida desde portal",
+  "cambios": [
+    {
+      "uid": "REG:6199",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6199,
+      "cod_patrimonial": "630011091",
+      "cod_personal": "R046",
+      "responsable": "RAMIREZ BALTODANO TITO EDEN",
+      "updated_at": "2026-11-26T20:49:53.337Z",
+      "campos_modificados": [
+        "puesto_id",
+        "puesto",
+        "cod_personal",
+        "responsable",
+        "estado_activo",
+        "observaciones"
+      ],
+      "puesto_id": 79,
+      "puesto": "OTROS",
+      "observaciones": "APOYO COMERCIAL",
+      "estado_activo": "REGULAR",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:339106007",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "339106007",
+      "marca": "AIWA",
+      "updated_at": "2026-11-26T22:40:09.834Z",
+      "campos_modificados": [
+        "unidad",
+        "puesto_id",
+        "puesto",
+        "cod_personal",
+        "responsable",
+        "estado_activo",
+        "caracteristicas_accesorios",
+        "marca",
+        "modelo",
+        "numero_serie",
+        "color"
+      ],
+      "modelo": "AWSP15TWL",
+      "numero_serie": "15TWL2G300000249",
+      "color": "NEGRO",
+      "unidad": "UNIDAD OPERATIVA",
+      "puesto_id": 79,
+      "puesto": "OTROS",
+      "cod_personal": "R046",
+      "responsable": "RAMIREZ BALTODANO TITO EDEN",
+      "estado_activo": "REGULAR",
+      "caracteristicas_accesorios": "PMO COMERCIAL",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6231",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6231,
+      "cod_patrimonial": "630016017",
+      "cod_personal": "R046",
+      "responsable": "RAMIREZ BALTODANO TITO EDEN",
+      "updated_at": "2026-11-26T20:49:27.273Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "observaciones",
+        "modelo"
+      ],
+      "observaciones": "APOYO ADM",
+      "modelo": "20MP48A",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6190",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6190,
+      "cod_patrimonial": "620046011",
+      "numero_serie": "200043",
+      "updated_at": "2026-11-26T20:29:35.577Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "numero_serie"
+      ],
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:300036002",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "300036002",
+      "caracteristicas_accesorios": "NO ENCONTRADO",
+      "updated_at": "2026-11-26T20:29:38.657Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "caracteristicas_accesorios"
+      ],
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:300036001",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "300036001",
+      "caracteristicas_accesorios": "NO ENCONTRADO",
+      "updated_at": "2026-11-26T20:29:41.488Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "caracteristicas_accesorios"
+      ],
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:620046018",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "620046018",
+      "caracteristicas_accesorios": "NO ENCONTRADO",
+      "updated_at": "2026-11-26T20:29:44.513Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "caracteristicas_accesorios"
+      ],
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6180",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6180,
+      "cod_patrimonial": "620066005",
+      "estado_activo": "PARA BAJA",
+      "updated_at": "2026-11-26T20:29:47.001Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "estado_activo",
+        "observaciones"
+      ],
+      "observaciones": "OBSOLETO POR CORROSIÓN",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6173",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6173,
+      "cod_patrimonial": "200036000",
+      "estado_activo": "PARA BAJA",
+      "updated_at": "2026-11-26T20:30:36.257Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "estado_activo",
+        "observaciones"
+      ],
+      "observaciones": "INOPERATIVO / IRREPARABLE",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:300076009",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "300076009",
+      "caracteristicas_accesorios": "NO ENCONTRADO",
+      "updated_at": "2026-11-26T20:30:39.113Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "caracteristicas_accesorios"
+      ],
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:620046013",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "620046013",
+      "estado_activo": "REGULAR",
+      "updated_at": "2026-11-26T20:30:42.016Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "estado_activo",
+        "caracteristicas_accesorios"
+      ],
+      "caracteristicas_accesorios": "PRESENTA FALLAS",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:620046014",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "620046014",
+      "modelo": "VR3980",
+      "updated_at": "2026-11-26T20:30:47.608Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "estado_activo",
+        "caracteristicas_accesorios",
+        "modelo",
+        "numero_serie",
+        "color"
+      ],
+      "numero_serie": "VR3980000000920",
+      "color": "GRIS",
+      "estado_activo": "PARA BAJA",
+      "caracteristicas_accesorios": "INOPERATIVO / IRREPARABLE",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6849",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6849,
+      "cod_patrimonial": "SOB-333-0096",
+      "observaciones": "NO SE DA USO",
+      "updated_at": "2026-11-26T20:30:52.256Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "observaciones"
+      ],
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6850",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6850,
+      "cod_patrimonial": "SOB-333-0097",
+      "observaciones": "NO SE DA USO",
+      "updated_at": "2026-11-26T20:30:55.696Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "observaciones"
+      ],
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6851",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6851,
+      "cod_patrimonial": "SOB-333-0098",
+      "observaciones": "NO SE DA USO",
+      "updated_at": "2026-11-26T20:30:57.289Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "observaciones"
+      ],
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:620066011",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "620066011",
+      "color": "GRIS",
+      "updated_at": "2026-11-26T20:31:02.425Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "color"
+      ],
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:620036016",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "620036016",
+      "numero_serie": "23100B001215",
+      "updated_at": "2026-11-26T20:31:04.137Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "numero_serie"
+      ],
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6182",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6182,
+      "cod_patrimonial": "620036002",
+      "estado_activo": "PARA BAJA",
+      "updated_at": "2026-11-26T20:31:08.113Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "estado_activo",
+        "observaciones"
+      ],
+      "observaciones": "INOPERATIVO / IRREPARABLE - 620030034",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:620036017",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "620036017",
+      "caracteristicas_accesorios": "NO ENCONTRADO",
+      "updated_at": "2026-11-26T20:31:10.329Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "caracteristicas_accesorios"
+      ],
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:300086001",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "300086001",
+      "caracteristicas_accesorios": "NO ENCONTRADO",
+      "updated_at": "2026-11-26T20:31:12.361Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "caracteristicas_accesorios"
+      ],
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:300086002",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "300086002",
+      "caracteristicas_accesorios": "SIN DAR USO",
+      "updated_at": "2026-11-26T20:31:16.545Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "caracteristicas_accesorios"
+      ],
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6183",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6183,
+      "cod_patrimonial": "620036004",
+      "estado_activo": "PARA BAJA",
+      "updated_at": "2026-11-26T20:31:19.816Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "estado_activo",
+        "observaciones"
+      ],
+      "observaciones": "INOPERATIVO / IRREPARABLE",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6186",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6186,
+      "cod_patrimonial": "620036012",
+      "observaciones": "SIN DAR USO",
+      "updated_at": "2026-11-26T20:31:21.649Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "observaciones"
+      ],
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:300086005",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "300086005",
+      "caracteristicas_accesorios": "NO ENCONTRADO",
+      "updated_at": "2026-11-26T20:31:27.569Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "caracteristicas_accesorios"
+      ],
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6181",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6181,
+      "cod_patrimonial": "620036000",
+      "estado_activo": "PARA BAJA",
+      "updated_at": "2026-11-26T20:31:32.921Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "estado_activo",
+        "observaciones"
+      ],
+      "observaciones": "INOPERATIVO / IRREPARABLE",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6188",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6188,
+      "cod_patrimonial": "630016009",
+      "estado_activo": "PARA BAJA",
+      "updated_at": "2026-11-26T20:31:35.673Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "estado_activo",
+        "observaciones"
+      ],
+      "observaciones": "INOPERATIVO / IRREPARABLE",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6184",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6184,
+      "cod_patrimonial": "620036005",
+      "estado_activo": "PARA BAJA",
+      "updated_at": "2026-11-26T20:31:38.960Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "estado_activo",
+        "observaciones"
+      ],
+      "observaciones": "INOPERATIVO / IRREPARABLE - 62003037",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6187",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6187,
+      "cod_patrimonial": "620036011",
+      "observaciones": "NO SE DA USO",
+      "updated_at": "2026-11-26T20:31:40.664Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "observaciones"
+      ],
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:300086004",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "300086004",
+      "caracteristicas_accesorios": "NO ENCONTRADO",
+      "updated_at": "2026-11-26T20:31:45.696Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "caracteristicas_accesorios"
+      ],
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6185",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6185,
+      "cod_patrimonial": "620036003",
+      "estado_activo": "PARA BAJA",
+      "updated_at": "2026-11-26T20:31:47.719Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "estado_activo",
+        "observaciones"
+      ],
+      "observaciones": "INOPERATIVO / IRREPARABLE",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:300086003",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "300086003",
+      "caracteristicas_accesorios": "NO ENCONTRADO",
+      "updated_at": "2026-11-26T20:31:55.160Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "caracteristicas_accesorios"
+      ],
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:410026004",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "410026004",
+      "caracteristicas_accesorios": "NINGUNA",
+      "updated_at": "2026-11-26T20:08:20.074Z",
+      "campos_modificados": [
+        "caracteristicas_accesorios"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:32",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 32,
+      "cod_patrimonial": "410026000",
+      "observaciones": "NO TIENE PLACA VISIBLE",
+      "updated_at": "2026-11-26T20:07:12.994Z",
+      "campos_modificados": [
+        "observaciones"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:38",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 38,
+      "cod_patrimonial": "339600001",
+      "cod_personal": "R004",
+      "responsable": "REYES TAIPE AURELIO",
+      "updated_at": "2026-11-26T20:08:22.778Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "observaciones"
+      ],
+      "observaciones": "NINGUNA - PMO 2023",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:33",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 33,
+      "cod_patrimonial": "410026001",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "updated_at": "2026-11-26T20:32:02.672Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "observaciones"
+      ],
+      "observaciones": "NINGUNA",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:410026005",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "410026005",
+      "cod_personal": "",
+      "responsable": "Sin Asignar",
+      "updated_at": "2026-11-26T20:09:01.058Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "caracteristicas_accesorios"
+      ],
+      "caracteristicas_accesorios": "BRAYAN",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:410026006",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "410026006",
+      "cod_personal": "C083",
+      "responsable": "CONDORI HUAMAN JESUS FAUSTINO",
+      "updated_at": "2026-11-26T20:09:39.489Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "caracteristicas_accesorios"
+      ],
+      "caracteristicas_accesorios": "NINGUNA",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6880",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6880,
+      "cod_patrimonial": "SOB-334-0002",
+      "observaciones": "ELIMINAR - DUPLICADO",
+      "updated_at": "2026-11-26T20:09:48.010Z",
+      "campos_modificados": [
+        "observaciones"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6881",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6881,
+      "cod_patrimonial": "SOB-334-0003",
+      "observaciones": "ELIMINAR - DUPLICADO",
+      "updated_at": "2026-11-26T20:13:26.287Z",
+      "campos_modificados": [
+        "observaciones"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:36",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 36,
+      "cod_patrimonial": "410021004",
+      "cod_personal": "C083",
+      "responsable": "CONDORI HUAMAN JESUS FAUSTINO",
+      "updated_at": "2026-11-26T20:14:07.695Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "observaciones"
+      ],
+      "observaciones": "NINGUNA",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:37",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 37,
+      "cod_patrimonial": "339600002",
+      "cod_personal": "C045",
+      "responsable": "CASACHAHUA YUPANQUI ALEJANDRO",
+      "updated_at": "2026-11-26T20:14:23.504Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "observaciones"
+      ],
+      "observaciones": "NINGUNA",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:34",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 34,
+      "cod_patrimonial": "410026003",
+      "cod_personal": "R004",
+      "responsable": "REYES TAIPE AURELIO",
+      "updated_at": "2026-11-26T20:15:03.399Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "observaciones"
+      ],
+      "observaciones": "NINGUNA",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:35",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 35,
+      "cod_patrimonial": "410026002",
+      "cod_personal": "R046",
+      "responsable": "RAMIREZ BALTODANO TITO EDEN",
+      "updated_at": "2026-11-26T20:15:32.694Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "estado_activo",
+        "observaciones"
+      ],
+      "estado_activo": "MALO",
+      "observaciones": "EN LA PTAP - POR REPARAR",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6858",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6858,
+      "cod_patrimonial": "SOB-337-0059",
+      "unidad": "PTAP",
+      "puesto_id": 19,
+      "puesto": "CTO MÁQUINAS",
+      "updated_at": "2026-11-26T20:29:02.057Z",
+      "campos_modificados": [
+        "unidad",
+        "puesto_id",
+        "puesto",
+        "cod_personal",
+        "responsable"
+      ],
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6189",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6189,
+      "cod_patrimonial": "620046009",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "updated_at": "2026-11-26T20:29:28.649Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6174",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6174,
+      "cod_patrimonial": "320016010",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "updated_at": "2026-11-26T20:29:55.329Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6175",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6175,
+      "cod_patrimonial": "320016011",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "updated_at": "2026-11-26T20:29:58.313Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6176",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6176,
+      "cod_patrimonial": "320016012",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "updated_at": "2026-11-26T20:29:59.673Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6177",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6177,
+      "cod_patrimonial": "320016013",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "updated_at": "2026-11-26T20:30:03.145Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6178",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6178,
+      "cod_patrimonial": "320016014",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "updated_at": "2026-11-26T20:30:08.770Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6179",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6179,
+      "cod_patrimonial": "320016015",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "updated_at": "2026-11-26T20:30:10.897Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:300076001",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "300076001",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "updated_at": "2026-11-26T20:30:14.433Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:300076007",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "300076007",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "updated_at": "2026-11-26T20:30:17.169Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:300076008",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "300076008",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "updated_at": "2026-11-26T20:30:19.665Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:320016019",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "320016019",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "updated_at": "2026-11-26T20:30:21.473Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:320016016",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "320016016",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "updated_at": "2026-11-26T20:30:23.881Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:320016017",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "320016017",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "updated_at": "2026-11-26T20:30:26.289Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:320016018",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "320016018",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "updated_at": "2026-11-26T20:30:31.233Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:310046001",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "310046001",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "updated_at": "2026-11-26T20:30:48.913Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:620036014",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "620036014",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "updated_at": "2026-11-26T20:31:25.184Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:620036013",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "620036013",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "updated_at": "2026-11-26T20:31:43.816Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:620036015",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "620036015",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "updated_at": "2026-11-26T20:31:51.752Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6857",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6857,
+      "cod_patrimonial": "SOB-337-0058",
+      "unidad": "PTAP",
+      "puesto_id": 19,
+      "puesto": "CTO MÁQUINAS",
+      "updated_at": "2026-11-26T20:33:59.359Z",
+      "campos_modificados": [
+        "unidad",
+        "puesto_id",
+        "puesto",
+        "cod_personal",
+        "responsable",
+        "modelo"
+      ],
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "modelo": "IW220/18200",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:310016003",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "310016003",
+      "caracteristicas_accesorios": "REVISAR",
+      "updated_at": "2026-11-26T20:37:06.222Z",
+      "campos_modificados": [
+        "caracteristicas_accesorios"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6197",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6197,
+      "cod_patrimonial": "620046010",
+      "observaciones": "REVISAR",
+      "updated_at": "2026-11-26T20:37:08.837Z",
+      "campos_modificados": [
+        "observaciones"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6232",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6232,
+      "cod_patrimonial": "630016018",
+      "cod_personal": "R046",
+      "responsable": "RAMIREZ BALTODANO TITO EDEN",
+      "updated_at": "2026-11-26T20:43:35.508Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6234",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6234,
+      "cod_patrimonial": "630016025",
+      "cod_personal": "R046",
+      "responsable": "RAMIREZ BALTODANO TITO EDEN",
+      "updated_at": "2026-11-26T20:48:59.737Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "observaciones"
+      ],
+      "observaciones": "APOYO ADM",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6230",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6230,
+      "cod_patrimonial": "610056003",
+      "modelo": "UFACE 800",
+      "updated_at": "2026-11-26T20:54:58.342Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "observaciones",
+        "modelo",
+        "numero_serie"
+      ],
+      "observaciones": "COMERCIAL 600046001 / REVISAR",
+      "numero_serie": "AF4C191760180",
+      "cod_personal": "R046",
+      "responsable": "RAMIREZ BALTODANO TITO EDEN",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:600046001",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "600046001",
+      "caracteristicas_accesorios": "COMERCIAL  610056003 / REVISAR",
+      "updated_at": "2026-11-26T20:55:04.030Z",
+      "campos_modificados": [
+        "caracteristicas_accesorios"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6893",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6893,
+      "cod_patrimonial": "SOB-336-0282",
+      "cod_personal": "R046",
+      "responsable": "RAMIREZ BALTODANO TITO EDEN",
+      "updated_at": "2026-11-26T21:05:05.634Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6890",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6890,
+      "cod_patrimonial": "SOB-336-0279",
+      "cod_personal": "R046",
+      "responsable": "RAMIREZ BALTODANO TITO EDEN",
+      "updated_at": "2026-11-26T21:05:42.521Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:630016029",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "630016029",
+      "id_sucursal": 60,
+      "sucursal": "SATIPO",
+      "updated_at": "2026-11-26T21:14:27.165Z",
+      "campos_modificados": [
+        "id_sucursal",
+        "sucursal",
+        "caracteristicas_accesorios",
+        "color"
+      ],
+      "color": "NEGRO",
+      "caracteristicas_accesorios": "MODIFICACIÓN DE SUCURSAL",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:610053010",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "610053010",
+      "id_sucursal": 40,
+      "sucursal": "PICHANAKI",
+      "updated_at": "2026-11-26T21:15:41.717Z",
+      "campos_modificados": [
+        "id_sucursal",
+        "sucursal"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6202",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6202,
+      "cod_patrimonial": "630016022",
+      "numero_serie": "CNDKM2V7JJ",
+      "updated_at": "2026-11-26T21:44:10.162Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "numero_serie"
+      ],
+      "cod_personal": "C073",
+      "responsable": "COLONIO QUIÑONEZ KELVA KELY",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:630016031",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "630016031",
+      "puesto_id": 2,
+      "puesto": "ATENCIÓN AL CLIENTE",
+      "updated_at": "2026-11-26T21:34:11.772Z",
+      "campos_modificados": [
+        "puesto_id",
+        "puesto",
+        "cod_personal",
+        "responsable"
+      ],
+      "cod_personal": "C073",
+      "responsable": "COLONIO QUIÑONEZ KELVA KELY",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:630016032",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "630016032",
+      "color": "NEGRO",
+      "updated_at": "2026-11-26T21:38:02.844Z",
+      "campos_modificados": [
+        "puesto_id",
+        "puesto",
+        "cod_personal",
+        "responsable",
+        "color"
+      ],
+      "puesto_id": 2,
+      "puesto": "ATENCIÓN AL CLIENTE",
+      "cod_personal": "C073",
+      "responsable": "COLONIO QUIÑONEZ KELVA KELY",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:630016034",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "630016034",
+      "cod_personal": "D018",
+      "responsable": "DURAND DE LA O FLOR DE MARIA",
+      "updated_at": "2026-11-26T21:41:38.010Z",
+      "campos_modificados": [
+        "puesto_id",
+        "puesto",
+        "cod_personal",
+        "responsable"
+      ],
+      "puesto_id": 5,
+      "puesto": "COMERCIALIZACIÓN",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:630016033",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "630016033",
+      "cod_personal": "D018",
+      "responsable": "DURAND DE LA O FLOR DE MARIA",
+      "updated_at": "2026-11-26T21:41:40.810Z",
+      "campos_modificados": [
+        "puesto_id",
+        "puesto",
+        "cod_personal",
+        "responsable"
+      ],
+      "puesto_id": 5,
+      "puesto": "COMERCIALIZACIÓN",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:630016026",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "630016026",
+      "cod_personal": "A054",
+      "responsable": "ARIZAPANA MURAYARI NANCY JANETH",
+      "updated_at": "2026-11-26T21:42:44.899Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6207",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6207,
+      "cod_patrimonial": "630016020",
+      "responsable": "Sin Asignar",
+      "updated_at": "2026-11-26T23:25:39.873Z",
+      "campos_modificados": [
+        "puesto_id",
+        "puesto",
+        "responsable",
+        "estado_activo",
+        "observaciones"
+      ],
+      "puesto_id": 79,
+      "puesto": "OTROS",
+      "observaciones": "VESTIDOR - 630010240",
+      "estado_activo": "PARA BAJA",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6868",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6868,
+      "cod_patrimonial": "SOB-336-0266",
+      "responsable": "ARIZAPANA MURAYARI NANCY JANETH",
+      "updated_at": "2026-11-26T21:43:20.682Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "cod_personal": "A054",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6869",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6869,
+      "cod_patrimonial": "SOB-335-0208",
+      "cod_personal": "A054",
+      "responsable": "ARIZAPANA MURAYARI NANCY JANETH",
+      "updated_at": "2026-11-26T21:43:26.642Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6205",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6205,
+      "cod_patrimonial": "630011076",
+      "responsable": "Sin Asignar",
+      "updated_at": "2026-11-26T23:27:15.806Z",
+      "campos_modificados": [
+        "puesto_id",
+        "puesto",
+        "responsable",
+        "estado_activo",
+        "observaciones",
+        "numero_serie"
+      ],
+      "puesto_id": 79,
+      "puesto": "OTROS",
+      "observaciones": "VESTIDOR 630010153",
+      "estado_activo": "PARA BAJA",
+      "numero_serie": "BRBSD76MN8",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6206",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6206,
+      "cod_patrimonial": "610051034",
+      "responsable": "Sin Asignar",
+      "updated_at": "2026-11-26T22:23:19.578Z",
+      "campos_modificados": [
+        "puesto_id",
+        "puesto",
+        "responsable",
+        "estado_activo",
+        "observaciones"
+      ],
+      "observaciones": "NO ENCONTRADO",
+      "estado_activo": "PARA BAJA",
+      "puesto_id": 79,
+      "puesto": "OTROS",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6208",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6208,
+      "cod_patrimonial": "500036000",
+      "cod_personal": "A054",
+      "responsable": "ARIZAPANA MURAYARI NANCY JANETH",
+      "updated_at": "2026-11-26T21:43:36.657Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6209",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6209,
+      "cod_patrimonial": "500036002",
+      "cod_personal": "A054",
+      "responsable": "ARIZAPANA MURAYARI NANCY JANETH",
+      "updated_at": "2026-11-26T22:19:21.572Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "estado_activo",
+        "observaciones"
+      ],
+      "estado_activo": "REGULAR",
+      "observaciones": "",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6201",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6201,
+      "cod_patrimonial": "630016021",
+      "responsable": "Sin Asignar",
+      "updated_at": "2026-11-26T22:26:51.023Z",
+      "campos_modificados": [
+        "puesto_id",
+        "puesto",
+        "responsable",
+        "observaciones"
+      ],
+      "puesto_id": 79,
+      "puesto": "OTROS",
+      "observaciones": "NO ENCONTRADO",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6860",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6860,
+      "cod_patrimonial": "SOB-336-0265",
+      "cod_personal": "C073",
+      "responsable": "COLONIO QUIÑONEZ KELVA KELY",
+      "updated_at": "2026-11-26T21:44:03.217Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6865",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6865,
+      "cod_patrimonial": "SOB-335-0205",
+      "cod_personal": "C073",
+      "responsable": "COLONIO QUIÑONEZ KELVA KELY",
+      "updated_at": "2026-11-26T21:50:58.471Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "observaciones"
+      ],
+      "observaciones": "BAJO DE 2 NIVELES",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6198",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6198,
+      "cod_patrimonial": "630016001",
+      "cod_personal": "C073",
+      "responsable": "COLONIO QUIÑONEZ KELVA KELY",
+      "updated_at": "2026-11-26T21:51:25.566Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "observaciones"
+      ],
+      "observaciones": "SIN USO",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6200",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6200,
+      "cod_patrimonial": "630016015",
+      "cod_personal": "A054",
+      "responsable": "ARIZAPANA MURAYARI NANCY JANETH",
+      "updated_at": "2026-11-26T22:17:41.267Z",
+      "campos_modificados": [
+        "puesto_id",
+        "puesto",
+        "cod_personal",
+        "responsable"
+      ],
+      "puesto_id": 7,
+      "puesto": "RECAUDACIÓN",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6861",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6861,
+      "cod_patrimonial": "SOB-335-0201",
+      "cod_personal": "C073",
+      "responsable": "COLONIO QUIÑONEZ KELVA KELY",
+      "updated_at": "2026-11-26T21:44:11.218Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6862",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6862,
+      "cod_patrimonial": "SOB-335-0202",
+      "cod_personal": "C073",
+      "responsable": "COLONIO QUIÑONEZ KELVA KELY",
+      "updated_at": "2026-11-26T22:29:10.063Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "color"
+      ],
+      "color": "AZUL/GRIS",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6203",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6203,
+      "cod_patrimonial": "630016024",
+      "responsable": "Sin Asignar",
+      "updated_at": "2026-11-26T23:30:07.909Z",
+      "campos_modificados": [
+        "puesto_id",
+        "puesto",
+        "responsable",
+        "estado_activo",
+        "observaciones",
+        "modelo",
+        "color"
+      ],
+      "observaciones": "NO ENCONTRADO",
+      "puesto_id": 79,
+      "puesto": "OTROS",
+      "color": "",
+      "estado_activo": "PARA BAJA",
+      "modelo": "",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6867",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6867,
+      "cod_patrimonial": "SOB-335-0207",
+      "responsable": "Sin Asignar",
+      "updated_at": "2026-11-26T22:28:31.686Z",
+      "campos_modificados": [
+        "puesto_id",
+        "puesto",
+        "responsable",
+        "observaciones"
+      ],
+      "observaciones": "ELIMINAR REGISTRO",
+      "puesto_id": 79,
+      "puesto": "OTROS",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6863",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6863,
+      "cod_patrimonial": "SOB-335-0203",
+      "cod_personal": "C073",
+      "responsable": "COLONIO QUIÑONEZ KELVA KELY",
+      "updated_at": "2026-11-26T21:47:01.353Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6896",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6896,
+      "cod_patrimonial": "SOB-335-0215",
+      "puesto_id": 5,
+      "puesto": "COMERCIALIZACIÓN",
+      "updated_at": "2026-11-26T22:04:22.714Z",
+      "campos_modificados": [
+        "puesto_id",
+        "puesto",
+        "cod_personal",
+        "responsable"
+      ],
+      "cod_personal": "D018",
+      "responsable": "DURAND DE LA O FLOR DE MARIA",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6236",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6236,
+      "cod_patrimonial": "500036003",
+      "color": "NEGRO",
+      "updated_at": "2026-11-26T22:05:58.799Z",
+      "campos_modificados": [
+        "puesto_id",
+        "puesto",
+        "cod_personal",
+        "responsable",
+        "color"
+      ],
+      "puesto_id": 5,
+      "puesto": "COMERCIALIZACIÓN",
+      "cod_personal": "D018",
+      "responsable": "DURAND DE LA O FLOR DE MARIA",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:630016027",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "630016027",
+      "updated_at": "2026-11-26T22:19:40.658Z",
+      "campos_modificados": [
+        "puesto_id",
+        "puesto",
+        "cod_personal",
+        "responsable"
+      ],
+      "cod_personal": "A054",
+      "responsable": "ARIZAPANA MURAYARI NANCY JANETH",
+      "puesto_id": 7,
+      "puesto": "RECAUDACIÓN",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:630016028",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "630016028",
+      "puesto_id": 7,
+      "puesto": "RECAUDACIÓN",
+      "updated_at": "2026-11-26T22:18:29.475Z",
+      "campos_modificados": [
+        "puesto_id",
+        "puesto",
+        "cod_personal",
+        "responsable"
+      ],
+      "cod_personal": "A054",
+      "responsable": "ARIZAPANA MURAYARI NANCY JANETH",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:620016005",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "620016005",
+      "puesto_id": 5,
+      "puesto": "COMERCIALIZACIÓN",
+      "updated_at": "2026-11-26T22:12:05.845Z",
+      "campos_modificados": [
+        "puesto_id",
+        "puesto",
+        "cod_personal",
+        "responsable",
+        "caracteristicas_accesorios"
+      ],
+      "cod_personal": "D018",
+      "responsable": "DURAND DE LA O FLOR DE MARIA",
+      "caracteristicas_accesorios": "9P HD (1340X800), IPS 1 TABLET",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6895",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6895,
+      "cod_patrimonial": "SOB-335-0214",
+      "puesto_id": 5,
+      "puesto": "COMERCIALIZACIÓN",
+      "updated_at": "2026-11-26T22:12:40.232Z",
+      "campos_modificados": [
+        "puesto_id",
+        "puesto",
+        "cod_personal",
+        "responsable"
+      ],
+      "cod_personal": "D018",
+      "responsable": "DURAND DE LA O FLOR DE MARIA",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6864",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6864,
+      "cod_patrimonial": "SOB-335-0204",
+      "observaciones": "ELIMINAR",
+      "updated_at": "2026-11-26T22:32:02.502Z",
+      "campos_modificados": [
+        "puesto_id",
+        "puesto",
+        "observaciones"
+      ],
+      "puesto_id": 79,
+      "puesto": "OTROS",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6866",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6866,
+      "cod_patrimonial": "SOB-335-0206",
+      "observaciones": "GRANDE",
+      "updated_at": "2026-11-26T22:30:19.126Z",
+      "campos_modificados": [
+        "cod_personal",
+        "responsable",
+        "observaciones"
+      ],
+      "cod_personal": "C073",
+      "responsable": "COLONIO QUIÑONEZ KELVA KELY",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6224",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6224,
+      "cod_patrimonial": "200086012",
+      "unidad": "REDES DE AGUA",
+      "puesto_id": 91,
+      "puesto": "REDES DE AGUA",
+      "updated_at": "2026-11-26T22:36:08.612Z",
+      "campos_modificados": [
+        "unidad",
+        "puesto_id",
+        "puesto"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6226",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6226,
+      "cod_patrimonial": "200066001",
+      "unidad": "REDES DE AGUA",
+      "puesto_id": 91,
+      "puesto": "REDES DE AGUA",
+      "updated_at": "2026-11-26T22:36:33.132Z",
+      "campos_modificados": [
+        "unidad",
+        "puesto_id",
+        "puesto"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6223",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6223,
+      "cod_patrimonial": "200086008",
+      "unidad": "REDES DE AGUA",
+      "puesto_id": 91,
+      "puesto": "REDES DE AGUA",
+      "updated_at": "2026-11-26T22:36:36.819Z",
+      "campos_modificados": [
+        "unidad",
+        "puesto_id",
+        "puesto"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6227",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6227,
+      "cod_patrimonial": "200086014",
+      "unidad": "REDES DE AGUA",
+      "puesto_id": 91,
+      "puesto": "REDES DE AGUA",
+      "updated_at": "2026-11-26T22:36:41.403Z",
+      "campos_modificados": [
+        "unidad",
+        "puesto_id",
+        "puesto"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6220",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6220,
+      "cod_patrimonial": "200086005",
+      "unidad": "CAPTACIÓN",
+      "puesto_id": 88,
+      "puesto": "CAPTACIÓN",
+      "updated_at": "2026-11-26T22:36:53.817Z",
+      "campos_modificados": [
+        "unidad",
+        "puesto_id",
+        "puesto"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:610056008",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "610056008",
+      "marca": "EPSON",
+      "updated_at": "2026-11-26T22:38:16.395Z",
+      "campos_modificados": [
+        "marca",
+        "modelo",
+        "color"
+      ],
+      "modelo": "L4260",
+      "color": "NEGRO",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:610056006",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "610056006",
+      "marca": "EPSON",
+      "updated_at": "2026-11-26T22:38:00.915Z",
+      "campos_modificados": [
+        "marca",
+        "modelo",
+        "color"
+      ],
+      "modelo": "L4260",
+      "color": "NEGRO",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:610056007",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "610056007",
+      "caracteristicas_accesorios": "REVISAR",
+      "updated_at": "2026-11-26T22:38:22.122Z",
+      "campos_modificados": [
+        "caracteristicas_accesorios"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:610056005",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "610056005",
+      "marca": "EPSON",
+      "updated_at": "2026-11-26T22:38:38.450Z",
+      "campos_modificados": [
+        "marca",
+        "modelo",
+        "color"
+      ],
+      "modelo": "L1300",
+      "color": "NEGRO",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:610096003",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "610096003",
+      "caracteristicas_accesorios": "ELIMINAR",
+      "updated_at": "2026-11-26T22:38:53.778Z",
+      "campos_modificados": [
+        "estado_activo",
+        "caracteristicas_accesorios"
+      ],
+      "estado_activo": "PARA BAJA",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6218",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6218,
+      "cod_patrimonial": "200086006",
+      "unidad": "CAPTACIÓN",
+      "puesto_id": 88,
+      "puesto": "CAPTACIÓN",
+      "updated_at": "2026-11-26T22:39:06.491Z",
+      "campos_modificados": [
+        "unidad",
+        "puesto_id",
+        "puesto"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6217",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6217,
+      "cod_patrimonial": "200086003",
+      "unidad": "REDES DE AGUA",
+      "puesto_id": 91,
+      "puesto": "REDES DE AGUA",
+      "updated_at": "2026-11-26T22:39:11.250Z",
+      "campos_modificados": [
+        "unidad",
+        "puesto_id",
+        "puesto"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6216",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6216,
+      "cod_patrimonial": "200086010",
+      "unidad": "REDES DE AGUA",
+      "puesto_id": 91,
+      "puesto": "REDES DE AGUA",
+      "updated_at": "2026-11-26T22:39:22.378Z",
+      "campos_modificados": [
+        "unidad",
+        "puesto_id",
+        "puesto"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6214",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6214,
+      "cod_patrimonial": "200086009",
+      "unidad": "REDES DE AGUA",
+      "puesto_id": 91,
+      "puesto": "REDES DE AGUA",
+      "updated_at": "2026-11-26T22:39:29.682Z",
+      "campos_modificados": [
+        "unidad",
+        "puesto_id",
+        "puesto"
+      ],
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "REG:6233",
+      "origen_tabla": "REGULARIZACION",
+      "id_regularizacion": 6233,
+      "cod_patrimonial": "630016023",
+      "estado_activo": "PARA BAJA",
+      "updated_at": "2026-11-26T23:27:18.118Z",
+      "campos_modificados": [
+        "estado_activo",
+        "observaciones",
+        "numero_serie"
+      ],
+      "observaciones": "VESTIDOR - 630010269",
+      "numero_serie": "X5E9047523",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "ACTIVO:610026003",
+      "origen_tabla": "ACTIVO",
+      "id_regularizacion": null,
+      "cod_patrimonial": "610026003",
+      "caracteristicas_accesorios": "VESTIDOR - 630020329",
+      "updated_at": "2026-11-26T23:29:57.452Z",
+      "campos_modificados": [
+        "estado_activo",
+        "caracteristicas_accesorios",
+        "marca",
+        "modelo",
+        "numero_serie",
+        "color"
+      ],
+      "color": "GRIS",
+      "numero_serie": "TE-24FHD82105L0733",
+      "marca": "TEROS",
+      "modelo": "TE-24FHD8",
+      "estado_activo": "PARA BAJA",
+      "tipo_operacion": "MODIFICACION"
+    },
+    {
+      "uid": "NEW:1795730923534-ppnb",
+      "tipo_operacion": "ALTA_SOBRANTE",
+      "sub_modulo": "SOBRANTE",
+      "origen_tabla": "NUEVO_CAMPO",
+      "cod_categoria": 61005,
+      "categoria": "EQUIPOS INFORMÁTICOS",
+      "subcategoria": "IMPRESORAS",
+      "denominacion": "IMPRESORA",
+      "id_sucursal": 60,
+      "sucursal": "SATIPO",
+      "unidad": "UNIDAD OPERATIVA",
+      "puesto_id": 5,
+      "puesto": "COMERCIALIZACIÓN",
+      "cod_personal": "D018",
+      "responsable": "DURAND DE LA O FLOR DE MARIA",
+      "propietario_manual": "",
+      "estado_activo": "BUENO",
+      "observaciones": "REVISAR PROCEDENCIA - PMO",
+      "marca": "EPSON",
+      "modelo": "L6270",
+      "numero_serie": "X8G5183648",
+      "color": "NEGRO",
+      "placa": ""
+    },
+    {
+      "uid": "NEW:1795727025004-7lik",
+      "tipo_operacion": "ALTA_SOBRANTE",
+      "sub_modulo": "SOBRANTE",
+      "origen_tabla": "NUEVO_CAMPO",
+      "cod_categoria": 61002,
+      "categoria": "EQUIPOS INFORMÁTICOS",
+      "subcategoria": "MONITORES",
+      "denominacion": "MONITOR 27\"",
+      "id_sucursal": 60,
+      "sucursal": "SATIPO",
+      "unidad": "UNIDAD OPERATIVA",
+      "puesto_id": 39,
+      "puesto": "JEFATURA UO",
+      "cod_personal": "R046",
+      "responsable": "RAMIREZ BALTODANO TITO EDEN",
+      "propietario_manual": "",
+      "estado_activo": "REGULAR",
+      "observaciones": "CAMARA DE SEGURIDAD",
+      "marca": "SAMSUNG",
+      "modelo": "S27F350FHL",
+      "numero_serie": "ZZWKH4ZK700030F",
+      "color": "NEGRO",
+      "placa": ""
+    },
+    {
+      "uid": "NEW:1795726722503-xwtf",
+      "tipo_operacion": "ALTA_SOBRANTE",
+      "sub_modulo": "SOBRANTE",
+      "origen_tabla": "NUEVO_CAMPO",
+      "cod_categoria": 60004,
+      "categoria": "EQUIPOS DIVERSOS",
+      "subcategoria": "EQUIPOS DE REGISTRO CONTROL Y SEGURIDAD",
+      "denominacion": "RELOJ TARJETERO",
+      "id_sucursal": 60,
+      "sucursal": "SATIPO",
+      "unidad": "UNIDAD OPERATIVA",
+      "puesto_id": 39,
+      "puesto": "JEFATURA UO",
+      "cod_personal": "R046",
+      "responsable": "RAMIREZ BALTODANO TITO EDEN",
+      "propietario_manual": "",
+      "estado_activo": "REGULAR",
+      "observaciones": "REVISAR EN SISTEMA",
+      "marca": "WAYFU",
+      "modelo": "SP-5005",
+      "numero_serie": "2320786",
+      "color": "GRIS",
+      "placa": ""
+    },
+    {
+      "uid": "NEW:1795725602278-xi3j",
+      "tipo_operacion": "ALTA_SOBRANTE",
+      "sub_modulo": "SOBRANTE",
+      "origen_tabla": "NUEVO_CAMPO",
+      "cod_categoria": 30007,
+      "categoria": "MAQUINARIA Y EQUIPOS DE PRODUCCIÓN",
+      "subcategoria": "EQUIPOS DE DOSIFICACIÓN Y DESINFECCIÓN",
+      "denominacion": "MEZCLADORA",
+      "id_sucursal": 60,
+      "sucursal": "SATIPO",
+      "unidad": "PTAP",
+      "puesto_id": 17,
+      "puesto": "CTO DOSIFICACIÓN",
+      "cod_personal": "R035",
+      "responsable": "ROJAS BELTRAN NILTON ALCIDES",
+      "propietario_manual": "",
+      "estado_activo": "BUENO",
+      "observaciones": "ENTREGADO POR JEFE DE CALIDAD",
+      "marca": "EMTOP",
+      "modelo": "EMXR14061",
+      "numero_serie": "25129590191",
+      "color": "ROJO",
+      "placa": ""
+    }
+  ]
+}
