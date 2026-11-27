@@ -284,6 +284,123 @@
     }
   }
 
+  let remotePendingLoaded = false;
+  let remotePendingCount = 0;
+
+  async function loadRemotePendingFromGitHub() {
+    if (remotePendingLoaded) return;
+    try {
+      const apiUrl = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/INVENTARIO/pendientes?_t=${Date.now()}`;
+      const res = await fetch(apiUrl, {
+        headers: { Accept: "application/vnd.github+json" },
+        cache: "no-store",
+      });
+      if (!res.ok) return;
+      const files = await res.json();
+      if (!Array.isArray(files) || files.length === 0) return;
+
+      const jsonFiles = files.filter((f) => f.name && f.name.toLowerCase().endsWith(".json"));
+      if (jsonFiles.length === 0) return;
+
+      let appliedModCount = 0;
+      let appliedNewCount = 0;
+
+      for (const fileObj of jsonFiles) {
+        try {
+          const rawUrl = fileObj.download_url || `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/${GH_BRANCH}/INVENTARIO/pendientes/${fileObj.name}?_t=${Date.now()}`;
+          const fRes = await fetch(rawUrl, { cache: "no-store" });
+          if (!fRes.ok) continue;
+          const pkg = await fRes.json();
+          const list = Array.isArray(pkg.cambios) ? pkg.cambios : [];
+
+          list.forEach((entry) => {
+            if (!entry || !entry.uid) return;
+            const op = String(entry.tipo_operacion || "");
+
+            if (op.startsWith("ALTA_") || entry.origen_tabla === "NUEVO_CAMPO") {
+              const exists = state.items.some((it) => it.uid === entry.uid) || state.newItems.some((n) => n.uid === entry.uid);
+              if (!exists) {
+                const newObj = {
+                  uid: entry.uid,
+                  origen_tabla: "NUEVO_CAMPO",
+                  tipo_origen: entry.sub_modulo || "SOBRANTE",
+                  sub_modulo: entry.sub_modulo || "SOBRANTE",
+                  cod_patrimonial: entry.cod_patrimonial || entry.uid,
+                  cod_categoria: entry.cod_categoria,
+                  categoria: entry.categoria || "",
+                  subcategoria: entry.subcategoria || "",
+                  denominacion: entry.denominacion || "",
+                  id_sucursal: entry.id_sucursal,
+                  sucursal: entry.sucursal || "",
+                  unidad: entry.unidad || "",
+                  puesto_id: entry.puesto_id || null,
+                  puesto: entry.puesto || "",
+                  cod_personal: entry.cod_personal || "",
+                  responsable: entry.responsable || "Sin Asignar",
+                  propietario_manual: entry.propietario_manual || "",
+                  estado_activo: entry.estado_activo || "REGULAR",
+                  observaciones: entry.observaciones || "",
+                  marca: entry.marca || "",
+                  modelo: entry.modelo || "",
+                  numero_serie: entry.numero_serie || "",
+                  color: entry.color || "",
+                  placa: entry.placa || "",
+                  _remoteSync: true,
+                  _remoteFile: fileObj.name,
+                };
+                state.items.push(newObj);
+                appliedNewCount++;
+              }
+            } else {
+              const target = state.items.find((it) => it.uid === entry.uid || it.cod_patrimonial === entry.cod_patrimonial);
+              if (target) {
+                const localDraft = state.drafts[target.uid];
+                const localFields = new Set(localDraft ? localDraft.campos_modificados || [] : []);
+
+                const updatable = [
+                  "marca", "modelo", "numero_serie", "color", "placa",
+                  "id_sucursal", "sucursal", "unidad", "puesto", "puesto_id",
+                  "cod_personal", "responsable", "estado_activo", "observaciones", "caracteristicas_accesorios"
+                ];
+                updatable.forEach((f) => {
+                  if (entry[f] !== undefined && !localFields.has(f)) {
+                    target[f] = entry[f];
+                  }
+                });
+                target._remoteSync = true;
+                target._remoteFile = fileObj.name;
+                appliedModCount++;
+              }
+            }
+          });
+        } catch (e) {
+          console.warn("Error procesando paquete remoto:", fileObj.name, e);
+        }
+      }
+
+      remotePendingLoaded = true;
+      const totalSync = appliedModCount + appliedNewCount;
+      remotePendingCount = totalSync;
+
+      if (totalSync > 0) {
+        showRemoteBanner(totalSync, jsonFiles.length);
+        refreshDynamicFilters();
+        renderAll();
+      }
+    } catch (e) {
+      console.warn("No se pudieron cargar pendientes remotos de GitHub:", e);
+    }
+  }
+
+  function showRemoteBanner(totalChanges, totalFiles) {
+    const el = document.getElementById("remoteChangesBanner");
+    const txt = document.getElementById("remoteBannerText");
+    if (el && txt) {
+      txt.innerHTML = `<strong>☁️ Sincronizado desde GitHub:</strong> Se integraron <strong>${totalChanges}</strong> modificaciones y altas desde <strong>${totalFiles}</strong> paquete(s) pendientes de campo.`;
+      el.classList.remove("hidden");
+    }
+  }
+
   function populateStaticSelects() {
     const estOpts = state.catalogos.estados.map((e) => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join("");
     document.getElementById("batchEstado").innerHTML = `<option value="">— Estado —</option>${estOpts}`;
@@ -325,7 +442,7 @@
             const resp = normText(it.responsable);
             if (resp && resp !== "SIN ASIGNAR" && resp !== "PENDIENTE DE UBICACION") return false;
           }
-          if (state.activePill === "MODIFICADOS" && !it._isModified) return false;
+          if (state.activePill === "MODIFICADOS" && !it._isModified && !it._remoteSync) return false;
         }
 
         if (!exclude.unidad && state.filterUnidad) {
@@ -890,6 +1007,7 @@
     persistDrafts();
     renderHeaderAndTabs();
     renderBatchBar();
+    triggerAutoSyncIfAvailable();
   }
 
   function revertItem(uid) {
@@ -969,11 +1087,28 @@
     }
     const pushBtn = document.getElementById("btnPushGithub");
     if (pushBtn) {
-      pushBtn.disabled = currentSucMod === 0;
+      pushBtn.disabled = totalMod === 0;
       pushBtn.textContent =
         state.activeSucursalId === "ALL"
           ? `☁️ Enviar a GitHub (${totalMod})`
           : `☁️ Enviar Sucursal a GitHub (${currentSucMod})`;
+    }
+
+    const banner = document.getElementById("pendingChangesBanner");
+    if (banner) {
+      if (totalMod > 0) {
+        banner.classList.remove("hidden");
+        const tEl = document.getElementById("pendingBannerTitle");
+        const sEl = document.getElementById("pendingBannerSub");
+        if (tEl) tEl.textContent = `⚠️ Se detectaron ${totalMod} modificación(es) guardadas en esta computadora`;
+        if (sEl) {
+          sEl.textContent = hasToken
+            ? `Están guardadas en este navegador. Haz clic en "Sincronizar a GitHub Ahora" para enviarlas a la nube y que se actualicen en todas partes.`
+            : `Están guardadas en este navegador. Conecta tu Token de GitHub para publicarlas en la nube y que aparezcan en cualquier otra computadora.`;
+        }
+      } else {
+        banner.classList.add("hidden");
+      }
     }
 
     const sucCounts = new Map();
@@ -1086,7 +1221,12 @@
           <span class="origin-tag ${originClass}">${escapeHtml(it.tipo_origen || it.origen_tabla)}</span>
           ${isNew
             ? `<div><span class="mod-tag" style="background:#c7d2fe; color:#312e81; border-color:#818cf8;">NUEVO</span> <button type="button" class="undo-btn" data-delnew="${escapeHtml(it.uid)}" title="Eliminar registro nuevo">✕</button></div>`
-            : (draft ? `<div><span class="mod-tag">MODIFICADO</span> <button type="button" class="undo-btn" data-undo="${escapeHtml(it.uid)}" title="Deshacer cambios de esta fila">↺</button></div>` : "")}
+            : (draft
+              ? `<div><span class="mod-tag">MODIFICADO</span> <button type="button" class="undo-btn" data-undo="${escapeHtml(it.uid)}" title="Deshacer cambios de esta fila">↺</button></div>`
+              : (it._isRemoteSync || it._remoteSync
+                ? `<div><span class="mod-tag" style="background:#e0f2fe; color:#0369a1; border-color:#7dd3fc;" title="Modificación sincronizada desde GitHub">☁️ GITHUB</span></div>`
+                : "")
+            )}
         </td>
         <td>
           <div style="font-weight:800; color:#0f172a; line-height:1.28;">${escapeHtml(it.denominacion)}</div>
@@ -1418,6 +1558,93 @@
     fb.textContent = "";
     document.getElementById("btnConfirmPush").disabled = false;
     document.getElementById("pushConfirmModal").classList.remove("hidden");
+  }
+
+  let autoSyncDebounceTimer = null;
+  function triggerAutoSyncIfAvailable() {
+    if (!getGhToken()) return;
+    const totalMod = Object.keys(state.drafts).length + state.newItems.length;
+    if (totalMod === 0) return;
+
+    if (autoSyncDebounceTimer) clearTimeout(autoSyncDebounceTimer);
+    autoSyncDebounceTimer = setTimeout(() => {
+      autoSyncDebounceTimer = null;
+      quickPushToGithub({ silent: true, note: "Sincronización automática de campo" });
+    }, 20000); // 20 segundos tras último cambio
+  }
+
+  async function quickPushToGithub(opts = {}) {
+    const token = getGhToken();
+    if (!token) {
+      openTokenModal();
+      showToast("Conecta tu Token de GitHub para sincronizar los cambios a la nube.");
+      return;
+    }
+
+    const built = buildChangesPayload(false, { nota_envio: opts.note || "Sincronización rápida desde portal" });
+    if (!built) {
+      if (!opts.silent) showToast("No hay cambios pendientes para subir.");
+      return;
+    }
+
+    const { payload, sucLabel, targetDrafts, targetNews, totalCount } = built;
+    const slug = normText(sucLabel).replace(/[^A-Z0-9]+/g, "_") || "CAMPO";
+    const stamp = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 15);
+    const filename = `cambios_${slug}_${stamp}.json`;
+    const repoPath = `INVENTARIO/pendientes/${filename}`;
+
+    const bannerBtn = document.getElementById("btnBannerQuickSync");
+    if (bannerBtn) {
+      bannerBtn.disabled = true;
+      bannerBtn.textContent = "Subiendo a GitHub...";
+    }
+    const statusPill = document.getElementById("statusPill");
+    if (statusPill) statusPill.textContent = "🔄 Sincronizando con GitHub...";
+
+    try {
+      const contentB64 = utf8ToBase64(JSON.stringify(payload, null, 2));
+      const res = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${repoPath}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/vnd.github+json",
+          "Content-Type": "application/json",
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+        body: JSON.stringify({
+          message: `Verificación campo ${sucLabel}: ${totalCount} registro(s) sincronizados`,
+          content: contentB64,
+          branch: GH_BRANCH,
+        }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        if (res.status === 401 || res.status === 403) {
+          showToast("Token inválido o sin permisos en GitHub. Verifíquelo.");
+          openTokenModal();
+          return;
+        }
+        throw new Error(errData.message || `Error HTTP ${res.status}`);
+      }
+
+      // Limpiar borrador local tras éxito comprobado
+      targetDrafts.forEach((d) => { delete state.drafts[d.uid]; });
+      if (targetNews.length > 0) {
+        const sentNewsUids = new Set(targetNews.map((n) => n.uid));
+        state.newItems = state.newItems.filter((n) => !sentNewsUids.has(n.uid));
+      }
+      persistDrafts();
+      renderAll();
+      showToast(`✓ ¡Éxito! ${totalCount} registro(s) sincronizados en GitHub. Ya están disponibles para cualquier equipo.`);
+    } catch (e) {
+      showToast(`Error al sincronizar con GitHub: ${e.message}`);
+    } finally {
+      if (bannerBtn) {
+        bannerBtn.disabled = false;
+        bannerBtn.textContent = "⚡ Sincronizar a GitHub Ahora";
+      }
+    }
   }
 
   async function confirmPushToGithub() {
@@ -2135,6 +2362,17 @@
     document.getElementById("btnCancelPush").addEventListener("click", () => document.getElementById("pushConfirmModal").classList.add("hidden"));
     document.getElementById("btnConfirmPush").addEventListener("click", confirmPushToGithub);
 
+    const bQuickSync = document.getElementById("btnBannerQuickSync");
+    if (bQuickSync) bQuickSync.addEventListener("click", () => quickPushToGithub());
+
+    const bDlJson = document.getElementById("btnBannerDownloadJson");
+    if (bDlJson) bDlJson.addEventListener("click", () => downloadJsonPackage(false));
+
+    const bDismissRem = document.getElementById("btnDismissRemoteBanner");
+    if (bDismissRem) bDismissRem.addEventListener("click", () => {
+      document.getElementById("remoteChangesBanner").classList.add("hidden");
+    });
+
     document.getElementById("btnDownloadBranchJson").addEventListener("click", () => downloadJsonPackage(true));
     document.getElementById("btnDownloadAllJson").addEventListener("click", () => downloadJsonPackage(false));
     document.getElementById("btnExportPdf").addEventListener("click", exportVerificationPDF);
@@ -2339,6 +2577,7 @@
 
       state.newItems.unshift(newItem);
       persistDrafts();
+      triggerAutoSyncIfAvailable();
 
       if (state.activeSucursalId !== "ALL" && String(state.activeSucursalId) !== String(newItem.id_sucursal)) {
         state.activeSucursalId = String(newItem.id_sucursal);
