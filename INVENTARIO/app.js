@@ -7,7 +7,7 @@
   const GH_TOKEN_LOCAL_KEY = "eps_inv_gh_pat_local";
   const GH_OWNER = "epspatrimonio";
   const GH_REPO = "ACTIVOS-FIJOS";
-  const GH_BRANCH = "master";
+  const GH_BRANCH = "main";
   // Hash SHA-256 de la clave autorizada + validación directa para entornos HTTP LAN sin crypto.subtle
   const ACCESS_KEY_SHA256 = "6b4d18a060d1833674da885839e68ccf44ed05c0de1f610b13ce56bc0f614180";
   const ACCESS_FALLBACK_PLAIN = "patrimonio1996";
@@ -290,7 +290,7 @@
   async function loadRemotePendingFromGitHub() {
     if (remotePendingLoaded) return;
     try {
-      const apiUrl = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/INVENTARIO/pendientes?_t=${Date.now()}`;
+      const apiUrl = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/INVENTARIO/pendientes?ref=${GH_BRANCH}&_t=${Date.now()}`;
       const res = await fetch(apiUrl, {
         headers: { Accept: "application/vnd.github+json" },
         cache: "no-store",
@@ -1626,6 +1626,44 @@
           return;
         }
         throw new Error(errData.message || `Error HTTP ${res.status}`);
+      }
+
+      // Actualizar directamente INVENTARIO/inventario_unificado.json en GitHub para sincronización global instantánea
+      try {
+        const fileRes = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/INVENTARIO/inventario_unificado.json?ref=${GH_BRANCH}&_t=${Date.now()}`, {
+          headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" }
+        });
+        if (fileRes.ok) {
+          const fileData = await fileRes.json();
+          const currentSha = fileData.sha;
+          const workingAll = getAllWorkingItems().map((it) => {
+            const copy = { ...it };
+            delete copy._isModified;
+            delete copy._changedFields;
+            delete copy._isNew;
+            delete copy._remoteSync;
+            delete copy._remoteFile;
+            delete copy._isRemoteSync;
+            return copy;
+          });
+          const cleanJsonB64 = utf8ToBase64(JSON.stringify(workingAll, null, 2));
+          await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/INVENTARIO/inventario_unificado.json`, {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: "application/vnd.github+json",
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              message: `Actualización automática inventario: ${totalCount} bien(es) modificados/nuevos`,
+              content: cleanJsonB64,
+              sha: currentSha,
+              branch: GH_BRANCH,
+            })
+          });
+        }
+      } catch (errJson) {
+        console.warn("Aviso: el paquete fue guardado pero no se pudo actualizar el archivo unificado:", errJson);
       }
 
       // Limpiar borrador local tras éxito comprobado
